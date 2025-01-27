@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Check-In{% endblock %}
+
+{% block content %}
+<section>
+    <h1>Check-In</h1>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="phone_number" placeholder="Enter your phone number">
+        <button type="submit">Check In</button>
+    </form>
+</section>
+{% endblock %}

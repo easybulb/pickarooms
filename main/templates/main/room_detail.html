@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Room Details{% endblock %}
+
+{% block content %}
+<section>
+    <h1>Welcome, Guest</h1>
+    <h2>Your Room: {{ guest.assigned_room.name }}</h2>
+    <p>{{ guest.assigned_room.description }}</p>
+    <video controls>
+        <source src="{{ guest.assigned_room.video_url }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <p><a href="/static/instructions/room_{{ guest.assigned_room.id }}.pdf" download>Download Room Instructions (PDF)</a></p>
+</section>
+{% endblock %}
