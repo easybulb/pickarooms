@@ -1,1 +1,1 @@
-web: gunicorn checkin_app.wsgi
+web: gunicorn pickarooms.wsgi
