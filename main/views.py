@@ -5,6 +5,9 @@ from django.core.mail import send_mail
 def home(request):
     return render(request, 'main/home.html')
 
+def about(request):
+    return render(request, 'main/about.html')
+
 
 def checkin(request):
     if request.method == 'POST':
