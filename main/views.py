@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Guest, Room
 from django.core.mail import send_mail
 
@@ -44,3 +44,21 @@ def contact(request):
         )
         return render(request, 'main/contact.html', {'success': True})
     return render(request, 'main/contact.html')
+
+
+
+def admin_page(request):
+    if request.method == 'POST':
+        # Handle form submission
+        phone_number = request.POST.get('phone_number')
+        room_id = request.POST.get('room')
+        try:
+            room = Room.objects.get(id=room_id)
+            Guest.objects.create(phone_number=phone_number, assigned_room=room)
+            return render(request, 'main/admin_page.html', {'success': True})
+        except Room.DoesNotExist:
+            return render(request, 'main/admin_page.html', {'error': 'Invalid room selected.'})
+
+    rooms = Room.objects.all()
+    guests = Guest.objects.all()
+    return render(request, 'main/admin_page.html', {'rooms': rooms, 'guests': guests})

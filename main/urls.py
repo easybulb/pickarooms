@@ -8,4 +8,5 @@ urlpatterns = [
     path('room/<int:room_id>/', views.room_detail, name='room_detail'),
     path('explore-manchester/', views.explore_manchester, name='explore_manchester'),
     path('contact/', views.contact, name='contact'),
+    path('admin-page/', views.admin_page, name='admin_page'),  # Custom admin page
 ]

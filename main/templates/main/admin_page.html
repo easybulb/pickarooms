@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Page{% endblock %}
+
+{% block content %}
+<h1>Admin Page</h1>
+
+{% if success %}
+    <p style="color: green;">Guest added successfully!</p>
+{% elif error %}
+    <p style="color: red;">{{ error }}</p>
+{% endif %}
+
+<!-- Form to add new guests -->
+<h2>Add New Guest</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="phone_number">Phone Number:</label>
+    <input type="text" id="phone_number" name="phone_number" required><br><br>
+
+    <label for="room">Assign Room:</label>
+    <select id="room" name="room" required>
+        <option value="">-- Select Room --</option>
+        {% for room in rooms %}
+            <option value="{{ room.id }}">{{ room.name }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <button type="submit">Add Guest</button>
+</form>
+
+<!-- List of current guests -->
+<h2>Existing Guests</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Phone Number</th>
+            <th>Assigned Room</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for guest in guests %}
+            <tr>
+                <td>{{ guest.phone_number }}</td>
+                <td>{{ guest.assigned_room.name }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
