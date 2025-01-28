@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Guest, Room
 from django.core.mail import send_mail
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import user_passes_test
+
 
 def home(request):
     return render(request, 'main/home.html')
@@ -47,6 +50,7 @@ def contact(request):
 
 
 
+@user_passes_test(lambda user: user.is_superuser)
 def admin_page(request):
     if request.method == 'POST':
         # Handle form submission
