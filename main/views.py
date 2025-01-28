@@ -57,7 +57,8 @@ class AdminLoginView(LoginView):
         # Redirect to the admin page after login
         return '/admin-page/'
 
-@user_passes_test(lambda user: user.is_superuser)
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
@@ -72,3 +73,9 @@ def admin_page(request):
     rooms = Room.objects.all()
     guests = Guest.objects.all()
     return render(request, 'main/admin_page.html', {'rooms': rooms, 'guests': guests})
+
+
+
+def unauthorized(request):
+    return render(request, 'main/unauthorized.html')
+
