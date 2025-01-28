@@ -1,8 +1,8 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Guest, Room
 from django.core.mail import send_mail
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import user_passes_test
 
 
 def home(request):
@@ -50,10 +50,16 @@ def contact(request):
 
 
 
+class AdminLoginView(LoginView):
+    template_name = 'main/admin_login.html'
+
+    def get_success_url(self):
+        # Redirect to the admin page after login
+        return '/admin-page/'
+
 @user_passes_test(lambda user: user.is_superuser)
 def admin_page(request):
     if request.method == 'POST':
-        # Handle form submission
         phone_number = request.POST.get('phone_number')
         room_id = request.POST.get('room')
         try:

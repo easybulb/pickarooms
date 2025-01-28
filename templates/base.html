@@ -17,6 +17,19 @@
                 <li><a href="/checkin/">Check-In</a></li>
                 <li><a href="/explore-manchester/">Explore Manchester</a></li>
                 <li><a href="/contact/">Contact Us</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="/admin-page/">Admin Only</a></li>
+                    <li>
+                        <form action="{% url 'logout' %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit">
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="/admin-page/login/">Admin Login</a></li>
+                {% endif %}
             </ul>
         </nav>
     </header>
