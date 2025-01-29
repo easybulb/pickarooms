@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Guest, Room
 from django.core.mail import send_mail
 from django.utils.timezone import now
+from django.http import Http404
 
 
 def home(request):
@@ -39,14 +40,28 @@ def checkin(request):
 
 
 
+from django.http import Http404
+
 def room_detail(request, room_id):
     room = get_object_or_404(Room, id=room_id)
-    guest = Guest.objects.get(assigned_room=room)
+    guests = Guest.objects.filter(assigned_room=room)
+
+    if not guests.exists():
+        raise Http404("No guest assigned to this room.")
+
+    if guests.count() > 1:
+        return render(request, 'main/room_detail.html', {
+            'room': room,
+            'error': "Multiple guests are assigned to this room. Please contact the admin for assistance."
+        })
+
+    guest = guests.first()
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
     })
+
 
 
 
@@ -80,22 +95,56 @@ class AdminLoginView(LoginView):
         # Redirect to the admin page after login
         return '/admin-page/'
 
+
+
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
+        full_name = request.POST.get('full_name')
+        check_in_date = request.POST.get('check_in_date')
+        check_out_date = request.POST.get('check_out_date')
         room_id = request.POST.get('room')
         try:
             room = Room.objects.get(id=room_id)
-            Guest.objects.create(phone_number=phone_number, assigned_room=room)
-            return render(request, 'main/admin_page.html', {'success': True})
-        except Room.DoesNotExist:
-            return render(request, 'main/admin_page.html', {'error': 'Invalid room selected.'})
+            # Ensure no duplicate phone numbers are added
+            if Guest.objects.filter(phone_number=phone_number).exists():
+                error_message = "A guest with this phone number already exists."
+                rooms = Room.objects.all()
+                guests = Guest.objects.all()
+                return render(request, 'main/admin_page.html', {
+                    'rooms': rooms,
+                    'guests': guests,
+                    'error': error_message,
+                })
 
+            # Create the guest if no duplicate exists
+            Guest.objects.create(
+                phone_number=phone_number,
+                full_name=full_name,
+                check_in_date=check_in_date,
+                check_out_date=check_out_date,
+                assigned_room=room
+            )
+            # Redirect to the same page to avoid form resubmission
+            return redirect('admin_page')
+
+        except Room.DoesNotExist:
+            error_message = "Invalid room selected."
+            rooms = Room.objects.all()
+            guests = Guest.objects.all()
+            return render(request, 'main/admin_page.html', {
+                'rooms': rooms,
+                'guests': guests,
+                'error': error_message,
+            })
+
+    # GET request - display the page with existing data
     rooms = Room.objects.all()
     guests = Guest.objects.all()
     return render(request, 'main/admin_page.html', {'rooms': rooms, 'guests': guests})
+
 
 
 
