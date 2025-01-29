@@ -15,4 +15,5 @@ urlpatterns = [
     path('unauthorized/', views.unauthorized, name='unauthorized'),
     path('admin-page/edit-guest/<int:guest_id>/', views.edit_guest, name='edit_guest'),
     path('admin-page/delete-guest/<int:guest_id>/', views.delete_guest, name='delete_guest'),
+    path('admin-page/available-rooms/', views.available_rooms, name='available_rooms'),
 ]

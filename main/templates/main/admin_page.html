@@ -70,5 +70,30 @@
     </tbody>
 </table>
 
+<!-- JavaScript for dynamically updating rooms -->
+<script>
+    document.getElementById('check_in_date').addEventListener('change', updateRooms);
+    document.getElementById('check_out_date').addEventListener('change', updateRooms);
 
+    function updateRooms() {
+        const checkInDate = document.getElementById('check_in_date').value;
+        const checkOutDate = document.getElementById('check_out_date').value;
+
+        if (checkInDate && checkOutDate) {
+            fetch(`/admin-page/available-rooms/?check_in_date=${checkInDate}&check_out_date=${checkOutDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const roomSelect = document.getElementById('room');
+                    roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
+                    data.rooms.forEach(room => {
+                        const option = document.createElement('option');
+                        option.value = room.id;
+                        option.textContent = room.name;
+                        roomSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching available rooms:', error));
+        }
+    }
+</script>
 {% endblock %}

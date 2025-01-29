@@ -5,6 +5,9 @@ from .models import Guest, Room
 from django.core.mail import send_mail
 from django.utils.timezone import now
 from django.http import Http404
+from django.db.models import Q
+from datetime import date
+from django.http import JsonResponse
 
 
 def home(request):
@@ -12,6 +15,9 @@ def home(request):
 
 def about(request):
     return render(request, 'main/about.html')
+
+def explore_manchester(request):
+    return render(request, 'main/explore_manchester.html')
 
 
 
@@ -40,8 +46,6 @@ def checkin(request):
 
 
 
-from django.http import Http404
-
 def room_detail(request, room_id):
     room = get_object_or_404(Room, id=room_id)
     guests = Guest.objects.filter(assigned_room=room)
@@ -63,11 +67,6 @@ def room_detail(request, room_id):
     })
 
 
-
-
-
-def explore_manchester(request):
-    return render(request, 'main/explore_manchester.html')
 
 
 
@@ -100,50 +99,92 @@ class AdminLoginView(LoginView):
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
-    if request.method == 'POST':
+    error_message = None
+    guests = Guest.objects.all()
+
+    # Handle date inputs dynamically
+    check_in_date = request.POST.get('check_in_date') or request.GET.get('check_in_date') or None
+    check_out_date = request.POST.get('check_out_date') or request.GET.get('check_out_date') or None
+
+    if check_in_date and check_out_date:
+        check_in_date = date.fromisoformat(check_in_date)
+        check_out_date = date.fromisoformat(check_out_date)
+        available_rooms = get_available_rooms(check_in_date, check_out_date)
+    else:
+        available_rooms = Room.objects.all()  # Show all rooms if no date is selected
+
+    # Handle guest addition
+    if request.method == 'POST' and 'phone_number' in request.POST:
         phone_number = request.POST.get('phone_number')
         full_name = request.POST.get('full_name')
-        check_in_date = request.POST.get('check_in_date')
-        check_out_date = request.POST.get('check_out_date')
         room_id = request.POST.get('room')
+
         try:
             room = Room.objects.get(id=room_id)
-            # Ensure no duplicate phone numbers are added
             if Guest.objects.filter(phone_number=phone_number).exists():
                 error_message = "A guest with this phone number already exists."
-                rooms = Room.objects.all()
-                guests = Guest.objects.all()
-                return render(request, 'main/admin_page.html', {
-                    'rooms': rooms,
-                    'guests': guests,
-                    'error': error_message,
-                })
-
-            # Create the guest if no duplicate exists
-            Guest.objects.create(
-                phone_number=phone_number,
-                full_name=full_name,
-                check_in_date=check_in_date,
-                check_out_date=check_out_date,
-                assigned_room=room
-            )
-            # Redirect to the same page to avoid form resubmission
-            return redirect('admin_page')
-
+            else:
+                Guest.objects.create(
+                    phone_number=phone_number,
+                    full_name=full_name,
+                    check_in_date=check_in_date,
+                    check_out_date=check_out_date,
+                    assigned_room=room
+                )
+                return redirect('admin_page')
         except Room.DoesNotExist:
             error_message = "Invalid room selected."
-            rooms = Room.objects.all()
-            guests = Guest.objects.all()
-            return render(request, 'main/admin_page.html', {
-                'rooms': rooms,
-                'guests': guests,
-                'error': error_message,
-            })
 
-    # GET request - display the page with existing data
-    rooms = Room.objects.all()
-    guests = Guest.objects.all()
-    return render(request, 'main/admin_page.html', {'rooms': rooms, 'guests': guests})
+    return render(request, 'main/admin_page.html', {
+        'rooms': available_rooms,
+        'guests': guests,
+        'error': error_message,
+        'check_in_date': check_in_date,
+        'check_out_date': check_out_date,
+    })
+
+
+
+
+
+
+def get_available_rooms(check_in_date, check_out_date):
+    """Returns rooms that are not assigned for the given date range."""
+    # Convert dates if necessary
+    check_in_date = date.fromisoformat(str(check_in_date)) if isinstance(check_in_date, str) else check_in_date
+    check_out_date = date.fromisoformat(str(check_out_date)) if isinstance(check_out_date, str) else check_out_date
+
+    # Find guests whose bookings overlap with the provided date range
+    conflicting_guests = Guest.objects.filter(
+        Q(check_in_date__lt=check_out_date) & Q(check_out_date__gt=check_in_date)
+    )
+
+    # Get IDs of rooms that are booked during the conflicting date range
+    conflicting_rooms = conflicting_guests.values_list('assigned_room', flat=True)
+
+    # Return rooms that are NOT in the list of conflicting rooms
+    return Room.objects.exclude(id__in=conflicting_rooms)
+
+
+
+
+from django.http import JsonResponse
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def available_rooms(request):
+    check_in_date = request.GET.get('check_in_date')
+    check_out_date = request.GET.get('check_out_date')
+
+    if check_in_date and check_out_date:
+        check_in_date = date.fromisoformat(check_in_date)
+        check_out_date = date.fromisoformat(check_out_date)
+        rooms = get_available_rooms(check_in_date, check_out_date)
+        room_list = [{'id': room.id, 'name': room.name} for room in rooms]
+        return JsonResponse({'rooms': room_list})
+    return JsonResponse({'rooms': []})
+
+
 
 
 
@@ -157,6 +198,7 @@ def unauthorized(request):
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def edit_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
+
     if request.method == 'POST':
         guest.full_name = request.POST.get('full_name')
         guest.phone_number = request.POST.get('phone_number')
@@ -165,8 +207,16 @@ def edit_guest(request, guest_id):
         guest.assigned_room_id = request.POST.get('room')
         guest.save()
         return redirect('admin_page')
-    rooms = Room.objects.all()
-    return render(request, 'main/edit_guest.html', {'guest': guest, 'rooms': rooms})
+
+    # Include the currently assigned room in the available rooms
+    available_rooms = get_available_rooms(guest.check_in_date, guest.check_out_date) | Room.objects.filter(id=guest.assigned_room.id)
+
+    return render(request, 'main/edit_guest.html', {
+        'guest': guest,
+        'rooms': available_rooms,
+    })
+
+
 
 
 @login_required(login_url='/admin-page/login/')
