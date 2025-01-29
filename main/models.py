@@ -1,4 +1,12 @@
 from django.db import models
+from django.utils.timezone import now
+from datetime import date, timedelta, datetime
+
+def default_check_out_date():
+    """Returns the next day with time set to 11:00 AM."""
+    tomorrow = date.today() + timedelta(days=1)
+    return tomorrow
+
 
 class Room(models.Model):
     name = models.CharField(max_length=100)  # Room name
@@ -9,9 +17,19 @@ class Room(models.Model):
         return self.name
 
 
+
 class Guest(models.Model):
-    phone_number = models.CharField(max_length=15, unique=True)  # Unique phone number for guest login
-    assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)  # Relationship to Room model
+    full_name = models.CharField(max_length=100, default="Guest")
+    phone_number = models.CharField(max_length=15, unique=True)
+    check_in_date = models.DateField(default=date.today)  # Default to the current date
+    check_out_date = models.DateField(default=default_check_out_date)  # Default to the next day
+    assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
+
+    def has_access(self):
+        """Check if the guest's access is still valid."""
+        current_time = now()
+        # Allow access until 11:59 PM on the check-out date
+        return current_time.date() <= self.check_out_date
 
     def __str__(self):
-        return f"Guest: {self.phone_number} - Room: {self.assigned_room.name}"
+        return f"{self.full_name} - {self.phone_number} - {self.assigned_room.name}"

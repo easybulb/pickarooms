@@ -11,12 +11,21 @@
     <p style="color: red;">{{ error }}</p>
 {% endif %}
 
-<!-- Form to add new guests -->
+<!-- Add Guest Form -->
 <h2>Add New Guest</h2>
 <form method="POST">
     {% csrf_token %}
+    <label for="full_name">Full Name:</label>
+    <input type="text" id="full_name" name="full_name" required><br><br>
+
     <label for="phone_number">Phone Number:</label>
     <input type="text" id="phone_number" name="phone_number" required><br><br>
+
+    <label for="check_in_date">Check-In Date:</label>
+    <input type="date" id="check_in_date" name="check_in_date" required><br><br>
+
+    <label for="check_out_date">Check-Out Date:</label>
+    <input type="date" id="check_out_date" name="check_out_date" required><br><br>
 
     <label for="room">Assign Room:</label>
     <select id="room" name="room" required>
@@ -29,22 +38,34 @@
     <button type="submit">Add Guest</button>
 </form>
 
-<!-- List of current guests -->
+<!-- Existing Guests -->
 <h2>Existing Guests</h2>
 <table>
     <thead>
         <tr>
+            <th>Full Name</th>
             <th>Phone Number</th>
+            <th>Check-In Date</th>
+            <th>Check-Out Date</th>
             <th>Assigned Room</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         {% for guest in guests %}
-            <tr>
-                <td>{{ guest.phone_number }}</td>
-                <td>{{ guest.assigned_room.name }}</td>
-            </tr>
+        <tr>
+            <td>{{ guest.full_name }}</td>
+            <td>{{ guest.phone_number }}</td>
+            <td>{{ guest.check_in_date }}</td>
+            <td>{{ guest.check_out_date }}</td>
+            <td>{{ guest.assigned_room.name }}</td>
+            <td>
+                <a href="{% url 'edit_guest' guest.id %}">Edit</a> |
+                <a href="{% url 'delete_guest' guest.id %}">Delete</a>
+            </td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
+
 {% endblock %}

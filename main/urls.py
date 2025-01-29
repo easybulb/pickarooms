@@ -13,4 +13,6 @@ urlpatterns = [
     path('admin-page/login/', views.AdminLoginView.as_view(), name='admin_login'),
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('unauthorized/', views.unauthorized, name='unauthorized'),
+    path('admin-page/edit-guest/<int:guest_id>/', views.edit_guest, name='edit_guest'),
+    path('admin-page/delete-guest/<int:guest_id>/', views.delete_guest, name='delete_guest'),
 ]
