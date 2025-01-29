@@ -5,6 +5,8 @@
 {% block content %}
 <section>
     <h1>Welcome to {{ room.name }}</h1>
+
+    <!-- Description with PIN -->
     <p>{{ room.description }}</p>
 
     <!-- Embed YouTube video -->
@@ -17,6 +19,7 @@
             allowfullscreen>
     </iframe>
 
+    <!-- Downloadable PDF -->
     <h2>Additional Information</h2>
     <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>Download Room Instructions (PDF)</a></p>
 </section>
