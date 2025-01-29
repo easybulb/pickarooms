@@ -17,15 +17,22 @@ def checkin(request):
         phone_number = request.POST.get('phone_number')
         try:
             guest = Guest.objects.get(phone_number=phone_number)
-            return render(request, 'main/room_detail.html', {'guest': guest})
+            # Redirect to the guest's assigned room page
+            return redirect('room_detail', room_id=guest.assigned_room.id)
         except Guest.DoesNotExist:
-            return render(request, 'main/checkin.html', {'error': 'Phone number not found. Please contact the admin.'})
+            # Return an error message for invalid phone numbers
+            return render(request, 'main/checkin.html', {
+                'error': "Details not found. Make sure you input the same phone number used in your booking on Booking.com or Airbnb."
+            })
     return render(request, 'main/checkin.html')
+
+
 
 
 def room_detail(request, room_id):
     room = get_object_or_404(Room, id=room_id)
     return render(request, 'main/room_detail.html', {'room': room})
+
 
 
 def explore_manchester(request):

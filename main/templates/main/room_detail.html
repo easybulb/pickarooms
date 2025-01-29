@@ -4,13 +4,20 @@
 
 {% block content %}
 <section>
-    <h1>Welcome, Guest</h1>
-    <h2>Your Room: {{ guest.assigned_room.name }}</h2>
-    <p>{{ guest.assigned_room.description }}</p>
-    <video controls>
-        <source src="{{ guest.assigned_room.video_url }}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    <p><a href="/static/instructions/room_{{ guest.assigned_room.id }}.pdf" download>Download Room Instructions (PDF)</a></p>
+    <h1>Welcome to {{ room.name }}</h1>
+    <p>{{ room.description }}</p>
+
+    <!-- Embed YouTube video -->
+    <h2>Room Video Instructions</h2>
+    <iframe width="600" height="400"
+            src="{{ room.video_url }}"
+            title="Room Video Instructions"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+    </iframe>
+
+    <h2>Additional Information</h2>
+    <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>Download Room Instructions (PDF)</a></p>
 </section>
 {% endblock %}
