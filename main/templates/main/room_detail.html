@@ -4,9 +4,18 @@
 
 {% block content %}
 <section>
-    <h1>Welcome to {{ room.name }}</h1>
+    <h1>Welcome, {{ guest.full_name }}</h1>
+    <h2>Room: {{ room.name }}</h2>
+
+    <!-- Stay Duration -->
+    <p><strong>Check-In Date:</strong> {{ guest.check_in_date }}</p>
+    <p><strong>Check-Out Date:</strong> {{ guest.check_out_date }}</p>
+
+    <!-- Expiration Message -->
+    <p><strong>Access Expiration:</strong> {{ expiration_message }}</p>
 
     <!-- Description with PIN -->
+    <h2>Room Information</h2>
     <p>{{ room.description }}</p>
 
     <!-- Embed YouTube video -->
@@ -20,10 +29,7 @@
     </iframe>
 
     <!-- Downloadable PDF -->
-    <h2>Additional Information</h2>
+    <h2>Additional Resources</h2>
     <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>Download Room Instructions (PDF)</a></p>
-
-    <p>{{ expiration_message }}</p>
-
 </section>
 {% endblock %}
