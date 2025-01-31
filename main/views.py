@@ -9,6 +9,7 @@ from django.http import Http404
 from django.db.models import Q
 from django.http import JsonResponse
 from django_ratelimit.decorators import ratelimit
+from django.core.paginator import Paginator
 
 
 def home(request):
@@ -240,11 +241,32 @@ def delete_guest(request, guest_id):
 
 
 
+
+
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def past_guests(request):
-    past_guests = Guest.objects.filter(is_archived=True).order_by('-check_out_date')
+    search_query = request.GET.get('search', '')
+    
+    past_guests = Guest.objects.filter(is_archived=True)
+
+    # Apply search filter if search_query exists
+    if search_query:
+        past_guests = past_guests.filter(
+            Q(full_name__icontains=search_query) |
+            Q(phone_number__icontains=search_query) |
+            Q(assigned_room__name__icontains=search_query)
+        )
+
+    # Sort by the most recent check-out date (descending)
+    past_guests = past_guests.order_by('-check_out_date')
+
+    # Paginate results - limit to 50 guests per page
+    paginator = Paginator(past_guests, 50)
+    page_number = request.GET.get('page')
+    paginated_past_guests = paginator.get_page(page_number)
 
     return render(request, 'main/past_guests.html', {
-        'past_guests': past_guests
+        'past_guests': paginated_past_guests,
+        'search_query': search_query,
     })
