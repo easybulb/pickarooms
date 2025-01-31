@@ -93,8 +93,6 @@ class AdminLoginView(LoginView):
 
 
 
-from datetime import datetime, time
-from django.utils.timezone import localtime
 
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
@@ -112,11 +110,11 @@ def admin_page(request):
     # 2. Their checkout date is today AND the current time is past 11:00 AM
     Guest.objects.filter(
         Q(check_out_date__lt=today) | 
-        (Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False))
+        (Q(check_out_date=today) & Q(is_archived=False))
     ).update(is_archived=True)
 
-    # Show only active guests (not archived)
-    guests = Guest.objects.filter(is_archived=False)
+    # Show only active guests (not archived) and sort by nearest check-in date
+    guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
 
     check_in_date = request.POST.get('check_in_date') or request.GET.get('check_in_date') or None
     check_out_date = request.POST.get('check_out_date') or request.GET.get('check_out_date') or None
@@ -162,6 +160,7 @@ def admin_page(request):
 
 
 
+
 def get_available_rooms(check_in_date, check_out_date):
     """Returns rooms that are not assigned for the given date range."""
     # Convert dates if necessary
@@ -181,8 +180,6 @@ def get_available_rooms(check_in_date, check_out_date):
 
 
 
-
-from django.http import JsonResponse
 
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
