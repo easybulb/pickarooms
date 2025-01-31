@@ -27,23 +27,19 @@ def explore_manchester(request):
 def checkin(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
-        current_date = localtime(now()).date()
 
         try:
-            guest = Guest.objects.filter(
-                phone_number=phone_number
-            ).order_by('-check_in_date').first()  # Get the latest booking
+            guest = Guest.objects.filter(phone_number=phone_number).order_by('-check_in_date').first()
 
             if guest:
-                return redirect('room_detail', room_token=guest.secure_token)  # Use secure_token
+                # Store phone number in session for security
+                request.session['phone_number'] = phone_number
+                return redirect('room_detail', room_token=guest.secure_token)
             else:
-                return render(request, 'main/checkin.html', {
-                    'error': "No reservation found for this phone number."
-                })
+                return render(request, 'main/checkin.html', {'error': "No reservation found for this phone number."})
+
         except Guest.DoesNotExist:
-            return render(request, 'main/checkin.html', {
-                'error': "Details not found. Make sure you input the same phone number used in your booking on Booking.com or Airbnb."
-            })
+            return render(request, 'main/checkin.html', {'error': "Details not found. Make sure you input the correct phone number."})
 
     return render(request, 'main/checkin.html')
 
@@ -53,9 +49,14 @@ def checkin(request):
 
 
 def room_detail(request, room_token):
-    guest = get_object_or_404(Guest, secure_token=room_token)  # Fetch guest securely
-    room = guest.assigned_room  # Get the assigned room for the guest
+    phone_number = request.session.get('phone_number', None)  # Retrieve from session
+    guest = get_object_or_404(Guest, secure_token=room_token)
 
+    # Ensure only the correct guest can access their own room details
+    if not phone_number or guest.phone_number != phone_number:
+        return redirect('unauthorized')  # Redirect unauthorized users
+
+    room = guest.assigned_room
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
