@@ -35,7 +35,7 @@ def checkin(request):
             ).order_by('-check_in_date').first()  # Get the latest booking
 
             if guest:
-                return redirect('room_detail', room_id=guest.assigned_room.id, guest_id=guest.id)  # Pass guest_id
+                return redirect('room_detail', room_token=guest.secure_token)  # Use secure_token
             else:
                 return render(request, 'main/checkin.html', {
                     'error': "No reservation found for this phone number."
@@ -52,15 +52,16 @@ def checkin(request):
 
 
 
-def room_detail(request, room_id, guest_id):
-    room = get_object_or_404(Room, id=room_id)
-    guest = get_object_or_404(Guest, id=guest_id)  # Get only the specific guest
+def room_detail(request, room_token):
+    guest = get_object_or_404(Guest, secure_token=room_token)  # Fetch guest securely
+    room = guest.assigned_room  # Get the assigned room for the guest
 
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
     })
+
 
 
 

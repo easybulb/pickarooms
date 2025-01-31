@@ -16,16 +16,13 @@
 <form method="POST">
     {% csrf_token %}
     <label for="full_name">Full Name:</label>
-    <input type="text" id="full_name" name="full_name" required><br><br>
+    <input type="text" id="full_name" name="full_name" required><br>
 
     <label for="phone_number">Phone Number:</label>
-    <input type="text" id="phone_number" name="phone_number" required><br><br>
+    <input type="text" id="phone_number" name="phone_number" required><br>
 
     <label for="check_in_date">Check-In Date:</label>
-    <input type="date" id="check_in_date" name="check_in_date" required><br><br>
-
-    <label for="check_out_date">Check-Out Date:</label>
-    <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy"><br><br>
+    <input type="date" id="check_in_date" name="check_in_date" required><br>
 
     <!-- Stay Duration Radio Buttons -->
     <label>Stay Duration:</label><br>
@@ -36,6 +33,10 @@
     <input type="radio" name="stay_duration" value="5"> 5 Nights
     <br><br>
 
+    <label for="check_out_date">Check-Out Date:</label>
+    <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy"><br>
+
+    
     <label for="room">Assign Room:</label>
     <select id="room" name="room" required>
         <option value="">-- Select Room --</option>

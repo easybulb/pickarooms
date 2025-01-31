@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.utils.timezone import now
 from datetime import date, timedelta
@@ -23,6 +24,13 @@ class Guest(models.Model):
     check_out_date = models.DateField(default=default_check_out_date)  # Default to the next day
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
     is_archived = models.BooleanField(default=False)
+    secure_token = models.CharField(max_length=10, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        """Generate a secure token if it's not already set."""
+        if not self.secure_token:
+            self.secure_token = str(uuid.uuid4().hex[:10])  # Generates a unique 10-character token
+        super().save(*args, **kwargs)
 
     def has_access(self):
         """Check if the guest's access is still valid."""
