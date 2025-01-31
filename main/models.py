@@ -24,7 +24,7 @@ class Guest(models.Model):
     check_out_date = models.DateField(default=default_check_out_date)  # Default to the next day
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
     is_archived = models.BooleanField(default=False)
-    secure_token = models.CharField(max_length=10, blank=True)
+    secure_token = models.CharField(max_length=10, unique=True, blank=True)
 
     def save(self, *args, **kwargs):
         """Generate a secure token if it's not already set."""
