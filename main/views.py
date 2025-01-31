@@ -26,46 +26,35 @@ def explore_manchester(request):
 def checkin(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
+        current_date = localtime(now()).date()
+
         try:
-            guest = Guest.objects.get(phone_number=phone_number)
-            if guest.has_access():
-                # Redirect to the guest's assigned room page if they have access
-                return redirect('room_detail', room_id=guest.assigned_room.id)
+            guest = Guest.objects.filter(
+                phone_number=phone_number
+            ).order_by('-check_in_date').first()  # Get the latest booking
+
+            if guest:
+                return redirect('room_detail', room_id=guest.assigned_room.id, guest_id=guest.id)  # Pass guest_id
             else:
-                # If the guest's access has expired
                 return render(request, 'main/checkin.html', {
-                    'error': "Access expired. If you need assistance, please contact the admin."
+                    'error': "No reservation found for this phone number."
                 })
         except Guest.DoesNotExist:
-            # If the phone number is not found in the database
             return render(request, 'main/checkin.html', {
                 'error': "Details not found. Make sure you input the same phone number used in your booking on Booking.com or Airbnb."
             })
+
     return render(request, 'main/checkin.html')
 
 
 
 
 
-def room_detail(request, room_id):
+
+def room_detail(request, room_id, guest_id):
     room = get_object_or_404(Room, id=room_id)
-    
-    # Fetch only active (non-archived) guests assigned to this room
-    guests = Guest.objects.filter(assigned_room=room, is_archived=False)
+    guest = get_object_or_404(Guest, id=guest_id)  # Get only the specific guest
 
-    if not guests.exists():
-        return render(request, 'main/room_detail.html', {
-            'room': room,
-            'error': "No active guest assigned to this room. If this is incorrect, please contact the admin."
-        })
-
-    if guests.count() > 1:
-        return render(request, 'main/room_detail.html', {
-            'room': room,
-            'error': "Multiple guests are assigned to this room. Please contact the admin for assistance."
-        })
-
-    guest = guests.first()
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,

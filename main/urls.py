@@ -1,12 +1,13 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.views import LogoutView
+from .views import home, checkin, room_detail
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('checkin/', views.checkin, name='checkin'),
-    path('room/<int:room_id>/', views.room_detail, name='room_detail'),
+    path('room/<int:room_id>/<int:guest_id>/', room_detail, name='room_detail'),
     path('explore-manchester/', views.explore_manchester, name='explore_manchester'),
     path('contact/', views.contact, name='contact'),
     path('admin-page/', views.admin_page, name='admin_page'),
