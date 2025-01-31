@@ -33,6 +33,16 @@
             </ul>
         </nav>
     </header>
+
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div id="confirmation-messages">
+        {% for message in messages %}
+        <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <main>
         {% block content %}{% endblock %}
     </main>

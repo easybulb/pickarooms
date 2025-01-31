@@ -49,10 +49,15 @@ def checkin(request):
 
 def room_detail(request, room_id):
     room = get_object_or_404(Room, id=room_id)
-    guests = Guest.objects.filter(assigned_room=room)
+    
+    # Fetch only active (non-archived) guests assigned to this room
+    guests = Guest.objects.filter(assigned_room=room, is_archived=False)
 
     if not guests.exists():
-        raise Http404("No guest assigned to this room.")
+        return render(request, 'main/room_detail.html', {
+            'room': room,
+            'error': "No active guest assigned to this room. If this is incorrect, please contact the admin."
+        })
 
     if guests.count() > 1:
         return render(request, 'main/room_detail.html', {
@@ -66,6 +71,7 @@ def room_detail(request, room_id):
         'guest': guest,
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
     })
+
 
 
 
