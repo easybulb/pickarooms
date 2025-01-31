@@ -8,6 +8,7 @@ from datetime import date, datetime, time
 from django.http import Http404
 from django.db.models import Q
 from django.http import JsonResponse
+from django_ratelimit.decorators import ratelimit
 
 
 def home(request):
@@ -21,7 +22,7 @@ def explore_manchester(request):
 
 
 
-
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def checkin(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number')
