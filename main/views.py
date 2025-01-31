@@ -3,10 +3,10 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Guest, Room
 from django.core.mail import send_mail
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
+from datetime import date, datetime, time
 from django.http import Http404
 from django.db.models import Q
-from datetime import date
 from django.http import JsonResponse
 
 
@@ -96,13 +96,32 @@ class AdminLoginView(LoginView):
 
 
 
+
+from datetime import datetime, time
+from django.utils.timezone import localtime
+
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
     error_message = None
-    guests = Guest.objects.all()
+    
+    # Auto-move past guests at 11:00 AM on the checkout date
+    now_time = localtime(now())  # Get the current time in the local timezone
+    today = now_time.date()
+    current_time = now_time.time()
+    archive_time = time(11, 0)  # Set the archive time to 11:00 AM
 
-    # Handle date inputs dynamically
+    # Move guests to archive if:
+    # 1. Their checkout date is in the past, OR
+    # 2. Their checkout date is today AND the current time is past 11:00 AM
+    Guest.objects.filter(
+        Q(check_out_date__lt=today) | 
+        (Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False) & Q(check_out_date=today) & Q(is_archived=False))
+    ).update(is_archived=True)
+
+    # Show only active guests (not archived)
+    guests = Guest.objects.filter(is_archived=False)
+
     check_in_date = request.POST.get('check_in_date') or request.GET.get('check_in_date') or None
     check_out_date = request.POST.get('check_out_date') or request.GET.get('check_out_date') or None
 
@@ -111,9 +130,8 @@ def admin_page(request):
         check_out_date = date.fromisoformat(check_out_date)
         available_rooms = get_available_rooms(check_in_date, check_out_date)
     else:
-        available_rooms = Room.objects.all()  # Show all rooms if no date is selected
+        available_rooms = Room.objects.all()
 
-    # Handle guest addition
     if request.method == 'POST' and 'phone_number' in request.POST:
         phone_number = request.POST.get('phone_number')
         full_name = request.POST.get('full_name')
@@ -225,3 +243,15 @@ def delete_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
     guest.delete()
     return redirect('admin_page')
+
+
+
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def past_guests(request):
+    past_guests = Guest.objects.filter(is_archived=True).order_by('-check_out_date')
+
+    return render(request, 'main/past_guests.html', {
+        'past_guests': past_guests
+    })

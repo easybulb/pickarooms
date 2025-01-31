@@ -1,11 +1,10 @@
 from django.db import models
 from django.utils.timezone import now
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 def default_check_out_date():
     """Returns the next day with time set to 11:00 AM."""
-    tomorrow = date.today() + timedelta(days=1)
-    return tomorrow
+    return date.today() + timedelta(days=1)
 
 
 class Room(models.Model):
@@ -17,19 +16,18 @@ class Room(models.Model):
         return self.name
 
 
-
 class Guest(models.Model):
     full_name = models.CharField(max_length=100, default="Guest")
     phone_number = models.CharField(max_length=15, unique=True)
     check_in_date = models.DateField(default=date.today)  # Default to the current date
     check_out_date = models.DateField(default=default_check_out_date)  # Default to the next day
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    is_archived = models.BooleanField(default=False)
 
     def has_access(self):
         """Check if the guest's access is still valid."""
         current_time = now()
-        # Allow access until 11:59 PM on the check-out date
-        return current_time.date() <= self.check_out_date
+        return current_time.date() <= self.check_out_date and not self.is_archived  # Prevent access for archived guests ✅
 
     def __str__(self):
         return f"{self.full_name} - {self.phone_number} - {self.assigned_room.name}"

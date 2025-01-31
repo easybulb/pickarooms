@@ -25,7 +25,16 @@
     <input type="date" id="check_in_date" name="check_in_date" required><br><br>
 
     <label for="check_out_date">Check-Out Date:</label>
-    <input type="date" id="check_out_date" name="check_out_date" required><br><br>
+    <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy"><br><br>
+
+    <!-- Stay Duration Radio Buttons -->
+    <label>Stay Duration:</label><br>
+    <input type="radio" name="stay_duration" value="1"> 1 Night
+    <input type="radio" name="stay_duration" value="2"> 2 Nights
+    <input type="radio" name="stay_duration" value="3"> 3 Nights
+    <input type="radio" name="stay_duration" value="4"> 4 Nights
+    <input type="radio" name="stay_duration" value="5"> 5 Nights
+    <br><br>
 
     <label for="room">Assign Room:</label>
     <select id="room" name="room" required>
@@ -70,8 +79,37 @@
     </tbody>
 </table>
 
-<!-- JavaScript for dynamically updating rooms -->
+<h2>Past Guests</h2>
+<p>
+    <a href="{% url 'past_guests' %}">View past guests</a>
+</p>
+
+<!-- JavaScript to Handle Stay Duration and Available Rooms -->
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toISOString().split('T')[0]; // Get today's date
+        document.getElementById("check_in_date").value = today; // Set check-in date to today
+
+        function updateCheckout(days) {
+            if (!days) return; // Prevent setting empty values
+
+            let checkIn = new Date(document.getElementById("check_in_date").value);
+            checkIn.setDate(checkIn.getDate() + parseInt(days));
+            document.getElementById("check_out_date").value = checkIn.toISOString().split('T')[0];
+
+            // Trigger room availability update
+            updateRooms();
+        }
+
+        // Add event listeners to radio buttons
+        document.querySelectorAll("input[name='stay_duration']").forEach(radio => {
+            radio.addEventListener("change", function () {
+                updateCheckout(this.value);
+            });
+        });
+    });
+
+    // JavaScript for dynamically updating available rooms
     document.getElementById('check_in_date').addEventListener('change', updateRooms);
     document.getElementById('check_out_date').addEventListener('change', updateRooms);
 
