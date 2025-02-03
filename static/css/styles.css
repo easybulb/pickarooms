@@ -58,6 +58,11 @@ nav {
   display: none;
   flex-direction: column;
   cursor: pointer;
+  color: #F5F5F5;
+}
+
+#mobile-menu{
+  color: #F5F5F5;
 }
 
 .menu-toggle .bar {
@@ -163,6 +168,7 @@ footer p {
       width: 100%;
       background: linear-gradient(90deg, #2E2E2E, #1B263B);
       padding: 20px;
+      color: #F5F5F5;
   }
 
   .nav-links.active {
