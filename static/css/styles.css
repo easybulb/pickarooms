@@ -189,9 +189,12 @@ footer p {
     object-position: 25% center; /* For positioning the visible part of the image */
   }
 
+  .hero-content {
+    margin-top: -2rem;
+  }
+
   .hero-content h1 {
     font-size: 2.2rem;
-    margin-top: -1rem;
     margin-bottom: 1rem;
   }
   
