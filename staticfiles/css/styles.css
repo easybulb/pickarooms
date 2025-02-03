@@ -1,11 +1,27 @@
 /* General Styling */
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} */
+
+main {
+  padding-top: 90px; /* Adjust this based on header height */
+}
 
 
-body {
+html, body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #F5F5F5;
+  background: linear-gradient(90deg, #2E2E2E, #1B263B);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  flex: 1; /* Pushes the footer to the bottom */
 }
 
 /* Navigation */
@@ -142,6 +158,7 @@ footer {
   background: linear-gradient(90deg, #2E2E2E, #1B263B);
   color: #F5F5F5;
   padding: 2px 0;
+  z-index: 1;
 }
 
 footer p {
@@ -193,6 +210,17 @@ footer p {
     height: 100vh;
     object-fit: cover;
     object-position: 25% center; /* For positioning the visible part of the image */
+    margin-top: -24px;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 104%;
+    background: rgba(0, 0, 0, 0.4);
+    margin-top: -25px;
   }
 
   .hero-content {
@@ -229,15 +257,3 @@ footer p {
     margin-top: 16px;
   }
 }
-
-
-@media (prefers-color-scheme: dark) {
-  .menu-toggle {
-    color: #F5F5F5 !important;
-  }
-
-  .menu-toggle .bar {
-    background: #F5F5F5 !important;
-  }
-}
-
