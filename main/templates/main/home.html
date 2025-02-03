@@ -3,16 +3,133 @@
 {% block title %}Home - Pick-A-Rooms{% endblock %}
 
 {% block content %}
-<section>
-    <h1>Welcome to Pick-A-Rooms</h1>
-    <form action="/checkin/" method="post">
-        {% csrf_token %}
-        <input type="text" name="phone_number" placeholder="Enter your phone number">
-        <button type="submit">Check In</button>
-    </form>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Seamless Check-Ins for a Hassle-Free Stay!</h1>
+        <p>Check in online, receive your secure PIN, and enjoy your stay in Manchester.</p>
+        <form action="/checkin/" method="post" class="checkin-form">
+            {% csrf_token %}
+            <input type="text" name="phone_number" placeholder="Enter your phone number">
+            <button type="submit">Check In</button>
+        </form>
+    </div>
+    <img src="https://res.cloudinary.com/your_cloud_name/image/upload/v1700000000/hero-image.jpg" alt="Hotel room" class="hero-image">
 </section>
-<section>
+
+<!-- Why Pick-A-Rooms? -->
+<section class="why-us">
+    <h2>Why Pick-A-Rooms?</h2>
+    <div class="features">
+        <div class="feature">
+            <img src="https://res.cloudinary.com/your_cloud_name/image/upload/v1700000000/fast-checkin.png" alt="Fast Check-in">
+            <h3>Fast & Easy Check-In</h3>
+            <p>Enter your phone number, get instant access.</p>
+        </div>
+        <div class="feature">
+            <img src="https://res.cloudinary.com/your_cloud_name/image/upload/v1700000000/smart-lock.png" alt="Smart Lock">
+            <h3>Smart Lock Access</h3>
+            <p>Secure PINs sent directly for seamless entry.</p>
+        </div>
+        <div class="feature">
+            <img src="https://res.cloudinary.com/your_cloud_name/image/upload/v1700000000/location.png" alt="Great Location">
+            <h3>Perfect Locations</h3>
+            <p>Stay close to Manchester’s top attractions.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Rooms -->
+<section class="featured-rooms">
     <h2>Our Rooms</h2>
     <p>Explore the best accommodations we have to offer.</p>
+    <div class="room-gallery">
+        <div class="room">
+            <img src="https://res.cloudinary.com/your_cloud_name/image/upload/v1700000000/room1.jpg" alt="Room 1">
+            <h3>Deluxe Suite</h3>
+            <p>Spacious and stylish with all modern amenities.</p>
+        </div>
+        <div class="room">
+            <img src="https://res.cloudinary.com/your_cloud_name/image/upload/v1700000000/room2.jpg" alt="Room 2">
+            <h3>Cozy Double Room</h3>
+            <p>Perfect for solo travelers or couples.</p>
+        </div>
+        <div class="room">
+            <img src="https://res.cloudinary.com/your_cloud_name/image/upload/v1700000000/room3.jpg" alt="Room 3">
+            <h3>Executive Room</h3>
+            <p>Designed for business travelers seeking comfort.</p>
+        </div>
+    </div>
 </section>
+
+
+<!-- Explore Manchester -->
+<section class="explore-manchester">
+    <h2>Explore Manchester</h2>
+    <p>Discover the top attractions near your stay.</p>
+    <ul>
+        <li>🏟️ <strong>Etihad Stadium</strong> – Home of Manchester City FC.</li>
+        <li>🎤 <strong>The Coop Live Arena</strong> – Enjoy top concerts and events.</li>
+        <li>🚆 <strong>Piccadilly Station</strong> – Easy travel connections.</li>
+    </ul>
+    <a href="/explore-manchester/" class="explore-btn">View More</a>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+        <div class="step">
+            <h3>1. Enter Your Phone Number</h3>
+            <p>Use the same number from your Booking.com or Airbnb reservation.</p>
+        </div>
+        <div class="step">
+            <h3>2. Get Your Secure Code</h3>
+            <p>Receive a unique PIN and room details instantly.</p>
+        </div>
+        <div class="step">
+            <h3>3. Enjoy Your Stay</h3>
+            <p>Check in, relax, and enjoy your trip hassle-free!</p>
+        </div>
+    </div>
+</section>
+
+<!-- Guest Testimonials -->
+<section class="testimonials">
+    <h2>What Our Guests Say</h2>
+    <div class="testimonial">
+        <p>"The check-in process was super smooth. Loved the convenience of getting my PIN online!"</p>
+        <h4>- James, UK</h4>
+    </div>
+    <div class="testimonial">
+        <p>"Perfect stay! The room was amazing, and the smart lock system was brilliant."</p>
+        <h4>- Emily, USA</h4>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-item">
+        <h3>How do I get my PIN?</h3>
+        <p>Enter your phone number on the check-in page, and you'll receive your secure PIN instantly.</p>
+    </div>
+    <div class="faq-item">
+        <h3>What if I arrive late?</h3>
+        <p>No worries! Your PIN works anytime from check-in time onwards.</p>
+    </div>
+    <div class="faq-item">
+        <h3>Can I extend my stay?</h3>
+        <p>Contact our team for availability and an easy extension process.</p>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta">
+    <h2>Ready to Check In?</h2>
+    <p>Enter your phone number and get instant access to your room.</p>
+    <a href="/checkin/" class="cta-btn">Check In Now</a>
+</section>
+
 {% endblock %}
