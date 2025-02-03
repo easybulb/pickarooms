@@ -116,7 +116,7 @@ nav {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
-  margin-top: -3rem;
+  margin-top: -5rem;
 }
 
 .hero-content h1 {
@@ -174,7 +174,7 @@ footer p {
   }
 
   nav {
-    margin-right: -50px;
+    margin-right: -70px;
   }
 
   .nav-links {
@@ -225,7 +225,7 @@ footer p {
   }
 
   .hero-content {
-    margin-top: -4rem; /* For moving the h1, p, input and button up and down */
+    margin-top: -6rem; /* For moving the h1, p, input and button up and down */
     text-align: left;
   }
 
