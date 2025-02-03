@@ -178,6 +178,17 @@ footer p {
     margin-top: 10px ;
   }
 
+  .hero{
+    overflow: visible;
+  }
+
+  .hero img {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    object-position: 25% center; /* For positioning the visible part of the image */
+  }
+
   .hero-content h1 {
     font-size: 2.2rem;
     margin-top: -1rem;
