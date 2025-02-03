@@ -5,13 +5,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Guest Check-In{% endblock %}</title>
+    <title>{% block title %}Pick A Rooms{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
+
+    <!-- Navigation -->
     <header>
+        <div class="logo">
+            <a href="/">Pick-A-Rooms</a>
+        </div>
+        <div class="menu-toggle" id="mobile-menu">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
         <nav>
-            <ul>
+            <ul class="nav-links">
                 <li><a href="/">Home</a></li>
                 <li><a href="/about/">About</a></li>
                 <li><a href="/checkin/">Check-In</a></li>
@@ -20,11 +30,9 @@
                 {% if user.is_authenticated %}
                     <li><a href="/admin-page/">Admin Only</a></li>
                     <li>
-                        <form action="{% url 'logout' %}" method="POST" style="display:inline;">
+                        <form action="{% url 'logout' %}" method="POST">
                             {% csrf_token %}
-                            <button type="submit">
-                                Logout
-                            </button>
+                            <button type="submit" class="logout-btn">Logout</button>
                         </form>
                     </li>
                 {% else %}
@@ -34,21 +42,14 @@
         </nav>
     </header>
 
-    <!-- Flash Messages -->
-    {% if messages %}
-    <div id="confirmation-messages">
-        {% for message in messages %}
-        <div class="message {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
     <main>
         {% block content %}{% endblock %}
     </main>
+
     <footer>
-        <p>&copy; 2025 Pick-a-Rooms. WebApp built by Henry. Email easybulb@gmail.com</p>
+        <p>&copy; 2025 Pick-A-Rooms. WebApp built by Henry. Email easybulb@gmail.com</p>
     </footer>
 
+    <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
