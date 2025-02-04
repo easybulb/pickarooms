@@ -1,0 +1,145 @@
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5 !important;
+    background: #f5f5f5 !important;
+}
+
+/* Hero Section */
+.hero {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: url('https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738629222/about-pickarooms_xwdtbu.png') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.hero-text p {
+    font-size: 1.5rem;
+}
+
+/* Content Section */
+.content {
+    padding: 50px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.content h2 {
+    font-size: 2.5rem;
+    color: #1B263B;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #C7A008;
+    padding-bottom: 10px;
+}
+
+/* Grid Layout for Attractions, Culinary, Shopping, and Cultural Sections */
+.attractions, .culinary, .shopping, .cultural {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+.attraction, .culinary-spot, .shopping-spot, .cultural-spot {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.attraction:hover, .culinary-spot:hover, .shopping-spot:hover, .cultural-spot:hover {
+    transform: translateY(-5px);
+}
+
+.attraction img, .culinary-spot img, .shopping-spot img, .cultural-spot img {
+    width: 100%;
+    height: 200px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.attraction h3, .culinary-spot h3, .shopping-spot h3, .cultural-spot h3 {
+    font-size: 1.6rem;
+    color: #333;
+    margin-top: 15px;
+}
+
+.attraction p, .culinary-spot p, .shopping-spot p, .cultural-spot p {
+    font-size: 1rem;
+    color: #555;
+    margin-top: 10px;
+}
+
+/* Google Map Section */
+.map {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.map iframe {
+    width: 100%;
+    max-width: 800px;
+    height: 450px;
+    border-radius: 10px;
+    border: 2px solid #C7A008;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero {
+        height: 300px;
+    }
+
+    .hero-text h1 {
+        font-size: 2rem;
+    }
+
+    .hero-text p {
+        font-size: 1.2rem;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .content h2 {
+        font-size: 2rem;
+    }
+
+    .attractions, .culinary, .shopping, .cultural {
+        grid-template-columns: 1fr;
+    }
+
+    .map iframe {
+        height: 350px;
+    }
+}

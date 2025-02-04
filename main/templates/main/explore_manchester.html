@@ -1,22 +1,89 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/explore_manchester.css' %}">
+{% endblock %}
+
 {% block title %}Explore Manchester{% endblock %}
 
 {% block content %}
-<section>
-    <h1>Explore Manchester</h1>
-    <p>Discover the best that Manchester has to offer!</p>
-    <ul>
-        <li><strong>Restaurants:</strong> Try the famous Curry Mile or local pubs.</li>
-        <li><strong>Attractions:</strong> Visit the Manchester Museum or the Etihad Stadium.</li>
-        <li><strong>Shopping:</strong> Explore the Arndale Centre and Trafford Centre.</li>
-    </ul>
-    <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3049.9539480946986!2d-2.244644084622946!3d53.4807596800016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487bb1c6b7f6f1b5%3A0x123456789abcdef0!2sManchester!5e0!3m2!1sen!2suk!4v1617844118965!5m2!1sen!2suk"
-        width="600"
-        height="450"
-        style="border:0;"
-        allowfullscreen=""
-        loading="lazy"></iframe>
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+        <h1>Discover the Best of Manchester</h1>
+        <p>Uncover the city's top attractions, dining spots, and cultural landmarks.</p>
+    </div>
+</section>
+
+<section class="content">
+    <h2>Top Attractions</h2>
+    <div class="attractions">
+        <div class="attraction">
+            <img src="{% static 'images/john_rylands_library.jpg' %}" alt="John Rylands Library">
+            <h3>John Rylands Library</h3>
+            <p>A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts.</p>
+        </div>
+        <div class="attraction">
+            <img src="{% static 'images/etihad_stadium.jpg' %}" alt="Etihad Stadium">
+            <h3>Etihad Stadium</h3>
+            <p>Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue.</p>
+        </div>
+        <div class="attraction">
+            <img src="{% static 'images/science_industry_museum.jpg' %}" alt="Science and Industry Museum">
+            <h3>Science and Industry Museum</h3>
+            <p>Delve into Manchester's industrial past with interactive exhibits and historical artifacts.</p>
+        </div>
+    </div>
+
+    <h2>Culinary Delights</h2>
+    <div class="culinary">
+        <div class="culinary-spot">
+            <img src="{% static 'images/curry_mile.jpg' %}" alt="Curry Mile">
+            <h3>Curry Mile</h3>
+            <p>Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes.</p>
+        </div>
+        <div class="culinary-spot">
+            <img src="{% static 'images/mackie_mayor.jpg' %}" alt="Mackie Mayor">
+            <h3>Mackie Mayor</h3>
+            <p>A bustling food hall housed in a restored Victorian market, featuring diverse food vendors.</p>
+        </div>
+    </div>
+
+    <h2>Shopping Destinations</h2>
+    <div class="shopping">
+        <div class="shopping-spot">
+            <img src="{% static 'images/arndale_centre.jpg' %}" alt="Manchester Arndale">
+            <h3>Manchester Arndale</h3>
+            <p>One of the UK's largest shopping centers, offering a wide range of retail stores and eateries.</p>
+        </div>
+        <div class="shopping-spot">
+            <img src="{% static 'images/trafford_centre.jpg' %}" alt="Trafford Centre">
+            <h3>Trafford Centre</h3>
+            <p>A grand shopping and leisure complex with unique architecture, shops, and entertainment options.</p>
+        </div>
+    </div>
+
+    <h2>Cultural Experiences</h2>
+    <div class="cultural">
+        <div class="cultural-spot">
+            <img src="{% static 'images/northern_quarter.jpg' %}" alt="Northern Quarter">
+            <h3>Northern Quarter</h3>
+            <p>A trendy district known for its street art, independent shops, and vibrant nightlife.</p>
+        </div>
+        <div class="cultural-spot">
+            <img src="{% static 'images/whitworth_gallery.jpg' %}" alt="The Whitworth">
+            <h3>The Whitworth</h3>
+            <p>An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting.</p>
+        </div>
+    </div>
+
+    <h2>Map of Manchester</h2>
+    <div class="map">
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3049.9539480946986!2d-2.244644084622946!3d53.4807596800016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487bb1c6b7f6f1b5%3A0x123456789abcdef0!2sManchester!5e0!3m2!1sen!2suk!4v1617844118965!5m2!1sen!2suk"
+            width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
 </section>
 {% endblock %}
