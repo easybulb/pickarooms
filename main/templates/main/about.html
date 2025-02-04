@@ -1,18 +1,83 @@
 {% extends 'base.html' %}
 
-{% block title %}About Us{% endblock %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block title %}About Us - PickARooms{% endblock %}
 
 {% block content %}
-<section>
-    <h1>About Us</h1>
-    <p>Welcome to PickARooms, your trusted platform for seamless guest check-ins.</p>
-    <p>Our goal is to provide a smooth and efficient check-in process for guests, offering tailored video instructions for every room.</p>
-    <p>With PickARooms, you get:</p>
+<!-- Hero Section with Background Image -->
+<section class="about-hero"
+    style="background-image: url('https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738629222/about-pickarooms_xwdtbu.png');">
+    <div class="about-overlay"></div>
+    <div class="about-text">
+        <h1>Welcome to PickARooms</h1>
+        <p>Your trusted platform for a seamless and stress-free check-in experience.</p>
+    </div>
+</section>
+
+<section class="about-content">
+    <h2>About PickARooms</h2>
+    <p>
+        Nestled in the quiet neighborhood of <strong>Beswick, Manchester</strong>, PickARooms is designed for travelers
+        seeking comfort, convenience, and a seamless self-check-in process.
+        Whether you're visiting for <strong>business, a football match, or a concert</strong>, our <strong>modern,
+            well-appointed rooms</strong> provide everything you need for a comfortable stay.
+    </p>
+
+    <h2>🏠 Our Accommodation</h2>
     <ul>
-        <li>Room-specific check-in videos</li>
-        <li>Personalized guest services</li>
-        <li>A secure and reliable platform</li>
+        <li><strong>Spacious Rooms:</strong> Each room features a cozy <strong>double bed</strong>, premium linens, and
+            some come with a <strong>private en-suite bathroom</strong>.</li>
+        <li><strong>Modern Amenities:</strong> Guests enjoy <strong>free high-speed Wi-Fi</strong>, a fully equipped
+            <strong>kitchen</strong>, and an inviting <strong>living room</strong>.
+        </li>
+        <li><strong>Smart Check-In System:</strong> Use your <strong>phone number to access your PIN</strong> and gain
+            entry to your room hassle-free.</li>
+        <li><strong>Prime Location:</strong> Just a <strong>5-minute walk to Etihad Stadium</strong> and a short drive
+            to <strong>Manchester Piccadilly Train Station</strong>.</li>
     </ul>
-    <p>We are dedicated to making your stay as comfortable as possible.</p>
+
+    <h2>👋 Meet Your Host</h2>
+    <div class="host-bio">
+        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738628777/henry-ofodieze_n2zmoj.png"
+            alt="Henry, PickARooms Host">
+        <p>
+            Hi, I’m <strong>Henry</strong>, a <strong>Full Stack Developer</strong> passionate about creating seamless
+            experiences—both in <strong>tech</strong> and for my <strong>guests</strong>.
+            My background includes <strong>eCommerce development</strong>, an appearance on <strong>BBC's Dragons'
+                Den</strong>, and a love for travel.
+            Whether you're visiting Manchester for work, a match, or a city break, I strive to make your stay
+            <strong>easy, enjoyable, and memorable</strong>.
+        </p>
+    </div>
+
+    <h2>📍 Explore Beswick & Manchester</h2>
+    <p>Guests love the peaceful atmosphere of Beswick while being minutes away from Manchester’s top attractions.</p>
+    <ul>
+        <li><strong>⚽ Etihad Stadium (5 min walk)</strong> - Home of <strong>Manchester City FC</strong>, perfect for
+            match days or stadium tours.</li>
+        <li>🎤 <strong>Co-op Live Arena (5 min walk)</strong> – The UK’s largest indoor arena, hosting world-class
+            concerts and events.</li>
+        <li><strong>🚆 Manchester Piccadilly Station (5 min drive)</strong> - Connects you to the rest of the UK.</li>
+        <li><strong>🎭 Cultural Landmarks:</strong> The <strong>Manchester Museum</strong>, <strong>The
+                Whitworth</strong>, and historic <strong>Victoria Baths</strong>.</li>
+        <li><strong>🍽️ Dining & Nightlife:</strong> New Islington Marina, local pubs, and a variety of
+            <strong>restaurants & cafés</strong>.
+        </li>
+        <li><strong>🛍️ Shopping & Leisure:</strong> <strong>Manchester Arndale</strong>, <strong>The Co-op</strong>,
+            and outdoor escapes like <strong>Philips Park</strong>.</li>
+    </ul>
+
+    <h2>🌟 Why Stay With Us?</h2>
+    <p>
+        At PickARooms, we offer a <strong>stress-free check-in process</strong>, comfortable accommodations, and a
+        <strong>prime location</strong> near Manchester’s major attractions.
+        Whether you're here for <strong>business, sports, or a city escape</strong>, we ensure you have an
+        <strong>effortless and enjoyable stay</strong>.
+    </p>
 </section>
 {% endblock %}
