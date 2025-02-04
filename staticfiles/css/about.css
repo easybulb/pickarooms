@@ -130,6 +130,8 @@ html, body {
     }
 
     .host-bio img {
+        width: 200px;
+        height: 200px;
         margin-right: 0;
         margin-bottom: 15px;
     }
