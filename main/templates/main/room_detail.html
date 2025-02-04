@@ -1,40 +1,58 @@
 {% extends 'base.html' %}
 
-{% block title %}Room Details{% endblock %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
+{% endblock %}
+
+{% block title %}Room Details - {{ room.name }}{% endblock %}
 
 {% block content %}
-<section>
-    {% if guest %}
-        <h1>Welcome, {{ guest.full_name }}</h1>
-        <h2>Room: {{ room.name }}</h2>
-
-        <!-- Stay Duration -->
-        <p><strong>Check-In Date:</strong> {{ guest.check_in_date }} - From 2pm</p>
-        <p><strong>Check-Out Date:</strong> {{ guest.check_out_date }} - Anytime before 11am</p>
-
-        <!-- Expiration Message -->
-        <p><strong>Access Expiration:</strong> {{ expiration_message }}</p>
-
-    {% else %}
-        <p style="color: red;"><strong>No guest assigned to this room.</strong> If this is incorrect, please contact the admin.</p>
-    {% endif %}
-
-    <!-- Description with PIN -->
-    <h2>Room Information</h2>
-    <p>{{ room.description }}</p>
-
-    <!-- Embed YouTube video -->
-    <h2>Room Video Instructions</h2>
-    <iframe width="600" height="400"
-            src="{{ room.video_url }}"
-            title="Room Video Instructions"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen>
-    </iframe>
-
-    <!-- Downloadable PDF -->
-    <h2>Additional Resources</h2>
-    <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>Download Room Instructions (PDF)</a></p>
+<!-- Hero Section -->
+<section class="room-hero" style="background-image: url('{{ room.image_url }}');">
+    <div class="room-overlay"></div>
+    <div class="room-text">
+        <h1>{{ room.name }}</h1>
+        {% if guest %}
+            <p>Welcome, {{ guest.full_name }}</p>
+        {% endif %}
+    </div>
 </section>
+
+<!-- Room Details Section -->
+<section class="room-container">
+    <div class="room-info">
+        <h2>🛏️ Room Details</h2>
+        <p>{{ room.description }}</p>
+
+        {% if guest %}
+        <h2>📅 Your Stay</h2>
+        <p><strong>Check-In Date:</strong> {{ guest.check_in_date }} (From 2 PM)</p>
+        <p><strong>Check-Out Date:</strong> {{ guest.check_out_date }} (Anytime before 11 AM)</p>
+        <p class="expiration"><strong>Access Expiration:</strong> {{ expiration_message }}</p>
+        {% else %}
+        <p class="no-guest">❌ No guest assigned to this room. If this is incorrect, please contact the admin.</p>
+        {% endif %}
+    </div>
+
+    <!-- Room Video Instructions -->
+    <div class="room-video">
+        <h2>🎥 Room Video Instructions</h2>
+        <iframe width="100%" height="400"
+                src="{{ room.video_url }}"
+                title="Room Video Instructions"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+    </div>
+
+    <!-- Additional Resources -->
+    <div class="room-resources">
+        <h2>📄 Additional Resources</h2>
+        <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>📥 Download Room Instructions (PDF)</a></p>
+    </div>
+</section>
+
 {% endblock %}
