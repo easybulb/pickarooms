@@ -14,10 +14,10 @@
         <input type="text" id="phone_number" name="phone_number" value="{{ guest.phone_number }}" required><br><br>
 
         <label for="check_in_date">Check-In Date:</label>
-        <input type="date" id="check_in_date" name="check_in_date" value="{{ guest.check_in_date }}" required><br><br>
+        <input type="date" id="check_in_date" name="check_in_date" value="{{ guest.check_in_date|date:'Y-m-d' }}" required><br><br>
 
         <label for="check_out_date">Check-Out Date:</label>
-        <input type="date" id="check_out_date" name="check_out_date" value="{{ guest.check_out_date }}" required><br><br>
+        <input type="date" id="check_out_date" name="check_out_date" value="{{ guest.check_out_date|date:'Y-m-d' }}" required><br><br>
 
         <label for="room">Assign Room:</label>
         <select id="room" name="room" required>
@@ -31,4 +31,34 @@
         <button type="submit">Save Changes</button>
     </form>
 </section>
+
+<!-- JavaScript for updating available rooms dynamically -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function updateRooms() {
+            const checkInDate = document.getElementById('check_in_date').value;
+            const checkOutDate = document.getElementById('check_out_date').value;
+
+            if (checkInDate && checkOutDate) {
+                fetch(`/admin-page/available-rooms/?check_in_date=${checkInDate}&check_out_date=${checkOutDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const roomSelect = document.getElementById('room');
+                        roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
+                        data.rooms.forEach(room => {
+                            const option = document.createElement('option');
+                            option.value = room.id;
+                            option.textContent = room.name;
+                            roomSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching available rooms:', error));
+            }
+        }
+
+        // Trigger room update when dates change
+        document.getElementById('check_in_date').addEventListener('change', updateRooms);
+        document.getElementById('check_out_date').addEventListener('change', updateRooms);
+    });
+</script>
 {% endblock %}

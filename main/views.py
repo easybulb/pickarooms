@@ -224,7 +224,7 @@ def edit_guest(request, guest_id):
         guest.save()
         return redirect('admin_page')
 
-    # Include the currently assigned room in the available rooms
+    # Get available rooms for selected check-in and check-out dates
     available_rooms = get_available_rooms(guest.check_in_date, guest.check_out_date) | Room.objects.filter(id=guest.assigned_room.id)
 
     return render(request, 'main/edit_guest.html', {
