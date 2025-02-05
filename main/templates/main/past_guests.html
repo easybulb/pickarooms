@@ -1,58 +1,80 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Past Guests{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/past_guests.css' %}">
+{% endblock %}
+
 {% block content %}
-<h1>Past Guests</h1>
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
+    <br>
+    <h1>Past Guests</h1>
 
-<!-- Search Box -->
-<form method="GET" action="{% url 'past_guests' %}">
-    <input type="text" name="search" placeholder="Search guests..." value="{{ search_query }}">
-    <button type="submit">Search</button>
-</form>
+    <!-- Search Box -->
+    <form method="GET" action="{% url 'past_guests' %}" class="search-form">
+        <input type="text" name="search" placeholder="Search guests..." value="{{ search_query }}">
+        <button type="submit">Search</button>
+    </form>
 
-<!-- Guests Table -->
-<table>
-    <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Phone Number</th>
-            <th>Check-In Date</th>
-            <th>Check-Out Date</th>
-            <th>Assigned Room</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for guest in past_guests %}
-        <tr>
-            <td>{{ guest.full_name }}</td>
-            <td>{{ guest.phone_number }}</td>
-            <td>{{ guest.check_in_date }}</td>
-            <td>{{ guest.check_out_date }}</td>
-            <td>{{ guest.assigned_room.name }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5">No past guests found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <!-- Guests Table -->
+    <div class="table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Phone Number</th>
+                    <th>Check-In Date</th>
+                    <th>Check-Out Date</th>
+                    <th>Assigned Room</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guest in past_guests %}
+                <tr>
+                    <td>{{ guest.full_name }}</td>
+                    <td>{{ guest.phone_number }}</td>
+                    <td>{{ guest.check_in_date }}</td>
+                    <td>{{ guest.check_out_date }}</td>
+                    <td>{{ guest.assigned_room.name }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No past guests found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<!-- Pagination Controls -->
-<div>
-    {% if past_guests.has_previous %}
-        <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
-        <a href="?page={{ past_guests.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
-    {% endif %}
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        {% if past_guests.has_previous %}
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
+            <a href="?page={{ past_guests.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+        {% endif %}
 
-    <span>Page {{ past_guests.number }} of {{ past_guests.paginator.num_pages }}</span>
+        <span>Page {{ past_guests.number }} of {{ past_guests.paginator.num_pages }}</span>
 
-    {% if past_guests.has_next %}
-        <a href="?page={{ past_guests.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-        <a href="?page={{ past_guests.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
-    {% endif %}
+        {% if past_guests.has_next %}
+            <a href="?page={{ past_guests.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+            <a href="?page={{ past_guests.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
 </div>
 
-<a href="{% url 'admin_page' %}">Back to Admin Page</a>
+<!-- JavaScript for Table Scrolling on Mobile -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tableContainer = document.querySelector(".table-container");
+        tableContainer.addEventListener("touchstart", function (event) {
+            event.stopPropagation();
+        });
+    });
+</script>
 {% endblock %}

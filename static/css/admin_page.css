@@ -133,6 +133,10 @@ th {
         margin-top: -25px;
     }
 
+    table td {
+        font-size: 1rem;
+    }
+
     form input, #select-room {
         width: 95%;
         font-size: 1.1rem;
@@ -146,6 +150,7 @@ th {
     th, td {
         padding: 5px;
         font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .admin-button {
