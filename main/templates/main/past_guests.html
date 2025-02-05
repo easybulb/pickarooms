@@ -30,6 +30,7 @@
                     <th>Check-In Date</th>
                     <th>Check-Out Date</th>
                     <th>Assigned Room</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,17 +41,23 @@
                     <td>{{ guest.check_in_date }}</td>
                     <td>{{ guest.check_out_date }}</td>
                     <td>{{ guest.assigned_room.name }}</td>
+                    <td>
+                        <button class="reassign-btn" 
+                            data-name="{{ guest.full_name }}"
+                            data-phone="{{ guest.phone_number }}">
+                            Reassign
+                        </button>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5">No past guests found.</td>
+                    <td colspan="6">No past guests found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Pagination Controls -->
     <div class="pagination">
         {% if past_guests.has_previous %}
             <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
@@ -68,13 +75,25 @@
     <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
 </div>
 
-<!-- JavaScript for Table Scrolling on Mobile -->
+<!-- JavaScript for Reassigning Guest -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const tableContainer = document.querySelector(".table-container");
-        tableContainer.addEventListener("touchstart", function (event) {
-            event.stopPropagation();
+        const reassignButtons = document.querySelectorAll(".reassign-btn");
+        
+        reassignButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                const name = this.getAttribute("data-name");
+                const phone = this.getAttribute("data-phone");
+
+                // Store guest data in localStorage for use in Admin Page
+                localStorage.setItem("reassign_name", name);
+                localStorage.setItem("reassign_phone", phone);
+
+                // Redirect to Admin Page to reassign
+                window.location.href = "{% url 'admin_page' %}";
+            });
         });
     });
 </script>
+
 {% endblock %}

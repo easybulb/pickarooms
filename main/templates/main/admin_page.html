@@ -134,7 +134,7 @@
             fetch(`/admin-page/available-rooms/?check_in_date=${checkInDate}&check_out_date=${checkOutDate}`)
                 .then(response => response.json())
                 .then(data => {
-                    const roomSelect = document.getElementById('room');
+                    const roomSelect = document.getElementById('select-room'); // ✅ FIX: Target the correct element
                     roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
                     data.rooms.forEach(room => {
                         const option = document.createElement('option');
@@ -147,12 +147,44 @@
         }
     }
 
-    // Make table scrollable on mobile
+    // ✅ Prevent duplicate room assignment
+    function validateRoomSelection() {
+        const selectedRoom = document.getElementById('select-room').value;
+        const guests = document.querySelectorAll("tbody tr"); // Get all guests in the table
+
+        for (let guest of guests) {
+            const assignedRoom = guest.cells[1].textContent.trim(); // Get room name from table
+            if (assignedRoom === selectedRoom) {
+                alert("This room is already assigned to another guest during this period.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    document.querySelector("form").addEventListener("submit", function (event) {
+        if (!validateRoomSelection()) {
+            event.preventDefault(); // Stop form submission if room is duplicated
+        }
+    });
+
+    // ✅ JavaScript to Pre-Fill Form When Reassigning
     document.addEventListener("DOMContentLoaded", function () {
-        const tableContainer = document.querySelector(".table-container");
-        tableContainer.addEventListener("touchstart", function (event) {
-            event.stopPropagation();
-        });
+        const nameField = document.getElementById("full_name");
+        const phoneField = document.getElementById("phone_number");
+
+        const storedName = localStorage.getItem("reassign_name");
+        const storedPhone = localStorage.getItem("reassign_phone");
+
+        if (storedName && storedPhone) {
+            nameField.value = storedName;
+            phoneField.value = storedPhone;
+
+            // Clear localStorage after use
+            localStorage.removeItem("reassign_name");
+            localStorage.removeItem("reassign_phone");
+        }
     });
 </script>
+
 {% endblock %}

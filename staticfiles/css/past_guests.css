@@ -65,6 +65,15 @@ h1 {
     color: white;
 }
 
+.reassign-btn {
+    padding: 10px 15px;
+    border: none;
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 /* Pagination */
 .pagination {
     text-align: center;

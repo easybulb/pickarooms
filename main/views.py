@@ -104,7 +104,7 @@ class AdminLoginView(LoginView):
 def admin_page(request):
     error_message = None
     
-    # Auto-move past guests at 11:00 AM on the checkout date
+    # Auto-move past guests to archive at 11:00 AM on the checkout date
     now_time = localtime(now())  # Get the current time in the local timezone
     today = now_time.date()
     current_time = now_time.time()
@@ -138,9 +138,21 @@ def admin_page(request):
 
         try:
             room = Room.objects.get(id=room_id)
-            if Guest.objects.filter(phone_number=phone_number).exists():
-                error_message = "A guest with this phone number already exists."
+            existing_guest = Guest.objects.filter(phone_number=phone_number).first()
+
+            if existing_guest:
+                # ✅ If the guest is archived, reactivate & update their details
+                if existing_guest.is_archived:
+                    existing_guest.is_archived = False
+                    existing_guest.assigned_room = room
+                    existing_guest.check_in_date = check_in_date
+                    existing_guest.check_out_date = check_out_date
+                    existing_guest.save()
+                    return redirect('admin_page')
+                else:
+                    error_message = "A guest with this phone number is already checked in."
             else:
+                # ✅ If no existing guest, create a new one
                 Guest.objects.create(
                     phone_number=phone_number,
                     full_name=full_name,
@@ -149,6 +161,7 @@ def admin_page(request):
                     assigned_room=room
                 )
                 return redirect('admin_page')
+
         except Room.DoesNotExist:
             error_message = "Invalid room selected."
 
@@ -159,6 +172,7 @@ def admin_page(request):
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
     })
+
 
 
 
