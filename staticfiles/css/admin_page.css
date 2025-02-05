@@ -151,6 +151,7 @@ th {
         padding: 5px;
         font-size: 0.9rem;
         font-size: 1rem;
+        text-align: left;
     }
 
     .admin-button {
