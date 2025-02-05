@@ -18,47 +18,7 @@
         <p class="error-message">{{ error }}</p>
     {% endif %}
 
-    <!-- Add Guest Form -->
-    <div class="admin-section">
-        <h2>Add New Guest</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <label for="full_name">Full Name:</label>
-            <input type="text" id="full_name" name="full_name" required>
-
-            <label for="phone_number">Phone Number:</label>
-            <input type="text" id="phone_number" name="phone_number" required>
-
-            <label for="check_in_date">Check-In Date:</label>
-            <input type="date" id="check_in_date" name="check_in_date" required>
-
-            <!-- Stay Duration -->
-            <label>Stay Duration:</label>
-            <div class="radio-group">
-                <label><input type="radio" name="stay_duration" value="1"> 1 Night</label>
-                <label><input type="radio" name="stay_duration" value="2"> 2 Nights</label>
-                <label><input type="radio" name="stay_duration" value="3"> 3 Nights</label>
-                <label><input type="radio" name="stay_duration" value="4"> 4 Nights</label>
-                <label><input type="radio" name="stay_duration" value="5"> 5 Nights</label>
-            </div>
-            
-
-            <label for="check_out_date">Check-Out Date:</label>
-            <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy">
-
-            <label for="room">Assign Room:</label>
-            <select id="select-room" name="room" required>
-                <option value="">-- Select Room --</option>
-                {% for room in rooms %}
-                    <option value="{{ room.id }}">{{ room.name }}</option>
-                {% endfor %}
-            </select>
-            <br>
-            <button type="submit" class="admin-button">Add Guest</button>
-        </form>
-    </div>
-
-    <!-- Existing Guests -->
+        <!-- Existing Guests -->
     <div class="admin-section">
         <h2>Existing Guests</h2>
         <div class="table-container">
@@ -92,7 +52,49 @@
                 </tbody>
             </table>
         </div>
+        <p>
+            <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
+        </p>
     </div>
+
+    <!-- Add Guest Form -->
+    <div class="admin-section">
+        <h2>Add New Guest</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="full_name">Full Name:</label>
+            <input type="text" id="full_name" name="full_name" required>
+
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" required>
+
+            <label for="check_in_date">Check-In Date:</label>
+            <input type="date" id="check_in_date" name="check_in_date" required>
+
+            <!-- Stay Duration -->
+            <label>Stay Duration:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="stay_duration" value="1"> 1 Night</label>
+                <label><input type="radio" name="stay_duration" value="2"> 2 Nights</label>
+                <label><input type="radio" name="stay_duration" value="3"> 3 Nights</label>
+            </div>
+            
+
+            <label for="check_out_date">Check-Out Date:</label>
+            <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy">
+
+            <label for="room">Assign Room:</label>
+            <select id="select-room" name="room" required>
+                <option value="">-- Select Room --</option>
+                {% for room in rooms %}
+                    <option value="{{ room.id }}">{{ room.name }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <button type="submit" class="admin-button">Add Guest</button>
+        </form>
+    </div>
+
 
     <h2>Past Guests</h2>
     <p>
