@@ -15,6 +15,12 @@ class GuestAdmin(admin.ModelAdmin):
     mark_as_archived.short_description = "Move selected guests to archive"
 
 
+
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ('name', 'video_url', 'image')  # Show image field in admin
+    search_fields = ('name',)
+
+
 # ✅ Register Room and Guest models
 admin.site.register(Room)
 admin.site.register(Guest, GuestAdmin)

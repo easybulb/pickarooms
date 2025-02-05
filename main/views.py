@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django_ratelimit.decorators import ratelimit
 from django.core.paginator import Paginator
+from django.conf import settings
 
 
 def home(request):
@@ -61,6 +62,7 @@ def room_detail(request, room_token):
         'room': room,
         'guest': guest,
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
+        'MEDIA_URL': settings.MEDIA_URL,
     })
 
 

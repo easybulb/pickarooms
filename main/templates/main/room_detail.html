@@ -6,11 +6,15 @@
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
 {% endblock %}
 
-{% block title %}Room Details - {{ room.name }}{% endblock %}
+{% block title %}{{ room.name }} - Room Details{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="room-hero" style="background-image: url('{{ room.image_url }}');">
+{% if room.image %}
+    <section class="room-hero" style="background-image: url('{{ room.image.url }}');">
+{% else %}
+    <section class="room-hero" style="background-color: #555;"> <!-- Default if no image -->
+{% endif %}
     <div class="room-overlay"></div>
     <div class="room-text">
         <h1>{{ room.name }}</h1>
@@ -20,7 +24,7 @@
     </div>
 </section>
 
-<!-- Room Details Section -->
+<!-- Room Details -->
 <section class="room-container">
     <div class="room-info">
         <h2>🛏️ Room Details</h2>
@@ -28,17 +32,17 @@
 
         {% if guest %}
         <h2>📅 Your Stay</h2>
-        <p><strong>Check-In Date:</strong> {{ guest.check_in_date }} (From 2 PM)</p>
-        <p><strong>Check-Out Date:</strong> {{ guest.check_out_date }} (Anytime before 11 AM)</p>
-        <p class="expiration"><strong>Access Expiration:</strong> {{ expiration_message }}</p>
+        <p><strong>Check-In:</strong> {{ guest.check_in_date }} (From 2 PM)</p>
+        <p><strong>Check-Out:</strong> {{ guest.check_out_date }} (Before 11 AM)</p>
+        <p class="expiration"><strong>Access Expires:</strong> {{ expiration_message }}</p>
         {% else %}
-        <p class="no-guest">❌ No guest assigned to this room. If this is incorrect, please contact the admin.</p>
+        <p class="no-guest">❌ No guest assigned to this room. Contact admin for assistance.</p>
         {% endif %}
     </div>
 
     <!-- Room Video Instructions -->
     <div class="room-video">
-        <h2>🎥 Room Video Instructions</h2>
+        <h2>🎥 Room Video Guide</h2>
         <iframe width="100%" height="400"
                 src="{{ room.video_url }}"
                 title="Room Video Instructions"
@@ -50,7 +54,7 @@
 
     <!-- Additional Resources -->
     <div class="room-resources">
-        <h2>📄 Additional Resources</h2>
+        <h2>📄 Room Instructions</h2>
         <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>📥 Download Room Instructions (PDF)</a></p>
     </div>
 </section>

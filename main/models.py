@@ -12,6 +12,7 @@ class Room(models.Model):
     name = models.CharField(max_length=100)  # Room name
     video_url = models.URLField()  # Link to the video instructions
     description = models.TextField(blank=True, null=True)  # Optional room description
+    image = models.ImageField(upload_to='room_images/', default='default_room.jpg')  # Room image
 
     def __str__(self):
         return self.name
