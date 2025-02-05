@@ -1,108 +1,116 @@
 {% extends 'base.html' %}
 
-{% block title %}Admin Page{% endblock %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
+{% endblock %}
+
+{% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<h1>Admin Page</h1>
+<section class="admin-container">
+    <h1 class="admin-title">Admin Dashboard</h1>
 
-{% if success %}
-    <p style="color: green;">Guest added successfully!</p>
-{% elif error %}
-    <p style="color: red;">{{ error }}</p>
-{% endif %}
+    {% if success %}
+        <p class="success-message">Guest added successfully!</p>
+    {% elif error %}
+        <p class="error-message">{{ error }}</p>
+    {% endif %}
 
-<!-- Add Guest Form -->
-<h2>Add New Guest</h2>
-<form method="POST">
-    {% csrf_token %}
-    <label for="full_name">Full Name:</label>
-    <input type="text" id="full_name" name="full_name" required><br>
+    <!-- Add Guest Form -->
+    <div class="admin-section">
+        <h2>Add New Guest</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="full_name">Full Name:</label>
+            <input type="text" id="full_name" name="full_name" required>
 
-    <label for="phone_number">Phone Number:</label>
-    <input type="text" id="phone_number" name="phone_number" required><br>
+            <label for="phone_number">Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" required>
 
-    <label for="check_in_date">Check-In Date:</label>
-    <input type="date" id="check_in_date" name="check_in_date" required><br>
+            <label for="check_in_date">Check-In Date:</label>
+            <input type="date" id="check_in_date" name="check_in_date" required>
 
-    <!-- Stay Duration Radio Buttons -->
-    <label>Stay Duration:</label><br>
-    <input type="radio" name="stay_duration" value="1"> 1 Night
-    <input type="radio" name="stay_duration" value="2"> 2 Nights
-    <input type="radio" name="stay_duration" value="3"> 3 Nights
-    <input type="radio" name="stay_duration" value="4"> 4 Nights
-    <input type="radio" name="stay_duration" value="5"> 5 Nights
-    <br><br>
+            <!-- Stay Duration -->
+            <label>Stay Duration:</label>
+            <div class="radio-group">
+                <input type="radio" name="stay_duration" value="1"> 1 Night
+                <input type="radio" name="stay_duration" value="2"> 2 Nights
+                <input type="radio" name="stay_duration" value="3"> 3 Nights
+            </div>
 
-    <label for="check_out_date">Check-Out Date:</label>
-    <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy"><br>
+            <label for="check_out_date">Check-Out Date:</label>
+            <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy">
 
-    
-    <label for="room">Assign Room:</label>
-    <select id="room" name="room" required>
-        <option value="">-- Select Room --</option>
-        {% for room in rooms %}
-            <option value="{{ room.id }}">{{ room.name }}</option>
-        {% endfor %}
-    </select><br><br>
+            <label for="room">Assign Room:</label>
+            <select id="select-room" name="room" required>
+                <option value="">-- Select Room --</option>
+                {% for room in rooms %}
+                    <option value="{{ room.id }}">{{ room.name }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <button type="submit" class="admin-button">Add Guest</button>
+        </form>
+    </div>
 
-    <button type="submit">Add Guest</button>
-</form>
+    <!-- Existing Guests -->
+    <div class="admin-section">
+        <h2>Existing Guests</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Phone Number</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
+                        <th>Assigned Room</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in guests %}
+                    <tr>
+                        <td>{{ guest.full_name }}</td>
+                        <td>{{ guest.phone_number }}</td>
+                        <td>{{ guest.check_in_date }}</td>
+                        <td>{{ guest.check_out_date }}</td>
+                        <td>{{ guest.assigned_room.name }}</td>
+                        <td>
+                            <a href="{% url 'edit_guest' guest.id %}" class="edit-link">Edit</a> |
+                            <a href="{% url 'delete_guest' guest.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest?');">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<!-- Existing Guests -->
-<h2>Existing Guests</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Full Name</th>
-            <th>Phone Number</th>
-            <th>Check-In Date</th>
-            <th>Check-Out Date</th>
-            <th>Assigned Room</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for guest in guests %}
-        <tr>
-            <td>{{ guest.full_name }}</td>
-            <td>{{ guest.phone_number }}</td>
-            <td>{{ guest.check_in_date }}</td>
-            <td>{{ guest.check_out_date }}</td>
-            <td>{{ guest.assigned_room.name }}</td>
-            <td>
-                <a href="{% url 'edit_guest' guest.id %}">Edit</a> |
-                <a href="{% url 'delete_guest' guest.id %}" onclick="return confirm('Are you sure you want to delete this guest?');">
-                    Delete
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <h2>Past Guests</h2>
+    <p>
+        <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
+    </p>
+</section>
 
-<h2>Past Guests</h2>
-<p>
-    <a href="{% url 'past_guests' %}">View past guests</a>
-</p>
-
-<!-- JavaScript to Handle Stay Duration and Available Rooms -->
+<!-- JavaScript for Stay Duration and Available Rooms -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const today = new Date().toISOString().split('T')[0]; // Get today's date
         document.getElementById("check_in_date").value = today; // Set check-in date to today
 
         function updateCheckout(days) {
-            if (!days) return; // Prevent setting empty values
-
+            if (!days) return;
             let checkIn = new Date(document.getElementById("check_in_date").value);
             checkIn.setDate(checkIn.getDate() + parseInt(days));
             document.getElementById("check_out_date").value = checkIn.toISOString().split('T')[0];
-
-            // Trigger room availability update
             updateRooms();
         }
 
-        // Add event listeners to radio buttons
         document.querySelectorAll("input[name='stay_duration']").forEach(radio => {
             radio.addEventListener("change", function () {
                 updateCheckout(this.value);
@@ -110,7 +118,6 @@
         });
     });
 
-    // JavaScript for dynamically updating available rooms
     document.getElementById('check_in_date').addEventListener('change', updateRooms);
     document.getElementById('check_out_date').addEventListener('change', updateRooms);
 
@@ -134,5 +141,13 @@
                 .catch(error => console.error('Error fetching available rooms:', error));
         }
     }
+
+    // Make table scrollable on mobile
+    document.addEventListener("DOMContentLoaded", function () {
+        const tableContainer = document.querySelector(".table-container");
+        tableContainer.addEventListener("touchstart", function (event) {
+            event.stopPropagation();
+        });
+    });
 </script>
 {% endblock %}

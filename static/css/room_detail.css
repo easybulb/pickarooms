@@ -52,7 +52,7 @@ body {
     text-align: center;
 }
 
-/* .pin-container {
+.pin-container {
     background: #1B263B;
     color: #fff;
     padding: 20px;
@@ -60,7 +60,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     max-width: 500px;
     width: 90%;
-} */
+}
 
 .pin-heading {
     font-size: 2rem;

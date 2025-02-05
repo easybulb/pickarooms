@@ -1,0 +1,126 @@
+/* Admin Page General Styles */
+.admin-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-title {
+    text-align: center;
+    font-size: 2rem;
+    color: #1B263B;
+}
+
+.success-message {
+    color: green;
+    text-align: center;
+}
+
+.error-message {
+    color: red;
+    text-align: center;
+}
+
+.admin-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+/* Form Styling */
+label {
+    font-weight: bold;
+    display: block;
+    margin: 10px 0 5px;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.radio-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-button {
+    background: #1B263B;
+    color: white;
+    padding: 10px;
+    width: 20%;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.admin-button:hover {
+    background: #162033;
+}
+
+/* Table Styling */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+form input, #select-room {
+    width: 40%;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #1B263B;
+    color: white;
+}
+
+/* Links */
+.edit-link {
+    color: blue;
+}
+
+.delete-link {
+    color: red;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .admin-container {
+        width: 90%;
+        margin-top: -25px;
+    }
+
+    form input, #select-room {
+        width: 95%;
+    }
+
+    th, td {
+        padding: 5px;
+        font-size: 0.9rem;
+    }
+
+    .admin-button {
+        width: 50%;
+        font-weight: 500;
+        margin-top: 13px;
+    }
+}
