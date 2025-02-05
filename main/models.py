@@ -16,6 +16,7 @@ def default_check_out_date():
 
 class Room(models.Model):
     name = models.CharField(max_length=100)  # Room name
+    access_pin = models.CharField(max_length=10, blank=True, null=True)  # House and Room Access PIN
     video_url = models.URLField()  # Link to the video instructions
     description = models.TextField(blank=True, null=True)  # Optional room description
 
@@ -27,6 +28,7 @@ class Room(models.Model):
 
     def __str__(self):
         return self.name
+    
 
 
 class Guest(models.Model):

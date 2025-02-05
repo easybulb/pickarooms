@@ -17,10 +17,10 @@ class GuestAdmin(admin.ModelAdmin):
 
 
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('name', 'video_url', 'image')  # Show image field in admin
+    list_display = ('name', 'access_pin', 'video_url', 'image')   # Show image field in admin
     search_fields = ('name',)
 
 
 # ✅ Register Room and Guest models
-admin.site.register(Room)
+admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
