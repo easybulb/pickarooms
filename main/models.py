@@ -2,6 +2,12 @@ import uuid
 from django.db import models
 from django.utils.timezone import now
 from datetime import date, timedelta
+from django.conf import settings
+
+# Import Cloudinary only if available (for production)
+if not settings.DEBUG:
+    from cloudinary.models import CloudinaryField
+
 
 def default_check_out_date():
     """Returns the next day with time set to 11:00 AM."""
@@ -12,7 +18,12 @@ class Room(models.Model):
     name = models.CharField(max_length=100)  # Room name
     video_url = models.URLField()  # Link to the video instructions
     description = models.TextField(blank=True, null=True)  # Optional room description
-    image = models.ImageField(upload_to='room_images/', default='default_room.jpg')  # Room image
+
+    # Conditional Image Field for Local vs. Cloudinary Storage
+    if settings.DEBUG:
+        image = models.ImageField(upload_to='room_images/', default='default_room.jpg')  # Local storage
+    else:
+        image = CloudinaryField('image', default='default_room.jpg')  # Cloudinary storage in production
 
     def __str__(self):
         return self.name
