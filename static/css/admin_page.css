@@ -71,6 +71,7 @@ input, select {
     display: flex;
     align-items: center;
     gap: 5px;
+    white-space: nowrap;
     font-size: 1rem;
 }
 
@@ -134,6 +135,7 @@ th {
 
     form input, #select-room {
         width: 95%;
+        font-size: 1.1rem;
     }
 
     th, td {
@@ -145,5 +147,6 @@ th {
         width: 50%;
         font-weight: 500;
         margin-top: 13px;
+        font-size: 1.1rem;
     }
 }
