@@ -1,23 +1,33 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Edit Guest{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_guest.css' %}">
+{% endblock %}
+
 {% block content %}
-<section>
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
+    <br>
     <h1>Edit Guest</h1>
-    <form method="POST">
+    
+    <form method="POST" class="admin-form">
         {% csrf_token %}
+        
         <label for="full_name">Full Name:</label>
-        <input type="text" id="full_name" name="full_name" value="{{ guest.full_name }}" required><br><br>
+        <input type="text" id="full_name" name="full_name" value="{{ guest.full_name }}" required>
 
         <label for="phone_number">Phone Number:</label>
-        <input type="text" id="phone_number" name="phone_number" value="{{ guest.phone_number }}" required><br><br>
+        <input type="text" id="phone_number" name="phone_number" value="{{ guest.phone_number }}" required>
 
         <label for="check_in_date">Check-In Date:</label>
-        <input type="date" id="check_in_date" name="check_in_date" value="{{ guest.check_in_date|date:'Y-m-d' }}" required><br><br>
+        <input type="date" id="check_in_date" name="check_in_date" value="{{ guest.check_in_date|date:'Y-m-d' }}" required>
 
         <label for="check_out_date">Check-Out Date:</label>
-        <input type="date" id="check_out_date" name="check_out_date" value="{{ guest.check_out_date|date:'Y-m-d' }}" required><br><br>
+        <input type="date" id="check_out_date" name="check_out_date" value="{{ guest.check_out_date|date:'Y-m-d' }}" required>
 
         <label for="room">Assign Room:</label>
         <select id="room" name="room" required>
@@ -26,13 +36,15 @@
                     {{ room.name }}
                 </option>
             {% endfor %}
-        </select><br><br>
+        </select>
 
-        <button type="submit">Save Changes</button>
+        <button type="submit" class="btn-save">Save Changes</button>
     </form>
-</section>
+    
+    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
+</div>
 
-<!-- JavaScript for updating available rooms dynamically -->
+<!-- JavaScript for Updating Available Rooms Dynamically -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         function updateRooms() {
