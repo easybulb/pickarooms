@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django_ratelimit.decorators import ratelimit
 from django.core.paginator import Paginator
 from django.conf import settings
+from django.contrib import messages 
 
 
 def home(request):
@@ -99,31 +100,33 @@ class AdminLoginView(LoginView):
 
 
 
+from django.contrib import messages  # Import Django messages
+
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
-    error_message = None
+    """Admin Dashboard to manage guests, rooms, and assignments."""
     
     # Auto-move past guests to archive at 11:00 AM on the checkout date
-    now_time = localtime(now())  # Get the current time in the local timezone
+    now_time = localtime(now())  # Get local timezone time
     today = now_time.date()
     current_time = now_time.time()
-    archive_time = time(11, 0)  # Set the archive time to 11:00 AM
+    archive_time = time(11, 0)  # Archive guests at 11:00 AM
 
-    # Move guests to archive if:
-    # 1. Their checkout date is in the past, OR
-    # 2. Their checkout date is today AND the current time is past 11:00 AM
+    # Archive guests whose checkout date has passed or is today after 11 AM
     Guest.objects.filter(
         Q(check_out_date__lt=today) | 
         (Q(check_out_date=today) & Q(is_archived=False))
     ).update(is_archived=True)
 
-    # Show only active guests (not archived) and sort by nearest check-in date
+    # Show only active (non-archived) guests sorted by check-in date
     guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
 
+    # Get check-in and check-out dates from the request
     check_in_date = request.POST.get('check_in_date') or request.GET.get('check_in_date') or None
     check_out_date = request.POST.get('check_out_date') or request.GET.get('check_out_date') or None
 
+    # Fetch available rooms based on date selection
     if check_in_date and check_out_date:
         check_in_date = date.fromisoformat(check_in_date)
         check_out_date = date.fromisoformat(check_out_date)
@@ -131,6 +134,7 @@ def admin_page(request):
     else:
         available_rooms = Room.objects.all()
 
+    # Handle guest addition
     if request.method == 'POST' and 'phone_number' in request.POST:
         phone_number = request.POST.get('phone_number')
         full_name = request.POST.get('full_name')
@@ -141,16 +145,19 @@ def admin_page(request):
             existing_guest = Guest.objects.filter(phone_number=phone_number).first()
 
             if existing_guest:
-                # ✅ If the guest is archived, reactivate & update their details
+                # ✅ If the guest is archived, reactivate & update details
                 if existing_guest.is_archived:
                     existing_guest.is_archived = False
                     existing_guest.assigned_room = room
                     existing_guest.check_in_date = check_in_date
                     existing_guest.check_out_date = check_out_date
                     existing_guest.save()
+
+                    messages.success(request, "Guest reactivated and assigned to room successfully!")
                     return redirect('admin_page')
+
                 else:
-                    error_message = "A guest with this phone number is already checked in."
+                    messages.error(request, "A guest with this phone number is already checked in.")
             else:
                 # ✅ If no existing guest, create a new one
                 Guest.objects.create(
@@ -160,18 +167,20 @@ def admin_page(request):
                     check_out_date=check_out_date,
                     assigned_room=room
                 )
+
+                messages.success(request, "Guest added successfully!")
                 return redirect('admin_page')
 
         except Room.DoesNotExist:
-            error_message = "Invalid room selected."
+            messages.error(request, "Invalid room selected.")
 
     return render(request, 'main/admin_page.html', {
         'rooms': available_rooms,
         'guests': guests,
-        'error': error_message,
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
     })
+
 
 
 

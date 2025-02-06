@@ -88,6 +88,41 @@ nav {
   margin: 4px 0;
 }
 
+#confirmation-message {
+  list-style: none;
+  padding: 10px;
+  margin: 10px auto;
+  max-width: 90%;  /* Use a percentage for better responsiveness */
+  text-align: center;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  font-size: 16px;  /* Default font size */
+  white-space: normal; /* Allow text to wrap */
+}
+
+/* Success Message */
+#confirmation-message .success {
+  background-color: #28a745; /* Green */
+  color: white;
+  padding: 12px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* Error Message */
+#confirmation-message .error {
+  background-color: #dc3545; /* Red */
+  color: white;
+  padding: 12px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+
+
 /* Hero Section */
 .hero {
   position: relative;
@@ -167,6 +202,14 @@ footer p {
   margin-left: 30px;
 }
 
+@media (max-width: 480px) {
+  #confirmation-message {
+      font-size: 13px;
+      top: 5px; /* Move higher for very small screens */
+      padding: 6px;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .menu-toggle {
@@ -236,6 +279,19 @@ footer p {
   
   .hero-content p {
     font-size: 1.4rem;
+  }
+
+  #confirmation-message {
+      font-size: 14px;  /* Slightly smaller font for mobile */
+      top: 10px; /* Adjust position */
+      max-width: 95%; /* Increase width on smaller screens */
+      padding: 8px; /* Reduce padding */
+  }
+  
+  #confirmation-message .success,
+  #confirmation-message .error {
+      padding: 10px; /* Reduce padding */
+      font-size: 14px; /* Smaller text for mobile */
   }
 
   .checkin-form input {

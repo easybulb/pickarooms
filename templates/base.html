@@ -45,6 +45,16 @@
         </nav>
     </header>
 
+    <!-- Confirmation Message -->
+    {% if messages %}
+        <ul id="confirmation-message">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+
     <!-- Main content -->
     <div class="content-wrapper">
         <main>
@@ -58,5 +68,17 @@
     </footer>
 
     <script src="{% static 'js/script.js' %}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const confirmationMessage = document.getElementById("confirmation-message");
+            if (confirmationMessage) {
+                setTimeout(() => {
+                    confirmationMessage.style.display = "none";
+                }, 3000);  // Hide after 3 seconds
+            }
+        });
+    </script>
+    
 </body>
 </html>
