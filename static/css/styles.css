@@ -316,10 +316,6 @@ footer p {
     margin-left: 10px;
   }
 
-  .nav-links a.active {
-    border-bottom: 2px solid #FFD700;
-  }
-
   .logout-btn {
     margin-top: 10px ;
   }
