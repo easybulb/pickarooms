@@ -27,6 +27,7 @@
                     <tr>
                         <th>Full Name</th>
                         <th>Assigned Room</th>
+                        <th>PIN</th>
                         <th>Check-In</th>
                         <th>Check-Out</th>
                         <th>Phone Number</th>
@@ -38,6 +39,13 @@
                     <tr>
                         <td>{{ guest.full_name }}</td>
                         <td>{{ guest.assigned_room.name }}</td>
+                        <td class="pin-code">
+                            {% if guest.assigned_room.access_pin %}
+                                {{ guest.assigned_room.access_pin }}
+                            {% else %}
+                                <span class="no-pin">N/A</span>
+                            {% endif %}
+                        </td>
                         <td>{{ guest.check_in_date }}</td>
                         <td>{{ guest.check_out_date }}</td>
                         <td>{{ guest.phone_number }}</td>

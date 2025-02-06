@@ -117,6 +117,19 @@ th {
     color: white;
 }
 
+/* Style for PIN column */
+.pin-code {
+    color: #1d3557; /* Dark blue for better readability */
+    text-align: center;
+}
+
+/* If no PIN is available */
+.no-pin {
+    color: #eb0a0a;
+    font-style: italic;
+}
+
+
 /* Links */
 .edit-link {
     color: blue;
