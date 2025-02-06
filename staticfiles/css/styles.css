@@ -225,7 +225,7 @@ footer p {
   }
 
   nav {
-    margin-right: -70px;
+    margin-right: -50px;
   }
 
   .nav-links {
@@ -251,6 +251,11 @@ footer p {
 
   .nav-links a {
     font-size: 1.3rem;
+  }
+
+  .nav-links li {
+    margin: 3px 0;
+    margin-left: 10px;
   }
 
   .logout-btn {
