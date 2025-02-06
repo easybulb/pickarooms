@@ -120,7 +120,7 @@ th {
 /* Style for PIN column */
 .pin-code {
     color: #1d3557; /* Dark blue for better readability */
-    text-align: center;
+    text-align: left;
 }
 
 /* If no PIN is available */

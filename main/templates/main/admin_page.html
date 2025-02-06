@@ -80,18 +80,17 @@
             <input type="date" id="check_in_date" name="check_in_date" required>
 
             <!-- Stay Duration -->
-            <label>Stay Duration:</label>
+            <label for="stay_duration">Stay Duration:</label>
             <div class="radio-group">
-                <label><input type="radio" name="stay_duration" value="1"> 1 Night</label>
-                <label><input type="radio" name="stay_duration" value="2"> 2 Nights</label>
-                <label><input type="radio" name="stay_duration" value="3"> 3 Nights</label>
-            </div>
+                <label for="stay_duration_1"><input type="radio" id="stay_duration_1" name="stay_duration" value="1"> 1 Night</label>
+                <label for="stay_duration_2"><input type="radio" id="stay_duration_2" name="stay_duration" value="2"> 2 Nights</label>
+                <label for="stay_duration_3"><input type="radio" id="stay_duration_3" name="stay_duration" value="3"> 3 Nights</label>
+            </div>            
             
-
             <label for="check_out_date">Check-Out Date:</label>
             <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy">
 
-            <label for="room">Assign Room:</label>
+            <label for="select-room">Assign Room:</label>
             <select id="select-room" name="room" required>
                 <option value="">-- Select Room --</option>
                 {% for room in rooms %}
