@@ -13,65 +13,65 @@
     <h1 class="admin-title">Admin Dashboard</h1>
 
     {% if success %}
-        <p class="success-message">Guest added successfully!</p>
+        <p id="success-message" class="success-message">Guest added successfully!</p>
+        <input type="hidden" id="guest-added" value="true">
     {% elif error %}
         <p class="error-message">{{ error }}</p>
     {% endif %}
 
-
-
-<!-- Existing Guests -->
-<div class="admin-section">
-    <div class="existing-guests-header">
-        <h2>Existing Guests</h2>
-        <!-- Add Guest Button -->
-        <a href="#add-guest-form" class="add-guest-btn">Add Guest</a>
+    <!-- Existing Guests -->
+    <div class="admin-section">
+        <div class="existing-guests-header">
+            <h2>Existing Guests</h2>
+            <!-- Add Guest Button -->
+            <a href="#add-guest-form" class="add-guest-btn">Add Guest</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Assigned Room</th>
+                        <th>PIN</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
+                        <th>Phone Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in guests %}
+                    <tr>
+                        <td>{{ guest.full_name }}</td>
+                        <td>{{ guest.assigned_room.name }}</td>
+                        <td class="pin-code">
+                            {% if guest.assigned_room.access_pin %}
+                                {{ guest.assigned_room.access_pin }}
+                            {% else %}
+                                <span class="no-pin">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ guest.check_in_date }}</td>
+                        <td>{{ guest.check_out_date }}</td>
+                        <td>{{ guest.phone_number }}</td>
+                        <td>
+                            <a href="{% url 'edit_guest' guest.id %}" class="edit-link">Edit</a> |
+                            <a href="{% url 'delete_guest' guest.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest?');">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p>
+            <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
+        </p>
     </div>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Full Name</th>
-                    <th>Assigned Room</th>
-                    <th>PIN</th>
-                    <th>Check-In</th>
-                    <th>Check-Out</th>
-                    <th>Phone Number</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for guest in guests %}
-                <tr>
-                    <td>{{ guest.full_name }}</td>
-                    <td>{{ guest.assigned_room.name }}</td>
-                    <td class="pin-code">
-                        {% if guest.assigned_room.access_pin %}
-                            {{ guest.assigned_room.access_pin }}
-                        {% else %}
-                            <span class="no-pin">N/A</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ guest.check_in_date }}</td>
-                    <td>{{ guest.check_out_date }}</td>
-                    <td>{{ guest.phone_number }}</td>
-                    <td>
-                        <a href="{% url 'edit_guest' guest.id %}" class="edit-link">Edit</a> |
-                        <a href="{% url 'delete_guest' guest.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest?');">
-                            Delete
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <p>
-        <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
-    </p>
-</div>
 
-<br>
+    <br>
+
     <!-- Add Guest Form -->
     <div class="admin-section" id="add-guest-form">
         <h2>Add New Guest</h2>
@@ -109,18 +109,17 @@
         </form>
     </div>
 
-
     <h2>Past Guests</h2>
     <p>
         <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
     </p>
 </section>
 
-<!-- JavaScript for Stay Duration and Available Rooms -->
+<!-- JavaScript for Stay Duration, Available Rooms & Page Scroll -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const today = new Date().toISOString().split('T')[0]; // Get today's date
-        document.getElementById("check_in_date").value = today; // Set check-in date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("check_in_date").value = today;
 
         function updateCheckout(days) {
             if (!days) return;
@@ -135,6 +134,26 @@
                 updateCheckout(this.value);
             });
         });
+
+        // ✅ Ensure available rooms are updated on page load
+        updateRooms();
+
+        // ✅ Scroll to top after adding a guest
+        const guestAdded = document.getElementById("guest-added");
+
+        if (guestAdded && guestAdded.value === "true") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+
+            setTimeout(() => {
+                const successMessage = document.getElementById("success-message");
+                if (successMessage) {
+                    successMessage.style.display = "none";
+                }
+            }, 3000);
+
+            // ✅ Update available rooms after adding a guest
+            updateRooms();
+        }
     });
 
     document.getElementById('check_in_date').addEventListener('change', updateRooms);
@@ -148,7 +167,7 @@
             fetch(`/admin-page/available-rooms/?check_in_date=${checkInDate}&check_out_date=${checkOutDate}`)
                 .then(response => response.json())
                 .then(data => {
-                    const roomSelect = document.getElementById('select-room'); // ✅ FIX: Target the correct element
+                    const roomSelect = document.getElementById('select-room');
                     roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
                     data.rooms.forEach(room => {
                         const option = document.createElement('option');
@@ -161,13 +180,12 @@
         }
     }
 
-    // ✅ Prevent duplicate room assignment
     function validateRoomSelection() {
         const selectedRoom = document.getElementById('select-room').value;
-        const guests = document.querySelectorAll("tbody tr"); // Get all guests in the table
+        const guests = document.querySelectorAll("tbody tr");
 
         for (let guest of guests) {
-            const assignedRoom = guest.cells[1].textContent.trim(); // Get room name from table
+            const assignedRoom = guest.cells[1].textContent.trim();
             if (assignedRoom === selectedRoom) {
                 alert("This room is already assigned to another guest during this period.");
                 return false;
@@ -178,11 +196,10 @@
 
     document.querySelector("form").addEventListener("submit", function (event) {
         if (!validateRoomSelection()) {
-            event.preventDefault(); // Stop form submission if room is duplicated
+            event.preventDefault();
         }
     });
 
-    // ✅ JavaScript to Pre-Fill Form When Reassigning
     document.addEventListener("DOMContentLoaded", function () {
         const nameField = document.getElementById("full_name");
         const phoneField = document.getElementById("phone_number");
@@ -194,7 +211,6 @@
             nameField.value = storedName;
             phoneField.value = storedPhone;
 
-            // Clear localStorage after use
             localStorage.removeItem("reassign_name");
             localStorage.removeItem("reassign_phone");
         }
