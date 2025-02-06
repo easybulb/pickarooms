@@ -20,54 +20,57 @@
 
 
 
-    <!-- Existing Guests -->
-    <div class="admin-section">
+<!-- Existing Guests -->
+<div class="admin-section">
+    <div class="existing-guests-header">
         <h2>Existing Guests</h2>
-    <!-- Add Guest Button -->
-    <a href="#add-guest-form" class="add-guest-btn">➕ Add Guest</a>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Assigned Room</th>
-                        <th>PIN</th>
-                        <th>Check-In</th>
-                        <th>Check-Out</th>
-                        <th>Phone Number</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for guest in guests %}
-                    <tr>
-                        <td>{{ guest.full_name }}</td>
-                        <td>{{ guest.assigned_room.name }}</td>
-                        <td class="pin-code">
-                            {% if guest.assigned_room.access_pin %}
-                                {{ guest.assigned_room.access_pin }}
-                            {% else %}
-                                <span class="no-pin">N/A</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ guest.check_in_date }}</td>
-                        <td>{{ guest.check_out_date }}</td>
-                        <td>{{ guest.phone_number }}</td>
-                        <td>
-                            <a href="{% url 'edit_guest' guest.id %}" class="edit-link">Edit</a> |
-                            <a href="{% url 'delete_guest' guest.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest?');">
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <p>
-            <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
-        </p>
+        <!-- Add Guest Button -->
+        <a href="#add-guest-form" class="add-guest-btn">Add Guest</a>
     </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Assigned Room</th>
+                    <th>PIN</th>
+                    <th>Check-In</th>
+                    <th>Check-Out</th>
+                    <th>Phone Number</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guest in guests %}
+                <tr>
+                    <td>{{ guest.full_name }}</td>
+                    <td>{{ guest.assigned_room.name }}</td>
+                    <td class="pin-code">
+                        {% if guest.assigned_room.access_pin %}
+                            {{ guest.assigned_room.access_pin }}
+                        {% else %}
+                            <span class="no-pin">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ guest.check_in_date }}</td>
+                    <td>{{ guest.check_out_date }}</td>
+                    <td>{{ guest.phone_number }}</td>
+                    <td>
+                        <a href="{% url 'edit_guest' guest.id %}" class="edit-link">Edit</a> |
+                        <a href="{% url 'delete_guest' guest.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest?');">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p>
+        <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
+    </p>
+</div>
+
 <br>
     <!-- Add Guest Form -->
     <div class="admin-section" id="add-guest-form">

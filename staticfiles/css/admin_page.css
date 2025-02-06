@@ -1,4 +1,3 @@
-
 /* General Styles */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -17,19 +16,22 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Style for Add Guest Button */
+.existing-guests-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
 .add-guest-btn {
-    display: inline-block;
     padding: 8px 15px;
     font-size: 16px;
     font-weight: bold;
     color: #fff;
-    background-color: #007bff; /* Blue Button */
+    background-color: #007bff;
+    /* Blue Button */
     border-radius: 5px;
     text-decoration: none;
-    position: absolute;
-    right: 20px;
-    top: 25px;
     transition: background 0.3s ease-in-out;
 }
 
@@ -68,7 +70,8 @@ label {
     margin: 10px 0 5px;
 }
 
-input, select {
+input,
+select {
     width: 100%;
     padding: 8px;
     border-radius: 5px;
@@ -84,7 +87,8 @@ input, select {
 
 .radio-group input[type="radio"] {
     margin-right: 5px;
-    transform: scale(1.2); /* Make the radio buttons slightly larger */
+    transform: scale(1.2);
+    /* Make the radio buttons slightly larger */
     vertical-align: middle;
 }
 
@@ -123,11 +127,13 @@ table {
     min-width: 700px;
 }
 
-form input, #select-room {
+form input,
+#select-room {
     width: 40%;
 }
 
-th, td {
+th,
+td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: center;
@@ -140,7 +146,8 @@ th {
 
 /* Style for PIN column */
 .pin-code {
-    color: #1d3557; /* Dark blue for better readability */
+    color: #1d3557;
+    /* Dark blue for better readability */
     text-align: left;
 }
 
@@ -167,11 +174,29 @@ th {
         margin-top: -25px;
     }
 
+    .admin-title {
+        font-size: 1.7rem;
+    }
+
+    .existing-guests-header {
+        font-size: 15px;
+    }
+
+    .add-guest-btn {
+        font-size: 14px;
+    }
+
+    .add-guest-btn:hover {
+        background-color: #0056b3;
+    }
+
+
     table td {
         font-size: 1rem;
     }
 
-    form input, #select-room {
+    form input,
+    #select-room {
         width: 95%;
         font-size: 1.1rem;
     }
@@ -181,7 +206,8 @@ th {
         align-items: flex-start;
     }
 
-    th, td {
+    th,
+    td {
         padding: 5px;
         font-size: 0.9rem;
         font-size: 1rem;
