@@ -35,8 +35,10 @@ header {
   z-index: 1000;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   /* background: linear-gradient(90deg, #2E2E2E, #1B263B); */
-  background: linear-gradient(90deg, #0F2027, #203A43, #2C5364);
-  /* background: linear-gradient(90deg, #2E2E2E, #C7A008); */
+  /* background: linear-gradient(90deg, #003580, #0056b3); */
+  background: linear-gradient(90deg, #002147, #003580, #0056b3);
+  /* background: linear-gradient(90deg, #003580, #007bff); */
+  /* background: linear-gradient(90deg, #001f3f, #003580); */
 }
 
 .logo a {
@@ -194,8 +196,10 @@ nav {
 
 footer {
   /* background: linear-gradient(90deg, #2E2E2E, #1B263B); */
-  background: linear-gradient(90deg, #0F2027, #203A43, #2C5364);
-  /* background: linear-gradient(90deg, #2E2E2E, #C7A008); */
+  /* background: linear-gradient(90deg, #003580, #0056b3); */
+  background: linear-gradient(90deg, #002147, #003580, #0056b3);
+  /* background: linear-gradient(90deg, #003580, #007bff); */
+  /* background: linear-gradient(90deg, #001f3f, #003580); */
   color: #F5F5F5;
   padding: 2px 0;
   z-index: 1;
@@ -232,8 +236,10 @@ footer p {
       left: 0;
       width: 100%;
   /* background: linear-gradient(90deg, #2E2E2E, #1B263B); */
-  background: linear-gradient(90deg, #0F2027, #203A43, #2C5364);
-  /* background: linear-gradient(90deg, #2E2E2E, #C7A008); */
+  /* background: linear-gradient(90deg, #003580, #0056b3); */
+  background: linear-gradient(90deg, #002147, #003580, #0056b3);
+  /* background: linear-gradient(90deg, #003580, #007bff); */
+  /* background: linear-gradient(90deg, #001f3f, #003580); */
       padding: 20px;
       color: #F5F5F5;
   }
@@ -244,7 +250,7 @@ footer p {
   }
 
   .nav-links a {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
   .logout-btn {
