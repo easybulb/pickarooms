@@ -95,7 +95,7 @@ nav {
   max-width: 90%;  /* Use a percentage for better responsiveness */
   text-align: left;
   position: fixed;
-  top: 15%;
+  top: 10%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
@@ -283,7 +283,7 @@ footer p {
 
   #confirmation-message {
       font-size: 14px;  /* Slightly smaller font for mobile */
-      top: 15%; /* Adjust position */
+      top: 10%; /* Adjust position */
       max-width: 95%; /* Increase width on smaller screens */
       padding: 8px; /* Reduce padding */
   }
