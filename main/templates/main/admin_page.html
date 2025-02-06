@@ -12,14 +12,14 @@
 <section class="admin-container">
     <h1 class="admin-title">Admin Dashboard</h1>
 
-    <!-- Add Guest Button -->
-    <a href="#add-guest-form" class="add-guest-btn">➕ Add Guest</a>
-
     {% if success %}
         <p class="success-message">Guest added successfully!</p>
     {% elif error %}
         <p class="error-message">{{ error }}</p>
     {% endif %}
+
+    <!-- Add Guest Button -->
+    <a href="#add-guest-form" class="add-guest-btn">➕ Add Guest</a>
 
         <!-- Existing Guests -->
     <div class="admin-section">
