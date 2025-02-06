@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.views import LogoutView
+from .views import privacy_policy
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -17,4 +18,5 @@ urlpatterns = [
     path('admin-page/delete-guest/<int:guest_id>/', views.delete_guest, name='delete_guest'),
     path('admin-page/available-rooms/', views.available_rooms, name='available_rooms'),
     path('admin-page/past-guests/', views.past_guests, name='past_guests'),
+    path('privacy-policy/', privacy_policy, name='privacy_policy'),
 ]

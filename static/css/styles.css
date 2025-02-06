@@ -73,6 +73,12 @@ nav {
   color: #C7A008;
 }
 
+/* Style for Active Navigation Links */
+.nav-links a.active {
+  border-bottom: 3px solid #FFD700; /* Gold underline */
+  padding-bottom: 3px; /* Space between text and underline */
+}
+
 /* Hamburger Menu */
 .menu-toggle {
   display: none;
@@ -210,6 +216,58 @@ footer p {
   margin-left: 30px;
 }
 
+/* Privacy Policy Page */
+.privacy-policy-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.privacy-policy-container h1 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.privacy-policy-container h2 {
+  font-size: 1.5rem;
+  margin-top: 20px;
+  color: #003580;
+}
+
+.privacy-policy-container p, .privacy-policy-container ul {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+.privacy-policy-container ul {
+  padding-left: 20px;
+}
+
+.privacy-policy-container a {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.privacy-policy-container a:hover {
+  color: #003580;
+}
+
+/* Footer Link */
+.footer-link {
+  color: #F5F5F5;
+  text-decoration: underline;
+}
+
+.footer-link:hover {
+  color: #FFD700;
+}
+
+
 @media (max-width: 480px) {
   #confirmation-message {
       font-size: 13px;
@@ -256,6 +314,10 @@ footer p {
   .nav-links li {
     margin: 3px 0;
     margin-left: 10px;
+  }
+
+  .nav-links a.active {
+    border-bottom: 2px solid #FFD700;
   }
 
   .logout-btn {

@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django_ratelimit.decorators import ratelimit
 from django.core.paginator import Paginator
 from django.conf import settings
-from django.contrib import messages 
+from django.contrib import messages
 
 
 def home(request):
@@ -184,11 +184,6 @@ def admin_page(request):
 
 
 
-
-
-
-
-
 def get_available_rooms(check_in_date, check_out_date):
     """Returns rooms that are not assigned for the given date range."""
     # Convert dates if necessary
@@ -306,3 +301,8 @@ def past_guests(request):
         'past_guests': paginated_past_guests,
         'search_query': search_query,
     })
+
+
+
+def privacy_policy(request):
+    return render(request, 'main/privacy_policy.html')

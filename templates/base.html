@@ -23,13 +23,14 @@
         </div>
         <nav>
             <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/about/">About</a></li>
-                <li><a href="/checkin/">Check-In</a></li>
-                <li><a href="/explore-manchester/">Explore Manchester</a></li>
-                <li><a href="/contact/">Contact Us</a></li>
+                <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+                <li><a href="/about/" class="{% if request.path == '/about/' %}active{% endif %}">About</a></li>
+                <li><a href="/checkin/" class="{% if request.path == '/checkin/' %}active{% endif %}">Check-In</a></li>
+                <li><a href="/explore-manchester/" class="{% if request.path == '/explore-manchester/' %}active{% endif %}">Explore Manchester</a></li>
+                <li><a href="/contact/" class="{% if request.path == '/contact/' %}active{% endif %}">Contact Us</a></li>
+        
                 {% if user.is_authenticated %}
-                    <li><a href="/admin-page/">Admin Only</a></li>
+                    <li><a href="/admin-page/" class="{% if request.path == '/admin-page/' %}active{% endif %}">Admin Only</a></li>
                     <li>
                         <form action="{% url 'logout' %}" method="POST">
                             {% csrf_token %}
@@ -37,10 +38,10 @@
                         </form>
                     </li>
                 {% else %}
-                    <li><a href="/admin-page/login/">Admin Login</a></li>
+                    <li><a href="/admin-page/login/" class="{% if request.path == '/admin-page/login/' %}active{% endif %}">Admin Login</a></li>
                 {% endif %}
             </ul>
-        </nav>
+        </nav>        
     </header>
 
     <!-- Confirmation Message -->
@@ -63,6 +64,7 @@
     <!-- Footer -->
     <footer>
         <p>&copy; 2025 Pick-A-Rooms. <br>WebApp by Henry easybulb@gmail.com</p>
+        <p><a href="{% url 'privacy_policy' %}" class="footer-link">Privacy Policy</a></p>
     </footer>
 
     <script src="{% static 'js/script.js' %}"></script>
