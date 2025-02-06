@@ -12,6 +12,9 @@
 <section class="admin-container">
     <h1 class="admin-title">Admin Dashboard</h1>
 
+    <!-- Add Guest Button -->
+    <a href="#add-guest-form" class="add-guest-btn">➕ Add Guest</a>
+
     {% if success %}
         <p class="success-message">Guest added successfully!</p>
     {% elif error %}
@@ -64,9 +67,9 @@
             <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
         </p>
     </div>
-
+<br>
     <!-- Add Guest Form -->
-    <div class="admin-section">
+    <div class="admin-section" id="add-guest-form">
         <h2>Add New Guest</h2>
         <form method="POST">
             {% csrf_token %}

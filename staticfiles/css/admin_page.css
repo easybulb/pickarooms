@@ -17,6 +17,27 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Style for Add Guest Button */
+.add-guest-btn {
+    display: inline-block;
+    padding: 8px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff; /* Blue Button */
+    border-radius: 5px;
+    text-decoration: none;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    transition: background 0.3s ease-in-out;
+}
+
+.add-guest-btn:hover {
+    background-color: #0056b3;
+}
+
+
 .admin-title {
     text-align: center;
     font-size: 2rem;
