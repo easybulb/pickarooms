@@ -245,6 +245,10 @@ def edit_guest(request, guest_id):
         guest.check_out_date = request.POST.get('check_out_date')
         guest.assigned_room_id = request.POST.get('room')
         guest.save()
+
+        # ✅ Add success message
+        messages.success(request, f"Guest {guest.full_name} updated successfully.")
+
         return redirect('admin_page')
 
     # Get available rooms for selected check-in and check-out dates
@@ -262,7 +266,12 @@ def edit_guest(request, guest_id):
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def delete_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
+    guest_name = guest.full_name  # Store guest name for message before deletion
     guest.delete()
+
+    # ✅ Add success message
+    messages.success(request, f"Guest {guest_name} deleted successfully.")
+
     return redirect('admin_page')
 
 
