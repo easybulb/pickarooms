@@ -200,24 +200,52 @@ nav {
   border-radius: 5px;
 }
 
+/* Footer Styling */
 footer {
-  /* background: linear-gradient(90deg, #2E2E2E, #1B263B); */
-  /* background: linear-gradient(90deg, #003580, #0056b3); */
   background: linear-gradient(90deg, #002147, #003580, #0056b3);
-  /* background: linear-gradient(90deg, #003580, #007bff); */
-  /* background: linear-gradient(90deg, #001f3f, #003580); */
   color: #F5F5F5;
-  padding: 2px 0;
-  z-index: 1;
+  padding: 5px 10px;
+  text-align: center;
 }
 
-footer p {
-  font-size: 0.8rem;
-  margin-left: 30px;
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-/* Privacy Policy Page */
-.privacy-policy-container {
+.email {
+  text-decoration: none;
+}
+
+.footer-container p {
+  font-size: 13px;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.footer-links li {
+  margin: 5px 15px;
+}
+
+.footer-links a {
+  color: #F5F5F5;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* Footer Pages Styling */
+.footer-page-container {
   max-width: 800px;
   margin: 40px auto;
   padding: 20px;
@@ -226,46 +254,48 @@ footer p {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.privacy-policy-container h1 {
+.footer-page-container h1 {
   font-size: 2rem;
   text-align: center;
   margin-bottom: 20px;
 }
 
-.privacy-policy-container h2 {
-  font-size: 1.5rem;
-  margin-top: 20px;
-  color: #003580;
-}
-
-.privacy-policy-container p, .privacy-policy-container ul {
+.footer-page-container p {
   font-size: 1.1rem;
   line-height: 1.6;
   color: #333;
 }
 
-.privacy-policy-container ul {
+.footer-page-container ul {
   padding-left: 20px;
 }
 
-.privacy-policy-container a {
+.footer-page-container a {
   color: #0056b3;
   text-decoration: underline;
 }
 
-.privacy-policy-container a:hover {
+.footer-page-container a:hover {
   color: #003580;
 }
 
-/* Footer Link */
-.footer-link {
-  color: #F5F5F5;
-  text-decoration: underline;
+.email a {
+  color: #F5F5F5; /* Default color */
+  text-decoration: none; /* Remove underline */
 }
 
-.footer-link:hover {
-  color: #FFD700;
+.email a:visited {
+  color: #F5F5F5; /* Ensures visited links do not change color */
 }
+
+.email a:hover {
+  color: #FFD700; /* Optional: Change color on hover */
+}
+
+.email a:active {
+  color: #F5F5F5; /* Ensures active/clicked state remains the same */
+}
+
 
 
 @media (max-width: 480px) {
@@ -314,6 +344,11 @@ footer p {
   .nav-links li {
     margin: 3px 0;
     margin-left: 10px;
+  }
+
+  .nav-links a.active {
+    border-bottom: 0;
+    padding-bottom: 0;
   }
 
   .logout-btn {
@@ -395,5 +430,36 @@ footer p {
 
   .privacy-policy-container h1 {
     font-size: 1.8rem;
+  }
+
+  footer {
+    background: linear-gradient(90deg, #002147, #003580, #0056b3);
+    color: #F5F5F5;
+    padding: 10px 15px;
+    text-align: left;
+  }
+
+  .footer-container p {
+    margin: 10px 15px;
+  }
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    display: flex;
+    justify-content: left;
+    flex-wrap: wrap;
+    gap: -5px;
+  }
+
+  .footer-page-container {
+    margin: 0px auto;
+    border-radius: 0px;
+    box-shadow: none
+  }
+
+  .footer-page-container h1 {
+    font-size: 1.5rem;
   }
 }

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Sitemap - Pick A Rooms{% endblock %}
+
+{% block content %}
+<section class="footer-page-container">
+    <h1>Sitemap</h1>
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'about' %}">About Us</a></li>
+        <li><a href="{% url 'checkin' %}">Check-In</a></li>
+        <li><a href="{% url 'explore_manchester' %}">Explore Manchester</a></li>
+        <li><a href="{% url 'contact' %}">Contact Us</a></li>
+        <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
+        <li><a href="{% url 'terms_of_use' %}">Terms of Use</a></li>
+        <li><a href="{% url 'terms_conditions' %}">Terms & Conditions</a></li>
+        <li><a href="{% url 'cookie_policy' %}">Cookie Policy</a></li>
+    </ul>
+</section>
+{% endblock %}

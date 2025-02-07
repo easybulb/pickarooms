@@ -306,3 +306,16 @@ def past_guests(request):
 
 def privacy_policy(request):
     return render(request, 'main/privacy_policy.html')
+
+def terms_of_use(request):
+    return render(request, 'main/terms_of_use.html')
+
+def terms_conditions(request):
+    return render(request, 'main/terms_conditions.html')
+
+def cookie_policy(request):
+    return render(request, 'main/cookie_policy.html')
+
+def sitemap(request):
+    return render(request, 'main/sitemap.html')
+

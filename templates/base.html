@@ -19,7 +19,7 @@
             <a href="/">Pick-A-Rooms</a>
         </div>
         <div class="menu-toggle" id="mobile-menu">
-            <p class="menu">Menu ^</p>
+            <p class="menu">More ^</p>
         </div>
         <nav>
             <ul class="nav-links">
@@ -63,9 +63,21 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 Pick-A-Rooms. <br>WebApp by Henry easybulb@gmail.com</p>
-        <p><a href="{% url 'privacy_policy' %}" class="footer-link">Privacy Policy</a></p>
+        <div class="footer-container">
+            <p>&copy; 2025 Pick-A-Rooms. All rights reserved.</p>
+            <ul class="footer-links">
+                <li><a href="{% url 'about' %}">About Us</a></li>
+                <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
+                <li><a href="{% url 'terms_of_use' %}">Terms of Use</a></li>
+                <li><a href="{% url 'terms_conditions' %}">Terms & Conditions</a></li>
+                <li><a href="{% url 'cookie_policy' %}">Cookie Policy</a></li>
+                <li><a href="{% url 'sitemap' %}">Sitemap</a></li>
+            </ul>
+            <p>WebApp by Henry <span class="email"><a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p></span></p>
+        </div>
     </footer>
+
 
     <script src="{% static 'js/script.js' %}"></script>
 
