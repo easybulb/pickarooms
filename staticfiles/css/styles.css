@@ -537,7 +537,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-right: 20px;
+  margin-left: -20px;
 }
 
 .cookie-banner p {
