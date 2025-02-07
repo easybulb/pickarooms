@@ -537,12 +537,13 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-left: 20px;
 }
 
 .cookie-banner p {
   flex: 1;
   margin: 0;
-  padding: 0 2px;
+  padding: 0 10px;
   font-size: 14px;
 }
 
