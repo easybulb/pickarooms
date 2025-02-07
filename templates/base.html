@@ -53,7 +53,6 @@
         </ul>
     {% endif %}
 
-
     <!-- Main content -->
     <div class="content-wrapper">
         <main>
@@ -74,23 +73,49 @@
                 <li><a href="{% url 'cookie_policy' %}">Cookie Policy</a></li>
                 <li><a href="{% url 'sitemap' %}">Sitemap</a></li>
             </ul>
-            <p>WebApp by Henry <span class="email"><a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p></span></p>
+            <p>WebApp by Henry <span class="email"><a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></span></p>
         </div>
     </footer>
 
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-banner" class="cookie-banner">
+        <p>We use cookies to enhance your experience on Pick-A-Rooms. By clicking "Accept," you agree to our use of cookies. <a href="{% url 'cookie_policy' %}">Learn more</a>.</p>
+        <button id="accept-cookies" class="cookie-btn">Accept</button>
+        <button id="decline-cookies" class="cookie-btn decline">Decline</button>
+    </div>
 
     <script src="{% static 'js/script.js' %}"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Hide confirmation message after 3 seconds
             const confirmationMessage = document.getElementById("confirmation-message");
             if (confirmationMessage) {
                 setTimeout(() => {
                     confirmationMessage.style.display = "none";
-                }, 3000);  // Hide after 3 seconds
+                }, 3000);
             }
+
+            // Cookie Banner Logic
+            const cookieBanner = document.getElementById("cookie-banner");
+            const acceptCookiesBtn = document.getElementById("accept-cookies");
+            const declineCookiesBtn = document.getElementById("decline-cookies");
+
+            if (localStorage.getItem("cookieConsent") === "accepted") {
+                cookieBanner.style.display = "none";
+            }
+
+            acceptCookiesBtn.addEventListener("click", function () {
+                localStorage.setItem("cookieConsent", "accepted");
+                cookieBanner.style.display = "none";
+            });
+
+            declineCookiesBtn.addEventListener("click", function () {
+                localStorage.setItem("cookieConsent", "declined");
+                cookieBanner.style.display = "none";
+            });
         });
     </script>
-    
+
 </body>
 </html>
