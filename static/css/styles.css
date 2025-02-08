@@ -532,6 +532,7 @@ footer {
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
+  max-width: 600px;
   background: rgba(0, 0, 0, 0.9);
   color: #fff;
   padding: 15px;
