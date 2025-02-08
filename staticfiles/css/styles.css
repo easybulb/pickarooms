@@ -132,7 +132,6 @@ nav {
 }
 
 
-
 /* Hero Section */
 .hero {
   position: relative;
@@ -453,10 +452,10 @@ footer {
 
   .hero img {
     width: 100%;
-    height: 100vh;
+    height: 80vh;
     object-fit: cover;
-    object-position: 25% center; /* For positioning the visible part of the image */
-    margin-top: -24px;
+    object-position: 15% center;
+    margin-top: -34px;
   }
 
   .hero-overlay {
@@ -470,7 +469,7 @@ footer {
   }
 
   .hero-content {
-    margin-top: -7rem; /* For moving the h1, p, input and button up and down */
+    margin-top: -3rem; /* For moving the h1, p, input and button up and down */
     text-align: left;
   }
 
