@@ -477,8 +477,14 @@ footer {
   }
 
   nav {
-    margin-right: -50px;
+    margin-right: -55px;
   }
+
+  .menu {
+    font-size: 2rem;
+    margin: -10px 0;
+  }
+
 
   .nav-links {
       display: none;
@@ -495,6 +501,7 @@ footer {
       padding: 20px;
       color: #F5F5F5;
   }
+
 
   .nav-links.active {
       display: flex;
