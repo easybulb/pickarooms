@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}How to Use - Pick A Rooms{% endblock %}
+
+{% block content %}
+<section class="footer-page-container">
+    <h1>How to Use Pick-A-Rooms</h1>
+    <p>Welcome! Follow these steps to check in smoothly:</p>
+    
+    <h2>1. Enter Your Phone Number</h2>
+    <p>On the homepage, enter the **phone number** used during your reservation.</p>
+
+    <h2>2. Retrieve Your PIN</h2>
+    <p>Once submitted, you'll receive a **unique PIN** for door access.</p>
+
+    <h2>3. Follow the Check-In Instructions</h2>
+    <p>You'll be directed to a **check-in guide** with video instructions.</p>
+
+    <h2>4. Enjoy Your Stay!</h2>
+    <p>If you need help, visit the <a href="{% url 'contact' %}">Contact Us</a> page.</p>
+
+</section>
+{% endblock %}

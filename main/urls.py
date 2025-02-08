@@ -5,6 +5,7 @@ from .views import (
     privacy_policy, terms_of_use, terms_conditions,
     cookie_policy, sitemap
 )
+from .views import how_to_use
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -26,4 +27,5 @@ urlpatterns = [
     path('terms-and-conditions/', terms_conditions, name='terms_conditions'),
     path('cookie-policy/', cookie_policy, name='cookie_policy'),
     path('sitemap/', sitemap, name='sitemap'),
+    path('how-to-use/', how_to_use, name='how_to_use'),
 ]

@@ -319,3 +319,5 @@ def cookie_policy(request):
 def sitemap(request):
     return render(request, 'main/sitemap.html')
 
+def how_to_use(request):
+    return render(request, 'main/how_to_use.html')
