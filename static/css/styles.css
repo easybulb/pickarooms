@@ -477,11 +477,11 @@ footer {
   }
 
   nav {
-    margin-right: -55px;
+    margin-right: -60px;
   }
 
   .menu {
-    font-size: 2rem;
+    font-size: 2.2rem;
     margin: -10px 0;
   }
 
@@ -595,14 +595,6 @@ footer {
     margin-top: 16px;
   }
 
-  .privacy-policy-container {
-    margin-top: -25px;
-  }
-
-  .privacy-policy-container h1 {
-    font-size: 1.8rem;
-  }
-
   footer {
     background: linear-gradient(90deg, #002147, #003580, #0056b3);
     color: #F5F5F5;
@@ -627,7 +619,8 @@ footer {
   .footer-page-container {
     margin: 0px auto;
     border-radius: 0px;
-    box-shadow: none
+    box-shadow: none;
+    margin-top: -25px;
   }
 
   .footer-page-container h1 {
@@ -638,8 +631,12 @@ footer {
     font-size: 1.2rem;
   }
 
-  .footer-page-container p ul {
+  .footer-page-container p, ul {
     font-size: 1rem;
+  }
+
+  .footer-page-container ul li{
+    padding-bottom: 10px;
   }
 
   .privacy-policy-container {
@@ -649,6 +646,23 @@ footer {
     /* background: white; */
     border-radius: 0px;
     box-shadow: 0;
+    margin-top: -25px;
+  }
+
+  .privacy-policy-container h1 {
+    font-size: 1.6rem;
+  }
+
+  .privacy-policy-container h2 {
+    font-size: 1.3rem;
+  }
+
+  .privacy-policy-container p, ul {
+    font-size: 1rem;
+  }
+
+  .privacy-policy-container ul li {
+    padding-bottom: 10px;
   }
 
   .cookie-banner {
