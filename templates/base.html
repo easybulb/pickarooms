@@ -97,25 +97,37 @@
                     confirmationMessage.style.display = "none";
                 }, 3000);
             }
-
-            // Cookie Banner Logic
-            const cookieBanner = document.getElementById("cookie-banner");
-            const acceptCookiesBtn = document.getElementById("accept-cookies");
-            const declineCookiesBtn = document.getElementById("decline-cookies");
-
-            if (localStorage.getItem("cookieConsent") === "accepted") {
-                cookieBanner.style.display = "none";
+    
+            // Function to show cookie banner
+            function showCookieBanner() {
+                const cookieBanner = document.getElementById("cookie-banner");
+    
+                // Show banner only if no previous choice is saved
+                if (!localStorage.getItem("cookieConsent")) {
+                    cookieBanner.style.display = "flex";
+    
+                    document.getElementById("accept-cookies").addEventListener("click", function () {
+                        localStorage.setItem("cookieConsent", "accepted");
+                        cookieBanner.style.display = "none";
+                    });
+    
+                    document.getElementById("decline-cookies").addEventListener("click", function () {
+                        localStorage.setItem("cookieConsent", "declined");
+                        cookieBanner.style.display = "none";
+                    });
+                }
             }
-
-            acceptCookiesBtn.addEventListener("click", function () {
-                localStorage.setItem("cookieConsent", "accepted");
-                cookieBanner.style.display = "none";
-            });
-
-            declineCookiesBtn.addEventListener("click", function () {
-                localStorage.setItem("cookieConsent", "declined");
-                cookieBanner.style.display = "none";
-            });
+    
+            // Fetch visitor location and show cookie banner for UK/EU
+            fetch("https://ipapi.co/json/")
+                .then(response => response.json())
+                .then(data => {
+                    const euCountries = ["GB", "FR", "DE", "ES", "IT", "NL", "BE", "SE", "DK", "FI", "IE", "PT", "AT", "PL", "GR"];
+                    if (euCountries.includes(data.country_code)) {
+                        showCookieBanner();
+                    }
+                })
+                .catch(error => console.error("Error fetching location:", error));
         });
     </script>
     
