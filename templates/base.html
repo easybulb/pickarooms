@@ -97,8 +97,28 @@
                     confirmationMessage.style.display = "none";
                 }, 3000);
             }
-
-            // Check visitor's location
+    
+            // Function to show cookie banner
+            function showCookieBanner() {
+                const cookieBanner = document.getElementById("cookie-banner");
+    
+                // Show banner only if no previous choice is saved
+                if (!localStorage.getItem("cookieConsent")) {
+                    cookieBanner.style.display = "flex";
+    
+                    document.getElementById("accept-cookies").addEventListener("click", function () {
+                        localStorage.setItem("cookieConsent", "accepted");
+                        cookieBanner.style.display = "none";
+                    });
+    
+                    document.getElementById("decline-cookies").addEventListener("click", function () {
+                        localStorage.setItem("cookieConsent", "declined");
+                        cookieBanner.style.display = "none";
+                    });
+                }
+            }
+    
+            // Fetch visitor location and show cookie banner for UK/EU
             fetch("https://ipapi.co/json/")
                 .then(response => response.json())
                 .then(data => {
@@ -108,25 +128,9 @@
                     }
                 })
                 .catch(error => console.error("Error fetching location:", error));
-
-            function showCookieBanner() {
-                const cookieBanner = document.getElementById("cookie-banner");
-                if (!localStorage.getItem("cookieConsent")) {
-                    cookieBanner.style.display = "flex";
-                }
-
-                document.getElementById("accept-cookies").addEventListener("click", function () {
-                    localStorage.setItem("cookieConsent", "accepted");
-                    cookieBanner.style.display = "none";
-                });
-
-                document.getElementById("decline-cookies").addEventListener("click", function () {
-                    localStorage.setItem("cookieConsent", "declined");
-                    cookieBanner.style.display = "none";
-                });
-            }
         });
     </script>
+    
 
 </body>
 </html>
