@@ -521,6 +521,10 @@ footer {
     border-radius: 0px;
     box-shadow: 0;
   }
+
+  .cookie-banner {
+    margin-left: -22px;
+  }
 }
 
 /* Cookie Banner */
@@ -537,7 +541,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-left: -22px;
+  margin-left: -32px;
 }
 
 .cookie-banner p {
