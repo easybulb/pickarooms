@@ -13,10 +13,44 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
 import pandas as pd
-
+import random
 
 def home(request):
-    return render(request, 'main/home.html')
+    # Fetch the latest uploaded CSV file
+    latest_file = ReviewCSVUpload.objects.last()
+    
+    if latest_file:
+        file_path = latest_file.file.path  # Get the actual file path
+        reviews_df = pd.read_csv(file_path)
+
+        # Filter reviews that have a comment and a score of 9 or 10
+        filtered_reviews = reviews_df[
+            (reviews_df["Review score"] >= 9) & 
+            (reviews_df["Positive review"].notna()) & 
+            (reviews_df["Positive review"].str.strip() != "")
+        ]
+
+        # Separate 10/10 reviews from 9/10 reviews
+        perfect_reviews = filtered_reviews[filtered_reviews["Review score"] == 10]
+        good_reviews = filtered_reviews[filtered_reviews["Review score"] == 9]
+
+        # Shuffle the reviews to make selection random
+        perfect_reviews = perfect_reviews.sample(frac=1).reset_index(drop=True)  # Shuffle perfect reviews
+        good_reviews = good_reviews.sample(frac=1).reset_index(drop=True)  # Shuffle good reviews
+
+        # Select up to 3 random 10/10 reviews first, then fill the rest with 9/10 reviews up to 5
+        selected_reviews = pd.concat([perfect_reviews.head(3), good_reviews.head(2)]).sample(frac=1).reset_index(drop=True)
+
+        # Convert to dictionary format for template rendering
+        latest_reviews = selected_reviews[["Guest name", "Positive review", "Review score"]].rename(
+            columns={"Guest name": "author", "Positive review": "text", "Review score": "score"}
+        ).to_dict(orient="records")
+    else:
+        latest_reviews = []  # Empty list if no CSV has been uploaded
+
+    return render(request, "main/home.html", {"latest_reviews": latest_reviews})
+
+
 
 def about(request):
     return render(request, 'main/about.html')
