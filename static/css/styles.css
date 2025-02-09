@@ -802,7 +802,9 @@ footer {
 /* Responsive Design */
 @media (max-width: 768px) {
   .reviews-awards {
-      padding: 15px;
+    padding: 15px;
+    background: #fff;
+    margin-top: -35px;
   }
 
   .reviews-awards h2 {
