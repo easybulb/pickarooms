@@ -804,7 +804,9 @@ footer {
   .reviews-awards {
     padding: 15px;
     background: #fff;
-    margin-top: -35px;
+    margin-top: -25px;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .reviews-awards h2 {
