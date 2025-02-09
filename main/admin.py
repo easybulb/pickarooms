@@ -21,7 +21,19 @@ class RoomAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
+class ReviewCSVUploadAdmin(admin.ModelAdmin):
+    list_display = ('uploaded_at',)  # Display only the uploaded time
+    readonly_fields = ('data',)  # Make 'data' read-only to prevent errors
+    exclude = ('data',)  # Hide the field from the admin form
+
+    def save_model(self, request, obj, form, change):
+        """Automatically process CSV and store data in JSON field."""
+        obj.save()  # Save the uploaded file first
+        obj.save()  # Call save again to trigger CSV processing
+        self.message_user(request, "CSV processed and stored as JSON successfully.")
+
+
 # ✅ Register Room and Guest models
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
-admin.site.register(ReviewCSVUpload)
+admin.site.register(ReviewCSVUpload, ReviewCSVUploadAdmin)
