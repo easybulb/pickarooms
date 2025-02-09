@@ -804,6 +804,7 @@ footer {
   .reviews-awards {
     padding: 15px;
     background: #F5F5F5;
+    margin-top: -10px;
     border-radius: 0;
     box-shadow: none;
   }
