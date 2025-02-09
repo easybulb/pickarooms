@@ -803,8 +803,8 @@ footer {
 @media (max-width: 768px) {
   .reviews-awards {
     padding: 15px;
-    background: #fff;
-    margin-top: -25px;
+    background: #F5F5F5;
+    margin-top: -10px;
     border-radius: 0;
     box-shadow: none;
   }
