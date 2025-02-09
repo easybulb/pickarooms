@@ -53,3 +53,12 @@ class Guest(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.phone_number} - {self.assigned_room.name}"
+
+
+
+class ReviewCSVUpload(models.Model):
+    file = models.FileField(upload_to="uploads/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Reviews CSV uploaded on {self.uploaded_at}"

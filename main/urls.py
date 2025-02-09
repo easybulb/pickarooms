@@ -28,4 +28,5 @@ urlpatterns = [
     path('cookie-policy/', cookie_policy, name='cookie_policy'),
     path('sitemap/', sitemap, name='sitemap'),
     path('how-to-use/', how_to_use, name='how_to_use'),
+    path('awards_reviews/', views.awards_reviews, name='awards_reviews'),
 ]

@@ -48,7 +48,30 @@
     <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738597703/pickaroomsbanner_rjtmav.png" alt="Luxury Hotel Room" class="hero-image">
 </section>
 
-<!-- Add JavaScript for Modal Below -->
+<!-- Guest Reviews & Awards Section -->
+<section class="reviews-awards">
+    <h2>What Our Guests Say</h2>
+
+    <!-- Awards Display -->
+    <div class="awards-container">
+        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739094366/Digital-Gallery-Award-TRA-2025_saszeh.png" alt="Booking.com Traveller Award 2025">
+    </div>
+
+    <!-- Latest Guest Reviews -->
+    <div class="reviews-container">
+        {% for review in latest_reviews %}
+            <div class="review">
+                <p class="review-text">"{{ review.text }}"</p>
+                <p class="review-author">- {{ review.author }} <span class="review-score">⭐ {{ review.score }}/10</span></p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Read More Button -->
+    <a href="{% url 'awards_reviews' %}" class="btn read-more-btn">Read More Reviews</a>
+</section>
+
+<!-- Add JavaScript for Modals -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const modals = document.querySelectorAll(".modal");

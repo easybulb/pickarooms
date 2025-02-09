@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Room, Guest
+from .models import Room, Guest, ReviewCSVUpload
 
 class GuestAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'phone_number', 'check_in_date', 'check_out_date', 'assigned_room', 'is_archived')
@@ -24,3 +24,4 @@ class RoomAdmin(admin.ModelAdmin):
 # ✅ Register Room and Guest models
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
+admin.site.register(ReviewCSVUpload)

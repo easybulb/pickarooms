@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Guest, Room
+from .models import Guest, Room, ReviewCSVUpload
 from django.core.mail import send_mail
 from django.utils.timezone import now, localtime
 from datetime import date, datetime, time
@@ -12,6 +12,7 @@ from django_ratelimit.decorators import ratelimit
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
+import pandas as pd
 
 
 def home(request):
@@ -321,3 +322,29 @@ def sitemap(request):
 
 def how_to_use(request):
     return render(request, 'main/how_to_use.html')
+
+
+
+def awards_reviews(request):
+    # Fetch the latest uploaded CSV file
+    latest_file = ReviewCSVUpload.objects.last()
+    
+    if latest_file:
+        file_path = latest_file.file.path  # Get the actual file path
+        reviews_df = pd.read_csv(file_path)
+
+        # Filter reviews with a score of 9 or 10 AND ensure the positive review column is not empty
+        filtered_reviews = reviews_df[(reviews_df["Review score"] >= 9) & (reviews_df["Positive review"].notna()) & (reviews_df["Positive review"].str.strip() != "")]
+
+        # Select up to 10 best reviews based on the score
+        filtered_reviews = filtered_reviews.sort_values(by="Review score", ascending=False).head(20)
+
+        # Convert to dictionary format for template rendering
+        all_reviews = filtered_reviews[["Guest name", "Positive review", "Review score"]].rename(
+            columns={"Guest name": "author", "Positive review": "text", "Review score": "score"}
+        ).to_dict(orient="records")
+    else:
+        all_reviews = []  # Empty list if no CSV has been uploaded
+
+    return render(request, "main/awards_reviews.html", {"all_reviews": all_reviews})
+

@@ -1,0 +1,141 @@
+/* Awards & Reviews Page Styling */
+.awards-reviews-page {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.awards-reviews-page h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #003580;
+}
+
+/* Awards Section */
+.awards-gallery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.awards-gallery img {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Reviews Container */
+.reviews-container {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+/* Individual Review Styling */
+.review {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    text-align: left;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Review Text */
+.review-text {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Author & Score */
+.review-author {
+    font-weight: bold;
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-score {
+    background: #003580;
+    color: #fff;
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+/* Hide extra reviews */
+.hidden-review {
+    display: none;
+}
+
+/* Show More / Show Less Button */
+#toggle-reviews {
+    background: #ff4500;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    display: block;
+    margin: 10px auto;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+#toggle-reviews:hover {
+    background: #d63a00;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .awards-reviews-page {
+        padding: 15px;
+        margin-top: -35px;
+    }
+
+    .awards-reviews-page h1 {
+        font-size: 1.4rem;
+    }
+
+    .awards-gallery img {
+        max-width: 90%;
+    }
+
+    .review {
+        padding: 12px;
+    }
+
+    .review-text {
+        font-size: 1rem;
+    }
+
+    .review-author {
+        font-size: 0.9rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .review-score {
+        font-size: 0.85rem;
+        padding: 4px 6px;
+        margin-top: 5px;
+    }
+
+    #toggle-reviews {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+}

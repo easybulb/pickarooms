@@ -724,3 +724,102 @@ footer {
     right: 12px;
   }
 }
+
+
+/* Reviews & Awards Section */
+.reviews-awards {
+  max-width: 900px;
+  margin: 50px auto;
+  text-align: center;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.reviews-awards h2 {
+  font-size: 1.8rem;
+  color: #003580;
+  margin-bottom: 15px;
+}
+
+/* Awards Styling */
+.awards-container img {
+  width: 100%;
+  max-width: 400px;
+  margin: 10px 0;
+  border-radius: 8px;
+}
+
+/* Reviews Container */
+.reviews-container {
+  margin-top: 20px;
+}
+
+.review {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
+
+.review-text {
+  font-size: 1rem;
+  font-style: italic;
+  color: #333;
+}
+
+.review-author {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.review-score {
+  background: #003580;
+  color: #fff;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+}
+
+/* Read More Button */
+.read-more-btn {
+  display: inline-block;
+  background: #ff4500;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.read-more-btn:hover {
+  background: #e03e00;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .reviews-awards {
+      padding: 15px;
+  }
+
+  .reviews-awards h2 {
+      font-size: 1.6rem;
+  }
+
+  .awards-container img {
+      max-width: 90%;
+  }
+
+  .review {
+      padding: 12px;
+      font-size: 0.9rem;
+  }
+
+  .read-more-btn {
+      font-size: 0.9rem;
+      padding: 8px 12px;
+  }
+}

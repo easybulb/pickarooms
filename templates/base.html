@@ -27,6 +27,7 @@
                 <li><a href="/about/" class="{% if request.path == '/about/' %}active{% endif %}">About</a></li>
                 <li><a href="/checkin/" class="{% if request.path == '/checkin/' %}active{% endif %}">Check-In</a></li>
                 <li><a href="/explore-manchester/" class="{% if request.path == '/explore-manchester/' %}active{% endif %}">Explore Manchester</a></li>
+                <li><a href="{% url 'awards_reviews' %}" class="{% if request.path == '/awards_reviews/' %}active{% endif %}">Awards & Reviews</a></li>
                 <li><a href="/contact/" class="{% if request.path == '/contact/' %}active{% endif %}">Contact Us</a></li>
 
                 {% if user.is_authenticated %}
