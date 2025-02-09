@@ -42,6 +42,24 @@ def home(request):
 
 
 
+def awards_reviews(request):
+    # Fetch the latest uploaded review data
+    latest_file = ReviewCSVUpload.objects.last()
+    
+    if latest_file and latest_file.data:
+        reviews = latest_file.data  # Access stored review data
+
+        # Filter reviews with a score of 9 or 10 AND ensure the positive review column is not empty
+        filtered_reviews = [r for r in reviews if r["score"] >= 9 and r["text"].strip()]
+
+        # Sort reviews by highest score first and select up to 20
+        all_reviews = sorted(filtered_reviews, key=lambda x: x["score"], reverse=True)[:20]
+    else:
+        all_reviews = []  # Empty list if no review data is available
+
+    return render(request, "main/awards_reviews.html", {"all_reviews": all_reviews})
+
+
 
 def about(request):
     return render(request, 'main/about.html')
@@ -349,23 +367,5 @@ def how_to_use(request):
     return render(request, 'main/how_to_use.html')
 
 
-
-
-def awards_reviews(request):
-    # Fetch the latest uploaded review data
-    latest_file = ReviewCSVUpload.objects.last()
-    
-    if latest_file and latest_file.data:
-        reviews = latest_file.data  # Access stored review data
-
-        # Filter reviews with a score of 9 or 10 AND ensure the positive review column is not empty
-        filtered_reviews = [r for r in reviews if r["score"] >= 9 and r["text"].strip()]
-
-        # Sort reviews by highest score first and select up to 20
-        all_reviews = sorted(filtered_reviews, key=lambda x: x["score"], reverse=True)[:20]
-    else:
-        all_reviews = []  # Empty list if no review data is available
-
-    return render(request, "main/awards_reviews.html", {"all_reviews": all_reviews})
 
 
