@@ -15,40 +15,31 @@ from django.contrib import messages
 import pandas as pd
 import random
 
+
 def home(request):
-    # Fetch the latest uploaded CSV file
     latest_file = ReviewCSVUpload.objects.last()
     
-    if latest_file:
-        file_path = latest_file.file.path  # Get the actual file path
-        reviews_df = pd.read_csv(file_path)
-
-        # Filter reviews that have a comment and a score of 9 or 10
-        filtered_reviews = reviews_df[
-            (reviews_df["Review score"] >= 9) & 
-            (reviews_df["Positive review"].notna()) & 
-            (reviews_df["Positive review"].str.strip() != "")
-        ]
+    if latest_file and latest_file.data:
+        reviews = latest_file.data
 
         # Separate 10/10 reviews from 9/10 reviews
-        perfect_reviews = filtered_reviews[filtered_reviews["Review score"] == 10]
-        good_reviews = filtered_reviews[filtered_reviews["Review score"] == 9]
+        perfect_reviews = [r for r in reviews if r["score"] == 10]
+        good_reviews = [r for r in reviews if r["score"] == 9]
 
         # Shuffle the reviews to make selection random
-        perfect_reviews = perfect_reviews.sample(frac=1).reset_index(drop=True)  # Shuffle perfect reviews
-        good_reviews = good_reviews.sample(frac=1).reset_index(drop=True)  # Shuffle good reviews
+        random.shuffle(perfect_reviews)
+        random.shuffle(good_reviews)
 
         # Select up to 3 random 10/10 reviews first, then fill the rest with 9/10 reviews up to 5
-        selected_reviews = pd.concat([perfect_reviews.head(3), good_reviews.head(2)]).sample(frac=1).reset_index(drop=True)
+        selected_reviews = perfect_reviews[:3] + good_reviews[:2]
+        random.shuffle(selected_reviews)
 
-        # Convert to dictionary format for template rendering
-        latest_reviews = selected_reviews[["Guest name", "Positive review", "Review score"]].rename(
-            columns={"Guest name": "author", "Positive review": "text", "Review score": "score"}
-        ).to_dict(orient="records")
+        latest_reviews = selected_reviews
     else:
-        latest_reviews = []  # Empty list if no CSV has been uploaded
+        latest_reviews = []  # Empty list if no CSV is available
 
     return render(request, "main/home.html", {"latest_reviews": latest_reviews})
+
 
 
 
@@ -359,26 +350,22 @@ def how_to_use(request):
 
 
 
+
 def awards_reviews(request):
-    # Fetch the latest uploaded CSV file
+    # Fetch the latest uploaded review data
     latest_file = ReviewCSVUpload.objects.last()
     
-    if latest_file:
-        file_path = latest_file.file.path  # Get the actual file path
-        reviews_df = pd.read_csv(file_path)
+    if latest_file and latest_file.data:
+        reviews = latest_file.data  # Access stored review data
 
         # Filter reviews with a score of 9 or 10 AND ensure the positive review column is not empty
-        filtered_reviews = reviews_df[(reviews_df["Review score"] >= 9) & (reviews_df["Positive review"].notna()) & (reviews_df["Positive review"].str.strip() != "")]
+        filtered_reviews = [r for r in reviews if r["score"] >= 9 and r["text"].strip()]
 
-        # Select up to 10 best reviews based on the score
-        filtered_reviews = filtered_reviews.sort_values(by="Review score", ascending=False).head(20)
-
-        # Convert to dictionary format for template rendering
-        all_reviews = filtered_reviews[["Guest name", "Positive review", "Review score"]].rename(
-            columns={"Guest name": "author", "Positive review": "text", "Review score": "score"}
-        ).to_dict(orient="records")
+        # Sort reviews by highest score first and select up to 20
+        all_reviews = sorted(filtered_reviews, key=lambda x: x["score"], reverse=True)[:20]
     else:
-        all_reviews = []  # Empty list if no CSV has been uploaded
+        all_reviews = []  # Empty list if no review data is available
 
     return render(request, "main/awards_reviews.html", {"all_reviews": all_reviews})
+
 

@@ -3,6 +3,9 @@ from django.db import models
 from django.utils.timezone import now
 from datetime import date, timedelta
 from django.conf import settings
+import pandas as pd
+import json
+
 
 # Import Cloudinary only if available (for production)
 if not settings.DEBUG:
@@ -56,9 +59,25 @@ class Guest(models.Model):
 
 
 
+
 class ReviewCSVUpload(models.Model):
     file = models.FileField(upload_to="uploads/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    data = models.JSONField(default=dict)  # Store reviews as JSON
 
-    def __str__(self):
-        return f"Reviews CSV uploaded on {self.uploaded_at}"
+    def save(self, *args, **kwargs):
+        # Read CSV and store it as JSON
+        if self.file:
+            self.file.seek(0)  # Ensure file is at the beginning
+            df = pd.read_csv(self.file)
+
+            # Filter reviews and convert to JSON
+            filtered_reviews = df[(df["Review score"] >= 9) & (df["Positive review"].notna()) & (df["Positive review"].str.strip() != "")]
+            filtered_reviews = filtered_reviews[["Guest name", "Positive review", "Review score"]].rename(
+                columns={"Guest name": "author", "Positive review": "text", "Review score": "score"}
+            )
+
+            self.data = filtered_reviews.to_dict(orient="records")
+
+        super().save(*args, **kwargs)
+
