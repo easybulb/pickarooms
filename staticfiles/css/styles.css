@@ -613,20 +613,22 @@ footer {
     margin-top: -2rem; /* For moving the h1, p, input and button up and down */
     text-align: left;
     left: 45%;
-    margin-top: -4px;
   }
 
   .hero-content h1 {
     line-height: 1.1;
-    font-size: 2.3rem;
+    width: 110%;
+    font-size: 2.5rem;
     font-weight: 450;
     color: white;
     text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
     margin-bottom: 1rem;
+    
   }
   
   .hero-content p {
     line-height: 1.1;
+    width: 115%;
     font-size: 1.3rem;
     font-weight: 350;
     color: white;
