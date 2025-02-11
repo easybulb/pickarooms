@@ -134,6 +134,10 @@ msgstr "Bienvenue, votre séjour commence ici !"
 msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
 msgstr "Entrez votre numéro de téléphone pour accéder à votre code PIN, au guide d’enregistrement et à tous les détails pour une expérience fluide."
 
+#: templates/main/home.html:11
+msgid "Enter your phone number to get your PIN and check-in details."
+msgstr "Entrez votre numéro de téléphone pour obtenir votre code PIN et les détails de l'enregistrement."
+
 #: templates/main/home.html:14
 msgid "Enter your phone number"
 msgstr "Entrez votre numéro de téléphone"

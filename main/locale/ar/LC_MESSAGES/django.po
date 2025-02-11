@@ -130,6 +130,10 @@ msgstr "مرحبًا، إقامتك تبدأ هنا!"
 msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
 msgstr "أدخل رقم هاتفك للوصول إلى رقم التعريف الشخصي (PIN)، ودليل تسجيل الوصول، وجميع التفاصيل لتجربة سلسة."
 
+#: templates/main/home.html:11
+msgid "Enter your phone number to get your PIN and check-in details."
+msgstr "أدخل رقم هاتفك للحصول على رقم التعريف الشخصي وتفاصيل تسجيل الوصول."
+
 #: templates/main/home.html:14
 msgid "Enter your phone number"
 msgstr "أدخل رقم هاتفك"

@@ -130,6 +130,10 @@ msgstr "Bem-vindo, sua estadia começa aqui!"
 msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
 msgstr "Digite seu número de telefone para acessar seu PIN, guia de check-in e todos os detalhes para uma experiência tranquila."
 
+#: templates/main/home.html:11
+msgid "Enter your phone number to get your PIN and check-in details."
+msgstr "Digite seu número de telefone para obter seu PIN e os detalhes do check-in."
+
 #: templates/main/home.html:14
 msgid "Enter your phone number"
 msgstr "Digite seu número de telefone"

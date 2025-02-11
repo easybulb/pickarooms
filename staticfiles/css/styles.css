@@ -616,7 +616,7 @@ footer {
   }
 
   .hero-content h1 {
-    line-height: 1.1;
+    line-height: 1.0;
     word-spacing: -2px;
     width: 110%;
     font-size: 2.5rem;
@@ -629,7 +629,6 @@ footer {
   
   .hero-content p {
     line-height: 1.1;
-    word-spacing: -2px;
     width: 115%;
     font-size: 1.3rem;
     font-weight: 350;

@@ -133,6 +133,10 @@ msgstr "欢迎，您的入住从这里开始！"
 msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
 msgstr "输入您的电话号码以获取 PIN 码、入住指南和所有详细信息，确保流畅体验。"
 
+#: templates/main/home.html:11
+msgid "Enter your phone number to get your PIN and check-in details."
+msgstr "输入您的电话号码以获取您的PIN码和入住详情。"
+
 #: templates/main/home.html:14
 msgid "Enter your phone number"
 msgstr "输入您的电话号码"

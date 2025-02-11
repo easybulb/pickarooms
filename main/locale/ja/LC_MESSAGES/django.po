@@ -130,6 +130,10 @@ msgstr "ようこそ、ご宿泊はこちらから！"
 msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
 msgstr "PIN、チェックインガイド、スムーズな体験のための詳細情報にアクセスするために電話番号を入力してください。"
 
+#: templates/main/home.html:11
+msgid "Enter your phone number to get your PIN and check-in details."
+msgstr "PINコードとチェックインの詳細を取得するために電話番号を入力してください。"
+
 #: templates/main/home.html:14
 msgid "Enter your phone number"
 msgstr "電話番号を入力してください"

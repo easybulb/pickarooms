@@ -134,6 +134,10 @@ msgstr "स्वागत है, आपकी यात्रा यहाँ 
 msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
 msgstr "अपने पिन, चेक-इन गाइड और सभी विवरणों तक पहुंचने के लिए अपना फोन नंबर दर्ज करें ताकि आपका अनुभव सुगम हो।"
 
+#: templates/main/home.html:11
+msgid "Enter your phone number to get your PIN and check-in details."
+msgstr "अपना फोन नंबर दर्ज करें ताकि आपको अपना पिन और चेक-इन विवरण मिल सके।"
+
 #: templates/main/home.html:14
 msgid "Enter your phone number"
 msgstr "अपना फोन नंबर दर्ज करें"
