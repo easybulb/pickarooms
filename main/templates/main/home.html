@@ -11,7 +11,7 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
-        <p>{% trans "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience" %}</p>
+        <p>{% trans "Enter your phone number to get your PIN and check-in details." %}</p>
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
             <input type="text" name="phone_number" placeholder="{% trans 'Enter your phone number' %}">
