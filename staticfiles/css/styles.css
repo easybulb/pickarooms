@@ -292,7 +292,7 @@ nav {
 }
 
 .logout-btn {
-  padding: 10px 15px;
+  padding: 7px 12px;
   margin-top: -10px ;
   border: none;
   background: #ff4500;
@@ -664,13 +664,13 @@ footer {
 
   .checkin-form button {
     padding: 10px 15px;
-    border: none;
+    border: solid 1px #be5a35;
     background: #ff4500;
     color: white;
     font-size: 17px;
     cursor: pointer;
     border-radius: 5px;
-    margin-top: 16px;
+    margin-top: 17px;
   }
 
   footer {
