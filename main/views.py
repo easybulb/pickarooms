@@ -14,6 +14,8 @@ from django.conf import settings
 from django.contrib import messages
 import pandas as pd
 import random
+from django.utils.translation import gettext as _
+
 
 
 def home(request):
@@ -38,7 +40,16 @@ def home(request):
     else:
         latest_reviews = []  # Empty list if no CSV is available
 
-    return render(request, "main/home.html", {"latest_reviews": latest_reviews})
+    # ✅ Include Translated Text for Template
+    context = {
+        "latest_reviews": latest_reviews,
+        "welcome_text": _("Welcome, Your Stay Starts Here!"),
+        "instructions": _("Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"),
+        "LANGUAGES": settings.LANGUAGES,  # ✅ Ensure available languages are included
+    }
+
+    return render(request, "main/home.html", context)
+
 
 
 
@@ -82,10 +93,14 @@ def checkin(request):
                 request.session['phone_number'] = phone_number
                 return redirect('room_detail', room_token=guest.secure_token)
             else:
-                return render(request, 'main/checkin.html', {'error': "No reservation found. Please enter the same phone number used in your Booking.com reservation."})
+                return render(request, 'main/checkin.html', {
+                    'error': _("No reservation found. Please enter the same phone number used in your Booking.com reservation.")  # Added translation
+                })
 
         except Guest.DoesNotExist:
-            return render(request, 'main/checkin.html', {'error': "Details not found. Make sure you input the correct phone number."})
+            return render(request, 'main/checkin.html', {
+                'error': _("Details not found. Make sure you input the correct phone number.")  # Added translation
+            })
 
     return render(request, 'main/checkin.html')
 

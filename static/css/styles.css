@@ -11,7 +11,7 @@ main {
 
 
 html, body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   margin: 0;
   padding: 0;
   background: #F5F5F5;
@@ -48,6 +48,35 @@ header {
   color: #F5F5F5;
 }
 
+
+/* Language Switcher */
+.language-switcher {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.language-switcher form {
+  display: flex;
+  align-items: center;
+}
+
+.language-switcher select {
+  background: #fff;
+  color: #333;
+  font-size: 13px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 3px;
+}
+
+/* Style for Hover Effect */
+.language-switcher select:hover {
+  border-color: #003580;
+}
+
 nav {
   margin-right: 45px;
   z-index: 1000;
@@ -59,12 +88,12 @@ nav {
 }
 
 .nav-links li {
-  margin: 0 15px;
+  margin: 0 10px;
 }
 
 .nav-links a {
   text-decoration: none;
-  font-size: 16px;
+  font-size: 15px;
   color: #F5F5F5;
   transition: color 0.3s ease-in-out;
 }
@@ -468,6 +497,34 @@ footer {
       top: 5px; /* Move higher for very small screens */
       padding: 6px;
   }
+
+  .logo {
+    margin-left: -15px;
+  }
+
+  .logo a {
+    font-size: 1.3rem;
+  }
+
+  .language-switcher {
+    position: absolute;
+    top: 15px;
+    left: 200px;
+    margin-top: 3px;
+  }
+
+.language-switcher select {
+    font-size: 15px;
+    padding: 5px 5px;
+    margin-top: -2px;
+  }
+
+  .menu {
+    font-size: 1.8rem;
+    margin: -10px 0;
+    margin-top: -10px;
+    z-index: 1000;
+  }
 }
 
 /* Responsive */
@@ -475,16 +532,16 @@ footer {
   .menu-toggle {
       display: flex;
   }
-
+  
   nav {
-    margin-right: -60px;
+    margin-right: -130px;
   }
 
-  .menu {
-    font-size: 2.2rem;
+  /* .menu {
+    font-size: 2rem;
     margin: -10px 0;
-  }
-
+    margin-top: -6px;
+  } */
 
   .nav-links {
       display: none;

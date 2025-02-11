@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - Pick-A-Rooms{% endblock %}
+{% load i18n %}  <!-- Load translation engine -->
+
+{% block title %}{% trans "Home - Pick-A-Rooms" %}{% endblock %}
 
 {% block content %}
 
@@ -8,29 +10,29 @@
 <section class="hero">
     <div class="hero-overlay"></div>
     <div class="hero-content">
-        <h1>Welcome, Your Stay Starts Here!</h1>
-        <p>Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience</p>
+        <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
+        <p>{% trans "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience" %}</p>
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="phone_number" placeholder="Enter your phone number">
-            <button type="submit">Check In</button>
+            <input type="text" name="phone_number" placeholder="{% trans 'Enter your phone number' %}">
+            <button type="submit">{% trans "Check In" %}</button>
         </form>
 
         <!-- Links for Popups -->
         <p class="how-to-use-link">
-            <a href="#" id="open-how-to-use-modal">How to Use</a> |
-            <a href="#" id="open-contact-modal">Contact Us</a>
+            <a href="#" id="open-how-to-use-modal">{% trans "How to Use" %}</a> |
+            <a href="#" id="open-contact-modal">{% trans "Contact Us" %}</a>
         </p>
 
         <!-- How to Use Modal -->
         <div id="how-to-use-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close" data-modal="how-to-use-modal">&times;</span>
-                <h2>How to Use</h2>
-                <p><strong>Step 1:</strong> Enter your phone number used during your reservation on booking.com.</p>
-                <p><strong>Step 2:</strong> Retrieve your PIN.</p>
-                <p><strong>Step 3:</strong> Follow the check-in instructions.</p>
-                <p><strong>Step 4:</strong> Enjoy your stay!</p>
+                <h2>{% trans "How to Use" %}</h2>
+                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter your phone number used during your reservation on Booking.com." %}</p>
+                <p><strong>{% trans "Step 2:" %}</strong> {% trans "Retrieve your PIN." %}</p>
+                <p><strong>{% trans "Step 3:" %}</strong> {% trans "Follow the check-in instructions." %}</p>
+                <p><strong>{% trans "Step 4:" %}</strong> {% trans "Enjoy your stay!" %}</p>
             </div>
         </div>
 
@@ -38,23 +40,24 @@
         <div id="contact-modal" class="modal" style="display: none;">
             <div class="modal-content">
                 <span class="close" data-modal="contact-modal">&times;</span>
-                <h2>Contact Us</h2>
-                <p><strong>Phone:</strong> +44 (0) 7539029629</p>
-                <p><strong>Email:</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
+                <h2>{% trans "Contact Us" %}</h2>
+                <p><strong>{% trans "Phone:" %}</strong> +44 (0) 7539029629</p>
+                <p><strong>{% trans "Whatsapp:" %}</strong> +44 (0) 7539029629</p>
+                <p><strong>{% trans "Email:" %}</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
             </div>
         </div>
 
     </div>
-    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738597703/pickaroomsbanner_rjtmav.png" alt="Luxury Hotel Room" class="hero-image">
+    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738597703/pickaroomsbanner_rjtmav.png" alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
 </section>
 
 <!-- Guest Reviews & Awards Section -->
 <section class="reviews-awards">
-    <h2>What Our Guests Say</h2>
+    <h2>{% trans "What Our Guests Say" %}</h2>
 
     <!-- Awards Display -->
     <div class="awards-container">
-        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739094366/Digital-Gallery-Award-TRA-2025_saszeh.png" alt="Booking.com Traveller Award 2025">
+        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739094366/Digital-Gallery-Award-TRA-2025_saszeh.png" alt="{% trans 'Booking.com Traveller Award 2025' %}">
     </div>
 
     <!-- Latest Guest Reviews -->
@@ -68,7 +71,7 @@
     </div>
 
     <!-- Read More Button -->
-    <a href="{% url 'awards_reviews' %}" class="btn read-more-btn">Read More Reviews</a>
+    <a href="{% url 'awards_reviews' %}" class="btn read-more-btn">{% trans "Read More Reviews" %}</a>
 </section>
 
 <!-- Add JavaScript for Modals -->
@@ -111,5 +114,4 @@
         });
     });
 </script>
-
 {% endblock %}

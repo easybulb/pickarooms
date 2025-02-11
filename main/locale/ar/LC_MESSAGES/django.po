@@ -1,0 +1,499 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-09 20:30+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\pickarooms\settings.py:154
+msgid "English"
+msgstr "English"
+
+#: .\pickarooms\settings.py:155
+msgid "French"
+msgstr "الفرنسية"
+
+#: .\pickarooms\settings.py:156
+msgid "German"
+msgstr "الألمانية"
+
+#: .\pickarooms\settings.py:157
+msgid "Spanish"
+msgstr "الإسبانية"
+
+#: .\pickarooms\settings.py:158
+msgid "Simplified Chinese"
+msgstr "الصينية المبسطة"
+
+#: .\pickarooms\settings.py:159
+msgid "Italian"
+msgstr "الإيطالية"
+
+#: .\pickarooms\settings.py:160
+msgid "Portuguese"
+msgstr "البرتغالية"
+
+#: .\pickarooms\settings.py:161
+msgid "Arabic"
+msgstr "العربية"
+
+#: templates/base.html:10
+msgid "Home"
+msgstr "الرئيسية"
+
+#: templates/base.html:11
+msgid "About"
+msgstr "من نحن"
+
+#: templates/base.html:12
+msgid "Check-In"
+msgstr "تسجيل الوصول"
+
+#: templates/base.html:14
+msgid "Awards & Reviews"
+msgstr "الجوائز والتقييمات"
+
+#: templates/base.html:15
+msgid "Contact Us"
+msgstr "اتصل بنا"
+
+#: templates/base.html:20
+msgid "Admin Only"
+msgstr "للمشرفين فقط"
+
+#: templates/base.html:22
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
+#: templates/base.html:24
+msgid "Admin Login"
+msgstr "تسجيل دخول المشرف"
+
+#: templates/base.html:35
+msgid "All rights reserved."
+msgstr "جميع الحقوق محفوظة."
+
+#: templates/base.html:40
+msgid "Privacy Policy"
+msgstr "سياسة الخصوصية"
+
+#: templates/base.html:41
+msgid "Terms of Use"
+msgstr "شروط الاستخدام"
+
+#: templates/base.html:42
+msgid "Terms & Conditions"
+msgstr "الشروط والأحكام"
+
+#: templates/base.html:43
+msgid "Cookie Policy"
+msgstr "سياسة ملفات تعريف الارتباط"
+
+#: templates/base.html:44
+msgid "Sitemap"
+msgstr "خريطة الموقع"
+
+#: templates/base.html:45
+msgid "WebApp by Henry"
+msgstr "تطبيق الويب بواسطة هنري"
+
+#: templates/main/home.html:5
+msgid "Home - Pick-A-Rooms"
+msgstr "الرئيسية - Pick-A-Rooms"
+
+#: templates/main/home.html:10
+msgid "Welcome, Your Stay Starts Here!"
+msgstr "مرحبًا، إقامتك تبدأ هنا!"
+
+#: templates/main/home.html:11
+msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
+msgstr "أدخل رقم هاتفك للوصول إلى رقم التعريف الشخصي (PIN)، ودليل تسجيل الوصول، وجميع التفاصيل لتجربة سلسة."
+
+#: templates/main/home.html:14
+msgid "Enter your phone number"
+msgstr "أدخل رقم هاتفك"
+
+#: templates/main/home.html:15
+msgid "Check In"
+msgstr "تسجيل الوصول"
+
+#: templates/main/home.html:19
+msgid "How to Use"
+msgstr "كيفية الاستخدام"
+
+#: templates/main/home.html:24
+msgid "Step 1:"
+msgstr "الخطوة 1:"
+
+#: templates/main/home.html:24
+msgid "Enter your phone number used during your reservation on Booking.com."
+msgstr "أدخل رقم هاتفك المستخدم أثناء الحجز على Booking.com."
+
+#: templates/main/home.html:25
+msgid "Step 2:"
+msgstr "الخطوة 2:"
+
+#: templates/main/home.html:25
+msgid "Retrieve your PIN."
+msgstr "احصل على رقم التعريف الشخصي (PIN)."
+
+#: templates/main/home.html:26
+msgid "Step 3:"
+msgstr "الخطوة 3:"
+
+#: templates/main/home.html:26
+msgid "Follow the check-in instructions."
+msgstr "اتبع تعليمات تسجيل الوصول."
+
+#: templates/main/home.html:27
+msgid "Step 4:"
+msgstr "الخطوة 4:"
+
+#: templates/main/home.html:27
+msgid "Enjoy your stay!"
+msgstr "استمتع بإقامتك!"
+
+#: templates/main/home.html:33
+msgid "Phone:"
+msgstr "الهاتف:"
+
+#: templates/main/home.html:34
+msgid "Whatsapp:"
+msgstr "واتساب:"
+
+#: templates/main/home.html:35
+msgid "Email:"
+msgstr "البريد الإلكتروني:"
+
+#: templates/main/home.html:42
+msgid "Luxury Hotel Room"
+msgstr "غرفة فندقية فاخرة"
+
+#: templates/main/home.html:47
+msgid "What Our Guests Say"
+msgstr "ماذا يقول ضيوفنا"
+
+#: templates/main/home.html:51
+msgid "Booking.com Traveller Award 2025"
+msgstr "جائزة Booking.com للمسافرين 2025"
+
+#: templates/main/home.html:59
+msgid "Read More Reviews"
+msgstr "اقرأ المزيد من التقييمات"
+
+#: templates/main/about.html:5
+msgid "About Us - PickARooms"
+msgstr "من نحن - PickARooms"
+
+#: templates/main/about.html:10
+msgid "Welcome to PickARooms"
+msgstr "مرحبًا بك في PickARooms"
+
+#: templates/main/about.html:11
+msgid "Seamless check-ins, comfortable stays, and a hassle-free experience in Manchester."
+msgstr "تسجيل وصول سلس، إقامة مريحة، وتجربة خالية من المتاعب في مانشستر."
+
+#: templates/main/about.html:17
+msgid "About PickARooms"
+msgstr "حول PickARooms"
+
+#: templates/main/about.html:19
+msgid "Nestled in the peaceful neighborhood of Beswick, Manchester, PickARooms is designed for travelers who value convenience and comfort. Whether you're visiting for business, a football match, or a concert, we ensure a hassle-free experience with our self-check-in system."
+msgstr "يقع PickARooms في حي بيسويك الهادئ في مانشستر، وهو مصمم للمسافرين الذين يقدرون الراحة والسهولة. سواء كنت تزور من أجل العمل، مباراة كرة قدم، أو حفلة موسيقية، فإننا نضمن لك تجربة خالية من المتاعب مع نظام تسجيل الوصول الذاتي لدينا."
+
+#: templates/main/about.html:24
+msgid "PickARooms Property"
+msgstr "عقار PickARooms"
+
+#: templates/main/about.html:25
+msgid "Smart Check-In"
+msgstr "تسجيل وصول ذكي"
+
+#: templates/main/about.html:26
+msgid "Use your phone number to receive a secure PIN and access your room in seconds."
+msgstr "استخدم رقم هاتفك للحصول على رقم تعريف شخصي (PIN) آمن والوصول إلى غرفتك في ثوانٍ."
+
+#: templates/main/about.html:30
+msgid "Comfortable Room"
+msgstr "غرفة مريحة"
+
+#: templates/main/about.html:31
+msgid "Modern & Cozy Rooms"
+msgstr "غرف حديثة"
+
+#: templates/main/about.html:36
+msgid "Kitchen Area"
+msgstr "منطقة المطبخ"
+
+#: templates/main/about.html:37
+msgid "Fully Equipped Kitchen"
+msgstr "مطبخ مجهز بالكامل"
+
+#: templates/main/about.html:38
+msgid "Prepare meals in our modern kitchen, stocked with essentials for your convenience."
+msgstr "قم بإعداد وجباتك في مطبخنا الحديث المجهز بجميع الضروريات لراحتك."
+
+#: templates/main/about.html:43
+msgid "Meet Your Host"
+msgstr "تعرف على مضيفك"
+
+#: templates/main/about.html:46
+msgid "Henry, PickARooms Host"
+msgstr "هنري، مضيف PickARooms"
+
+#: templates/main/about.html:47
+msgid "Hi, I’m Henry, a Full Stack Developer and passionate host. My background includes eCommerce development, an appearance on BBC's Dragons' Den, and a love for travel."
+msgstr "مرحبًا، أنا هنري، مطور Full Stack ومضيف شغوف. لدي خبرة في تطوير التجارة الإلكترونية، وظهرت في برنامج Dragons' Den على BBC، وأعشق السفر."
+
+#: templates/main/about.html:48
+msgid "PickARooms was built with the goal of making check-ins effortless and stays more enjoyable. Whether you're in Manchester for work, leisure, or a game at Etihad Stadium, I strive to make your experience smooth and memorable."
+msgstr "تم إنشاء PickARooms بهدف جعل تسجيل الوصول سهلاً وجعل الإقامة أكثر متعة. سواء كنت في مانشستر للعمل أو الترفيه أو لمشاهدة مباراة في استاد الاتحاد، فإنني أسعى لجعل تجربتك سلسة ولا تُنسى."
+
+#: templates/main/about.html:53
+msgid "Explore Beswick & Manchester"
+msgstr "استكشف بيسويك ومانشستر"
+
+#: templates/main/about.html:54
+msgid "From sports stadiums to cultural attractions, everything is just a short walk or ride away."
+msgstr "من الملاعب الرياضية إلى المعالم الثقافية، كل شيء على بعد مسافة قصيرة سيرًا على الأقدام أو بالسيارة."
+
+#: templates/main/about.html:59
+msgid "Watch Manchester City FC live or take a stadium tour to explore the facilities."
+msgstr "شاهد مانشستر سيتي FC مباشرة أو قم بجولة في الملعب لاستكشاف المرافق."
+
+#: templates/main/about.html:63
+msgid "Co-op Live Arena"
+msgstr "قاعة Co-op Live"
+
+#: templates/main/about.html:64
+msgid "Enjoy concerts and world-class events at the UK’s largest indoor arena."
+msgstr "استمتع بالحفلات الموسيقية والفعاليات العالمية في أكبر قاعة داخلية في المملكة المتحدة."
+
+#: templates/main/explore_manchester.html:5
+msgid "Explore Manchester"
+msgstr "استكشف مانشستر"
+
+#: templates/main/explore_manchester.html:10
+msgid "Discover the Best of Manchester"
+msgstr "اكتشف أفضل ما في مانشستر"
+
+#: templates/main/explore_manchester.html:11
+msgid "Uncover the city's top attractions, dining spots, and cultural landmarks."
+msgstr "تعرف على أفضل المعالم السياحية وأماكن الطعام والمعالم الثقافية في المدينة."
+
+#: templates/main/explore_manchester.html:16
+msgid "Top Attractions"
+msgstr "أهم المعالم السياحية"
+
+#: templates/main/explore_manchester.html:19
+msgid "John Rylands Library"
+msgstr "مكتبة جون رايلاندز"
+
+#: templates/main/explore_manchester.html:20
+msgid "A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts."
+msgstr "تحفة معمارية على الطراز القوطي الحديث تضم كتبًا نادرة ومخطوطات. مكان لا بد من زيارته لعشاق التاريخ والعمارة."
+
+#: templates/main/explore_manchester.html:25
+msgid "Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue."
+msgstr "المقر الرئيسي لنادي مانشستر سيتي FC. قم بجولة في الملعب لاستكشاف ما وراء الكواليس لهذا المعلم الرياضي الشهير."
+
+#: templates/main/explore_manchester.html:29
+msgid "Science and Industry Museum"
+msgstr "متحف العلوم والصناعة"
+
+#: templates/main/explore_manchester.html:30
+msgid "Delve into Manchester's industrial past with interactive exhibits and historical artifacts."
+msgstr "استكشف ماضي مانشستر الصناعي من خلال المعروضات التفاعلية والقطع الأثرية التاريخية."
+
+#: templates/main/explore_manchester.html:34
+msgid "Manchester Museum"
+msgstr "متحف مانشستر"
+
+#: templates/main/explore_manchester.html:35
+msgid "Home to one of the UK’s most extensive collections of natural history, archaeology, and anthropology, the Manchester Museum offers a fascinating journey through time."
+msgstr "يضم واحدة من أكبر مجموعات التاريخ الطبيعي والآثار والأنثروبولوجيا في المملكة المتحدة، ويوفر متحف مانشستر رحلة رائعة عبر الزمن."
+
+#: templates/main/explore_manchester.html:40
+msgid "Culinary Delights"
+msgstr "روائع الطهي"
+
+#: templates/main/explore_manchester.html:43
+msgid "Vermilion"
+msgstr "فيرميليون"
+
+#: templates/main/explore_manchester.html:44
+msgid "An opulent dining destination offering a fusion of Asian and world cuisines, known for its striking decor, exotic cocktails, and immersive fine dining experience."
+msgstr "وجهة طعام فاخرة تقدم مزيجًا من المأكولات الآسيوية والعالمية، وتشتهر بديكورها المميز وكوكتيلاتها الفريدة وتجربة تناول الطعام الفاخرة."
+
+#: templates/main/explore_manchester.html:48
+msgid "Curry Mile"
+msgstr "كاري مايل"
+
+#: templates/main/explore_manchester.html:49
+msgid "Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes."
+msgstr "استمتع بشارع طويل مليء بالمطاعم الجنوب آسيوية التي تقدم مجموعة متنوعة من الأطباق اللذيذة."
+
+#: templates/main/explore_manchester.html:53
+msgid "Mackie Mayor"
+msgstr "ماكي مايور"
+
+#: templates/main/explore_manchester.html:54
+msgid "A bustling food hall housed in a restored Victorian market, featuring diverse food vendors."
+msgstr "قاعة طعام نابضة بالحياة داخل سوق فيكتوري تم ترميمه، وتضم مجموعة متنوعة من البائعين."
+
+#: templates/main/explore_manchester.html:58
+msgid "63 Degrees"
+msgstr "63 Degrees"
+
+#: templates/main/explore_manchester.html:59
+msgid "A chic French restaurant offering exquisite Parisian-inspired dishes, fine wines, and a cozy yet elegant atmosphere in the heart of Manchester’s Northern Quarter."
+msgstr "مطعم فرنسي أنيق يقدم أطباقًا مستوحاة من باريس، ونبيذًا فاخرًا، وأجواءً دافئة وأنيقة في قلب منطقة Northern Quarter بمانشستر."
+
+#: templates/main/explore_manchester.html:64
+msgid "Shopping Destinations"
+msgstr "وجهات التسوق"
+
+#: templates/main/explore_manchester.html:67
+msgid "Manchester Arndale"
+msgstr "مانشستر أرنديل"
+
+#: templates/main/explore_manchester.html:68
+msgid "One of the UK's largest shopping centers, offering a wide range of retail stores and eateries."
+msgstr "واحد من أكبر مراكز التسوق في المملكة المتحدة، حيث يوفر مجموعة واسعة من المتاجر والمطاعم."
+
+#: templates/main/explore_manchester.html:72
+msgid "Trafford Centre"
+msgstr "مركز ترافورد"
+
+#: templates/main/explore_manchester.html:73
+msgid "A grand shopping and leisure complex with unique architecture, shops, and entertainment options."
+msgstr "مجمع ضخم للتسوق والترفيه يتميز بهندسته المعمارية الفريدة والمتاجر المتنوعة وخيارات الترفيه."
+
+#: templates/main/explore_manchester.html:78
+msgid "Cultural Experiences"
+msgstr "تجارب ثقافية"
+
+#: templates/main/explore_manchester.html:81
+msgid "Northern Quarter"
+msgstr "نورثرن كوارتر"
+
+#: templates/main/explore_manchester.html:82
+msgid "A trendy district known for its street art, independent shops, and vibrant nightlife."
+msgstr "منطقة عصرية معروفة بفنون الشوارع والمتاجر المستقلة والحياة الليلية النابضة بالحياة."
+
+#: templates/main/explore_manchester.html:86
+msgid "The Whitworth"
+msgstr "ذا ويتوورث"
+
+#: templates/main/explore_manchester.html:87
+msgid "An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting."
+msgstr "معرض فني يقع في حديقة، يعرض مجموعة متنوعة من الأعمال الفنية في بيئة هادئة."
+
+#: templates/main/explore_manchester.html:92
+msgid "Map of Manchester"
+msgstr "خريطة مانشستر"
+
+#: templates/main/contact.html:5
+msgid "Contact Us - PickARooms"
+msgstr "اتصل بنا - PickARooms"
+
+#: templates/main/contact.html:10
+msgid "Get in Touch"
+msgstr "تواصل معنا"
+
+#: templates/main/contact.html:11
+msgid "Need assistance? The best way to reach us is via phone, email, or through Booking.com and Airbnb messaging."
+msgstr "هل تحتاج إلى مساعدة؟ أفضل طريقة للتواصل معنا هي عبر الهاتف أو البريد الإلكتروني أو من خلال الرسائل على Booking.com وAirbnb."
+
+#: templates/main/contact.html:16
+msgid "Our Location"
+msgstr "موقعنا"
+
+#: templates/main/contact.html:18
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: templates/main/contact.html:20
+msgid "Phone"
+msgstr "الهاتف"
+
+#: templates/main/contact.html:26
+msgid "Send Us a Message"
+msgstr "أرسل لنا رسالة"
+
+#: templates/main/contact.html:28
+msgid "Your message has been sent successfully!"
+msgstr "تم إرسال رسالتك بنجاح!"
+
+#: templates/main/contact.html:31
+msgid "Full Name"
+msgstr "الاسم الكامل"
+
+#: templates/main/contact.html:32
+msgid "Enter your name"
+msgstr "أدخل اسمك"
+
+#: templates/main/contact.html:34
+msgid "Email Address"
+msgstr "عنوان البريد الإلكتروني"
+
+#: templates/main/contact.html:35
+msgid "Enter your email"
+msgstr "أدخل بريدك الإلكتروني"
+
+#: templates/main/contact.html:37
+msgid "Your Message"
+msgstr "رسالتك"
+
+#: templates/main/contact.html:38
+msgid "Write your message here..."
+msgstr "اكتب رسالتك هنا..."
+
+#: templates/main/contact.html:40
+msgid "Send Message"
+msgstr "إرسال الرسالة"
+
+#: templates/main/contact.html:46
+msgid "Find Us"
+msgstr "اعثر علينا"
+
+#: templates/main/about.html:31
+msgid "Enjoy premium linens, spacious beds, and stylish interiors for a relaxing stay."
+msgstr "استمتع ببياضات فاخرة، وأسرة واسعة، وديكورات أنيقة لإقامة مريحة."
+
+#: templates/main/about.html:31
+msgid "Manchester Piccadilly Station"
+msgstr "محطة مانشستر بيكاديللي"
+
+#: templates/main/about.html:31
+msgid "Your gateway to transport links connecting Manchester to the rest of the UK."
+msgstr "بوابتك إلى وسائل النقل التي تربط مانشستر بباقي أنحاء المملكة المتحدة."
+
+#: templates/main/about.html:31
+msgid "Dining & Nightlife"
+msgstr "المطاعم والحياة الليلية"
+
+#: templates/main/about.html:31
+msgid "Visit New Islington Marina, Northern Quarter, and Manchester's top restaurants."
+msgstr "قم بزيارة مرسى نيو إيسلينغتون، ونورثرن كوارتر، وأفضل مطاعم مانشستر."
+
+#: views.py:12
+msgid "No reservation found. Please enter the same phone number used in your Booking.com reservation."
+msgstr "لم يتم العثور على حجز. يرجى إدخال نفس رقم الهاتف المستخدم في حجزك على Booking.com."
+
+#: views.py:16
+msgid "Details not found. Make sure you input the correct phone number."
+msgstr "لم يتم العثور على التفاصيل. تأكد من إدخال رقم الهاتف الصحيح."

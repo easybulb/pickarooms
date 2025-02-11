@@ -1,0 +1,498 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-09 20:32+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: .\pickarooms\settings.py:154
+msgid "English"
+msgstr "English"
+
+#: .\pickarooms\settings.py:155
+msgid "French"
+msgstr "法语"
+
+#: .\pickarooms\settings.py:156
+msgid "German"
+msgstr "德语"
+
+#: .\pickarooms\settings.py:157
+msgid "Spanish"
+msgstr "西班牙语"
+
+#: .\pickarooms\settings.py:158
+msgid "Simplified Chinese"
+msgstr "简体中文"
+
+#: .\pickarooms\settings.py:159
+msgid "Italian"
+msgstr "意大利语"
+
+#: .\pickarooms\settings.py:160
+msgid "Portuguese"
+msgstr "葡萄牙语"
+
+#: .\pickarooms\settings.py:161
+msgid "Arabic"
+msgstr "阿拉伯语"
+
+#: templates/base.html:10
+msgid "Home"
+msgstr "首页"
+
+#: templates/base.html:11
+msgid "About"
+msgstr "关于我们"
+
+#: templates/base.html:12
+msgid "Check-In"
+msgstr "入住登记"
+
+#: templates/base.html:13
+msgid "Explore Manchester"
+msgstr "探索曼彻斯特"
+
+#: templates/base.html:14
+msgid "Awards & Reviews"
+msgstr "奖项与评价"
+
+#: templates/base.html:20
+msgid "Admin Only"
+msgstr "仅限管理员"
+
+#: templates/base.html:22
+msgid "Logout"
+msgstr "退出登录"
+
+#: templates/base.html:24
+msgid "Admin Login"
+msgstr "管理员登录"
+
+#: templates/base.html:35
+msgid "All rights reserved."
+msgstr "版权所有。"
+
+#: templates/base.html:40
+msgid "Privacy Policy"
+msgstr "隐私政策"
+
+#: templates/base.html:41
+msgid "Terms of Use"
+msgstr "使用条款"
+
+#: templates/base.html:42
+msgid "Terms & Conditions"
+msgstr "条款和条件"
+
+#: templates/base.html:43
+msgid "Cookie Policy"
+msgstr "Cookie 政策"
+
+#: templates/base.html:44
+msgid "Sitemap"
+msgstr "网站地图"
+
+#: templates/base.html:45
+msgid "WebApp by Henry"
+msgstr "Henry 开发的 Web 应用"
+
+# Simplified Chinese translation for home.html
+# Translations are mapped to the corresponding lines in the template
+
+#: templates/main/home.html:5
+msgid "Home - Pick-A-Rooms"
+msgstr "主页 - Pick-A-Rooms"
+
+#: templates/main/home.html:10
+msgid "Welcome, Your Stay Starts Here!"
+msgstr "欢迎，您的入住从这里开始！"
+
+#: templates/main/home.html:11
+msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
+msgstr "输入您的电话号码以获取 PIN 码、入住指南和所有详细信息，确保流畅体验。"
+
+#: templates/main/home.html:14
+msgid "Enter your phone number"
+msgstr "输入您的电话号码"
+
+#: templates/main/home.html:15
+msgid "Check In"
+msgstr "入住"
+
+#: templates/main/home.html:19
+msgid "How to Use"
+msgstr "使用指南"
+
+#: templates/main/home.html:20
+msgid "Contact Us"
+msgstr "联系我们"
+
+#: templates/main/home.html:24
+msgid "Step 1:"
+msgstr "步骤 1："
+
+#: templates/main/home.html:24
+msgid "Enter your phone number used during your reservation on Booking.com."
+msgstr "输入您在 Booking.com 预订时使用的电话号码。"
+
+#: templates/main/home.html:25
+msgid "Step 2:"
+msgstr "步骤 2："
+
+#: templates/main/home.html:25
+msgid "Retrieve your PIN."
+msgstr "获取您的 PIN 码。"
+
+#: templates/main/home.html:26
+msgid "Step 3:"
+msgstr "步骤 3："
+
+#: templates/main/home.html:26
+msgid "Follow the check-in instructions."
+msgstr "按照入住指南操作。"
+
+#: templates/main/home.html:27
+msgid "Step 4:"
+msgstr "步骤 4："
+
+#: templates/main/home.html:27
+msgid "Enjoy your stay!"
+msgstr "享受您的入住！"
+
+#: templates/main/home.html:33
+msgid "Phone:"
+msgstr "电话："
+
+#: templates/main/home.html:34
+msgid "Whatsapp:"
+msgstr "WhatsApp："
+
+#: templates/main/home.html:35
+msgid "Email:"
+msgstr "电子邮件："
+
+#: templates/main/home.html:42
+msgid "Luxury Hotel Room"
+msgstr "豪华酒店房间"
+
+#: templates/main/home.html:47
+msgid "What Our Guests Say"
+msgstr "我们的客人怎么说"
+
+#: templates/main/home.html:51
+msgid "Booking.com Traveller Award 2025"
+msgstr "Booking.com 旅行者大奖 2025"
+
+#: templates/main/home.html:59
+msgid "Read More Reviews"
+msgstr "阅读更多评价"
+
+#: templates/main/about.html:5
+msgid "About Us - PickARooms"
+msgstr "关于我们 - PickARooms"
+
+#: templates/main/about.html:10
+msgid "Welcome to PickARooms"
+msgstr "欢迎来到 PickARooms"
+
+#: templates/main/about.html:11
+msgid "Seamless check-ins, comfortable stays, and a hassle-free experience in Manchester."
+msgstr "无缝入住，舒适住宿，曼彻斯特无忧体验。"
+
+#: templates/main/about.html:17
+msgid "About PickARooms"
+msgstr "关于 PickARooms"
+
+#: templates/main/about.html:19
+msgid "Nestled in the peaceful neighborhood of Beswick, Manchester, PickARooms is designed for travelers who value convenience and comfort. Whether you're visiting for business, a football match, or a concert, we ensure a hassle-free experience with our self-check-in system."
+msgstr "PickARooms 位于曼彻斯特安静的 Beswick 社区，专为注重便利性和舒适度的旅行者打造。无论您是来出差、观看足球比赛还是参加音乐会，我们的自助入住系统都能确保您拥有无忧体验。"
+
+#: templates/main/about.html:24
+msgid "PickARooms Property"
+msgstr "PickARooms 住宿"
+
+#: templates/main/about.html:25
+msgid "Smart Check-In"
+msgstr "智能入住"
+
+#: templates/main/about.html:26
+msgid "Use your phone number to receive a secure PIN and access your room in seconds."
+msgstr "使用您的电话号码接收安全 PIN 码，并在几秒钟内进入您的房间。"
+
+#: templates/main/about.html:30
+msgid "Comfortable Room"
+msgstr "舒适房间"
+
+#: templates/main/about.html:31
+msgid "Modern & Cozy Rooms"
+msgstr "现代化且舒适的房间"
+
+#: templates/main/about.html:32
+msgid "Enjoy premium linens, spacious beds, and stylish interiors for a relaxing stay."
+msgstr "享受优质床单、宽敞的床铺和时尚的室内装饰，度过轻松的住宿体验。"
+
+#: templates/main/about.html:36
+msgid "Kitchen Area"
+msgstr "厨房区域"
+
+#: templates/main/about.html:37
+msgid "Fully Equipped Kitchen"
+msgstr "设备齐全的厨房"
+
+#: templates/main/about.html:38
+msgid "Prepare meals in our modern kitchen, stocked with essentials for your convenience."
+msgstr "在我们的现代化厨房中准备您的餐点，厨房配备基本用品，方便您的使用。"
+
+#: templates/main/about.html:43
+msgid "Meet Your Host"
+msgstr "认识您的房东"
+
+#: templates/main/about.html:46
+msgid "Henry, PickARooms Host"
+msgstr "Henry，PickARooms 房东"
+
+#: templates/main/about.html:47
+msgid "Hi, I’m Henry, a Full Stack Developer and passionate host. My background includes eCommerce development, an appearance on BBC's Dragons' Den, and a love for travel."
+msgstr "您好，我是 Henry，一名全栈开发者和热情的房东。我拥有电子商务开发经验，曾登上 BBC《龙穴》(Dragons' Den) 节目，并热爱旅行。"
+
+#: templates/main/about.html:48
+msgid "PickARooms was built with the goal of making check-ins effortless and stays more enjoyable. Whether you're in Manchester for work, leisure, or a game at Etihad Stadium, I strive to make your experience smooth and memorable."
+msgstr "PickARooms 的建立旨在让入住变得简单，使住宿更加愉快。无论您是因工作、休闲还是观看曼城主场比赛来到曼彻斯特，我都会努力让您的体验流畅且难忘。"
+
+#: templates/main/about.html:53
+msgid "Explore Beswick & Manchester"
+msgstr "探索 Beswick & 曼彻斯特"
+
+#: templates/main/about.html:54
+msgid "From sports stadiums to cultural attractions, everything is just a short walk or ride away."
+msgstr "从体育场到文化景点，一切都在步行或短途车程范围内。"
+
+#: templates/main/about.html:58
+msgid "Etihad Stadium"
+msgstr "阿提哈德球场"
+
+#: templates/main/about.html:59
+msgid "Watch Manchester City FC live or take a stadium tour to explore the facilities."
+msgstr "观看曼城足球俱乐部的比赛，或参加球场之旅，探索其设施。"
+
+#: templates/main/about.html:63
+msgid "Co-op Live Arena"
+msgstr "Co-op Live 体育馆"
+
+#: templates/main/about.html:64
+msgid "Enjoy concerts and world-class events at the UK’s largest indoor arena."
+msgstr "在英国最大的室内体育馆享受音乐会和世界级活动。"
+
+#: templates/main/explore_manchester.html:10
+msgid "Discover the Best of Manchester"
+msgstr "发现曼彻斯特的最佳景点"
+
+#: templates/main/explore_manchester.html:11
+msgid "Uncover the city's top attractions, dining spots, and cultural landmarks."
+msgstr "探索这座城市的顶级景点、美食餐厅和文化地标。"
+
+#: templates/main/explore_manchester.html:16
+msgid "Top Attractions"
+msgstr "热门景点"
+
+#: templates/main/explore_manchester.html:19
+msgid "John Rylands Library"
+msgstr "约翰·赖兰兹图书馆"
+
+#: templates/main/explore_manchester.html:20
+msgid "A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts."
+msgstr "一座新哥特式建筑杰作，收藏着珍贵的书籍和手稿。历史和建筑爱好者必去之地。"
+
+#: templates/main/explore_manchester.html:25
+msgid "Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue."
+msgstr "曼城足球俱乐部的主场。参观体育场，探索这座标志性体育场馆的幕后故事。"
+
+#: templates/main/explore_manchester.html:29
+msgid "Science and Industry Museum"
+msgstr "科学与工业博物馆"
+
+#: templates/main/explore_manchester.html:30
+msgid "Delve into Manchester's industrial past with interactive exhibits and historical artifacts."
+msgstr "通过互动展览和历史文物深入了解曼彻斯特的工业历史。"
+
+#: templates/main/explore_manchester.html:34
+msgid "Manchester Museum"
+msgstr "曼彻斯特博物馆"
+
+#: templates/main/explore_manchester.html:35
+msgid "Home to one of the UK’s most extensive collections of natural history, archaeology, and anthropology, the Manchester Museum offers a fascinating journey through time."
+msgstr "收藏着英国最丰富的自然历史、考古和人类学藏品之一，曼彻斯特博物馆带您踏上一场穿越时空的奇妙旅程。"
+
+#: templates/main/explore_manchester.html:40
+msgid "Culinary Delights"
+msgstr "美食体验"
+
+#: templates/main/explore_manchester.html:43
+msgid "Vermilion"
+msgstr "Vermilion"
+
+#: templates/main/explore_manchester.html:44
+msgid "An opulent dining destination offering a fusion of Asian and world cuisines, known for its striking decor, exotic cocktails, and immersive fine dining experience."
+msgstr "一家豪华餐厅，融合了亚洲与世界各地的美食，以其华丽的装饰、独特的鸡尾酒和沉浸式高端餐饮体验而闻名。"
+
+#: templates/main/explore_manchester.html:48
+msgid "Curry Mile"
+msgstr "咖喱一条街"
+
+#: templates/main/explore_manchester.html:49
+msgid "Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes."
+msgstr "探索长达一英里的南亚餐馆街，品尝各种风味浓郁的美食。"
+
+#: templates/main/explore_manchester.html:53
+msgid "Mackie Mayor"
+msgstr "Mackie Mayor"
+
+#: templates/main/explore_manchester.html:54
+msgid "A bustling food hall housed in a restored Victorian market, featuring diverse food vendors."
+msgstr "一座位于修复后的维多利亚市场内的繁华美食广场，汇聚多种美食摊贩。"
+
+#: templates/main/explore_manchester.html:58
+msgid "63 Degrees"
+msgstr "63 Degrees"
+
+#: templates/main/explore_manchester.html:59
+msgid "A chic French restaurant offering exquisite Parisian-inspired dishes, fine wines, and a cozy yet elegant atmosphere in the heart of Manchester’s Northern Quarter."
+msgstr "一家时尚的法式餐厅，提供精致的巴黎风味菜肴、优质葡萄酒，并在曼彻斯特北区营造出温馨而优雅的氛围。"
+
+#: templates/main/explore_manchester.html:64
+msgid "Shopping Destinations"
+msgstr "购物目的地"
+
+#: templates/main/explore_manchester.html:67
+msgid "Manchester Arndale"
+msgstr "曼彻斯特阿恩代尔购物中心"
+
+#: templates/main/explore_manchester.html:68
+msgid "One of the UK's largest shopping centers, offering a wide range of retail stores and eateries."
+msgstr "英国最大的购物中心之一，拥有众多零售商店和餐饮选择。"
+
+#: templates/main/explore_manchester.html:72
+msgid "Trafford Centre"
+msgstr "特拉福德中心"
+
+#: templates/main/explore_manchester.html:73
+msgid "A grand shopping and leisure complex with unique architecture, shops, and entertainment options."
+msgstr "一座宏伟的购物和娱乐综合体，拥有独特的建筑风格、商店和丰富的娱乐设施。"
+
+#: templates/main/explore_manchester.html:78
+msgid "Cultural Experiences"
+msgstr "文化体验"
+
+#: templates/main/explore_manchester.html:81
+msgid "Northern Quarter"
+msgstr "北区"
+
+#: templates/main/explore_manchester.html:82
+msgid "A trendy district known for its street art, independent shops, and vibrant nightlife."
+msgstr "一个以街头艺术、独立商店和活力四射的夜生活而闻名的时尚街区。"
+
+#: templates/main/explore_manchester.html:86
+msgid "The Whitworth"
+msgstr "惠特沃斯美术馆"
+
+#: templates/main/explore_manchester.html:87
+msgid "An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting."
+msgstr "一座坐落于公园中的艺术馆，展出各种艺术作品，为您带来宁静的艺术体验。"
+
+#: templates/main/explore_manchester.html:92
+msgid "Map of Manchester"
+msgstr "曼彻斯特地图"
+
+#: templates/main/contact.html:5
+msgid "Contact Us - PickARooms"
+msgstr "联系我们 - PickARooms"
+
+#: templates/main/contact.html:10
+msgid "Get in Touch"
+msgstr "联系我们"
+
+#: templates/main/contact.html:11
+msgid "Need assistance? The best way to reach us is via phone, email, or through Booking.com and Airbnb messaging."
+msgstr "需要帮助？联系我们的最佳方式是通过电话、电子邮件或Booking.com和Airbnb的消息功能。"
+
+#: templates/main/contact.html:16
+msgid "Our Location"
+msgstr "我们的地址"
+
+#: templates/main/contact.html:18
+msgid "Email"
+msgstr "电子邮件"
+
+#: templates/main/contact.html:20
+msgid "Phone"
+msgstr "电话"
+
+#: templates/main/contact.html:26
+msgid "Send Us a Message"
+msgstr "给我们留言"
+
+#: templates/main/contact.html:28
+msgid "Your message has been sent successfully!"
+msgstr "✅ 您的消息已成功发送！"
+
+#: templates/main/contact.html:31
+msgid "Full Name"
+msgstr "全名"
+
+#: templates/main/contact.html:32
+msgid "Enter your name"
+msgstr "输入您的姓名"
+
+#: templates/main/contact.html:34
+msgid "Email Address"
+msgstr "电子邮件地址"
+
+#: templates/main/contact.html:35
+msgid "Enter your email"
+msgstr "输入您的电子邮件"
+
+#: templates/main/contact.html:37
+msgid "Your Message"
+msgstr "您的留言"
+
+#: templates/main/contact.html:38
+msgid "Write your message here..."
+msgstr "在此处输入您的留言..."
+
+#: templates/main/contact.html:40
+msgid "Send Message"
+msgstr "发送留言"
+
+#: templates/main/contact.html:46
+msgid "Find Us"
+msgstr "找到我们"
+
+#: templates/main/about.html:31
+msgid "Manchester Piccadilly Station"
+msgstr "曼彻斯特皮卡迪利车站"
+
+#: templates/main/about.html:31
+msgid "Your gateway to transport links connecting Manchester to the rest of the UK."
+msgstr "连接曼彻斯特与英国其他地区的交通枢纽。"
+
+#: templates/main/about.html:31
+msgid "Dining & Nightlife"
+msgstr "餐饮与夜生活"
+
+#: templates/main/about.html:31
+msgid "Visit New Islington Marina, Northern Quarter, and Manchester's top restaurants."
+msgstr "探索新伊斯灵顿码头、北区及曼彻斯特顶级餐厅。"

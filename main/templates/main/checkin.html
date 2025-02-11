@@ -1,22 +1,95 @@
 {% extends 'base.html' %}
 
-{% block title %}Check-In{% endblock %}
+{% load i18n %}  <!-- ✅ Ensure this is loaded for translations -->
+
+{% block title %}{% trans "Check-In" %}{% endblock %}
 
 {% block content %}
 <section class="hero">
     <div class="hero-overlay"></div>
     <div class="hero-content">
-        <h1>Check-In</h1>
+        <h1>{% trans "Check-In" %}</h1>
         {% if error %}
-        <p style="color: red; ">{{ error }}</p>
+        <p style="color: red;">{{ error }}</p>
         {% endif %}
         <form method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="phone_number" placeholder="Enter your phone number">
-            <button type="submit">Check In</button>
+            <input type="text" name="phone_number" placeholder="{% trans 'Enter your phone number' %}">
+            <button type="submit">{% trans "Check In" %}</button>
         </form>
+
+        <!-- Links for Popups -->
+        <p class="how-to-use-link">
+            <a href="#" id="open-how-to-use-modal">{% trans "How to Use" %}</a> |
+            <a href="#" id="open-contact-modal">{% trans "Contact Us" %}</a>
+        </p>
+
+        <!-- How to Use Modal -->
+        <div id="how-to-use-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" data-modal="how-to-use-modal">&times;</span>
+                <h2>{% trans "How to Use" %}</h2>
+                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter your phone number used during your reservation on Booking.com." %}</p>
+                <p><strong>{% trans "Step 2:" %}</strong> {% trans "Retrieve your PIN." %}</p>
+                <p><strong>{% trans "Step 3:" %}</strong> {% trans "Follow the check-in instructions." %}</p>
+                <p><strong>{% trans "Step 4:" %}</strong> {% trans "Enjoy your stay!" %}</p>
+            </div>
+        </div>
+
+        <!-- Contact Us Modal -->
+        <div id="contact-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" data-modal="contact-modal">&times;</span>
+                <h2>{% trans "Contact Us" %}</h2>
+                <p><strong>{% trans "Phone:" %}</strong> +44 (0) 7539 029 629</p>
+                <p><strong>{% trans "Whatsapp:" %}</strong> +44 (0) 7539 029 629</p>
+                <p><strong>{% trans "Email:" %}</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
+            </div>
+        </div>
+
     </div>
     <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738597703/pickaroomsbanner_rjtmav.png"
-        alt="Luxury Hotel Room" class="hero-image">
+        alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
 </section>
+
+<!-- Add JavaScript for Modals -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modals = document.querySelectorAll(".modal");
+        const openHowToUseBtn = document.getElementById("open-how-to-use-modal");
+        const openContactBtn = document.getElementById("open-contact-modal");
+        const closeModalBtns = document.querySelectorAll(".close");
+
+        // Ensure modals are hidden on page load
+        modals.forEach(modal => modal.style.display = "none");
+
+        // Open How to Use Modal
+        openHowToUseBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            document.getElementById("how-to-use-modal").style.display = "flex";
+        });
+
+        // Open Contact Us Modal
+        openContactBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            document.getElementById("contact-modal").style.display = "flex";
+        });
+
+        // Close Modal (Handles both modals)
+        closeModalBtns.forEach(btn => {
+            btn.addEventListener("click", function () {
+                document.getElementById(btn.getAttribute("data-modal")).style.display = "none";
+            });
+        });
+
+        // Close Modal when clicking outside content
+        window.addEventListener("click", function (event) {
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

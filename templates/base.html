@@ -1,7 +1,9 @@
 {% load static %}
 
+{% load i18n %}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ request.LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,31 +20,47 @@
         <div class="logo">
             <a href="/">Pick-A-Rooms</a>
         </div>
+
+        <div class="language-switcher">
+            <form action="{% url 'set_language' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">  <!-- Preserve current page -->
+                <select name="language" onchange="this.form.submit()">
+                    {% get_current_language as LANGUAGE_CODE %}
+                    {% for lang_code, lang_name in LANGUAGES %}
+                        <option value="{{ lang_code }}" {% if lang_code == LANGUAGE_CODE %}selected{% endif %}>{{ lang_name }}</option>
+                    {% endfor %}
+                </select>
+            </form>            
+        </div>
+        
+               
+
         <div class="menu-toggle" id="mobile-menu">
             <p class="menu"><i class="fa-solid fa-bars"></i></p>
         </div>
         <nav>
             <ul class="nav-links">
-                <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
-                <li><a href="/about/" class="{% if request.path == '/about/' %}active{% endif %}">About</a></li>
-                <li><a href="/checkin/" class="{% if request.path == '/checkin/' %}active{% endif %}">Check-In</a></li>
-                <li><a href="/explore-manchester/" class="{% if request.path == '/explore-manchester/' %}active{% endif %}">Explore Manchester</a></li>
-                <li><a href="{% url 'awards_reviews' %}" class="{% if request.path == '/awards_reviews/' %}active{% endif %}">Awards & Reviews</a></li>
-                <li><a href="/contact/" class="{% if request.path == '/contact/' %}active{% endif %}">Contact Us</a></li>
-
+                <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">{% trans "Home" %}</a></li>
+                <li><a href="/about/" class="{% if request.path == '/about/' %}active{% endif %}">{% trans "About" %}</a></li>
+                <li><a href="/checkin/" class="{% if request.path == '/checkin/' %}active{% endif %}">{% trans "Check-In" %}</a></li>
+                <li><a href="/explore-manchester/" class="{% if request.path == '/explore-manchester/' %}active{% endif %}">{% trans "Explore Manchester" %}</a></li>
+                <li><a href="{% url 'awards_reviews' %}" class="{% if request.path == '/awards_reviews/' %}active{% endif %}">{% trans "Awards & Reviews" %}</a></li>
+                <li><a href="/contact/" class="{% if request.path == '/contact/' %}active{% endif %}">{% trans "Contact Us" %}</a></li>
+        
                 {% if user.is_authenticated %}
-                    <li><a href="/admin-page/" class="{% if request.path == '/admin-page/' %}active{% endif %}">Admin Only</a></li>
+                    <li><a href="/admin-page/" class="{% if request.path == '/admin-page/' %}active{% endif %}">{% trans "Admin Only" %}</a></li>
                     <li>
                         <form action="{% url 'logout' %}" method="POST">
                             {% csrf_token %}
-                            <button type="submit" class="logout-btn">Logout</button>
+                            <button type="submit" class="logout-btn">{% trans "Logout" %}</button>
                         </form>
                     </li>
                 {% else %}
-                    <li><a href="/admin-page/login/" class="{% if request.path == '/admin-page/login/' %}active{% endif %}">Admin Login</a></li>
+                    <li><a href="/admin-page/login/" class="{% if request.path == '/admin-page/login/' %}active{% endif %}">{% trans "Admin Login" %}</a></li>
                 {% endif %}
             </ul>
-        </nav>        
+        </nav>             
     </header>
 
     <!-- Confirmation Message -->
@@ -64,22 +82,22 @@
     <!-- Footer -->
     <footer>
         <div class="footer-container">
-            <p>&copy; 2025 Pick-A-Rooms. All rights reserved.</p>
+            <p>&copy; 2025 Pick-A-Rooms. {% trans "All rights reserved." %}</p>
             <ul class="footer-links">
-                <li><a href="{% url 'about' %}">About Us</a></li>
-                <li><a href="{% url 'contact' %}">Contact Us</a></li>
-                <li><a href="{% url 'how_to_use' %}">How to use guide</a></li>
-                <li><a href="{% url 'awards_reviews' %}">Awards & Reviews</a></li>
-                <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
-                <li><a href="{% url 'terms_of_use' %}">Terms of Use</a></li>
-                <li><a href="{% url 'terms_conditions' %}">Terms & Conditions</a></li>
-                <li><a href="{% url 'cookie_policy' %}">Cookie Policy</a></li>
-                <li><a href="{% url 'sitemap' %}">Sitemap</a></li>
-                <li><a href="https://booking.com" target="blank">Booking.com</a></li>
+                <li><a href="{% url 'about' %}">{% trans "About Us" %}</a></li>
+                <li><a href="{% url 'contact' %}">{% trans "Contact Us" %}</a></li>
+                <li><a href="{% url 'how_to_use' %}">{% trans "How to use guide" %}</a></li>
+                <li><a href="{% url 'awards_reviews' %}">{% trans "Awards & Reviews" %}</a></li>
+                <li><a href="{% url 'privacy_policy' %}">{% trans "Privacy Policy" %}</a></li>
+                <li><a href="{% url 'terms_of_use' %}">{% trans "Terms of Use" %}</a></li>
+                <li><a href="{% url 'terms_conditions' %}">{% trans "Terms & Conditions" %}</a></li>
+                <li><a href="{% url 'cookie_policy' %}">{% trans "Cookie Policy" %}</a></li>
+                <li><a href="{% url 'sitemap' %}">{% trans "Sitemap" %}</a></li>
+                <li><a href="https://booking.com" target="blank">{% trans "Booking.com" %}</a></li>
             </ul>
-            <p>WebApp by Henry <span class="email"><a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></span></p>
+            <p>{% trans "WebApp by Henry" %} <span class="email"><a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></span></p>
         </div>
-    </footer>
+    </footer>    
 
     <!-- Cookie Consent Banner (Hidden by Default) -->
     <div id="cookie-banner" class="cookie-banner" style="display: none;">
@@ -138,6 +156,5 @@
         });
     </script>
     
-
 </body>
 </html>

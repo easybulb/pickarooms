@@ -1,0 +1,503 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-10 19:06+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\pickarooms\settings.py:154
+msgid "English"
+msgstr "English"
+
+#: .\pickarooms\settings.py:155
+msgid "French"
+msgstr "फ्रेंच"
+
+#: .\pickarooms\settings.py:156
+msgid "German"
+msgstr "जर्मन"
+
+#: .\pickarooms\settings.py:157
+msgid "Spanish"
+msgstr "स्पेनिश"
+
+#: .\pickarooms\settings.py:158
+msgid "Simplified Chinese"
+msgstr "सरलीकृत चीनी"
+
+#: .\pickarooms\settings.py:159
+msgid "Italian"
+msgstr "इतालवी"
+
+#: .\pickarooms\settings.py:160
+msgid "Portuguese"
+msgstr "पुर्तगाली"
+
+#: .\pickarooms\settings.py:161
+msgid "Arabic"
+msgstr "अरबी"
+
+#: templates/base.html:10
+msgid "Home"
+msgstr "होम"
+
+#: templates/base.html:11
+msgid "About"
+msgstr "हमारे बारे में"
+
+#: templates/base.html:12
+msgid "Check-In"
+msgstr "चेक-इन"
+
+#: templates/base.html:13
+msgid "Explore Manchester"
+msgstr "मैनचेस्टर की खोज करें"
+
+#: templates/base.html:14
+msgid "Awards & Reviews"
+msgstr "पुरस्कार और समीक्षाएँ"
+
+#: templates/base.html:15
+msgid "Contact Us"
+msgstr "संपर्क करें"
+
+#: templates/base.html:20
+msgid "Admin Only"
+msgstr "केवल एडमिन"
+
+#: templates/base.html:22
+msgid "Logout"
+msgstr "लॉगआउट"
+
+#: templates/base.html:24
+msgid "Admin Login"
+msgstr "एडमिन लॉगिन"
+
+#: templates/base.html:35
+msgid "All rights reserved."
+msgstr "सभी अधिकार सुरक्षित।"
+
+#: templates/base.html:40
+msgid "Privacy Policy"
+msgstr "गोपनीयता नीति"
+
+#: templates/base.html:41
+msgid "Terms of Use"
+msgstr "उपयोग की शर्तें"
+
+#: templates/base.html:42
+msgid "Terms & Conditions"
+msgstr "नियम और शर्तें"
+
+#: templates/base.html:43
+msgid "Cookie Policy"
+msgstr "कुकी नीति"
+
+#: templates/base.html:44
+msgid "Sitemap"
+msgstr "साइटमैप"
+
+#: templates/base.html:45
+msgid "WebApp by Henry"
+msgstr "हेनरी द्वारा वेबऐप"
+
+#: templates/main/home.html:5
+msgid "Home - Pick-A-Rooms"
+msgstr "होम - पिक-ए-रूम्स"
+
+#: templates/main/home.html:10
+msgid "Welcome, Your Stay Starts Here!"
+msgstr "स्वागत है, आपकी यात्रा यहाँ से शुरू होती है!"
+
+#: templates/main/home.html:11
+msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
+msgstr "अपने पिन, चेक-इन गाइड और सभी विवरणों तक पहुंचने के लिए अपना फोन नंबर दर्ज करें ताकि आपका अनुभव सुगम हो।"
+
+#: templates/main/home.html:14
+msgid "Enter your phone number"
+msgstr "अपना फोन नंबर दर्ज करें"
+
+#: templates/main/home.html:15
+msgid "Check In"
+msgstr "चेक-इन करें"
+
+#: templates/main/home.html:19
+msgid "How to Use"
+msgstr "कैसे उपयोग करें"
+
+#: templates/main/home.html:24
+msgid "Step 1:"
+msgstr "चरण 1:"
+
+#: templates/main/home.html:24
+msgid "Enter your phone number used during your reservation on Booking.com."
+msgstr "Booking.com पर अपनी बुकिंग के दौरान उपयोग किया गया फोन नंबर दर्ज करें।"
+
+#: templates/main/home.html:25
+msgid "Step 2:"
+msgstr "चरण 2:"
+
+#: templates/main/home.html:25
+msgid "Retrieve your PIN."
+msgstr "अपना पिन प्राप्त करें।"
+
+#: templates/main/home.html:26
+msgid "Step 3:"
+msgstr "चरण 3:"
+
+#: templates/main/home.html:26
+msgid "Follow the check-in instructions."
+msgstr "चेक-इन निर्देशों का पालन करें।"
+
+#: templates/main/home.html:27
+msgid "Step 4:"
+msgstr "चरण 4:"
+
+#: templates/main/home.html:27
+msgid "Enjoy your stay!"
+msgstr "अपने प्रवास का आनंद लें!"
+
+#: templates/main/home.html:33
+msgid "Phone:"
+msgstr "फोन:"
+
+#: templates/main/home.html:34
+msgid "Whatsapp:"
+msgstr "व्हाट्सएप:"
+
+#: templates/main/home.html:35
+msgid "Email:"
+msgstr "ईमेल:"
+
+#: templates/main/home.html:42
+msgid "Luxury Hotel Room"
+msgstr "लक्ज़री होटल का कमरा"
+
+#: templates/main/home.html:47
+msgid "What Our Guests Say"
+msgstr "हमारे अतिथि क्या कहते हैं"
+
+#: templates/main/home.html:51
+msgid "Booking.com Traveller Award 2025"
+msgstr "Booking.com यात्री पुरस्कार 2025"
+
+#: templates/main/home.html:59
+msgid "Read More Reviews"
+msgstr "और समीक्षाएँ पढ़ें"
+
+#: templates/main/about.html:5
+msgid "About Us - PickARooms"
+msgstr "हमारे बारे में - PickARooms"
+
+#: templates/main/about.html:10
+msgid "Welcome to PickARooms"
+msgstr "PickARooms में आपका स्वागत है"
+
+#: templates/main/about.html:11
+msgid "Seamless check-ins, comfortable stays, and a hassle-free experience in Manchester."
+msgstr "सहज चेक-इन, आरामदायक प्रवास और मैनचेस्टर में एक परेशानी मुक्त अनुभव।"
+
+#: templates/main/about.html:17
+msgid "About PickARooms"
+msgstr "PickARooms के बारे में"
+
+#: templates/main/about.html:19
+msgid "Nestled in the peaceful neighborhood of Beswick, Manchester, PickARooms is designed for travelers who value convenience and comfort. Whether you're visiting for business, a football match, or a concert, we ensure a hassle-free experience with our self-check-in system."
+msgstr "मैनचेस्टर के शांतिपूर्ण बेज़विक पड़ोस में स्थित, PickARooms उन यात्रियों के लिए डिज़ाइन किया गया है जो सुविधा और आराम को महत्व देते हैं। चाहे आप व्यवसाय, फुटबॉल मैच, या संगीत कार्यक्रम के लिए आए हों, हम अपने स्वयं-चेक-इन सिस्टम के साथ एक परेशानी मुक्त अनुभव सुनिश्चित करते हैं।"
+
+#: templates/main/about.html:24
+msgid "PickARooms Property"
+msgstr "PickARooms संपत्ति"
+
+#: templates/main/about.html:25
+msgid "Smart Check-In"
+msgstr "स्मार्ट चेक-इन"
+
+#: templates/main/about.html:26
+msgid "Use your phone number to receive a secure PIN and access your room in seconds."
+msgstr "सुरक्षित पिन प्राप्त करने और कुछ सेकंड में अपने कमरे तक पहुंचने के लिए अपना फोन नंबर दर्ज करें।"
+
+#: templates/main/about.html:30
+msgid "Comfortable Room"
+msgstr "आरामदायक कमरा"
+
+#: templates/main/about.html:31
+msgid "Modern & Cozy Rooms"
+msgstr "आधुनिक और आरामदायक कमरे"
+
+#: templates/main/about.html:32
+msgid "Enjoy premium linens, spacious beds, and stylish interiors for a relaxing stay."
+msgstr "आरामदायक प्रवास के लिए प्रीमियम लिनन, विशाल बिस्तर और स्टाइलिश इंटीरियर का आनंद लें।"
+
+#: templates/main/about.html:36
+msgid "Kitchen Area"
+msgstr "रसोई क्षेत्र"
+
+#: templates/main/about.html:37
+msgid "Fully Equipped Kitchen"
+msgstr "संपूर्ण रूप से सुसज्जित रसोई"
+
+#: templates/main/about.html:38
+msgid "Prepare meals in our modern kitchen, stocked with essentials for your convenience."
+msgstr "हमारी आधुनिक रसोई में भोजन तैयार करें, जो आपकी सुविधा के लिए आवश्यक चीजों से सुसज्जित है।"
+
+#: templates/main/about.html:43
+msgid "Meet Your Host"
+msgstr "अपने मेजबान से मिलें"
+
+#: templates/main/about.html:46
+msgid "Henry, PickARooms Host"
+msgstr "हेनरी, PickARooms मेजबान"
+
+#: templates/main/about.html:47
+msgid "Hi, I’m Henry, a Full Stack Developer and passionate host. My background includes eCommerce development, an appearance on BBC's Dragons' Den, and a love for travel."
+msgstr "नमस्ते, मैं हेनरी हूं, एक फुल-स्टैक डेवलपर और एक उत्साही मेजबान। मेरा अनुभव ई-कॉमर्स विकास, बीबीसी के ड्रैगन्स डेन में उपस्थिति और यात्रा के प्रति प्रेम शामिल है।"
+
+#: templates/main/about.html:48
+msgid "PickARooms was built with the goal of making check-ins effortless and stays more enjoyable. Whether you're in Manchester for work, leisure, or a game at Etihad Stadium, I strive to make your experience smooth and memorable."
+msgstr "PickARooms को चेक-इन को आसान और प्रवास को अधिक आनंददायक बनाने के लक्ष्य के साथ बनाया गया था। चाहे आप मैनचेस्टर में काम, अवकाश, या एतिहाद स्टेडियम में खेल देखने के लिए आए हों, मैं आपके अनुभव को सहज और यादगार बनाने का प्रयास करता हूं।"
+
+#: templates/main/about.html:53
+msgid "Explore Beswick & Manchester"
+msgstr "बेसविक और मैनचेस्टर का अन्वेषण करें"
+
+#: templates/main/about.html:54
+msgid "From sports stadiums to cultural attractions, everything is just a short walk or ride away."
+msgstr "खेल स्टेडियमों से लेकर सांस्कृतिक आकर्षणों तक, सब कुछ बस थोड़ी दूरी पर ही है।"
+
+#: templates/main/about.html:58
+msgid "Etihad Stadium"
+msgstr "एतिहाद स्टेडियम"
+
+#: templates/main/about.html:59
+msgid "Watch Manchester City FC live or take a stadium tour to explore the facilities."
+msgstr "मैनचेस्टर सिटी एफसी का लाइव मैच देखें या स्टेडियम के दौरे पर जाकर इसकी सुविधाओं का अन्वेषण करें।"
+
+#: templates/main/about.html:63
+msgid "Co-op Live Arena"
+msgstr "को-ऑप लाइव एरिना"
+
+#: templates/main/about.html:64
+msgid "Enjoy concerts and world-class events at the UK’s largest indoor arena."
+msgstr "यूके के सबसे बड़े इनडोर एरिना में संगीत कार्यक्रमों और विश्व स्तरीय आयोजनों का आनंद लें।"
+
+#: templates/main/explore_manchester.html:10
+msgid "Discover the Best of Manchester"
+msgstr "मैनचेस्टर के सर्वश्रेष्ठ स्थलों की खोज करें"
+
+#: templates/main/explore_manchester.html:11
+msgid "Uncover the city's top attractions, dining spots, and cultural landmarks."
+msgstr "शहर के शीर्ष आकर्षणों, भोजन स्थलों और सांस्कृतिक स्थलों की खोज करें।"
+
+#: templates/main/explore_manchester.html:16
+msgid "Top Attractions"
+msgstr "शीर्ष आकर्षण"
+
+#: templates/main/explore_manchester.html:19
+msgid "John Rylands Library"
+msgstr "जॉन राइलैंड्स लाइब्रेरी"
+
+#: templates/main/explore_manchester.html:20
+msgid "A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts."
+msgstr "एक नव-गोथिक कृति जिसमें दुर्लभ पुस्तकें और पांडुलिपियां रखी गई हैं। इतिहास और वास्तुकला प्रेमियों के लिए अवश्य देखने योग्य स्थान।"
+
+#: templates/main/explore_manchester.html:25
+msgid "Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue."
+msgstr "मैनचेस्टर सिटी एफसी का घर। इस प्रतिष्ठित खेल स्थल के पीछे के दृश्य देखने के लिए स्टेडियम टूर लें।"
+
+#: templates/main/explore_manchester.html:29
+msgid "Science and Industry Museum"
+msgstr "विज्ञान और उद्योग संग्रहालय"
+
+#: templates/main/explore_manchester.html:30
+msgid "Delve into Manchester's industrial past with interactive exhibits and historical artifacts."
+msgstr "इंटरेक्टिव प्रदर्शनों और ऐतिहासिक अवशेषों के माध्यम से मैनचेस्टर के औद्योगिक अतीत में गहराई से उतरें।"
+
+#: templates/main/explore_manchester.html:34
+msgid "Manchester Museum"
+msgstr "मैनचेस्टर संग्रहालय"
+
+#: templates/main/explore_manchester.html:35
+msgid "Home to one of the UK’s most extensive collections of natural history, archaeology, and anthropology, the Manchester Museum offers a fascinating journey through time."
+msgstr "यूके के प्राकृतिक इतिहास, पुरातत्व और मानवविज्ञान की सबसे व्यापक संग्रहों में से एक का घर, मैनचेस्टर संग्रहालय समय के माध्यम से एक आकर्षक यात्रा प्रदान करता है।"
+
+#: templates/main/explore_manchester.html:40
+msgid "Culinary Delights"
+msgstr "पाक कला के आनंद"
+
+#: templates/main/explore_manchester.html:43
+msgid "Vermilion"
+msgstr "वर्मिलियन"
+
+#: templates/main/explore_manchester.html:44
+msgid "An opulent dining destination offering a fusion of Asian and world cuisines, known for its striking decor, exotic cocktails, and immersive fine dining experience."
+msgstr "एक भव्य भोजन स्थल जो एशियाई और विश्व व्यंजनों का मिश्रण प्रदान करता है, अपने शानदार सजावट, विदेशी कॉकटेल और उत्तम भोजन अनुभव के लिए प्रसिद्ध है।"
+
+#: templates/main/explore_manchester.html:48
+msgid "Curry Mile"
+msgstr "करी माइल"
+
+#: templates/main/explore_manchester.html:49
+msgid "Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes."
+msgstr "दक्षिण एशियाई रेस्तरां की एक मील लंबी श्रृंखला का अनुभव करें, जहां विभिन्न स्वादिष्ट व्यंजन उपलब्ध हैं।"
+
+#: templates/main/explore_manchester.html:53
+msgid "Mackie Mayor"
+msgstr "मैकी मेयर"
+
+#: templates/main/explore_manchester.html:54
+msgid "A bustling food hall housed in a restored Victorian market, featuring diverse food vendors."
+msgstr "एक व्यस्त खाद्य हॉल, जो एक पुनर्निर्मित विक्टोरियन बाजार में स्थित है, जिसमें विभिन्न खाद्य विक्रेता हैं।"
+
+#: templates/main/explore_manchester.html:58
+msgid "63 Degrees"
+msgstr "63 Degrees"
+
+#: templates/main/explore_manchester.html:59
+msgid "A chic French restaurant offering exquisite Parisian-inspired dishes, fine wines, and a cozy yet elegant atmosphere in the heart of Manchester’s Northern Quarter."
+msgstr "एक शानदार फ्रेंच रेस्तरां, जो पेरिस से प्रेरित उत्तम व्यंजन, बेहतरीन वाइन और मैनचेस्टर के नॉर्दर्न क्वार्टर के केंद्र में एक आरामदायक और शानदार माहौल प्रदान करता है।"
+
+#: templates/main/explore_manchester.html:64
+msgid "Shopping Destinations"
+msgstr "खरीदारी के गंतव्य"
+
+#: templates/main/explore_manchester.html:67
+msgid "Manchester Arndale"
+msgstr "Manchester Arndale"
+
+#: templates/main/explore_manchester.html:68
+msgid "One of the UK's largest shopping centers, offering a wide range of retail stores and eateries."
+msgstr "यूके के सबसे बड़े शॉपिंग सेंटरों में से एक, जो विभिन्न खुदरा स्टोर और खाने-पीने के विकल्प प्रदान करता है।"
+
+#: templates/main/explore_manchester.html:72
+msgid "Trafford Centre"
+msgstr "Trafford Centre"
+
+#: templates/main/explore_manchester.html:73
+msgid "A grand shopping and leisure complex with unique architecture, shops, and entertainment options."
+msgstr "एक भव्य शॉपिंग और मनोरंजन परिसर, जिसमें अनोखी वास्तुकला, दुकानें और मनोरंजन के विकल्प हैं।"
+
+#: templates/main/explore_manchester.html:78
+msgid "Cultural Experiences"
+msgstr "सांस्कृतिक अनुभव"
+
+#: templates/main/explore_manchester.html:81
+msgid "Northern Quarter"
+msgstr "Northern Quarter"
+
+#: templates/main/explore_manchester.html:82
+msgid "A trendy district known for its street art, independent shops, and vibrant nightlife."
+msgstr "एक आधुनिक जिला, जो अपनी स्ट्रीट आर्ट, स्वतंत्र दुकानों और जीवंत नाइटलाइफ़ के लिए जाना जाता है।"
+
+#: templates/main/explore_manchester.html:86
+msgid "The Whitworth"
+msgstr "The Whitworth"
+
+#: templates/main/explore_manchester.html:87
+msgid "An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting."
+msgstr "एक कला गैलरी, जो एक पार्क में स्थित है और शांत वातावरण में विविध कलाकृतियों का प्रदर्शन करती है।"
+
+#: templates/main/explore_manchester.html:92
+msgid "Map of Manchester"
+msgstr "मैनचेस्टर का मानचित्र"
+
+#: templates/main/contact.html:5
+msgid "Contact Us - PickARooms"
+msgstr "संपर्क करें - PickARooms"
+
+#: templates/main/contact.html:10
+msgid "Get in Touch"
+msgstr "संपर्क करें"
+
+#: templates/main/contact.html:11
+msgid "Need assistance? The best way to reach us is via phone, email, or through Booking.com and Airbnb messaging."
+msgstr "मदद की जरूरत है? हमसे संपर्क करने का सबसे अच्छा तरीका फोन, ईमेल या Booking.com और Airbnb मैसेजिंग के माध्यम से है।"
+
+#: templates/main/contact.html:16
+msgid "Our Location"
+msgstr "हमारा स्थान"
+
+#: templates/main/contact.html:18
+msgid "Email"
+msgstr "ईमेल"
+
+#: templates/main/contact.html:20
+msgid "Phone"
+msgstr "फोन"
+
+#: templates/main/contact.html:26
+msgid "Send Us a Message"
+msgstr "हमें संदेश भेजें"
+
+#: templates/main/contact.html:28
+msgid "Your message has been sent successfully!"
+msgstr "✅ आपका संदेश सफलतापूर्वक भेज दिया गया है!"
+
+#: templates/main/contact.html:31
+msgid "Full Name"
+msgstr "पूरा नाम"
+
+#: templates/main/contact.html:32
+msgid "Enter your name"
+msgstr "अपना नाम दर्ज करें"
+
+#: templates/main/contact.html:34
+msgid "Email Address"
+msgstr "ईमेल पता"
+
+#: templates/main/contact.html:35
+msgid "Enter your email"
+msgstr "अपना ईमेल दर्ज करें"
+
+#: templates/main/contact.html:37
+msgid "Your Message"
+msgstr "आपका संदेश"
+
+#: templates/main/contact.html:38
+msgid "Write your message here..."
+msgstr "यहां अपना संदेश लिखें..."
+
+#: templates/main/contact.html:40
+msgid "Send Message"
+msgstr "संदेश भेजें"
+
+#: templates/main/contact.html:46
+msgid "Find Us"
+msgstr "हमें खोजें"
+
+#: templates/main/about.html:31
+msgid "Manchester Piccadilly Station"
+msgstr "मैनचेस्टर पिकाडिली स्टेशन"
+
+#: templates/main/about.html:31
+msgid "Your gateway to transport links connecting Manchester to the rest of the UK."
+msgstr "मैनचेस्टर को यूके के बाकी हिस्सों से जोड़ने वाले परिवहन लिंक का प्रवेश द्वार।"
+
+#: templates/main/about.html:31
+msgid "Dining & Nightlife"
+msgstr "भोजन और नाइटलाइफ़"
+
+#: templates/main/about.html:31
+msgid "Visit New Islington Marina, Northern Quarter, and Manchester's top restaurants."
+msgstr "न्यू इस्लिंगटन मरीना, नॉर्दर्न क्वार्टर और मैनचेस्टर के शीर्ष रेस्तरां का दौरा करें।"
+
+#: views.py:12
+msgid "No reservation found. Please enter the same phone number used in your Booking.com reservation."
+msgstr "कोई आरक्षण नहीं मिला। कृपया वही फोन नंबर दर्ज करें जो आपने अपनी Booking.com आरक्षण में उपयोग किया था।"
+
+#: views.py:16
+msgid "Details not found. Make sure you input the correct phone number."
+msgstr "विवरण नहीं मिला। सुनिश्चित करें कि आपने सही फोन नंबर दर्ज किया है।"

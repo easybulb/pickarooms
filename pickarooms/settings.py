@@ -13,13 +13,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 import dj_database_url
 from pathlib import Path
+from django.utils.translation import gettext_lazy as _
 
 # Import env.py if it exists
 if os.path.isfile("env.py"):
     import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -45,10 +46,36 @@ INSTALLED_APPS = [
     'cloudinary_storage',
 ]
 
+
+LANGUAGE_CODE = 'en'  # Default language
+
+# Add multiple languages (modify as needed)
+LANGUAGES = [
+    ('en', _('English')),
+    ('fr', _('French')),
+    ('de', _('German')),
+    ('es', _('Spanish')),
+    ('zh-hans', _('Chinese')),
+    ('it', _('Italian')),
+    ('pt', _('Portuguese')),
+    ('ar', _('Arabic')),
+    ('ja', _('Japanese')),
+    ('hi', _('Hindi')),
+]
+
+USE_I18N = True  # Enable internationalization
+USE_L10N = True  # Optional: Localization settings
+USE_TZ = True  # Keep timezone support
+
+
+LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware', # Required for language switching
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -59,10 +86,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'pickarooms.urls'
 
+# Templates settings
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # ✅ FIXED HERE
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,10 +98,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "django.template.context_processors.i18n",
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'pickarooms.wsgi.application'
 
@@ -116,7 +146,7 @@ LOGIN_URL = '/admin/login/'  # Redirect unauthorized users to the login page
 
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
@@ -144,4 +174,5 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Media files (uploaded images)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 

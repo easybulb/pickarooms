@@ -1,89 +1,85 @@
 {% extends 'base.html' %}
 
+{% load i18n %}
+
 {% load static %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/about.css' %}">
 {% endblock %}
 
-{% block title %}About Us - PickARooms{% endblock %}
+{% block title %}{% trans "About Us - PickARooms" %}{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="about-hero">
     <div class="about-overlay"></div>
     <div class="about-text">
-        <h1>Welcome to PickARooms</h1>
-        <p>Seamless check-ins, comfortable stays, and a hassle-free experience in Manchester.</p>
+        <h1>{% trans "Welcome to PickARooms" %}</h1>
+        <p>{% trans "Seamless check-ins, comfortable stays, and a hassle-free experience in Manchester." %}</p>
     </div>
 </section>
 
 <!-- About Section -->
 <section class="about-content">
     <div class="about-intro">
-        <h2>About PickARooms</h2>
+        <h2>{% trans "About PickARooms" %}</h2>
         <p>
-            Nestled in the peaceful neighborhood of Beswick, Manchester, PickARooms is designed for
-            travelers who value convenience and comfort. Whether you're visiting for
-            business, a football match, or a concert, we ensure a hassle-free experience with our
-            self-check-in system.
+            {% trans "Nestled in the peaceful neighborhood of Beswick, Manchester, PickARooms is designed for travelers who value convenience and comfort. Whether you're visiting for business, a football match, or a concert, we ensure a hassle-free experience with our self-check-in system." %}
         </p>
     </div>
 
     <div class="about-grid">
         <div class="about-item">
-            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678358/smartlock_kmxljk.png" alt="PickARooms Property">
-            <h3>Smart Check-In</h3>
-            <p>Use your phone number to receive a secure PIN and access your room in seconds.</p>
+            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678358/smartlock_kmxljk.png" alt="{% trans 'PickARooms Property' %}">
+            <h3>{% trans "Smart Check-In" %}</h3>
+            <p>{% trans "Use your phone number to receive a secure PIN and access your room in seconds." %}</p>
         </div>
         <div class="about-item">
-            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678532/double-room_rmmolc.png" alt="Comfortable Room">
-            <h3>Modern & Cozy Rooms</h3>
-            <p>Enjoy premium linens, spacious beds, and stylish interiors for a relaxing stay.</p>
+            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678532/double-room_rmmolc.png" alt="{% trans 'Comfortable Room' %}">
+            <h3>{% trans "Modern & Cozy Rooms" %}</h3>
+            <p>{% trans "Enjoy premium linens, spacious beds, and stylish interiors for a relaxing stay." %}</p>
         </div>
         <div class="about-item">
-            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678770/kitchen_vdy3h3.png" alt="Kitchen Area">
-            <h3>Fully Equipped Kitchen</h3>
-            <p>Prepare meals in our modern kitchen, stocked with essentials for your convenience.</p>
+            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678770/kitchen_vdy3h3.png" alt="{% trans 'Kitchen Area' %}">
+            <h3>{% trans "Fully Equipped Kitchen" %}</h3>
+            <p>{% trans "Prepare meals in our modern kitchen, stocked with essentials for your convenience." %}</p>
         </div>
     </div>
 </section>
 
 <!-- Host Section -->
 <section class="host-section">
-    <h2>👋 Meet Your Host</h2>
+    <h2>👋 {% trans "Meet Your Host" %}</h2>
     <div class="host-container">
-        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738628777/henry-ofodieze_n2zmoj.png" alt="Henry, PickARooms Host">
+        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738628777/henry-ofodieze_n2zmoj.png" alt="{% trans 'Henry, PickARooms Host' %}">
         <div class="host-text">
-            <p>Hi, I’m Henry, a Full Stack Developer and passionate host. My background includes eCommerce
-                development, an appearance on BBC's Dragons' Den, and a love for travel.</p>
-            <p>PickARooms was built with the goal of making check-ins effortless and stays more enjoyable. Whether
-                you're in Manchester for work, leisure, or a game at Etihad Stadium, I strive to make your
-                experience smooth and memorable.</p>
+            <p>{% trans "Hi, I’m Henry, a Full Stack Developer and passionate host. My background includes eCommerce development, an appearance on BBC's Dragons' Den, and a love for travel." %}</p>
+            <p>{% trans "PickARooms was built with the goal of making check-ins effortless and stays more enjoyable. Whether you're in Manchester for work, leisure, or a game at Etihad Stadium, I strive to make your experience smooth and memorable." %}</p>
         </div>
     </div>
 </section>
 
 <!-- Explore Manchester -->
 <section class="explore-manchester">
-    <h2>📍 Explore Beswick & Manchester</h2>
-    <p>From sports stadiums to cultural attractions, everything is just a short walk or ride away.</p>
+    <h2>📍 {% trans "Explore Beswick & Manchester" %}</h2>
+    <p>{% trans "From sports stadiums to cultural attractions, everything is just a short walk or ride away." %}</p>
     <div class="explore-grid">
         <div class="explore-item">
-            <h3>⚽ Etihad Stadium</h3>
-            <p>Watch Manchester City FC live or take a stadium tour to explore the facilities.</p>
+            <h3>⚽ {% trans "Etihad Stadium" %}</h3>
+            <p>{% trans "Watch Manchester City FC live or take a stadium tour to explore the facilities." %}</p>
         </div>
         <div class="explore-item">
-            <h3>🎤 Co-op Live Arena</h3>
-            <p>Enjoy concerts and world-class events at the UK’s largest indoor arena.</p>
+            <h3>🎤 {% trans "Co-op Live Arena" %}</h3>
+            <p>{% trans "Enjoy concerts and world-class events at the UK’s largest indoor arena." %}</p>
         </div>
         <div class="explore-item">
-            <h3>🚆 Manchester Piccadilly Station</h3>
-            <p>Your gateway to transport links connecting Manchester to the rest of the UK.</p>
+            <h3>🚆 {% trans "Manchester Piccadilly Station" %}</h3>
+            <p>{% trans "Your gateway to transport links connecting Manchester to the rest of the UK." %}</p>
         </div>
         <div class="explore-item">
-            <h3>🍽️ Dining & Nightlife</h3>
-            <p>Visit New Islington Marina, Northern Quarter, and Manchester's top restaurants.</p>
+            <h3>🍽️ {% trans "Dining & Nightlife" %}</h3>
+            <p>{% trans "Visit New Islington Marina, Northern Quarter, and Manchester's top restaurants." %}</p>
         </div>
     </div>
 </section>
