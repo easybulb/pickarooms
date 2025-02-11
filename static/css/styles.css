@@ -42,11 +42,25 @@ header {
 }
 
 .logo a {
-  text-decoration: none;
+  /* text-decoration: none;
   font-size: 24px;
   font-weight: bold;
-  color: #F5F5F5;
+  color: #F5F5F5; */
 }
+
+/* Logo Styling */
+.logo img {
+  max-height: 50px; /* Adjust height as needed */
+  width: auto; /* Maintain aspect ratio */
+  display: block;
+}
+
+/* Ensure logo aligns properly within the header */
+.logo {
+  display: flex;
+  align-items: center;
+}
+
 
 
 /* Language Switcher */
@@ -503,7 +517,7 @@ footer {
   }
 
   .logo a {
-    font-size: 1.4rem;
+    /* font-size: 1.4rem; */
   }
 
   .language-switcher {
@@ -519,7 +533,7 @@ footer {
   }
 
   nav {
-    margin-left: 7px;
+    margin-left: -43px;
   }
 
   .menu {
@@ -532,14 +546,20 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-/* Mobile Menu Button */
-.menu-toggle {
-  display: flex;
-}
+  @media (max-width: 768px) {
+    .logo img {
+      max-height: 40px; /* Slightly smaller for mobile */
+    }
+  }
+  
+  /* Mobile Menu Button */
+  .menu-toggle {
+    display: flex;
+  }
 
   header {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
   }
   
   nav {
