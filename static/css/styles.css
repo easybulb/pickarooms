@@ -41,13 +41,6 @@ header {
   /* background: linear-gradient(90deg, #001f3f, #003580); */
 }
 
-.logo a {
-  /* text-decoration: none;
-  font-size: 24px;
-  font-weight: bold;
-  color: #F5F5F5; */
-}
-
 /* Logo Styling */
 .logo img {
   max-height: 50px; /* Adjust height as needed */
@@ -514,10 +507,6 @@ footer {
 
   .logo {
     margin-left: -10px;
-  }
-
-  .logo a {
-    /* font-size: 1.4rem; */
   }
 
   .language-switcher {
