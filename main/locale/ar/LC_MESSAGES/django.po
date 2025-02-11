@@ -48,7 +48,15 @@ msgstr "Portuguese"
 
 #: .\pickarooms\settings.py:161
 msgid "Arabic"
-msgstr "العربية"
+msgstr "Arabic"
+
+#: .\pickarooms\settings.py:162
+msgid "Japanese"
+msgstr "Japanese"
+
+#: .\pickarooms\settings.py:163
+msgid "Hindi"
+msgstr "Hindi"
 
 #: templates/base.html:10
 msgid "Home"

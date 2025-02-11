@@ -17,6 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: .\pickarooms\settings.py:154
 msgid "English"
 msgstr "English"
@@ -48,6 +49,14 @@ msgstr "Portuguese"
 #: .\pickarooms\settings.py:161
 msgid "Arabic"
 msgstr "Arabic"
+
+#: .\pickarooms\settings.py:162
+msgid "Japanese"
+msgstr "Japanese"
+
+#: .\pickarooms\settings.py:163
+msgid "Hindi"
+msgstr "Hindi"
 
 #: templates/base.html:10
 msgid "Home"
