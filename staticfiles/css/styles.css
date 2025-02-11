@@ -506,14 +506,14 @@ footer {
   }
 
   .logo {
-    margin-left: -10px;
+    margin-left: -12px;
   }
 
   .language-switcher {
     position: absolute;
     top: 15px;
     left: 200px;
-    margin-top: 2px;
+    margin-top: 3px;
   }
 
 .language-switcher select {
@@ -522,7 +522,7 @@ footer {
   }
 
   nav {
-    margin-left: -29px;
+    margin-left: -25px;
   }
 
   .menu {
@@ -537,7 +537,7 @@ footer {
 @media (max-width: 768px) {
   @media (max-width: 768px) {
     .logo img {
-      max-height: 45px; /* Slightly smaller for mobile */
+      max-height: 48px; /* Slightly smaller for mobile */
     }
   }
   
