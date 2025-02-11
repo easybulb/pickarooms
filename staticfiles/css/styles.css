@@ -521,7 +521,7 @@ footer {
   .menu {
     font-size: 1.8rem;
     margin: -10px 0;
-    margin-top: -11px;
+    margin-top: -10px;
     z-index: 1000;
   }
 }
