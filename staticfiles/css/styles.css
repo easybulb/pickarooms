@@ -512,7 +512,7 @@ footer {
   .language-switcher {
     position: absolute;
     top: 15px;
-    left: 205px;
+    left: 200px;
     margin-top: 2px;
   }
 
@@ -522,7 +522,7 @@ footer {
   }
 
   nav {
-    margin-left: -36px;
+    margin-left: -29px;
   }
 
   .menu {
