@@ -516,7 +516,6 @@ footer {
 .language-switcher select {
     font-size: 15px;
     padding: 5px 5px;
-    margin-top: -2px;
   }
 
   .menu {
@@ -532,9 +531,14 @@ footer {
   .menu-toggle {
       display: flex;
   }
+
+  header {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
   
   nav {
-    margin-right: -130px;
+    margin-right: -120px;
   }
 
   /* .menu {
