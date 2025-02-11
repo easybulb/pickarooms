@@ -20,35 +20,35 @@ msgstr ""
 
 #: .\pickarooms\settings.py:154
 msgid "English"
-msgstr "Englisch"
+msgstr "English"
 
 #: .\pickarooms\settings.py:155
 msgid "French"
-msgstr "Französisch"
+msgstr "French"
 
 #: .\pickarooms\settings.py:156
 msgid "German"
-msgstr "Deutsch"
+msgstr "German"
 
 #: .\pickarooms\settings.py:157
 msgid "Spanish"
-msgstr "Spanisch"
+msgstr "Spanish"
 
 #: .\pickarooms\settings.py:158
-msgid "Simplified Chinese"
-msgstr "Vereinfachtes Chinesisch"
+msgid "Chinese"
+msgstr "Chinese"
 
 #: .\pickarooms\settings.py:159
 msgid "Italian"
-msgstr "Italienisch"
+msgstr "Italian"
 
 #: .\pickarooms\settings.py:160
 msgid "Portuguese"
-msgstr "Portugiesisch"
+msgstr "Portuguese"
 
 #: .\pickarooms\settings.py:161
 msgid "Arabic"
-msgstr "Arabisch"
+msgstr "Arabic"
 
 #: templates/base.html:10
 msgid "Home"

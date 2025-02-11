@@ -24,31 +24,31 @@ msgstr "English"
 
 #: .\pickarooms\settings.py:155
 msgid "French"
-msgstr "法语"
+msgstr "French"
 
 #: .\pickarooms\settings.py:156
 msgid "German"
-msgstr "德语"
+msgstr "German"
 
 #: .\pickarooms\settings.py:157
 msgid "Spanish"
-msgstr "西班牙语"
+msgstr "Spanish"
 
 #: .\pickarooms\settings.py:158
-msgid "Simplified Chinese"
-msgstr "简体中文"
+msgid "Chinese"
+msgstr "Chinese"
 
 #: .\pickarooms\settings.py:159
 msgid "Italian"
-msgstr "意大利语"
+msgstr "Italian"
 
 #: .\pickarooms\settings.py:160
 msgid "Portuguese"
-msgstr "葡萄牙语"
+msgstr "Portuguese"
 
 #: .\pickarooms\settings.py:161
 msgid "Arabic"
-msgstr "阿拉伯语"
+msgstr "Arabic"
 
 #: templates/base.html:10
 msgid "Home"
