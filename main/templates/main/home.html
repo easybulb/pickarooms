@@ -81,6 +81,8 @@
         const openHowToUseBtn = document.getElementById("open-how-to-use-modal");
         const openContactBtn = document.getElementById("open-contact-modal");
         const closeModalBtns = document.querySelectorAll(".close");
+        const navLinks = document.querySelector(".nav-links");
+        const menuToggle = document.getElementById("mobile-menu");
 
         // Ensure modals are hidden on page load
         modals.forEach(modal => modal.style.display = "none");
@@ -112,6 +114,24 @@
                 }
             });
         });
+
+        /*** ✅ FIXED - CLOSE MENU WHEN CLICKING BODY, BUT NOT ON TOGGLE BUTTON ***/
+        document.body.addEventListener("click", function (event) {
+            if (
+                !navLinks.contains(event.target) &&  // Click is outside menu
+                !menuToggle.contains(event.target) && // Click is NOT on menu toggle button
+                navLinks.classList.contains("active") // Menu is open
+            ) {
+                navLinks.classList.remove("active");
+            }
+        });
+
+        // ✅ Prevent immediate closing when clicking the menu toggle itself
+        menuToggle.addEventListener("click", function (event) {
+            event.stopPropagation(); // Prevents document.body click from firing
+        });
     });
 </script>
+
+
 {% endblock %}
