@@ -512,7 +512,10 @@ footer {
   .language-switcher {
     position: absolute;
     top: 15px;
-    left: 200px;
+    left: 198px;
+  }
+
+  .language-switcher form {
     margin-top: 3px;
   }
 
