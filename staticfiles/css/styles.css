@@ -612,6 +612,8 @@ footer {
   .hero-content {
     margin-top: -2rem; /* For moving the h1, p, input and button up and down */
     text-align: left;
+    left: 45%;
+    margin-top: -4px;
   }
 
   .hero-content h1 {
