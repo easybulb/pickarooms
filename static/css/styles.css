@@ -34,11 +34,9 @@ header {
   width: 100%;
   z-index: 1000;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  /* background: linear-gradient(90deg, #2E2E2E, #1B263B); */
-  /* background: linear-gradient(90deg, #003580, #0056b3); */
-  background: linear-gradient(90deg, #002147, #003580, #0056b3);
-  /* background: linear-gradient(90deg, #003580, #007bff); */
-  /* background: linear-gradient(90deg, #001f3f, #003580); */
+  /* background: linear-gradient(90deg, #002147, #003580, #0056b3); */
+  /* background: linear-gradient(90deg, #0c0d12, #272d38, #5B647A); */
+  background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
 }
 
 /* Logo Styling */
@@ -310,7 +308,8 @@ nav {
 
 /* Footer Styling */
 footer {
-  background: linear-gradient(90deg, #002147, #003580, #0056b3);
+  /* background: linear-gradient(90deg, #002147, #003580, #0056b3); */
+  background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
   color: #F5F5F5;
   padding: 5px 10px;
   text-align: center;
@@ -737,7 +736,7 @@ footer {
   }
 
   footer {
-    background: linear-gradient(90deg, #002147, #003580, #0056b3);
+    background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
     color: #F5F5F5;
     padding: 10px 15px;
     text-align: left;
