@@ -514,11 +514,13 @@ footer {
     top: 15px;
     left: 198px;
     z-index: 1000;
+    width: 27%;
   }
 
   .language-switcher form {
     margin-top: 0;
     z-index: 1000;
+    width: 25%;
   }
 
 .language-switcher select {
@@ -528,6 +530,9 @@ footer {
     color: white;
     font-weight: 300;
     z-index: 1000;
+    -webkit-appearance: none; /* Hide default arrow */
+    -moz-appearance: none;
+    padding-right: 27px;
   }
 
   .language-switcher select option {
@@ -537,6 +542,19 @@ footer {
     font-weight: 300;
     z-index: 1000;
 }
+
+  /* Custom arrow */
+  .language-switcher::after {
+    content: "▼"; /* Unicode for dropdown arrow */
+    font-size: 14px;
+    color: white;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* Prevent interaction */
+    margin-top: 1px;
+  }
 
 
   nav {
