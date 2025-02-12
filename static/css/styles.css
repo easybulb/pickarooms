@@ -216,8 +216,8 @@ nav {
 
 .checkin-form button {
   padding: 10px 15px;
-  border: none;
-  background: #ff4500;
+  border: solid 1px white;
+  background: linear-gradient(90deg, #002147, #003580, #0056b3);
   color: white;
   cursor: pointer;
   border-radius: 5px;
@@ -299,8 +299,8 @@ nav {
 .logout-btn {
   padding: 7px 12px;
   margin-top: -10px ;
-  border: none;
-  background: #ff4500;
+  border: solid 1px white;
+  background: linear-gradient(90deg, #002147, #003580, #0056b3);
   color: white;
   cursor: pointer;
   border-radius: 5px;
@@ -598,7 +598,7 @@ footer {
   top: 60px;
   left: 0;
   width: 100%;
-  background: linear-gradient(90deg, #002147, #003580, #0056b3);
+  background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
   padding: 20px;
   color: #F5F5F5;
   font-weight: 300;
