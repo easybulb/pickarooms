@@ -516,14 +516,13 @@ footer {
   }
 
   .language-switcher form {
-    margin-top: 1px;
+    margin-top: 0;
   }
 
 .language-switcher select {
     font-size: 16px;
     padding: 5px 5px;
     background: none;
-    border: solid 1px white;
     color: white;
     font-weight: 300;
   }
