@@ -726,9 +726,10 @@ footer {
 
   .checkin-form button {
     padding: 10px 15px;
-    border: solid 1px #be5a35;
-    background: #ff4500;
+    border: solid 1px white;
+    background: linear-gradient(90deg, #002147, #003580, #0056b3);
     color: white;
+    font-weight: 300;
     font-size: 17px;
     cursor: pointer;
     border-radius: 5px;
