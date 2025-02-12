@@ -930,17 +930,19 @@ footer {
 /* Read More Button */
 .read-more-btn {
   display: inline-block;
-  background: #ff4500;
+  background: linear-gradient(90deg, #002147, #003580, #0056b3);
+  border: solid 1px white;
   color: white;
   padding: 10px 15px;
   border-radius: 5px;
   text-decoration: none;
   font-size: 1rem;
   margin-top: 10px;
+  font-weight: 300;
 }
 
 .read-more-btn:hover {
-  background: #e03e00;
+  background: #0056b3;
 }
 
 /* Responsive Design */
