@@ -608,7 +608,7 @@ footer {
   overflow: hidden;
   visibility: hidden;
   transform: translateY(-10px); /* Start slightly above */
-  transition: opacity 1s ease, transform 0s ease, visibility 0.3s ease;
+  transition: opacity 1s ease, transform 0s ease, visibility 0s ease;
 }
 
 /* Active Class for Menu */
