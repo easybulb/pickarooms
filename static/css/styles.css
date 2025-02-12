@@ -604,14 +604,20 @@ footer {
   color: #F5F5F5;
   font-weight: 300;
   opacity: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
   transform: translateY(-10px); /* Start slightly above */
-  transition: opacity 1s ease, transform 0s ease;
+  transition: opacity 1s ease, transform 0s ease, visibility 0.3s ease;
 }
 
 /* Active Class for Menu */
 .nav-links.active {
   display: flex;
   opacity: 1;
+  height: auto;
+  visibility: visible;
+  overflow: visible;
   margin: 0;
   transform: translateY(0); /* Move to normal position */
 }
