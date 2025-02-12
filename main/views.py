@@ -15,7 +15,7 @@ from django.contrib import messages
 import pandas as pd
 import random
 from django.utils.translation import gettext as _
-
+from langdetect import detect
 
 
 def home(request):
@@ -24,9 +24,18 @@ def home(request):
     if latest_file and latest_file.data:
         reviews = latest_file.data
 
+        # Filter out non-English reviews
+        def is_english(review_text):
+            try:
+                return detect(review_text) == "en"
+            except:
+                return False  # If detection fails, exclude the review
+
+        english_reviews = [r for r in reviews if is_english(r["text"])]
+
         # Separate 10/10 reviews from 9/10 reviews
-        perfect_reviews = [r for r in reviews if r["score"] == 10]
-        good_reviews = [r for r in reviews if r["score"] == 9]
+        perfect_reviews = [r for r in english_reviews if r["score"] == 10]
+        good_reviews = [r for r in english_reviews if r["score"] == 9]
 
         # Shuffle the reviews to make selection random
         random.shuffle(perfect_reviews)
