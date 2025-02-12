@@ -513,10 +513,12 @@ footer {
     position: absolute;
     top: 15px;
     left: 198px;
+    z-index: 1000;
   }
 
   .language-switcher form {
     margin-top: 0;
+    z-index: 1000;
   }
 
 .language-switcher select {
@@ -525,6 +527,7 @@ footer {
     background: none;
     color: white;
     font-weight: 300;
+    z-index: 1000;
   }
 
   .language-switcher select option {
@@ -532,6 +535,7 @@ footer {
     color: white;
     padding: 5px;
     font-weight: 300;
+    z-index: 1000;
 }
 
 
