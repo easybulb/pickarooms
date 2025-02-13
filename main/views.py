@@ -180,6 +180,7 @@ def admin_page(request):
     now_time = localtime(now())
     today = now_time.date()
 
+    # Auto-archive past guests
     Guest.objects.filter(
         Q(check_out_date__lt=today) & Q(is_archived=False)
     ).update(is_archived=True)
@@ -198,30 +199,31 @@ def admin_page(request):
 
     if request.method == 'POST':
         reservation_number = request.POST.get('reservation_number', '').strip()
-        phone_number = request.POST.get('phone_number', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip() or None  # ✅ Optional
         full_name = request.POST.get('full_name', 'Guest')
         room_id = request.POST.get('room')
+
+        if not reservation_number:
+            messages.error(request, "Reservation number is required.")
+            return redirect('admin_page')
 
         try:
             room = Room.objects.get(id=room_id)
 
-            # ✅ Check if this guest has stayed before (using phone or reservation number)
+            # ✅ Check if this guest has stayed before
             previous_stays = Guest.objects.filter(
                 Q(phone_number=phone_number) | Q(reservation_number=reservation_number)
             ).exists()
 
-            # ✅ Generate a new reservation number
-            new_reservation_number = str(uuid.uuid4().hex[:10]).upper()
-
-            # ✅ Create a new guest entry instead of reactivating
+            # ✅ Create a new guest entry (DO NOT MODIFY OLD RECORDS)
             Guest.objects.create(
                 full_name=full_name,
-                reservation_number=new_reservation_number,
-                phone_number=phone_number if phone_number else None,
+                reservation_number=reservation_number,  # ✅ Ensure Booking.com reservation number is used
+                phone_number=phone_number,
                 check_in_date=check_in_date,
                 check_out_date=check_out_date,
                 assigned_room=room,
-                is_returning=previous_stays  # ✅ Mark as returning if they have stayed before
+                is_returning=previous_stays  # ✅ Mark as returning if they stayed before
             )
 
             messages.success(request, "Guest added successfully!")
@@ -237,6 +239,7 @@ def admin_page(request):
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
     })
+
 
 
 
@@ -337,18 +340,16 @@ def past_guests(request):
     
     past_guests = Guest.objects.filter(is_archived=True)
 
-    # Apply search filter if search_query exists
     if search_query:
         past_guests = past_guests.filter(
             Q(full_name__icontains=search_query) |
             Q(phone_number__icontains=search_query) |
+            Q(reservation_number__icontains=search_query) |  # ✅ Allow search by reservation number
             Q(assigned_room__name__icontains=search_query)
         )
 
-    # Sort by the most recent check-out date (descending)
     past_guests = past_guests.order_by('-check_out_date')
 
-    # Paginate results - limit to 50 guests per page
     paginator = Paginator(past_guests, 50)
     page_number = request.GET.get('page')
     paginated_past_guests = paginator.get_page(page_number)
@@ -357,6 +358,7 @@ def past_guests(request):
         'past_guests': paginated_past_guests,
         'search_query': search_query,
     })
+
 
 
 

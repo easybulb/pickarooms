@@ -36,8 +36,8 @@ class Room(models.Model):
 
 class Guest(models.Model):
     full_name = models.CharField(max_length=100, default="Guest")
-    phone_number = models.CharField(max_length=15, blank=True, null=True)  # ✅ Remove `unique=True`
-    reservation_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)  # ✅ Make optional
+    reservation_number = models.CharField(max_length=15, unique=True)  # ✅ Required & must be unique
     check_in_date = models.DateField(default=date.today)
     check_out_date = models.DateField(default=default_check_out_date)
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -46,11 +46,9 @@ class Guest(models.Model):
     secure_token = models.CharField(max_length=10, unique=True, blank=True)
 
     def save(self, *args, **kwargs):
-        """Generate a unique reservation number if not provided"""
-        if not self.reservation_number:
-            self.reservation_number = str(uuid.uuid4().hex[:10]).upper()
+        """Ensure secure token is always generated"""
         if not self.secure_token:
-            self.secure_token = str(uuid.uuid4().hex[:10])  # Generates a unique 10-character token
+            self.secure_token = str(uuid.uuid4().hex[:10])
         super().save(*args, **kwargs)
 
     def has_access(self):
@@ -58,7 +56,7 @@ class Guest(models.Model):
         return now().date() <= self.check_out_date and not self.is_archived  
 
     def __str__(self):
-        return f"{self.full_name} - {self.reservation_number or 'No Res Number'} - {self.phone_number or 'No Phone'} - {self.assigned_room.name}"
+        return f"{self.full_name} - {self.reservation_number} - {self.phone_number or 'No Phone'} - {self.assigned_room.name}"
 
 
 
