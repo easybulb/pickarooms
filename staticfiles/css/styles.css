@@ -1022,7 +1022,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 200;
+  font-weight: 300;
   color: black;
 }
 
@@ -1096,7 +1096,7 @@ footer {
   }
 
   .faq-question {
-      font-size: 1rem;
+      font-size: 1.2rem;
   }
 
   .faq-answer {
