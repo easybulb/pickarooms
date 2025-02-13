@@ -1014,8 +1014,8 @@ footer {
   width: 100%;
   text-align: left;
   font-size: 1.3rem;
-  background: #e8eefe;
-  border: solid 5px #e8eefe;
+  background: #e8eaef;
+  border: solid 5px #e8eaef;
   border-radius: 5px;
   padding: 10px;
   cursor: pointer;
@@ -1027,7 +1027,7 @@ footer {
 }
 
 .faq-answer {
-  background: #e8eefe;
+  background: #e8eaef;
   border-radius: 0 0 5px 5px;
   display: none;
   padding: 10px;
