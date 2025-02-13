@@ -14,7 +14,7 @@
         {% endif %}
         <form method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="phone_number" placeholder="{% trans 'Enter your phone number' %}">
+            <input type="text" name="phone_number" placeholder="{% trans 'Enter your phone number' %}" value="{{ phone_number }}">
             <button type="submit">{% trans "Check In" %}</button>
         </form>
 

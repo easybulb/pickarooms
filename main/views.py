@@ -103,12 +103,14 @@ def checkin(request):
                 return redirect('room_detail', room_token=guest.secure_token)
             else:
                 return render(request, 'main/checkin.html', {
-                    'error': _("No reservation found. Please enter the same phone number used in your Booking.com reservation.")  # Added translation
+                    'error': _("No reservation found. Please enter the same phone number used in your Booking.com reservation."),
+                    'phone_number': phone_number,
                 })
 
         except Guest.DoesNotExist:
             return render(request, 'main/checkin.html', {
-                'error': _("Details not found. Make sure you input the correct phone number.")  # Added translation
+                'error': _("Details not found. Make sure you input the correct phone number."),
+                'phone_number': phone_number,
             })
 
     return render(request, 'main/checkin.html')
