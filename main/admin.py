@@ -16,9 +16,21 @@ class GuestAdmin(admin.ModelAdmin):
 
 
 
+from django.utils.html import format_html
+
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ('name', 'access_pin', 'video_url', 'image')   # Show image field in admin
+    list_display = ('name', 'access_pin', 'video_url', 'image_preview')  # ✅ Show image preview
+
     search_fields = ('name',)
+
+    def image_preview(self, obj):
+        """Display image preview in the admin panel."""
+        if obj.image:
+            return format_html('<img src="{}" width="50" height="50" style="border-radius:5px;"/>', obj.image.url)
+        return "No Image"
+
+    image_preview.short_description = "Image Preview"
+
 
 
 class ReviewCSVUploadAdmin(admin.ModelAdmin):
