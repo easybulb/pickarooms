@@ -513,7 +513,7 @@ footer {
     top: 15px;
     left: 198px;
     z-index: 1000;
-    width: 27%;
+    width: auto;
   }
 
   .language-switcher form {
@@ -524,14 +524,14 @@ footer {
 
   .language-switcher select {
     font-size: 16px;
-    padding: 5px 5px;
+    padding: 5px 30px 5px 10px;
     background: none;
     color: white;
     font-weight: 300;
     z-index: 1000;
     -webkit-appearance: none; /* Hide default arrow */
     -moz-appearance: none;
-    padding-right: 27px;
+    position: relative;
   }
 
   .language-switcher select option {
@@ -552,18 +552,17 @@ footer {
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none; /* Prevent interaction */
-    margin-top: 1px;
   }
 
 
   nav {
-    margin-left: -55px;
+    margin-left: -65px;
   }
 
   .menu {
     font-size: 1.8rem;
     margin: -10px 0;
-    margin-top: -11px;
+    margin-top: -14px;
     z-index: 1000;
   }
 }
@@ -883,7 +882,7 @@ footer {
 
 .reviews-awards h2 {
   font-size: 1.8rem;
-  color: #003580;
+  color: rgb(24, 22, 22);
   margin-bottom: 15px;
 }
 
