@@ -33,10 +33,10 @@ header {
   position: fixed;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
   /* background: linear-gradient(90deg, #002147, #003580, #0056b3); */
   /* background: linear-gradient(90deg, #0c0d12, #272d38, #5B647A); */
-  background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
+  background: linear-gradient(90deg, #0c0f18, #1e2530, #747f91);
 }
 
 /* Logo Styling */
@@ -584,6 +584,7 @@ footer {
   header {
     padding-top: 13px;
     padding-bottom: 13px;
+    background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
   }
   
   nav {
