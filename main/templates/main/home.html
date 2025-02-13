@@ -11,10 +11,10 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
-        <p>Enter your Booking.com reservation number or phone number to retrieve your check-in details.</p>
+        <p>Enter your Booking.com confirmation number or phone number to retrieve your check-in details.</p>
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="input_value" placeholder="Enter reservation number or phone number">
+            <input type="text" name="input_value" placeholder="Enter confirmation number or phone number">
             <button type="submit">Check In</button>
         </form>        
 
@@ -51,6 +51,73 @@
     <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739380781/grey-hero-pickarooms_i5lums.png" alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
 </section>
 
+<!-- FAQ Section -->
+<section class="faq-section">
+    <h2>{% trans "Have Questions? Answers Below." %}</h2>
+    <div class="faq-container">
+        <div class="faq-item">
+            <button class="faq-question">Where can I find my Booking.com confirmation number? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image).</p>
+                
+                <!-- Image Container -->
+                <div class="faq-images">
+                    <div class="faq-image">
+                        <h3>Using Browser</h3>
+                        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking.browser_pmzfnq.png" alt="Booking.com confirmation number on browser">
+                    </div>
+                    <div class="faq-image">
+                        <h3>On Booking.com App</h3>
+                        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking-app_xbqadd.png" alt="Booking.com confirmation number on app">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">What is the property address? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">What are the check-in and check-out times? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Check-in: <strong>From 2:00 PM</strong> <br> Check-out: <strong>Anytime before 11:00 AM on the checkout day</strong></p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">How do I get my room access PIN? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Your room access PIN can be found on this site after you enter your Booking.com confirmation number or the phone number used when making your reservation.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">Is there parking available at the property? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Yes, free parking is available on the property. Additional paid parking options are nearby.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">How can I contact support if I need help? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>For assistance, contact us via: <br> <strong>Phone:</strong> +44 (0) 7539029629 <br> <strong>Email:</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">What is your cancellation policy? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Guest Reviews & Awards Section -->
 <section class="reviews-awards">
     <h2>{% trans "What Our Guests Say" %}</h2>
@@ -74,9 +141,9 @@
     <a href="{% url 'awards_reviews' %}" class="btn read-more-btn">{% trans "Read More Reviews" %}</a>
 </section>
 
-<!-- Add JavaScript for Modals -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Modal Functionality
         const modals = document.querySelectorAll(".modal");
         const openHowToUseBtn = document.getElementById("open-how-to-use-modal");
         const openContactBtn = document.getElementById("open-contact-modal");
@@ -130,8 +197,33 @@
         menuToggle.addEventListener("click", function (event) {
             event.stopPropagation(); // Prevents document.body click from firing
         });
+
+        // FAQ Functionality
+        const faqItems = document.querySelectorAll(".faq-item");
+
+        faqItems.forEach(item => {
+            const question = item.querySelector(".faq-question");
+            const answer = item.querySelector(".faq-answer");
+            const arrow = item.querySelector(".arrow");
+
+            question.addEventListener("click", function () {
+                const isActive = answer.style.display === "block";
+
+                // Close all other answers
+                faqItems.forEach(faq => {
+                    faq.querySelector(".faq-answer").style.display = "none";
+                    faq.querySelector(".arrow").textContent = "▼";
+                });
+
+                // Toggle clicked item
+                answer.style.display = isActive ? "none" : "block";
+                arrow.textContent = isActive ? "▼" : "▲";
+            });
+        });
+
     });
 </script>
+
 
 
 {% endblock %}

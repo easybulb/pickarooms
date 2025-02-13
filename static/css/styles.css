@@ -976,3 +976,145 @@ footer {
       padding: 8px 12px;
   }
 }
+
+
+
+/* FAQ Section */
+.faq-section {
+  background: #ffffff;
+  padding: 40px 20px;
+  text-align: center;
+  max-width: 900px;
+  margin: 40px auto;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.faq-section h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: 400;
+}
+
+.faq-container {
+  text-align: left;
+}
+
+.faq-item {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+
+.faq-item strong {
+  font-weight: 500;
+}
+
+.faq-question {
+  width: 100%;
+  text-align: left;
+  font-size: 1.3rem;
+  background: #c1c8dc;
+  border: solid 5px #c1c8dc;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 200;
+  color: black;
+}
+
+.faq-answer {
+  background: #c1c8dc;
+  border-radius: 0 0 5px 5px;
+  display: none;
+  padding: 10px;
+  margin-top: -20px;
+  color: black;
+  font-size: 1.3rem;
+  font-weight: 300;
+}
+
+.faq-question:hover {
+  color: #0056b3;
+}
+
+.arrow {
+  font-size: 1.2rem;
+}
+
+* FAQ Images */
+.faq-images {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    gap: 15px;
+}
+
+.faq-image {
+    flex: 1;
+    text-align: center;
+}
+
+.faq-image h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #003580;
+    font-weight: 500;
+}
+
+.faq-image img {
+    width: 100%;
+    max-width: 500px;
+    height: 300px;
+    border-radius: 5px;
+    object-fit: contain;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .faq-section {
+      padding: 30px 15px;
+      border-radius: 0;
+      box-shadow: none;
+      margin-top: -30px;
+  }
+
+  .faq-item {
+    border-bottom: none;
+    padding: 3px 0;
+  }
+
+  .faq-section h2 {
+    font-weight: 400;
+  }
+
+  .faq-section p {
+    font-weight: 350;
+  }
+
+  .faq-question {
+      font-size: 1rem;
+  }
+
+  .faq-answer {
+      font-size: 1rem;
+  }
+
+  .faq-images {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .faq-image {
+    width: 100%;
+    object-fit: contain;
+    margin-top: 10px;
+  }
+
+  .faq-image img {
+    margin-top: -30px;
+  }
+}
