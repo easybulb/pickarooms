@@ -104,12 +104,12 @@ nav {
 }
 
 .nav-links a:hover {
-  color: #C7A008;
+  color: #cf9d58;
 }
 
 /* Style for Active Navigation Links */
 .nav-links a.active {
-  border-bottom: 3px solid #FFD700; /* Gold underline */
+  border-bottom: 3px solid #cf9d58; /* Gold underline */
   padding-bottom: 3px; /* Space between text and underline */
 }
 
