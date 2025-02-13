@@ -6,8 +6,7 @@ from django.conf import settings
 import pandas as pd
 import json
 
-
-# Import Cloudinary only if available (for production)
+# ✅ Import Cloudinary only if available (for production)
 if not settings.DEBUG:
     from cloudinary.models import CloudinaryField
 
@@ -23,15 +22,15 @@ class Room(models.Model):
     video_url = models.URLField()  # Link to the video instructions
     description = models.TextField(blank=True, null=True)  # Optional room description
 
-    # Conditional Image Field for Local vs. Cloudinary Storage
-    if settings.DEBUG:
-        image = models.ImageField(upload_to='room_images/', default='default_room.jpg')  # Local storage
-    else:
-        image = CloudinaryField('image', default='default_room.jpg')  # Cloudinary storage in production
+    # logic for image storage
+    image = (
+        models.ImageField(upload_to='room_images/', default='default_room.jpg')  # Local storage
+        if settings.DEBUG
+        else CloudinaryField('image')  # Cloudinary storage in production
+    )
 
     def __str__(self):
         return self.name
-    
 
 
 class Guest(models.Model):
@@ -59,9 +58,6 @@ class Guest(models.Model):
         return f"{self.full_name} - {self.reservation_number} - {self.phone_number or 'No Phone'} - {self.assigned_room.name}"
 
 
-
-
-
 class ReviewCSVUpload(models.Model):
     file = models.FileField(upload_to="uploads/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -82,4 +78,3 @@ class ReviewCSVUpload(models.Model):
             self.data = filtered_reviews.to_dict(orient="records")
 
         super().save(*args, **kwargs)
-
