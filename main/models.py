@@ -36,26 +36,30 @@ class Room(models.Model):
 
 class Guest(models.Model):
     full_name = models.CharField(max_length=100, default="Guest")
-    phone_number = models.CharField(max_length=15, unique=True)
-    check_in_date = models.DateField(default=date.today)  # Default to the current date
-    check_out_date = models.DateField(default=default_check_out_date)  # Default to the next day
+    phone_number = models.CharField(max_length=15, blank=True, null=True)  # ✅ Remove `unique=True`
+    reservation_number = models.CharField(max_length=15, unique=True, blank=True, null=True)
+    check_in_date = models.DateField(default=date.today)
+    check_out_date = models.DateField(default=default_check_out_date)
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
     is_archived = models.BooleanField(default=False)
+    is_returning = models.BooleanField(default=False)  # ✅ Track returning guests
     secure_token = models.CharField(max_length=10, unique=True, blank=True)
 
     def save(self, *args, **kwargs):
-        """Generate a secure token if it's not already set."""
+        """Generate a unique reservation number if not provided"""
+        if not self.reservation_number:
+            self.reservation_number = str(uuid.uuid4().hex[:10]).upper()
         if not self.secure_token:
             self.secure_token = str(uuid.uuid4().hex[:10])  # Generates a unique 10-character token
         super().save(*args, **kwargs)
 
     def has_access(self):
         """Check if the guest's access is still valid."""
-        current_time = now()
-        return current_time.date() <= self.check_out_date and not self.is_archived  # Prevent access for archived guests ✅
+        return now().date() <= self.check_out_date and not self.is_archived  
 
     def __str__(self):
-        return f"{self.full_name} - {self.phone_number} - {self.assigned_room.name}"
+        return f"{self.full_name} - {self.reservation_number or 'No Res Number'} - {self.phone_number or 'No Phone'} - {self.assigned_room.name}"
+
 
 
 

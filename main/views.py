@@ -16,6 +16,8 @@ import pandas as pd
 import random
 from django.utils.translation import gettext as _
 from langdetect import detect
+import uuid
+
 
 
 def home(request):
@@ -92,28 +94,28 @@ def explore_manchester(request):
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def checkin(request):
     if request.method == 'POST':
-        phone_number = request.POST.get('phone_number')
+        input_value = request.POST.get('input_value')
 
-        try:
-            guest = Guest.objects.filter(phone_number=phone_number).order_by('-check_in_date').first()
+        # Check if input is a reservation number
+        guest = Guest.objects.filter(reservation_number=input_value).order_by('-check_in_date').first()
 
-            if guest:
-                # Store phone number in session for security
-                request.session['phone_number'] = phone_number
-                return redirect('room_detail', room_token=guest.secure_token)
-            else:
-                return render(request, 'main/checkin.html', {
-                    'error': _("No reservation found. Please enter the same phone number used in your Booking.com reservation."),
-                    'phone_number': phone_number,
-                })
+        # If no reservation number match, fall back to phone number
+        if not guest:
+            guest = Guest.objects.filter(phone_number=input_value).order_by('-check_in_date').first()
 
-        except Guest.DoesNotExist:
-            return render(request, 'main/checkin.html', {
-                'error': _("Details not found. Make sure you input the correct phone number."),
-                'phone_number': phone_number,
-            })
+        if guest:
+            # Store details in session for security
+            request.session['phone_number'] = guest.phone_number
+            request.session['reservation_number'] = guest.reservation_number
+            return redirect('room_detail', room_token=guest.secure_token)
+        
+        return render(request, 'main/checkin.html', {
+            'error': _("No reservation found. Please enter the correct Booking.com reservation number or phone number used when you made the booking."),
+            'input_value': input_value,
+        })
 
     return render(request, 'main/checkin.html')
+
 
 
 
@@ -170,33 +172,23 @@ class AdminLoginView(LoginView):
 
 
 
-from django.contrib import messages  # Import Django messages
-
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
     """Admin Dashboard to manage guests, rooms, and assignments."""
-    
-    # Auto-move past guests to archive at 11:00 AM on the checkout date
-    now_time = localtime(now())  # Get local timezone time
-    today = now_time.date()
-    current_time = now_time.time()
-    archive_time = time(11, 0)  # Archive guests at 11:00 AM
 
-    # Archive guests whose checkout date has passed or is today after 11 AM
+    now_time = localtime(now())
+    today = now_time.date()
+
     Guest.objects.filter(
-        Q(check_out_date__lt=today) | 
-        (Q(check_out_date=today) & Q(is_archived=False))
+        Q(check_out_date__lt=today) & Q(is_archived=False)
     ).update(is_archived=True)
 
-    # Show only active (non-archived) guests sorted by check-in date
     guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
 
-    # Get check-in and check-out dates from the request
-    check_in_date = request.POST.get('check_in_date') or request.GET.get('check_in_date') or None
-    check_out_date = request.POST.get('check_out_date') or request.GET.get('check_out_date') or None
+    check_in_date = request.POST.get('check_in_date') or request.GET.get('check_in_date')
+    check_out_date = request.POST.get('check_out_date') or request.GET.get('check_out_date')
 
-    # Fetch available rooms based on date selection
     if check_in_date and check_out_date:
         check_in_date = date.fromisoformat(check_in_date)
         check_out_date = date.fromisoformat(check_out_date)
@@ -204,42 +196,37 @@ def admin_page(request):
     else:
         available_rooms = Room.objects.all()
 
-    # Handle guest addition
-    if request.method == 'POST' and 'phone_number' in request.POST:
-        phone_number = request.POST.get('phone_number')
-        full_name = request.POST.get('full_name')
+    if request.method == 'POST':
+        reservation_number = request.POST.get('reservation_number', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip()
+        full_name = request.POST.get('full_name', 'Guest')
         room_id = request.POST.get('room')
 
         try:
             room = Room.objects.get(id=room_id)
-            existing_guest = Guest.objects.filter(phone_number=phone_number).first()
 
-            if existing_guest:
-                # ✅ If the guest is archived, reactivate & update details
-                if existing_guest.is_archived:
-                    existing_guest.is_archived = False
-                    existing_guest.assigned_room = room
-                    existing_guest.check_in_date = check_in_date
-                    existing_guest.check_out_date = check_out_date
-                    existing_guest.save()
+            # ✅ Check if this guest has stayed before (using phone or reservation number)
+            previous_stays = Guest.objects.filter(
+                Q(phone_number=phone_number) | Q(reservation_number=reservation_number)
+            ).exists()
 
-                    messages.success(request, "Guest reactivated and assigned to room successfully!")
-                    return redirect('admin_page')
+            # ✅ Generate a new reservation number
+            new_reservation_number = str(uuid.uuid4().hex[:10]).upper()
 
-                else:
-                    messages.error(request, "A guest with this phone number is already checked in.")
-            else:
-                # ✅ If no existing guest, create a new one
-                Guest.objects.create(
-                    phone_number=phone_number,
-                    full_name=full_name,
-                    check_in_date=check_in_date,
-                    check_out_date=check_out_date,
-                    assigned_room=room
-                )
+            # ✅ Create a new guest entry instead of reactivating
+            Guest.objects.create(
+                full_name=full_name,
+                reservation_number=new_reservation_number,
+                phone_number=phone_number if phone_number else None,
+                check_in_date=check_in_date,
+                check_out_date=check_out_date,
+                assigned_room=room,
+                is_returning=previous_stays  # ✅ Mark as returning if they have stayed before
+            )
 
-                messages.success(request, "Guest added successfully!")
-                return redirect('admin_page')
+            messages.success(request, "Guest added successfully!")
+
+            return redirect('admin_page')
 
         except Room.DoesNotExist:
             messages.error(request, "Invalid room selected.")
@@ -250,6 +237,7 @@ def admin_page(request):
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
     })
+
 
 
 
@@ -290,9 +278,6 @@ def available_rooms(request):
 
 
 
-
-
-
 def unauthorized(request):
     return render(request, 'main/unauthorized.html')
 
@@ -305,6 +290,7 @@ def edit_guest(request, guest_id):
 
     if request.method == 'POST':
         guest.full_name = request.POST.get('full_name')
+        guest.reservation_number = request.POST.get('reservation_number', '').strip()
         guest.phone_number = request.POST.get('phone_number')
         guest.check_in_date = request.POST.get('check_in_date')
         guest.check_out_date = request.POST.get('check_out_date')

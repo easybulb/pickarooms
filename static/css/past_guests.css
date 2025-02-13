@@ -52,6 +52,11 @@ h1 {
     overflow-x: auto;
 }
 
+.returning-guest {
+    color: green;
+    font-weight: bold;
+}
+
 .admin-table {
     width: 100%;
     border-collapse: collapse;

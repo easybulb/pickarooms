@@ -39,6 +39,7 @@
 
         {% if guest %}
         <h2>📅 Your Stay</h2>
+        <p><strong>Reservation Number:</strong> {{ guest.reservation_number }}</p>
         <p><strong>Check-In:</strong> {{ guest.check_in_date }} (From 2 PM)</p>
         <p><strong>Check-Out:</strong> {{ guest.check_out_date }} (Before 11 AM)</p>
         <p class="expiration"><strong>Access Expires:</strong> {{ expiration_message }}</p>

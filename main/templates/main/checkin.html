@@ -8,15 +8,15 @@
 <section class="hero">
     <div class="hero-overlay"></div>
     <div class="hero-content">
-        <h1>{% trans "Check-In" %}</h1>
+        <h1>Check-In</h1>
         {% if error %}
         <p style="color: red;">{{ error }}</p>
         {% endif %}
         <form method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="phone_number" placeholder="{% trans 'Enter your phone number' %}" value="{{ phone_number }}">
-            <button type="submit">{% trans "Check In" %}</button>
-        </form>
+            <input type="text" name="input_value" placeholder="Enter reservation number or phone number" value="{{ input_value }}">
+            <button type="submit">Check In</button>
+        </form>        
 
         <!-- Links for Popups -->
         <p class="how-to-use-link">

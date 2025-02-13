@@ -11,12 +11,12 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
-        <p>{% trans "Enter your phone number to get your PIN and check-in details." %}</p>
+        <p>Enter your Booking.com reservation number or phone number to retrieve your check-in details.</p>
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="phone_number" placeholder="{% trans 'Enter your phone number' %}">
-            <button type="submit">{% trans "Check In" %}</button>
-        </form>
+            <input type="text" name="input_value" placeholder="Enter reservation number or phone number">
+            <button type="submit">Check In</button>
+        </form>        
 
         <!-- Links for Popups -->
         <p class="how-to-use-link">

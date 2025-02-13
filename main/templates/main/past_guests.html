@@ -36,7 +36,14 @@
             <tbody>
                 {% for guest in past_guests %}
                 <tr>
-                    <td>{{ guest.full_name }}</td>
+                    <td>
+                        {{ guest.full_name }} 
+                        {% if guest.is_returning %}
+                            <span class="returning-guest" title="Returning Guest"> (R) </span>
+                        {% endif %}
+                        <br>
+                        <small>Res #: {{ guest.reservation_number }}</small>
+                    </td>
                     <td>{{ guest.phone_number }}</td>
                     <td>{{ guest.check_in_date }}</td>
                     <td>{{ guest.check_out_date }}</td>

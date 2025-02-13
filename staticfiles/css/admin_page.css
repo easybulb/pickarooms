@@ -121,6 +121,11 @@ select {
     overflow-x: auto;
 }
 
+.returning-guest {
+    color: green;
+    font-weight: bold;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
