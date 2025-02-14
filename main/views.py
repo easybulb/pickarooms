@@ -211,13 +211,17 @@ class AdminLoginView(LoginView):
 def admin_page(request):
     """Admin Dashboard to manage guests, rooms, and assignments."""
 
-    now_time = localtime(now())
+    now_time = localtime(now())  # Get local timezone time
     today = now_time.date()
+    current_time = now_time.time()
+    archive_time = time(11, 0)  # Archive guests at 11:00 AM
 
-    # Auto-archive past guests
-    Guest.objects.filter(
-        Q(check_out_date__lt=today) & Q(is_archived=False)
-    ).update(is_archived=True)
+    # ✅ Archive guests who checked out before today OR today after 11 AM
+    if current_time >= archive_time:
+        Guest.objects.filter(
+            Q(check_out_date__lt=today) | 
+            (Q(check_out_date=today) & Q(is_archived=False))
+        ).update(is_archived=True)
 
     guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
 
@@ -273,6 +277,7 @@ def admin_page(request):
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
     })
+
 
 
 
