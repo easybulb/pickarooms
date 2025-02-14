@@ -129,20 +129,29 @@ def checkin(request):
 
 
 def room_detail(request, room_token):
-    phone_number = request.session.get('phone_number', None)  # Retrieve from session
+    phone_number = request.session.get('phone_number', None)
     guest = get_object_or_404(Guest, secure_token=room_token)
 
     # Ensure only the correct guest can access their own room details
     if not phone_number or guest.phone_number != phone_number:
-        return redirect('unauthorized')  # Redirect unauthorized users
+        return redirect('unauthorized')
 
     room = guest.assigned_room
+
+    # ✅ Determine correct image URL for local or production
+    if room.image and isinstance(room.image, str) and room.image.startswith("http"):
+        image_url = room.image  # Cloudinary URL
+    else:
+        image_url = request.build_absolute_uri(room.image.url) if room.image else None  # Local storage
+
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
+        'image_url': image_url,  # ✅ Pass computed image URL
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
         'MEDIA_URL': settings.MEDIA_URL,
     })
+
 
 
 
