@@ -5,33 +5,30 @@ from datetime import date, timedelta
 from django.conf import settings
 import pandas as pd
 import json
+import cloudinary.uploader
 
 
-# ✅ Import Cloudinary uploader in production
-if not settings.DEBUG:
-    import cloudinary.uploader
-
+import uuid
+from django.db import models
+from django.utils.timezone import now
+from datetime import date, timedelta
+from django.conf import settings
+import cloudinary.uploader  # ✅ Always import Cloudinary
 
 def default_check_out_date():
     """Returns the next day with time set to 11:00 AM."""
     return date.today() + timedelta(days=1)
-
 
 class Room(models.Model):
     name = models.CharField(max_length=100)  # Room name
     access_pin = models.CharField(max_length=10, blank=True, null=True)  # House and Room Access PIN
     video_url = models.URLField()  # Link to the video instructions
     description = models.TextField(blank=True, null=True)  # Optional room description
-
-    # ✅ Use different storage for local and production
-    if settings.DEBUG:
-        image = models.ImageField(upload_to='room_images/', default='default_room.jpg')
-    else:
-        image = models.URLField(blank=True, null=True)  # Store Cloudinary URL in production
+    image = models.URLField(blank=True, null=True)  # ✅ Always use Cloudinary URL (No local file upload)
 
     def save(self, *args, **kwargs):
-        """Upload image to Cloudinary and store its URL in production."""
-        if not settings.DEBUG and self.image and not self.image.startswith("http"):
+        """Ensure Cloudinary URL is always used."""
+        if self.image and not self.image.startswith("http"):
             uploaded_image = cloudinary.uploader.upload(self.image, folder="room_images")
             self.image = uploaded_image['secure_url']  # ✅ Save URL, not file reference
 
@@ -39,6 +36,7 @@ class Room(models.Model):
 
     def __str__(self):
         return self.name
+
 
 
 

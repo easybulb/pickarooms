@@ -294,12 +294,12 @@ body {
 
     .play-button {
         font-size: 1.5rem;
-        padding: 10px 15px;
+        padding: 15px 20px;
     }
 
     .play-text {
         font-size: 0.9rem;
-        top: 72%;
+        top: 65%;
     }
 
     .room-video-container iframe {

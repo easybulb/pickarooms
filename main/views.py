@@ -144,22 +144,13 @@ def room_detail(request, room_token):
 
     room = guest.assigned_room
 
-    # ✅ Determine correct image URL (Cloudinary or Local)
-    if room.image:
-        if isinstance(room.image, str) and room.image.startswith("http"):
-            image_url = room.image  # ✅ Cloudinary URL (Production)
-        else:
-            image_url = request.build_absolute_uri(room.image.url)  # ✅ Local Storage (Dev)
-    else:
-        image_url = None  # ✅ No image set
-
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
-        'image_url': image_url,  # ✅ Pass the correct URL to the template
+        'image_url': room.image or None,  # ✅ Always serve Cloudinary URL
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
-        'MEDIA_URL': settings.MEDIA_URL,
     })
+
 
 
 

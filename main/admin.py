@@ -5,7 +5,7 @@ from django import forms
 from .models import Room, Guest, ReviewCSVUpload
 
 
-# ✅ Custom Form to Handle File Upload in Local and Cloudinary URL in Production
+# ✅ Always show Cloudinary URL input (No file upload)
 class RoomAdminForm(forms.ModelForm):
     class Meta:
         model = Room
@@ -13,11 +13,8 @@ class RoomAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # ✅ If in production, use text input for Cloudinary URL instead of file upload
-        if not settings.DEBUG:
-            self.fields['image'].widget = forms.TextInput(attrs={'placeholder': 'Enter Cloudinary URL'})
-            self.fields['image'].required = False  # ✅ Ensure it's not required
+        self.fields['image'].widget = forms.TextInput(attrs={'placeholder': 'Enter Cloudinary Image URL'})
+        self.fields['image'].required = False  # ✅ Ensure it's optional
 
 
 class RoomAdmin(admin.ModelAdmin):
@@ -27,15 +24,9 @@ class RoomAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
     def image_preview(self, obj):
-        """Display image preview correctly in Django Admin for both local and production."""
+        """Display Cloudinary image preview in Django Admin."""
         if obj.image:
-            # ✅ If it's a Cloudinary URL (Production), use it directly
-            if isinstance(obj.image, str) and obj.image.startswith("http"):
-                image_url = obj.image
-            else:
-                # ✅ If it's a local file (Development), get the media URL
-                image_url = obj.image.url
-            return format_html('<img src="{}" width="50" height="50" style="border-radius:5px;"/>', image_url)
+            return format_html('<img src="{}" width="50" height="50" style="border-radius:5px;"/>', obj.image)
         return "No Image"
 
     image_preview.short_description = "Image Preview"
