@@ -57,9 +57,11 @@ def home(request):
         "welcome_text": _("Welcome, Your Stay Starts Here!"),
         "instructions": _("Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"),
         "LANGUAGES": settings.LANGUAGES,  # ✅ Ensure available languages are included
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
     }
 
     return render(request, "main/home.html", context)
+
 
 
 
@@ -108,13 +110,17 @@ def checkin(request):
             request.session['phone_number'] = guest.phone_number
             request.session['reservation_number'] = guest.reservation_number
             return redirect('room_detail', room_token=guest.secure_token)
-        
+
         return render(request, 'main/checkin.html', {
             'error': _("No reservation found. Please enter the correct Booking.com confirmation/reservation number or phone number used when you made the booking."),
             'input_value': input_value,
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
         })
 
-    return render(request, 'main/checkin.html')
+    return render(request, 'main/checkin.html', {
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+    })
+
 
 
 
@@ -149,6 +155,7 @@ def contact(request):
         name = request.POST.get('name')
         email = request.POST.get('email')
         message = request.POST.get('message')
+
         # Send email logic
         send_mail(
             f"Contact Us Message from {name}",
@@ -156,8 +163,16 @@ def contact(request):
             email,
             ['easybulb@gmail.com'],
         )
-        return render(request, 'main/contact.html', {'success': True})
-    return render(request, 'main/contact.html')
+
+        return render(request, 'main/contact.html', {
+            'success': True,
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+        })
+
+    return render(request, 'main/contact.html', {
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+    })
+
 
 
 

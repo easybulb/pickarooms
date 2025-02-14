@@ -137,6 +137,7 @@
 <!-- Add JavaScript for Modals -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // ✅ Modal Functionality
         const modals = document.querySelectorAll(".modal");
         const openHowToUseBtn = document.getElementById("open-how-to-use-modal");
         const openContactBtn = document.getElementById("open-contact-modal");
@@ -172,6 +173,31 @@
                 }
             });
         });
+
+        // ✅ FAQ Toggle Functionality
+        const faqItems = document.querySelectorAll(".faq-item");
+
+        faqItems.forEach(item => {
+            const question = item.querySelector(".faq-question");
+            const answer = item.querySelector(".faq-answer");
+            const arrow = item.querySelector(".arrow");
+
+            question.addEventListener("click", function () {
+                const isActive = answer.style.display === "block";
+
+                // Close all other answers
+                faqItems.forEach(faq => {
+                    faq.querySelector(".faq-answer").style.display = "none";
+                    faq.querySelector(".arrow").textContent = "▼";
+                });
+
+                // Toggle clicked item
+                answer.style.display = isActive ? "none" : "block";
+                arrow.textContent = isActive ? "▼" : "▲";
+            });
+        });
+
     });
 </script>
+
 {% endblock %}
