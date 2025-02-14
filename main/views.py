@@ -380,21 +380,26 @@ def delete_guest(request, guest_id):
 
 
 
-
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def past_guests(request):
     search_query = request.GET.get('search', '')
-    
+
     past_guests = Guest.objects.filter(is_archived=True)
 
     if search_query:
         past_guests = past_guests.filter(
             Q(full_name__icontains=search_query) |
             Q(phone_number__icontains=search_query) |
-            Q(reservation_number__icontains=search_query) |  # ✅ Allow search by reservation number
+            Q(reservation_number__icontains=search_query) |
             Q(assigned_room__name__icontains=search_query)
         )
+
+    # ✅ Update returning guest logic: Check if same full_name appears in past guests
+    for guest in past_guests:
+        guest.is_returning = Guest.objects.filter(
+            Q(full_name__iexact=guest.full_name) & Q(is_archived=False)
+        ).exists()
 
     past_guests = past_guests.order_by('-check_out_date')
 
@@ -406,6 +411,7 @@ def past_guests(request):
         'past_guests': paginated_past_guests,
         'search_query': search_query,
     })
+
 
 
 
