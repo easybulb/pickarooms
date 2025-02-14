@@ -14,9 +14,10 @@ class RoomAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # ✅ In production, use text input for Cloudinary URL
+        # ✅ If in production, use text input for Cloudinary URL instead of file upload
         if not settings.DEBUG:
             self.fields['image'].widget = forms.TextInput(attrs={'placeholder': 'Enter Cloudinary URL'})
+            self.fields['image'].required = False  # ✅ Ensure it's not required
 
 
 class RoomAdmin(admin.ModelAdmin):

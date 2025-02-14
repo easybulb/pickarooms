@@ -156,17 +156,10 @@ def room_detail(request, room_token):
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
-        'image_url': image_url,
+        'image_url': image_url,  # ✅ Pass the correct URL to the template
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
         'MEDIA_URL': settings.MEDIA_URL,
     })
-
-
-
-
-
-
-
 
 
 

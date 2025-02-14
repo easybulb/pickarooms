@@ -12,4 +12,5 @@ class RoomAdminForm(forms.ModelForm):
 
         # ✅ If in production, use a text input for Cloudinary URL
         if not settings.DEBUG:
-            self.fields['image'].widget = forms.TextInput(attrs={'placeholder': 'Enter Cloudinary URL'})
+            self.fields['image'].widget = forms.TextInput(attrs={'placeholder': 'Enter Cloudinary Image URL'})
+            self.fields['image'].required = False  # ✅ Make sure it's not required
