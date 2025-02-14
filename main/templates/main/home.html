@@ -258,7 +258,7 @@
             event.stopPropagation(); // Prevents document.body click from firing
         });
 
-        // FAQ Functionality
+        // ✅ FIXED FAQ FUNCTIONALITY - Close Before Opening New ✅
         const faqItems = document.querySelectorAll(".faq-item");
 
         faqItems.forEach(item => {
@@ -267,18 +267,32 @@
             const arrow = item.querySelector(".arrow");
 
             question.addEventListener("click", function () {
-                const isActive = answer.style.display === "block";
+                const isActive = item.classList.contains("active");
 
-                // Close all other answers
+                // First, Close any open FAQs
                 faqItems.forEach(faq => {
-                    faq.querySelector(".faq-answer").style.display = "none";
+                    faq.classList.remove("active");
+                    faq.querySelector(".faq-answer").style.maxHeight = "0px";
+                    faq.querySelector(".faq-answer").style.padding = "0";
                     faq.querySelector(".arrow").textContent = "▼";
                 });
 
-                // Toggle clicked item
-                answer.style.display = isActive ? "none" : "block";
-                arrow.textContent = isActive ? "▼" : "▲";
+                // Then, open the clicked one (if not already open)
+                if (!isActive) {
+                    item.classList.add("active");
+
+                    // Ensure it fully opens
+                    setTimeout(() => {
+                        answer.style.maxHeight = answer.scrollHeight + "px";
+                        answer.style.padding = "10px";
+                    }, 10); // Delay ensures smooth transition
+
+                    arrow.textContent = "▲";
+                }
             });
+
+            // ✅ Ensure transition effect after page load
+            answer.style.transition = "max-height 0.4s ease-in-out, padding 0.3s ease-in-out";
         });
 
         // ✅ IMAGE SLIDER FUNCTIONALITY ✅
@@ -330,8 +344,6 @@
         });
     });
 </script>
-
-
 
 
 {% endblock %}

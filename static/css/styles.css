@@ -1013,6 +1013,7 @@ footer {
   font-weight: 500;
 }
 
+/* FAQ Question */
 .faq-question {
   width: 100%;
   text-align: left;
@@ -1027,28 +1028,38 @@ footer {
   align-items: center;
   font-weight: 300;
   color: black;
-}
-
-.faq-answer {
-  background: #e8eaef;
-  border-radius: 0 0 5px 5px;
-  display: none;
-  padding: 10px;
-  margin-top: -20px;
-  color: black;
-  font-size: 1.2rem;
-  font-weight: 300;
+  transition: background 0.3s ease-in-out;
 }
 
 .faq-question:hover {
-  color: #0056b3;
+  background: #e8eaef;
+}
+
+/* ✅ Fix: Use max-height instead of display: none for smooth transitions */
+.faq-answer {
+  background: #e8eaef;
+  border-radius: 0 0 5px 5px;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0; /* Ensure no padding before open */
+  margin-top: -10px;
+  color: black;
+  font-size: 1.2rem;
+  font-weight: 300;
+  transition: max-height 0.4s ease-in-out, padding 0.3s ease-in-out;
+}
+
+/* ✅ Active FAQ - Expands smoothly */
+.faq-item.active .faq-answer {
+  max-height: 1000px; /* Allow full expansion */
+  padding: 10px;
 }
 
 .arrow {
   font-size: 1.2rem;
 }
 
-* FAQ Images */
+/* FAQ Images */
 .faq-images {
     display: flex;
     justify-content: space-between;
@@ -1135,8 +1146,9 @@ footer {
   .faq-map-container iframe {
     width: 100%;
     height: 250px;
+  }
 }
-}
+
 
 
 
@@ -1300,4 +1312,3 @@ footer {
     padding-bottom: 20px; /* Adjust if needed */
   }
 }
-
