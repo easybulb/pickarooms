@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-
 {% load static %}
+{% load i18n %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
@@ -9,30 +9,41 @@
 {% block title %}{{ room.name }} - Room Details{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-{% if room.image %}
-    <section class="room-hero" style="background-image: url('{{ room.image.url }}');">
-{% else %}
-    <section class="room-hero" style="background-color: #555;">
-{% endif %}
-    <div class="room-overlay"></div>
-    <div class="room-text">
-        <h1>{{ room.name }}</h1>
-        {% if guest %}
-            <p>Welcome, {{ guest.full_name }}</p>
-        {% endif %}
+
+<!-- ✅ Hero Section with Image and Playable Video -->
+<section class="room-hero">
+    <div class="hero-overlay"></div>
+
+    <!-- ✅ Default Room Image -->
+    <div class="room-hero-content">
+        <img src="{{ room.image.url }}" alt="{{ room.name }}" class="room-hero-image" id="heroImage">
+        <button class="play-button" id="playVideo">
+            <i class="fas fa-play"></i>
+        </button>
+        <p class="play-text">Play Video</p>  <!-- ✅ Play Video Text -->
+    </div>
+
+    <!-- ✅ Hidden Video (Revealed on Click) -->
+    <div class="room-video-container" id="videoContainer" style="display: none;">
+        <iframe id="videoFrame" src="{{ room.video_url }}" title="Room Instructions"
+                frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen>
+        </iframe>
     </div>
 </section>
 
-<!-- Room Details -->
+<!-- ✅ Room Name & Guest Info -->
+<section class="room-header">
+    <h1>{{ room.name }}</h1>
+    {% if guest %}
+        <p>Welcome, {{ guest.full_name }}</p>
+    {% endif %}
+</section>
+
+<!-- ✅ Room Details -->
 <section class="room-container">
     <div class="room-info">
-        <h2>🔑 House and Room Access PIN</h2>
-        {% if room.access_pin %}
-        <p class="pin-code">{{ room.access_pin }}</p>
-            {% else %}
-                <p>No PIN assigned yet. Contact us for your access PIN.</p>
-            {% endif %}
+        <h2>🔑 House & Room Access PIN</h2>
+        <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
 
         <h2>🛏️ Room Details</h2>
         <p>{{ room.description }}</p>
@@ -43,29 +54,113 @@
         <p><strong>Check-In:</strong> {{ guest.check_in_date }} (From 2 PM)</p>
         <p><strong>Check-Out:</strong> {{ guest.check_out_date }} (Before 11 AM)</p>
         <p class="expiration"><strong>Access Expires:</strong> {{ expiration_message }}</p>
-
         {% else %}
         <p class="no-guest">❌ No guest assigned to this room. Contact admin for assistance.</p>
         {% endif %}
     </div>
 
-    <!-- Room Video Instructions -->
-    <div class="room-video">
-        <h2>🎥 Room Video Guide</h2>
-        <iframe width="100%" height="400"
-                src="{{ room.video_url }}"
-                title="Room Video Instructions"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-        </iframe>
-    </div>
-
-    <!-- Additional Resources -->
+    <!-- ✅ Expandable "More Instructions" Section -->
     <div class="room-resources">
         <h2>📄 Room Instructions</h2>
         <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>📥 Download Room Instructions (PDF)</a></p>
+
+        <button class="toggle-instructions">More Instructions ▼</button>
+        <div class="extra-instructions" style="display: none;">
+            <ul>
+                <li>🛑 <strong>Please lock all doors when leaving</strong></li>
+                <li>🔌 <strong>Switch off all electricals before check-out</strong></li>
+                <li>📞 <strong>For any emergency, contact +44 (0) 7539029629</strong></li>
+            </ul>
+        </div>
     </div>
 </section>
+
+<!-- ✅ FAQ Section -->
+<section class="faq-section">
+    <h2>❓ Frequently Asked Questions</h2>
+    <div class="faq-container">
+        <div class="faq-item">
+            <button class="faq-question">What is the WiFi password? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>The WiFi password is printed inside your room and also available in the instructions.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">How do I check out? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Simply close the door behind you. Your access PIN will expire automatically.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">Is parking available? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Yes, free parking is available on the property.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ✅ JavaScript to Control Video and FAQ -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // ✅ Select elements
+        const heroImage = document.getElementById("heroImage");
+        const videoContainer = document.getElementById("videoContainer");
+        const playButton = document.getElementById("playVideo");
+        const playText = document.querySelector(".play-text");
+        const heroOverlay = document.querySelector(".hero-overlay");
+        const iframe = document.getElementById("videoFrame");
+
+        playButton.addEventListener("click", function () {
+            // ✅ Hide elements
+            heroImage.style.display = "none";
+            playButton.style.display = "none";
+            playText.style.display = "none";
+            heroOverlay.style.display = "none";
+
+            // ✅ Show and autoplay the video
+            videoContainer.style.display = "flex";
+            let videoSrc = iframe.src;
+            if (!videoSrc.includes("autoplay=1")) {
+                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
+            }
+        });
+
+        // ✅ Expand/Collapse More Instructions
+        const toggleBtn = document.querySelector(".toggle-instructions");
+        const extraInstructions = document.querySelector(".extra-instructions");
+
+        toggleBtn.addEventListener("click", function () {
+            const isVisible = extraInstructions.style.display === "block";
+            extraInstructions.style.display = isVisible ? "none" : "block";
+            toggleBtn.textContent = isVisible ? "More Instructions ▼" : "Less Instructions ▲";
+        });
+
+        // ✅ FAQ Functionality (Open/Close Answers)
+        const faqItems = document.querySelectorAll(".faq-item");
+
+        faqItems.forEach(item => {
+            const question = item.querySelector(".faq-question");
+            const answer = item.querySelector(".faq-answer");
+            const arrow = item.querySelector(".arrow");
+
+            question.addEventListener("click", function () {
+                const isActive = answer.style.display === "block";
+
+                // Close all other answers
+                faqItems.forEach(faq => {
+                    faq.querySelector(".faq-answer").style.display = "none";
+                    faq.querySelector(".arrow").textContent = "▼";
+                });
+
+                // Toggle clicked item
+                answer.style.display = isActive ? "none" : "block";
+                arrow.textContent = isActive ? "▼" : "▲";
+            });
+        });
+    });
+</script>
 
 {% endblock %}

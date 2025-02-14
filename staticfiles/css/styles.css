@@ -1241,28 +1241,28 @@ footer {
     display: flex;
     overflow: hidden;
     justify-content: center;
-    position: relative; /* Ensure arrows are positioned within */
+    position: relative; 
   }
 
   .slide {
-    display: none; /* Hide all slides initially */
+    display: none;
     width: 100%;
-    position: relative; /* Ensure caption is properly placed */
+    position: relative; 
   }
 
   .slide img {
     width: 95%;
     height: auto;
-    max-height: 350px; /* Prevents large gaps */
+    max-height: 350px; 
     object-fit: cover;
     margin-top: 10px;
   }
 
   .slide:first-child {
-    display: block; /* Ensure first image is visible on page load */
+    display: block; 
   }
 
-  /* Fix Navigation Arrows */
+ 
   .prev, .next {
     position: absolute;
     top: 40%;
@@ -1283,7 +1283,7 @@ footer {
     background-color: rgba(0, 0, 0, 0.8);
   }
 
-  /* Fix Caption Placement */
+ 
   .caption {
     font-size: 0.9rem;
     padding: 5px 8px;
@@ -1295,7 +1295,7 @@ footer {
     border-radius: 5px;
   }
 
-  /* Reduce black space below the slider */
+  
   .property-slider {
     padding-bottom: 20px; /* Adjust if needed */
   }
