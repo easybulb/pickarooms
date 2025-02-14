@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.html import format_html
+from django.conf import settings
 from .models import Room, Guest, ReviewCSVUpload
 
 class GuestAdmin(admin.ModelAdmin):
@@ -15,22 +17,19 @@ class GuestAdmin(admin.ModelAdmin):
     mark_as_archived.short_description = "Move selected guests to archive"
 
 
-
-from django.utils.html import format_html
-
 class RoomAdmin(admin.ModelAdmin):
     list_display = ('name', 'access_pin', 'video_url', 'image_preview')  # ✅ Show image preview
 
     search_fields = ('name',)
 
     def image_preview(self, obj):
-        """Display image preview in the admin panel."""
+        """Display image preview correctly in the admin panel for both local and production."""
         if obj.image:
-            return format_html('<img src="{}" width="50" height="50" style="border-radius:5px;"/>', obj.image.url)
+            image_url = obj.image if not settings.DEBUG else obj.image.url  # ✅ Handle both local and Cloudinary storage
+            return format_html('<img src="{}" width="50" height="50" style="border-radius:5px;"/>', image_url)
         return "No Image"
 
     image_preview.short_description = "Image Preview"
-
 
 
 class ReviewCSVUploadAdmin(admin.ModelAdmin):
@@ -45,7 +44,7 @@ class ReviewCSVUploadAdmin(admin.ModelAdmin):
         self.message_user(request, "CSV processed and stored as JSON successfully.")
 
 
-# ✅ Register Room and Guest models
-admin.site.register(Room, RoomAdmin)
+# ✅ Register models (Ensuring Room is not registered twice)
+admin.site.register(Room, RoomAdmin)  # ✅ Only keeping ONE instance
 admin.site.register(Guest, GuestAdmin)
 admin.site.register(ReviewCSVUpload, ReviewCSVUploadAdmin)

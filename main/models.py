@@ -6,9 +6,10 @@ from django.conf import settings
 import pandas as pd
 import json
 
-# ✅ Import Cloudinary only if available (for production)
+
+# ✅ Import Cloudinary uploader in production
 if not settings.DEBUG:
-    from cloudinary.models import CloudinaryField
+    import cloudinary.uploader
 
 
 def default_check_out_date():
@@ -22,15 +23,23 @@ class Room(models.Model):
     video_url = models.URLField()  # Link to the video instructions
     description = models.TextField(blank=True, null=True)  # Optional room description
 
-    # logic for image storage
-    image = (
-        models.ImageField(upload_to='room_images/', default='default_room.jpg')  # Local storage
-        if settings.DEBUG
-        else CloudinaryField('image')  # Cloudinary storage in production
-    )
+    # ✅ Use different storage for local and production
+    if settings.DEBUG:
+        image = models.ImageField(upload_to='room_images/', default='default_room.jpg')
+    else:
+        image = models.URLField(blank=True, null=True)  # Store Cloudinary URL in production
+
+    def save(self, *args, **kwargs):
+        """Upload image to Cloudinary and store its URL in production."""
+        if not settings.DEBUG and self.image and not self.image.startswith("http"):
+            uploaded_image = cloudinary.uploader.upload(self.image, folder="room_images")
+            self.image = uploaded_image['secure_url']  # ✅ Save URL, not file reference
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
+
 
 
 class Guest(models.Model):
