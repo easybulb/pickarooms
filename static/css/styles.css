@@ -881,7 +881,8 @@ footer {
 }
 
 .reviews-awards h2 {
-  font-size: 1.8rem;
+  font-size: 1.8em;
+  font-weight: 400;
   color: rgb(24, 22, 22);
   margin-bottom: 15px;
 }
@@ -960,10 +961,12 @@ footer {
       word-spacing: -2px;
       font-size: 1.8rem;
       font-weight: 350;
+      margin-top: -2px;
   }
 
   .awards-container img {
       max-width: 90%;
+      margin-top: 20px;
   }
 
   .review {
@@ -991,7 +994,7 @@ footer {
 }
 
 .faq-section h2 {
-  font-size: 2rem;
+  font-size: 1.8em;
   margin-bottom: 20px;
   color: #333;
   font-weight: 400;
@@ -1033,7 +1036,7 @@ footer {
   padding: 10px;
   margin-top: -20px;
   color: black;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 300;
 }
 
@@ -1073,13 +1076,26 @@ footer {
     object-fit: contain;
 }
 
+.faq-map-container {
+  text-align: center; 
+  margin-top: 10px;
+}
+
+.faq-map-container iframe {
+  width: 100%; 
+  max-width: 600px; 
+  height: 300px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .faq-section {
       padding: 30px 15px;
       border-radius: 0;
       box-shadow: none;
-      margin-top: -30px;
+      margin-top: -20px;
   }
 
   .faq-item {
@@ -1091,16 +1107,14 @@ footer {
     font-weight: 400;
   }
 
-  .faq-section p {
-    font-weight: 350;
-  }
-
   .faq-question {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      font-weight: 350;
   }
 
   .faq-answer {
-      font-size: 1rem;
+      font-size: 1.1rem;
+      font-weight: 350;
   }
 
   .faq-images {
@@ -1117,4 +1131,9 @@ footer {
   .faq-image img {
     margin-top: -30px;
   }
+
+  .faq-map-container iframe {
+    width: 100%;
+    height: 250px;
+}
 }
