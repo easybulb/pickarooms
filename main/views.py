@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.utils.timezone import now, localtime
 from datetime import date, datetime, time
 from django.http import Http404
+from django.db import IntegrityError 
 from django.db.models import Q
 from django.http import JsonResponse
 from django_ratelimit.decorators import ratelimit
@@ -238,7 +239,7 @@ def admin_page(request):
     if request.method == 'POST':
         reservation_number = request.POST.get('reservation_number', '').strip()
         phone_number = request.POST.get('phone_number', '').strip() or None  # ✅ Optional
-        full_name = request.POST.get('full_name', 'Guest')
+        full_name = request.POST.get('full_name', 'Guest').strip()
         room_id = request.POST.get('room')
 
         if not reservation_number:
@@ -248,9 +249,14 @@ def admin_page(request):
         try:
             room = Room.objects.get(id=room_id)
 
-            # ✅ Check if this guest has stayed before
+            # ✅ Check if reservation number already exists
+            if Guest.objects.filter(reservation_number=reservation_number).exists():
+                messages.error(request, "Reservation number already exists.")
+                return redirect('admin_page')
+
+            # ✅ Check if this guest has stayed before based on full name
             previous_stays = Guest.objects.filter(
-                Q(phone_number=phone_number) | Q(reservation_number=reservation_number)
+                Q(full_name__iexact=full_name)  # Case-insensitive match on full name
             ).exists()
 
             # ✅ Create a new guest entry (DO NOT MODIFY OLD RECORDS)
@@ -261,15 +267,17 @@ def admin_page(request):
                 check_in_date=check_in_date,
                 check_out_date=check_out_date,
                 assigned_room=room,
-                is_returning=previous_stays  # ✅ Mark as returning if they stayed before
+                is_returning=previous_stays  # ✅ Mark as returning if they stayed before (based on name)
             )
 
             messages.success(request, "Guest added successfully!")
-
             return redirect('admin_page')
 
         except Room.DoesNotExist:
             messages.error(request, "Invalid room selected.")
+        except IntegrityError:  # ✅ Catch duplicate reservation number error (extra safety)
+            messages.error(request, "Reservation number already exists.")
+            return redirect('admin_page')
 
     return render(request, 'main/admin_page.html', {
         'rooms': available_rooms,
@@ -277,6 +285,7 @@ def admin_page(request):
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
     })
+
 
 
 
