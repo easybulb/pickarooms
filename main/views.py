@@ -15,6 +15,7 @@ from django.contrib import messages
 import pandas as pd
 import random
 from django.utils.translation import gettext as _
+from django.utils.safestring import mark_safe
 from langdetect import detect
 import uuid
 
@@ -93,34 +94,38 @@ def explore_manchester(request):
 
 
 
+
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def checkin(request):
     if request.method == 'POST':
-        input_value = request.POST.get('input_value')
+        reservation_number = request.POST.get('reservation_number', '').strip()
 
-        # Check if input is a reservation number
-        guest = Guest.objects.filter(reservation_number=input_value).order_by('-check_in_date').first()
-
-        # If no reservation number match, fall back to phone number
-        if not guest:
-            guest = Guest.objects.filter(phone_number=input_value).order_by('-check_in_date').first()
+        # Find guest using only the unique Booking.com reservation number
+        guest = Guest.objects.filter(reservation_number=reservation_number).order_by('-check_in_date').first()
 
         if guest:
-            # Store details in session for security
-            request.session['phone_number'] = guest.phone_number
+            # 🔒 Securely store reservation number in session
             request.session['reservation_number'] = guest.reservation_number
             return redirect('room_detail', room_token=guest.secure_token)
 
+        
+        error_message = mark_safe(
+            _("No reservation found. Please enter the correct Booking.com confirmation number. ") +
+            "<br>" 
+            '<a href="#faq-booking-confirmation" class="faq-link" style="color: #FFD700; font-weight: 400; font-size: 15px">' +
+            _("Where can I find my confirmation number?") +
+            '</a>'
+        )
+
         return render(request, 'main/checkin.html', {
-            'error': _("No reservation found. Please enter the correct Booking.com confirmation/reservation number or phone number used when you made the booking."),
-            'input_value': input_value,
-            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+            'error': error_message,  # ✅ Pass error with safe HTML and translation
+            'reservation_number': reservation_number,
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         })
 
     return render(request, 'main/checkin.html', {
-        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
     })
-
 
 
 
@@ -129,28 +134,33 @@ def checkin(request):
 
 
 def room_detail(request, room_token):
-    phone_number = request.session.get('phone_number', None)
+    reservation_number = request.session.get('reservation_number', None)
     guest = get_object_or_404(Guest, secure_token=room_token)
 
-    # Ensure only the correct guest can access their own room details
-    if not phone_number or guest.phone_number != phone_number:
+    # 🔐 Ensure only the correct guest can access their room
+    if not reservation_number or guest.reservation_number != reservation_number:
         return redirect('unauthorized')
 
     room = guest.assigned_room
 
-    # ✅ Determine correct image URL for local or production
-    if room.image and isinstance(room.image, str) and room.image.startswith("http"):
-        image_url = room.image  # Cloudinary URL
+    # ✅ Determine correct image URL (Cloudinary or Local)
+    if room.image:
+        if isinstance(room.image, str) and room.image.startswith("http"):
+            image_url = room.image  # ✅ Cloudinary URL (Production)
+        else:
+            image_url = request.build_absolute_uri(room.image.url)  # ✅ Local Storage (Dev)
     else:
-        image_url = request.build_absolute_uri(room.image.url) if room.image else None  # Local storage
+        image_url = None  # ✅ No image set
 
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
-        'image_url': image_url,  # ✅ Pass computed image URL
+        'image_url': image_url,
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
         'MEDIA_URL': settings.MEDIA_URL,
     })
+
+
 
 
 

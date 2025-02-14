@@ -14,9 +14,10 @@
         {% endif %}
         <form method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="input_value" placeholder="Enter confirmation number or phone number" value="{{ input_value }}">
+            <input type="text" name="reservation_number" placeholder="Enter your Booking.com confirmation number" value="{{ reservation_number }}">
             <button type="submit">Check In</button>
-        </form>        
+        </form>
+             
 
         <!-- Links for Popups -->
         <p class="how-to-use-link">
@@ -29,7 +30,7 @@
             <div class="modal-content">
                 <span class="close" data-modal="how-to-use-modal">&times;</span>
                 <h2>{% trans "How to Use" %}</h2>
-                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter your phone number used during your reservation on Booking.com." %}</p>
+                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter the confirmation number you received during your reservation on Booking.com." %}</p>
                 <p><strong>{% trans "Step 2:" %}</strong> {% trans "Retrieve your PIN." %}</p>
                 <p><strong>{% trans "Step 3:" %}</strong> {% trans "Follow the check-in instructions." %}</p>
                 <p><strong>{% trans "Step 4:" %}</strong> {% trans "Enjoy your stay!" %}</p>
@@ -53,13 +54,15 @@
 </section>
 
 <!-- FAQ Section -->
-<section class="faq-section">
+<section class="faq-section" id="faq-booking-confirmation">
     <h2>{% trans "Have Questions? Answers Below." %}</h2>
     <div class="faq-container">
         <div class="faq-item">
-            <button class="faq-question">Where can I find my Booking.com confirmation number? <span class="arrow">▼</span></button>
+            <button class="faq-question">
+                Where can I find my Booking.com confirmation number? <span class="arrow">▼</span>
+            </button>
             <div class="faq-answer">
-                <p>Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image).</p>
+                <p>Your Booking.com confirmation number can be found in your email and phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image).</p>
                 
                 <!-- Image Container -->
                 <div class="faq-images">
@@ -74,6 +77,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
         <div class="faq-item">
             <button class="faq-question">What is the property address? <span class="arrow">▼</span></button>
@@ -134,7 +138,7 @@
     </div>
 </section>
 
-<!-- Add JavaScript for Modals -->
+<!-- Add JavaScript for Modals & Smooth Scrolling -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // ✅ Modal Functionality
@@ -197,7 +201,24 @@
             });
         });
 
+        // ✅ Smooth Scrolling for FAQ Anchor Link
+        document.querySelectorAll('.faq-link').forEach(link => {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+                const targetId = this.getAttribute('href').substring(1); // Remove `#`
+                const targetElement = document.getElementById(targetId);
+
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 20, // Adjust for any header
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
+
     });
 </script>
+
 
 {% endblock %}
