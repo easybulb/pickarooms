@@ -1227,14 +1227,19 @@ footer {
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .property-slider h2 {
-    margin-top: -5px;
+  .property-slider {
+    padding-bottom: 0px;
+    background: #1c232d;
+  }
+
+  .property-slider .section-title {
     font-weight: 400;
     font-size: 1.8em;
+    margin-top: -10px;
   }
 
   .slider-container {
-    height: 280px
+    height: 360px;
   }
 
   .slider {
@@ -1251,11 +1256,12 @@ footer {
   }
 
   .slide img {
-    width: 95%;
-    height: auto;
+    width: 100%;
+    height: 100%;
     max-height: 350px; 
     object-fit: cover;
     margin-top: 10px;
+    border-radius: 0;
   }
 
   .slide:first-child {
@@ -1265,7 +1271,7 @@ footer {
  
   .prev, .next {
     position: absolute;
-    top: 40%;
+    top: 50%;
     transform: translateY(-50%);
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
@@ -1287,7 +1293,7 @@ footer {
   .caption {
     font-size: 0.9rem;
     padding: 5px 8px;
-    bottom: 5px; /* Moves caption closer to image */
+    bottom: 15px; /* Moves caption closer to image */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.6);
@@ -1295,8 +1301,4 @@ footer {
     border-radius: 5px;
   }
 
-  
-  .property-slider {
-    padding-bottom: 20px; /* Adjust if needed */
-  }
 }
