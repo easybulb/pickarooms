@@ -39,14 +39,36 @@
     {% endif %}
 </section>
 
+<!-- ✅ Section Navigation Buttons -->
+<div class="section-nav">
+    <button onclick="scrollToSection('street-view')">Find Address</button>
+    <button onclick="scrollToSection('kitchen')">Kitchen</button>
+    <button onclick="scrollToSection('heating')">Heating</button>
+    <button onclick="scrollToSection('rules')">House Rules</button>
+    <button onclick="scrollToSection('transport')">Transport</button>
+    <button onclick="scrollToSection('parking')">Parking</button>
+    <button onclick="scrollToSection('check-out')">Check-Out</button>
+    <button onclick="scrollToSection('faq')">FAQ</button>
+</div>
+
 <!-- ✅ Room Details -->
 <section class="room-container">
     <div class="room-info">
         <h2>🔑 House & Room Access PIN</h2>
-        <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
+        {% if now_time < "14:00" %}
+            <p class="pin-wait">Check-in starts at 2 PM. Your PIN will be available then.</p>
+        {% else %}
+            <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
+        {% endif %}
 
         <h2>🛏️ Room Details</h2>
         <p>{{ room.description }}</p>
+        <p>👔 <strong>Pressing Iron & Fan:</strong> Located in the hallway storage. Feel free to use them!</p>
+        <!-- ✅ Bathroom & Towels -->
+        <h2>🛀 Bathroom & Towel Location</h2>
+        <p>🚿 <strong>Bathrooms & Toilets:</strong> Located on the first floor.</p>
+        <p>🛏 <strong>Towels:</strong> Fresh towels are provided inside your room.</p>
+
 
         {% if guest %}
         <h2>📅 Your Stay</h2>
@@ -57,32 +79,85 @@
         {% else %}
         <p class="no-guest">❌ No guest assigned to this room. Contact admin for assistance.</p>
         {% endif %}
+        <p class="discount">🎉 Book your next stay and get 10% off! Use code: <strong>RETURN10</strong></p>
     </div>
-
-    <!-- ✅ Expandable "More Instructions" Section -->
-    <div class="room-resources">
-        <h2>📄 Room Instructions</h2>
-        <p><a href="/static/instructions/room_{{ room.id }}.pdf" download>📥 Download Room Instructions (PDF)</a></p>
-
-        <button class="toggle-instructions">More Instructions ▼</button>
-        <div class="extra-instructions" style="display: none;">
-            <ul>
-                <li>🛑 <strong>Please lock all doors when leaving</strong></li>
-                <li>🔌 <strong>Switch off all electricals before check-out</strong></li>
-                <li>📞 <strong>For any emergency, contact: +44 (0) 7539029629</strong></li>
-            </ul>
-        </div>
+    <br>
+    <!-- ✅ House Rules -->
+    <div id="rules" class="room-info">
+        <h2>📜 House Rules</h2>
+        <p>❗ No smoking inside.</p>
+        <p>🔑 Lost keys incur a fee.</p>
+        <p>🎉 <stong>Noise & Party Policy:</stong> No loud noise or parties allowed.</p>
     </div>
-</section>
-
+    <br>
+    <!-- ✅ Heating & Radiators -->
+    <div id="heating" class="room-info">
+        <h2>🔥 Radiator & Heating Panel</h2>
+        <p>❄️ To adjust the heating, turn the knob clockwise for more heat.</p>
+        <p>🔥 The central heating is automated but can be controlled manually if needed.</p>
+    </div>
+    <br>
+    <!-- ✅ Kitchen & Appliances -->
+    <div id="kitchen" class="room-info">
+        <h2>🍽 Kitchen & Appliances</h2>
+        <p>🍕 <stong>Microwave & Oven:</stong> Located in the kitchen. Instructions available in the user manual near the appliances.</p>
+        <p>🍽 <stong>Plates & Cutlery:</stong> Stored in the lower cabinets near the sink. Please wash after use.</p>
+    </div>
+    <br>
+    <!-- ✅ Transport and Taxi Services -->
+    <div id="transport"  class="room-info">
+        <h2>🚖 Transport & Taxi Services</h2>
+        <p>🚕 Recommended Taxi: <strong>Uber, Bolt or StreetCars on +44 (0) 161 223 1066</strong></p>
+        <p>🚇 Metro Stop: <strong>To get to Manchester town you can take 219 bus from Ashton-Old-Road heading to the city centre</strong></p>
+    </div>
+    <br>
+    <!-- ✅ Check-Out Instructions -->
+    <div id="check-out" class="room-info">
+        <h2>📤 Check-Out Instructions</h2>
+        <ul>
+            <li>🛑 Lock all doors & switch off electricals.</li>
+            <li>🛏️ Leave towels in the bathroom.</li>
+            <li>📅 Workers have the right to enter after checkout time.</li>
+        </ul>
+    </div>
+    <br>
+    <!-- ✅ House Map & Street Image -->
+    <div Id="street-view" class="room-info">
+        <h2>📍 Find the Right House</h2>
+        <img src="{% static 'images/street.jpg' %}" alt="Street View of Property" class="street-image">
+        <p><a href="https://maps.google.com?q=YOUR_LOCATION" target="_blank">📍 Open in Google Maps</a></p>
+    </div>
+    <br>
+    <!-- ✅ Parking & Food Delivery -->
+    <div id="parking" class="room-info">
+        <h2>🚘 Parking & Food Delivery</h2>
+        <p>✅ <stong>Free Parking:</stong> Available in designated spots.</p>
+        <p>🍕 <stong>Food Delivery:</stong> Please instruct drivers not to ring the bell to avoid disturbing other guests.</p>
+    </div>
+    
+    <br>
 <!-- ✅ FAQ Section -->
-<section class="faq-section">
+<div id="faq"  class="room-info">
     <h2>❓ Frequently Asked Questions</h2>
     <div class="faq-container">
         <div class="faq-item">
             <button class="faq-question">What is the WiFi password? <span class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>The WiFi password is printed inside your room and also available in the instructions.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">How safe is the internet network? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>Our internet is powered by **Fibre One** and secured with an **Eero 6+ Gateway**. The guest network is fully isolated, preventing data sharing between devices.</p>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <button class="faq-question">Is my digital lock secure? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <p>The **Tuya Smart Lock** ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure.</p>
             </div>
         </div>
 
@@ -100,6 +175,15 @@
             </div>
         </div>
     </div>
+</div>
+<br>
+<!-- ✅ WhatsApp Chat Button -->
+<div id="chat-button"  class="room-info" onclick="toggleChat()">💬 Chat with Me</div>
+<div class="chat-box" id="chatBox">
+    <p>Need help? Send me a message on WhatsApp!</p>
+    <a href="https://wa.me/YOUR_PHONE_NUMBER" target="_blank">Open WhatsApp</a>
+</div>
+
 </section>
 
 <!-- ✅ JavaScript to Control Video and FAQ -->
@@ -128,16 +212,6 @@
             }
         });
 
-        // ✅ Expand/Collapse More Instructions
-        const toggleBtn = document.querySelector(".toggle-instructions");
-        const extraInstructions = document.querySelector(".extra-instructions");
-
-        toggleBtn.addEventListener("click", function () {
-            const isVisible = extraInstructions.style.display === "block";
-            extraInstructions.style.display = isVisible ? "none" : "block";
-            toggleBtn.textContent = isVisible ? "More Instructions ▼" : "Less Instructions ▲";
-        });
-
         // ✅ FAQ Functionality (Open/Close Answers)
         const faqItems = document.querySelectorAll(".faq-item");
 
@@ -160,7 +234,24 @@
                 arrow.textContent = isActive ? "▼" : "▲";
             });
         });
+
+        // ✅ Smooth Scroll Function for Navigation
+        window.scrollToSection = function (sectionId) {
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                window.scrollTo({
+                    top: targetSection.offsetTop - 20, // Adjust for spacing
+                    behavior: "smooth"
+                });
+            }
+        };
+
+        // ✅ Floating Chat Button Functionality
+        window.toggleChat = function () {
+            document.getElementById("chatBox").classList.toggle("show");
+        };
     });
 </script>
+
 
 {% endblock %}
