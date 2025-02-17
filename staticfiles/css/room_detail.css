@@ -272,7 +272,7 @@ body {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #25D366;
+    background: #159c46;
     color: white;
     padding: 12px 18px;
     border-radius: 25px;
@@ -311,7 +311,7 @@ body {
 
 .chat-box a {
     display: inline-block;
-    background: #25D366;
+    background: #159c46;
     color: white;
     padding: 8px 12px;
     border-radius: 5px;
@@ -412,6 +412,7 @@ body {
         right: 15px;
         padding: 10px 15px;
         font-size: 0.9rem;
+        font-weight: 300;
     }
 
     .chat-box {
