@@ -81,6 +81,35 @@
         {% endif %}
         <p class="discount">🎉 Book your next stay and get 10% off! Use code: <strong>RETURN10</strong></p>
     </div>
+
+    <br>
+<!-- ✅ House Map & Street Image -->
+<div id="street-view" class="room-info">
+    <h2>📍 Find the Right House</h2>
+    <p style="font-size: 1rem; font-weight: 300;">
+        <strong>8 Rylance Street, Beswick, Manchester, M11 3NP</strong>
+    </p>
+    <p>
+        <a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">
+            📍 Open in Google Maps
+        </a>
+    </p>
+
+    <h2>🚗 How to Get to the Property</h2>
+    <p>
+        If you are arriving from <strong>Manchester Airport</strong>, you have the following options:
+    </p>
+    <ul>
+        <li><strong>Taxi:</strong> A direct taxi ride from the airport to the property.</li>
+        <li><strong>Train:</strong> Take a train from <strong>Manchester Airport to Piccadilly Station</strong>, then a short <strong>£5 taxi ride</strong> to the property.</li>
+        <li><strong>Bus:</strong> The <strong>219 bus</strong> runs from <strong>Piccadilly Station</strong> and stops near the property.</li>
+    </ul>
+
+    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" 
+         alt="Street View of Property" 
+         class="street-image">
+    </div>
+
     <br>
     <!-- ✅ House Rules -->
     <div id="rules" class="room-info">
@@ -120,13 +149,7 @@
             <li>📅 Workers have the right to enter after checkout time.</li>
         </ul>
     </div>
-    <br>
-    <!-- ✅ House Map & Street Image -->
-    <div Id="street-view" class="room-info">
-        <h2>📍 Find the Right House</h2>
-        <img src="{% static 'images/street.jpg' %}" alt="Street View of Property" class="street-image">
-        <p><a href="https://maps.google.com?q=YOUR_LOCATION" target="_blank">📍 Open in Google Maps</a></p>
-    </div>
+
     <br>
     <!-- ✅ Parking & Food Delivery -->
     <div id="parking" class="room-info">
@@ -143,14 +166,18 @@
         <div class="faq-item">
             <button class="faq-question">What is the WiFi password? <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>The WiFi password is printed inside your room and also available in the instructions.</p>
+                <p>The WiFi details are below.</p>
+                <ul>
+                    <li><strong>Wifi Name:</strong> Guest_2.4G</li>
+                    <li><strong>Password:</strong> welcome1</li>
+                </ul>  
             </div>
         </div>
 
         <div class="faq-item">
             <button class="faq-question">How safe is the internet network? <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>Our internet is powered by **Fibre One** and secured with an **Eero 6+ Gateway**. The guest network is fully isolated, preventing data sharing between devices.</p>
+                <p>Our internet is powered by <strong>Fibre One</strong> and secured with an <strong>Eero 6+ Gateway</strong>. The guest network is fully isolated, preventing data sharing between devices.</p>
             </div>
         </div>
 

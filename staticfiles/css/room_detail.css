@@ -217,6 +217,16 @@ body {
     text-decoration: underline;
 }
 
+/* ✅ House Map & Street Image */
+
+.street-image {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 /* ✅ FAQ Section */
 .faq-section {
     margin-top: 40px;
@@ -395,6 +405,16 @@ body {
         padding: 15px;
     }
 
+    .street-image {
+        max-width: 100%;
+        border-radius: 5px;
+    }
+
+    #street-view a {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
     .faq-question {
         font-size: 1rem;
     }
@@ -421,4 +441,16 @@ body {
         width: 220px;
         padding: 12px;
     }
+
+    ul {
+        margin: 15px 0;
+        padding-left: 20px; 
+    }
+    
+    li {
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+    
 }
