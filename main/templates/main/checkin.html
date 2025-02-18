@@ -14,7 +14,9 @@
         {% endif %}
         <form method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="reservation_number" placeholder="Enter your Booking.com confirmation number" value="{{ reservation_number }}">
+            <input type="text" name="reservation_number" class="checkin-input" 
+       placeholder="Enter your confirmation number"
+       value="{{ reservation_number|default:'' }}" required>
             <button type="submit">Check In</button>
         </form>
              

@@ -15,7 +15,7 @@
         
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="reservation_number" placeholder="{% trans 'Enter your Booking.com confirmation number' %}">
+            <input type="text" name="reservation_number" placeholder="{% trans 'Enter your Booking.com confirmation number' %}" value="{{ reservation_number|default:'' }}">
             <button type="submit">{% trans "Check In" %}</button>
         </form>
 

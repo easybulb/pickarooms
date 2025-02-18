@@ -42,11 +42,9 @@ def home(request):
         perfect_reviews = [r for r in english_reviews if r["score"] == 10]
         good_reviews = [r for r in english_reviews if r["score"] == 9]
 
-        # Shuffle the reviews to make selection random
         random.shuffle(perfect_reviews)
         random.shuffle(good_reviews)
 
-        # Select up to 3 random 10/10 reviews first, then fill the rest with 9/10 reviews up to 5
         selected_reviews = perfect_reviews[:3] + good_reviews[:2]
         random.shuffle(selected_reviews)
 
@@ -54,17 +52,16 @@ def home(request):
     else:
         latest_reviews = []  # Empty list if no CSV is available
 
-    # ✅ Include Translated Text for Template
     context = {
         "latest_reviews": latest_reviews,
         "welcome_text": _("Welcome, Your Stay Starts Here!"),
         "instructions": _("Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"),
-        "LANGUAGES": settings.LANGUAGES,  # ✅ Ensure available languages are included
-        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+        "LANGUAGES": settings.LANGUAGES,
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+        "reservation_number": request.session.get("reservation_number", ""),  # ✅ Prefill from session
     }
 
     return render(request, "main/home.html", context)
-
 
 
 
@@ -110,9 +107,11 @@ def checkin(request):
             request.session['reservation_number'] = guest.reservation_number
             return redirect('room_detail', room_token=guest.secure_token)
 
-        
+        # If the reservation number is incorrect, keep it prefilled in the form
+        request.session['reservation_number'] = reservation_number
+
         error_message = mark_safe(
-            _("No reservation found. Please enter the correct Booking.com confirmation number. ") +
+            _("No reservation found. Please enter the correct Booking.com confirmation number.") +
             "<br>" 
             '<a href="#faq-booking-confirmation" class="faq-link" style="color: #FFD700; font-weight: 400; font-size: 15px">' +
             _("Where can I find my confirmation number?") +
@@ -120,16 +119,15 @@ def checkin(request):
         )
 
         return render(request, 'main/checkin.html', {
-            'error': error_message,  # ✅ Pass error with safe HTML and translation
+            'error': error_message,
             'reservation_number': reservation_number,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         })
 
     return render(request, 'main/checkin.html', {
         "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+        "reservation_number": request.session.get("reservation_number", ""),  # ✅ Prefill from session
     })
-
-
 
 
 
@@ -145,11 +143,11 @@ def room_detail(request, room_token):
 
     # ✅ Get UK time (handling Daylight Saving Time)
     uk_timezone = pytz.timezone("Europe/London")
-    now_uk_time = timezone.now().astimezone(uk_timezone).date()  # Convert to date for consistency
+    now_uk_time = timezone.now().astimezone(uk_timezone)  # ✅ Now includes time
 
     # ✅ Convert check-in and check-out dates to aware datetimes
     check_in_datetime = timezone.make_aware(
-        datetime.datetime.combine(guest.check_in_date, datetime.time.min),
+        datetime.datetime.combine(guest.check_in_date, datetime.time(14, 0)),  # ✅ 2 PM check-in time
         datetime.timezone.utc,
     ).astimezone(uk_timezone)
 
@@ -162,12 +160,13 @@ def room_detail(request, room_token):
     check_in_date = check_in_datetime.date()
     check_out_date = check_out_datetime.date()
 
-    # ✅ Check if guest has already checked out
-    if now_uk_time > check_out_date:  # 🔥 FIXED: Compare date to date, not datetime
-        return redirect("rebook_guest")  # Redirect to rebooking page
+    # ✅ If guest has checked out, remove reservation from session and redirect to rebook
+    if now_uk_time.date() > check_out_date:
+        request.session.pop("reservation_number", None)  # 🔥 Remove stored reservation number
+        return redirect("rebook_guest")
 
-    # ✅ Only enforce 2 PM rule if today is the check-in day
-    enforce_2pm_rule = now_uk_time == check_in_date and now_uk_time.strftime("%H:%M") < "14:00"
+    # ✅ Only enforce 2 PM rule if today is the check-in day AND before 2 PM
+    enforce_2pm_rule = now_uk_time < check_in_datetime  # ✅ Compare full datetime now
 
     return render(
         request,
@@ -177,9 +176,11 @@ def room_detail(request, room_token):
             "guest": guest,
             "image_url": room.image or None,
             "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
-            "show_pin": not enforce_2pm_rule,  # ✅ Only show PIN if check-in time has passed
+            "show_pin": not enforce_2pm_rule,  # ✅ PIN shows from 2 PM UK time onwards
         },
     )
+
+
 
 
 
@@ -187,8 +188,6 @@ def rebook_guest(request):
     return render(request, 'main/rebook_guest.html', {
         'booking_link': "https://www.booking.com/hotel/gb/double-bed-room-with-on-suite-near-etihad-manchester-city.en-gb.html?label=gen173nr-1BCAsoUEI5ZG91YmxlLWJlZC1yb29tLXdpdGgtb24tc3VpdGUtbmVhci1ldGloYWQtbWFuY2hlc3Rlci1jaXR5SDNYBGhQiAEBmAEJuAEYyAEM2AEB6AEBiAIBqAIEuAKSxdG9BsACAdICJGM2MGZlZWIxLWFhN2QtNGNjMC05MGVjLWMxNWYwZmM1ZDcyMdgCBeACAQ&sid=7613f9a14781ff8d39041ce2257bfde6&dist=0&keep_landing=1&sb_price_type=total&type=total&",
     })
-
-
 
 
 
