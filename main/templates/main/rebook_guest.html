@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Stay Again With Us!{% endblock %}
+{% load static %}
+{% load i18n %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rebook_guest.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="rebook-container">
+    <h1>We Hope You Enjoyed Your Stay!</h1>
+    <p>It looks like your check-out date has passed.</p>
+    <p>We'd love to welcome you back! Book your next stay below:</p>
+    
+    <a href="{{ booking_link }}" class="rebook-button" target="_blank">🔗 Book Again on Booking.com</a>
+
+    <p class="discount-text">Returning guest? We are always happy to welcome you back!</p>
+
+    <!-- ✅ Featured Guest Reviews -->
+    <div class="guest-reviews">
+        <h2>⭐ What Guests Loved</h2>
+        <p>“The place was super clean and the check-in process was seamless. Highly recommended!” – <strong>Jane D.</strong></p>
+        <p>“Great location and cozy rooms. Will definitely book again!” – <strong>Mark T.</strong></p>
+    </div>
+
+    <!-- ✅ Contact Us -->
+    <div class="contact-info">
+        <h2>❓ Need Help?</h2>
+        <p>For inquiries, feel free to <a href="mailto:easybulb@gmail.com">email us</a> or <a href="https://wa.me/447539029629" target="_blank">chat on WhatsApp</a>.</p>
+    </div>
+</section>
+{% endblock %}

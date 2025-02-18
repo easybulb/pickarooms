@@ -131,51 +131,63 @@ def checkin(request):
 
 
 
+
+
 def room_detail(request, room_token):
-    reservation_number = request.session.get('reservation_number', None)
+    reservation_number = request.session.get("reservation_number", None)
     guest = get_object_or_404(Guest, secure_token=room_token)
 
     # 🔐 Ensure only the correct guest can access their room
     if not reservation_number or guest.reservation_number != reservation_number:
-        return redirect('unauthorized')
+        return redirect("unauthorized")
 
     room = guest.assigned_room
 
     # ✅ Get UK time (handling Daylight Saving Time)
     uk_timezone = pytz.timezone("Europe/London")
-    now_uk_time = timezone.now().astimezone(uk_timezone)
+    now_uk_time = timezone.now().astimezone(uk_timezone).date()  # Convert to date for consistency
 
-    # ✅ Get today's UK date
-    today_uk = now_uk_time.date()
-
-    # ✅ Ensure check-in and check-out dates are datetime objects
+    # ✅ Convert check-in and check-out dates to aware datetimes
     check_in_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_in_date, datetime.time.min),
-        datetime.timezone.utc  # ✅ Use `datetime.timezone.utc` instead of `timezone.utc`
+        datetime.timezone.utc,
     ).astimezone(uk_timezone)
 
     check_out_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_out_date, datetime.time.min),
-        datetime.timezone.utc  # ✅ Fix applied here too
+        datetime.timezone.utc,
     ).astimezone(uk_timezone)
 
     # ✅ Convert to date for comparison
     check_in_date = check_in_datetime.date()
     check_out_date = check_out_datetime.date()
 
+    # ✅ Check if guest has already checked out
+    if now_uk_time > check_out_date:  # 🔥 FIXED: Compare date to date, not datetime
+        return redirect("rebook_guest")  # Redirect to rebooking page
+
     # ✅ Only enforce 2 PM rule if today is the check-in day
-    enforce_2pm_rule = today_uk == check_in_date and now_uk_time.strftime("%H:%M") < "14:00"
+    enforce_2pm_rule = now_uk_time == check_in_date and now_uk_time.strftime("%H:%M") < "14:00"
 
-    # ✅ Hide PIN if the guest has already checked out
-    is_guest_checked_out = today_uk > check_out_date
+    return render(
+        request,
+        "main/room_detail.html",
+        {
+            "room": room,
+            "guest": guest,
+            "image_url": room.image or None,
+            "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
+            "show_pin": not enforce_2pm_rule,  # ✅ Only show PIN if check-in time has passed
+        },
+    )
 
-    return render(request, 'main/room_detail.html', {
-        'room': room,
-        'guest': guest,
-        'image_url': room.image or None,  # ✅ Always serve Cloudinary URL
-        'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
-        'show_pin': not enforce_2pm_rule and not is_guest_checked_out,  # ✅ Only show PIN if conditions are met
+
+
+def rebook_guest(request):
+    return render(request, 'main/rebook_guest.html', {
+        'booking_link': "https://www.booking.com/hotel/gb/double-bed-room-with-on-suite-near-etihad-manchester-city.en-gb.html?label=gen173nr-1BCAsoUEI5ZG91YmxlLWJlZC1yb29tLXdpdGgtb24tc3VpdGUtbmVhci1ldGloYWQtbWFuY2hlc3Rlci1jaXR5SDNYBGhQiAEBmAEJuAEYyAEM2AEB6AEBiAIBqAIEuAKSxdG9BsACAdICJGM2MGZlZWIxLWFhN2QtNGNjMC05MGVjLWMxNWYwZmM1ZDcyMdgCBeACAQ&sid=7613f9a14781ff8d39041ce2257bfde6&dist=0&keep_landing=1&sb_price_type=total&type=total&",
     })
+
 
 
 

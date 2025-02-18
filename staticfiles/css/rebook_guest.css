@@ -1,0 +1,93 @@
+.rebook-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: -25px;
+}
+
+.rebook-container h1 {
+    font-weight: 500;
+    font-size: 1.5rem;
+}
+
+.rebook-button {
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-decoration: none;
+    font-weight: 400;
+    transition: 0.3s;
+}
+
+.rebook-button:hover {
+    background: #0056b3;
+}
+
+.discount-text {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    color: #28a745;
+    font-weight: bold;
+}
+
+.guest-reviews, .local-events, .contact-info {
+    margin-top: 30px;
+    text-align: left;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: 400;
+}
+
+h2 {
+    color: #1B263B;
+    font-weight: 400;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.contact-info a {
+    color: #007bff;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+}
+
+/* ✅ Mobile Responsive */
+@media (max-width: 768px) {
+    .rebook-container {
+        padding: 15px;
+    }
+
+    .rebook-button {
+        font-size: 0.9rem;
+        padding: 10px 14px;
+    }
+
+    .discount-text {
+        font-size: 1rem;
+    }
+
+    .guest-reviews, .local-events, .contact-info {
+        padding: 10px;
+    }
+}
