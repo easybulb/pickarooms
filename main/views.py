@@ -1,14 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Guest, Room, ReviewCSVUpload
 from django.core.mail import send_mail
 from django.utils.timezone import now, localtime
+from django.utils import timezone
 from datetime import date, datetime, time
-from django.http import Http404
-from django.db import IntegrityError 
+from django.http import Http404, JsonResponse
+from django.db import IntegrityError
 from django.db.models import Q
-from django.http import JsonResponse
 from django_ratelimit.decorators import ratelimit
 from django.core.paginator import Paginator
 from django.conf import settings
@@ -19,7 +18,9 @@ from django.utils.translation import gettext as _
 from django.utils.safestring import mark_safe
 from langdetect import detect
 import uuid
-
+import pytz
+import datetime  # ✅ This is fine, but should be used carefully with Django's `timezone`
+from .models import Guest, Room, ReviewCSVUpload
 
 
 def home(request):
@@ -129,16 +130,6 @@ def checkin(request):
     })
 
 
-
-
-
-
-
-from django.utils import timezone
-import pytz
-import datetime
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Guest
 
 def room_detail(request, room_token):
     reservation_number = request.session.get('reservation_number', None)
