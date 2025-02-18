@@ -63,7 +63,7 @@
         <p class="no-guest">❌ No guest assigned to this room. Contact admin for assistance.</p>
         {% endif %}
     </div>
-
+<br>
 <!-- ✅ FAQ Section -->
 <div id="faq" class="room-info">
     <h2>❓ Frequently Asked Questions</h2>
@@ -97,6 +97,26 @@
             </div>
         </div>
 
+        <div class="faq-item">
+            <button class="faq-question">How do I use the PIN? <span class="arrow">▼</span></button>
+            <div class="faq-answer">
+                <ul>
+                    <li>Watch the video at the top of this page for easy instructions.</li>
+                    <li>When you arrive at the property’s front door, touch the keypad area to light up the numbers.</li>
+                    <li>Enter your PIN: 
+                        {% if not show_pin %}
+                            <p class="pin-wait">Check-in starts at 2 PM UK time. Your PIN will be available then.</p>
+                        {% else %}
+                            <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
+                        {% endif %}
+                    </li>
+                    <li>Once inside, <strong>remove your shoes</strong> and make your way upstairs to find <strong>{{ room.name }}</strong>.</li>
+                    <li>Touch the front of the lock to light up the numbers and enter the same PIN to access your room.</li>
+                    <li>Inside your room, you will find a <strong>keycard</strong>. You can either continue using your PIN or use the keycard to enter and exit the property and your room.</li>
+                </ul>
+            </div>
+        </div>
+        
         <!-- ✅ Wifi Password -->
         <div class="faq-item">
             <button class="faq-question">What is the WiFi password? <span class="arrow">▼</span></button>
@@ -135,10 +155,12 @@
         <div class="faq-item">
             <button class="faq-question">How do I adjust the heating? <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>❄️ Turn the knobs clockwise of the radiator anti-clockwise to increase heat.</p>
-                <p>🔥 The heating will always come on when the temperature drops below 21 degrees celcius</p>
+                <p>❄️ To increase the heat, turn both radiator knobs <strong>anti-clockwise</strong> to allow hot water to flow in.</p>
+                <p>🔥 The heating system will automatically activate when the room temperature drops below <strong>21°C</strong>.</p>
+                <p>⚠️ <strong>Note:</strong> Do not force the knobs. If they feel stiff, turn them gently.</p>
             </div>
         </div>
+
 
         <!-- ✅ Transport and Taxi Services -->
         <div class="faq-item">
@@ -155,37 +177,41 @@
             <button class="faq-question">How do I check out? <span class="arrow">▼</span></button>
             <div class="faq-answer">
                 <ul>
-                    <li>🛑 </strong>Leave the key/card inside the room anywhere</strong></li>
-                    <li>🛑 Switch off electricals and </strong>close the door</strong>.</li>
-                    <li>🛏️ Leave towels in the bathroom.</li>
-                    <li>📅 Workers may enter after checkout time.</li>
+                    <li>🛑 <strong>Leave the keycard inside the room</strong>—anywhere visible.</li>
+                    <li>🔌 <strong>Switch off all electrical appliances</strong> and ensure lights are turned off.</li>
+                    <li>🚪 <strong>Close the door securely behind you</strong>.</li>
+                    <li>🛏️ <strong>Leave used towels</strong> in the bathroom.</li>
+                    <li>📅 <strong>Housekeeping staff may enter</strong> after the checkout time.</li>
                 </ul>
             </div>
         </div>
+
 
         <!-- ✅ Parking Info -->
         <div class="faq-item">
             <button class="faq-question">🚘 Where can I park? <span class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>✅ <strong>Free parking</strong> is available on the property.</p>
+                <p>✅ The tarmac area can accommodate two cars. If you arrive before other guests, please park <strong>well to the left</strong> to leave enough space for another car to park beside yours.</p>
             </div>
         </div>
 
         <!-- ✅ Bathroom & Towels -->
         <div class="faq-item">
-            <button class="faq-question">Where is the bathroom and do you provide towels? <span class="arrow">▼</span></button>
+            <button class="faq-question">Where is the bathroom, and do you provide towels? <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>🚿 <strong>Bathrooms & Toilets:</strong> Located en-suite for some rooms and located in the hallway for some other rooms.</p>
-                <p>🛏 Fresh towels are provided inside your room. We also provide shower gel which is located inside the bathroom.</p>
+                <p>🚿 <strong>Bathrooms & Toilets:</strong> Some rooms have en-suite bathrooms, while others have shared bathrooms located in the hallway.</p>
+                <p>🛏 Fresh towels are provided inside your room. Shower gel is also available in the bathroom for your convenience.</p>
             </div>
         </div>
 
-        <!-- ✅ Bathroom & Towels -->
+
+        <!-- ✅ Pressing Iron and Hairdryer -->
         <div class="faq-item">
-            <button class="faq-question">Do you provide pressing iron and hair dryer? <span class="arrow">▼</span></button>
+            <button class="faq-question">Do you provide a pressing iron and hairdryer? <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>🚿 Yes. The pressing iron is located in the hallway.</p>
-                <p>🛏 Hair dryer can be found in the bathroom.</p>
+                <p>🧺 Yes, a <strong>pressing iron</strong> is available in the hallway for your use.</p>
+                <p>💨 A <strong>hairdryer</strong> can be found in the bathroom.</p>
             </div>
         </div>
 

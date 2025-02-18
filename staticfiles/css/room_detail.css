@@ -413,7 +413,7 @@ body {
     }
 
     .room-header h1 {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         font-weight: 400;
         margin-top: -1px;
     }
@@ -421,6 +421,7 @@ body {
     .room-header p {
         font-size: 1.1rem;
         margin-top: -15px;
+        margin-bottom: -5px;
     }
 
     .room-info h2 {
@@ -452,6 +453,13 @@ body {
         padding: 15px;
     }
 
+    .room-container h2 {
+        font-weight: 500;
+    }
+    .room-container p {
+        font-size: 1rem;
+    }
+
     .street-image {
         max-width: 100%;
         border-radius: 5px;
@@ -471,7 +479,7 @@ body {
     }
 
     .faq-container {
-        padding: 10px;
+        padding: 0px;
     }
 
     #chat-button {
