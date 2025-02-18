@@ -47,7 +47,7 @@
         {% if not show_pin %}
             <p class="pin-wait">Check-in starts at 2 PM UK time. Your PIN will be available then.</p>
         {% else %}
-            <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
+            <p class="pin-code">{{ room.access_pin|default:"" }}</p>
         {% endif %}
     
         <h2>🛏️ Room Details</h2>

@@ -177,7 +177,6 @@ body {
     font-weight: bold;
     letter-spacing: 4px;
     text-align: center;
-    background: #28a745; /* Green background for PIN visibility */
     color: white;
     padding: 15px 20px;
     border-radius: 8px;
@@ -187,12 +186,11 @@ body {
     border: 2px solid #218838; /* Darker green border */
 }
 
-/* ✅ Styling for when no PIN is available */
-.pin-code:empty::before {
+.pin-code:empty::before,
+.pin-code[data-content=""]::before {
     content: "No PIN assigned yet. Contact support.";
     font-size: 1.2rem;
     letter-spacing: normal;
-    background: #dc3545; /* Red for alert */
     border: 2px solid #c82333;
     padding: 12px 18px;
     display: block;
