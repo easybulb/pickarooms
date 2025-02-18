@@ -171,6 +171,22 @@ body {
 }
 
 /* ✅ PIN Code Display */
+/* ✅ Styling for PIN Wait Message */
+.pin-wait {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #dc3545; /* Red color for alert */
+    background: #fdecea; /* Light red background */
+    border: 2px solid #dc3545; /* Matching border */
+    padding: 12px 18px;
+    display: block;
+    text-align: center;
+    border-radius: 8px;
+    width: fit-content;
+    margin: 15px auto; /* Centering */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 .pin-code {
     display: block;
     font-size: 2rem;
@@ -410,6 +426,12 @@ body {
     .room-info h2 {
         font-size: 1.2rem;
         font-size: 400;
+    }
+
+    .pin-wait {
+        font-size: 1rem;
+        padding: 10px 14px;
+        border-width: 1.5px;
     }
 
     .pin-code {
