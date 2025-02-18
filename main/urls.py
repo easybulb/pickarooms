@@ -12,6 +12,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('checkin/', views.checkin, name='checkin'),
     path('room/<str:room_token>/', views.room_detail, name='room_detail'),  # Secure Token URL
+    path("rebook/", views.rebook_guest, name="rebook_guest"),
     path('explore-manchester/', views.explore_manchester, name='explore_manchester'),
     path('contact/', views.contact, name='contact'),
     path('admin-page/', views.admin_page, name='admin_page'),
