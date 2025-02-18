@@ -170,16 +170,37 @@ body {
     color: #333;
 }
 
-/* ✅ PIN Display */
+/* ✅ PIN Code Display */
 .pin-code {
+    display: block;
     font-size: 2rem;
     font-weight: bold;
-    letter-spacing: 5px;
-    background: #28a745;
+    letter-spacing: 4px;
+    text-align: center;
+    background: #28a745; /* Green background for PIN visibility */
     color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    display: inline-block;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: fit-content;
+    margin: 20px auto;
+    border: 2px solid #218838; /* Darker green border */
+}
+
+/* ✅ Styling for when no PIN is available */
+.pin-code:empty::before {
+    content: "No PIN assigned yet. Contact support.";
+    font-size: 1.2rem;
+    letter-spacing: normal;
+    background: #dc3545; /* Red for alert */
+    border: 2px solid #c82333;
+    padding: 12px 18px;
+    display: block;
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    width: fit-content;
+    margin: auto;
 }
 
 /* ✅ Guest Access Expiration */
@@ -394,11 +415,14 @@ body {
     }
 
     .pin-code {
-        text-align: center;
-        font-size: 2rem;
-        border-radius: 8px;
-        background: rgb(255, 221, 0);
-        display: block;
+        font-size: 1.8rem;
+        padding: 12px 16px;
+        letter-spacing: 3px;
+    }
+
+    .pin-code:empty::before {
+        font-size: 1rem;
+        padding: 10px 14px;
     }
 
     .room-container {

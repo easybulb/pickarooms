@@ -44,12 +44,12 @@
 <section class="room-container">
     <div class="room-info">
         <h2>🔑 House & Room Access PIN</h2>
-        {% if now_time < "14:00" %}
-            <p class="pin-wait">Check-in starts at 2 PM. Your PIN will be available then.</p>
+        {% if not show_pin %}
+            <p class="pin-wait">Check-in starts at 2 PM UK time. Your PIN will be available then.</p>
         {% else %}
             <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
         {% endif %}
-
+    
         <h2>🛏️ Room Details</h2>
         <p>{{ room.description }}</p>
 
@@ -176,7 +176,7 @@
             <button class="faq-question">Where is the bathroom and do you provide towels? <span class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>🚿 <strong>Bathrooms & Toilets:</strong> Located en-suite for some rooms and located in the hallway for some other rooms.</p>
-                <p>🛏 Fresh towels are provided inside your room. We also provide shower gel which is located inside the bathroom</p>
+                <p>🛏 Fresh towels are provided inside your room. We also provide shower gel which is located inside the bathroom.</p>
             </div>
         </div>
 
@@ -185,7 +185,7 @@
             <button class="faq-question">Do you provide pressing iron and hair dryer? <span class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>🚿 Yes. The pressing iron is located in the hallway.</p>
-                <p>🛏 Hair dryer can be found in the bathroom</p>
+                <p>🛏 Hair dryer can be found in the bathroom.</p>
             </div>
         </div>
 
@@ -199,7 +199,7 @@
         <div class="faq-item">
             <button class="faq-question">Is my digital lock secure? <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>The **Tuya Smart Lock** ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure.</p>
+                <p>The <strong>Tuya Smart Lock</strong> ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure.</p>
             </div>
         </div>
 

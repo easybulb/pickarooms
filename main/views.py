@@ -134,6 +134,12 @@ def checkin(request):
 
 
 
+from django.utils import timezone
+import pytz
+import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Guest
+
 def room_detail(request, room_token):
     reservation_number = request.session.get('reservation_number', None)
     guest = get_object_or_404(Guest, secure_token=room_token)
@@ -144,11 +150,40 @@ def room_detail(request, room_token):
 
     room = guest.assigned_room
 
+    # ✅ Get UK time (handling Daylight Saving Time)
+    uk_timezone = pytz.timezone("Europe/London")
+    now_uk_time = timezone.now().astimezone(uk_timezone)
+
+    # ✅ Get today's UK date
+    today_uk = now_uk_time.date()
+
+    # ✅ Ensure check-in and check-out dates are datetime objects
+    check_in_datetime = timezone.make_aware(
+        datetime.datetime.combine(guest.check_in_date, datetime.time.min),
+        datetime.timezone.utc  # ✅ Use `datetime.timezone.utc` instead of `timezone.utc`
+    ).astimezone(uk_timezone)
+
+    check_out_datetime = timezone.make_aware(
+        datetime.datetime.combine(guest.check_out_date, datetime.time.min),
+        datetime.timezone.utc  # ✅ Fix applied here too
+    ).astimezone(uk_timezone)
+
+    # ✅ Convert to date for comparison
+    check_in_date = check_in_datetime.date()
+    check_out_date = check_out_datetime.date()
+
+    # ✅ Only enforce 2 PM rule if today is the check-in day
+    enforce_2pm_rule = today_uk == check_in_date and now_uk_time.strftime("%H:%M") < "14:00"
+
+    # ✅ Hide PIN if the guest has already checked out
+    is_guest_checked_out = today_uk > check_out_date
+
     return render(request, 'main/room_detail.html', {
         'room': room,
         'guest': guest,
         'image_url': room.image or None,  # ✅ Always serve Cloudinary URL
         'expiration_message': f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
+        'show_pin': not enforce_2pm_rule and not is_guest_checked_out,  # ✅ Only show PIN if conditions are met
     })
 
 
