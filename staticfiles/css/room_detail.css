@@ -203,7 +203,7 @@ body {
 }
 
 .pin-code:empty::before,
-.pin-code[data-content=""]::before {
+.pin-code[data-content="No PIN assigned yet. Contact support."]::before {
     content: "No PIN assigned yet. Contact support.";
     font-size: 1.2rem;
     letter-spacing: normal;
