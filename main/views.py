@@ -193,7 +193,7 @@ def rebook_guest(request):
     })
 
 
-
+@ratelimit(key='ip', rate='3/m', method='POST', block=True)
 def contact(request):
     if request.method == 'POST':
         name = request.POST.get('name')
