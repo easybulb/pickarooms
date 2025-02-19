@@ -152,7 +152,7 @@ def room_detail(request, room_token):
     ).astimezone(uk_timezone)
 
     check_out_datetime = timezone.make_aware(
-        datetime.datetime.combine(guest.check_out_date, datetime.time.min),
+        datetime.datetime.combine(guest.check_out_date, datetime.time(11, 0)),  # ✅ 11 AM check-out time
         datetime.timezone.utc,
     ).astimezone(uk_timezone)
 
@@ -161,7 +161,7 @@ def room_detail(request, room_token):
     check_out_date = check_out_datetime.date()
 
     # ✅ If guest has checked out, remove reservation from session and redirect to rebook
-    if now_uk_time.date() > check_out_date:
+    if now_uk_time > check_out_datetime:
         request.session.pop("reservation_number", None)  # 🔥 Remove stored reservation number
         return redirect("rebook_guest")
 
@@ -175,7 +175,7 @@ def room_detail(request, room_token):
             "room": room,
             "guest": guest,
             "image_url": room.image or None,
-            "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:59 PM.",
+            "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:00 AM.",
             "show_pin": not enforce_2pm_rule,  # ✅ PIN shows from 2 PM UK time onwards
         },
     )
