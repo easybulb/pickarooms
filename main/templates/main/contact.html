@@ -10,13 +10,28 @@
 {% block title %}{% trans "Contact Us - PickARooms" %}{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-text">
-        <h1>{% trans "Get in Touch" %}</h1>
-        <p>{% trans "Need assistance? The best way to reach us is via phone, email, or through Booking.com and Airbnb
-            messaging." %}</p>
+
+<!-- Contact Form -->
+<section class="contact-container">
+    <div class="contact-form">
+        <h2>{% trans "Send Us a Message" %}</h2>
+        {% if success %}
+        <p class="success-message">✅ {% trans "Your message has been sent successfully!" %}</p>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="name">{% trans "Full Name" %}</label>
+            <input type="text" id="name" name="name" placeholder="{% trans 'Enter your name' %}" required>
+
+            <label for="email">{% trans "Email Address" %}</label>
+            <input type="email" id="email" name="email" placeholder="{% trans 'Enter your email' %}" required>
+
+            <label for="message">{% trans "Your Message" %}</label>
+            <textarea id="message" name="message" rows="5" placeholder="{% trans 'Write your message here...' %}"
+                required></textarea>
+
+            <button type="submit">{% trans "Send Message" %}</button>
+        </form>
     </div>
 </section>
 
@@ -35,37 +50,13 @@
             <p>+44 (0) 7539 029 629</p>
         </div>
 
-        <!-- Contact Form -->
-        <div class="contact-form">
-            <h2>{% trans "Send Us a Message" %}</h2>
-            {% if success %}
-            <p class="success-message">✅ {% trans "Your message has been sent successfully!" %}</p>
-            {% endif %}
-            <form method="post">
-                {% csrf_token %}
-                <label for="name">{% trans "Full Name" %}</label>
-                <input type="text" id="name" name="name" placeholder="{% trans 'Enter your name' %}" required>
+        <!-- Map Section -->
+        <section class="map">
+            <h2>📍 {% trans "Find Us" %}</h2>
+            <iframe width="600" height="350" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                src="https://www.google.com/maps/embed/v1/place?q=8+Rylance+Street,+Beswick,+Manchester,+M11+3NP,+United+Kingdom&key={{ GOOGLE_MAPS_API_KEY }}">
+            </iframe>
+        </section>
 
-                <label for="email">{% trans "Email Address" %}</label>
-                <input type="email" id="email" name="email" placeholder="{% trans 'Enter your email' %}" required>
-
-                <label for="message">{% trans "Your Message" %}</label>
-                <textarea id="message" name="message" rows="5" placeholder="{% trans 'Write your message here...' %}"
-                    required></textarea>
-
-                <button type="submit">{% trans "Send Message" %}</button>
-            </form>
-        </div>
-    </div>
-</section>
-
-<!-- Map Section -->
-<section class="map">
-    <h2>📍 {% trans "Find Us" %}</h2>
-    <iframe width="600" height="350" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        src="https://www.google.com/maps/embed/v1/place?q=8+Rylance+Street,+Beswick,+Manchester,+M11+3NP,+United+Kingdom&key={{ GOOGLE_MAPS_API_KEY }}">
-    </iframe>
-</section>
-
-{% endblock %}
+        {% endblock %}
