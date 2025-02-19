@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage, BadHeaderError
+from django.conf import settings
+from django.http import HttpResponse
 from django.utils.timezone import now, localtime
 from django.utils import timezone
 from datetime import date, datetime, time
@@ -191,28 +193,42 @@ def rebook_guest(request):
 
 
 
+
 def contact(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
         message = request.POST.get('message')
 
-        # Send email logic
-        send_mail(
-            f"Contact Us Message from {name}",
-            message,
-            email,
-            ['easybulb@gmail.com'],
-        )
+        subject = f"Contact Us Message from {name}"
+        body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+
+        try:
+            # Use EmailMessage instead of send_mail for better header control
+            email_message = EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=settings.DEFAULT_FROM_EMAIL,  # Must be your Gmail address
+                to=['easybulb@gmail.com'],  # Your email to receive messages
+                reply_to=[email]  # Allows proper reply-to behavior
+            )
+            email_message.send()
+
+        except BadHeaderError:
+            return HttpResponse("Invalid header found.", status=400)
+        except Exception as e:
+            return HttpResponse(f"Error: {str(e)}", status=500)
 
         return render(request, 'main/contact.html', {
             'success': True,
-            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+            "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         })
 
     return render(request, 'main/contact.html', {
-        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,  # ✅ Include Google Maps API key
+        "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
     })
+
+
 
 
 
