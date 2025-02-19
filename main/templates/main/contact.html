@@ -30,10 +30,14 @@
             <textarea id="message" name="message" rows="5" placeholder="{% trans 'Write your message here...' %}"
                 required></textarea>
 
+            <!-- ✅ Google reCAPTCHA v2 Checkbox -->
+            <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_PUBLIC_KEY }}"></div>
+
             <button type="submit">{% trans "Send Message" %}</button>
         </form>
     </div>
 </section>
+
 
 <!-- Contact Section -->
 <section class="content contact-container">
@@ -58,5 +62,7 @@
                 src="https://www.google.com/maps/embed/v1/place?q=8+Rylance+Street,+Beswick,+Manchester,+M11+3NP,+United+Kingdom&key={{ GOOGLE_MAPS_API_KEY }}">
             </iframe>
         </section>
+
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
         {% endblock %}

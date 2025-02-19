@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
+import requests
 from django.core.mail import EmailMessage, BadHeaderError
 from django.conf import settings
 from django.http import HttpResponse
@@ -193,12 +194,26 @@ def rebook_guest(request):
 
 
 
-
 def contact(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         email = request.POST.get('email')
         message = request.POST.get('message')
+        recaptcha_response = request.POST.get('g-recaptcha-response')
+
+        # Verify reCAPTCHA response
+        recaptcha_secret = settings.RECAPTCHA_PRIVATE_KEY
+        recaptcha_url = "https://www.google.com/recaptcha/api/siteverify"
+        recaptcha_data = {'secret': recaptcha_secret, 'response': recaptcha_response}
+        recaptcha_verify = requests.post(recaptcha_url, data=recaptcha_data).json()
+
+        # If reCAPTCHA fails, show error message
+        if not recaptcha_verify.get('success'):
+            return render(request, 'main/contact.html', {
+                'error': "reCAPTCHA verification failed. Please try again.",
+                "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+                "RECAPTCHA_PUBLIC_KEY": settings.RECAPTCHA_PUBLIC_KEY,  # ✅ Pass Public Key
+            })
 
         subject = f"Contact Us Message from {name}"
         body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
@@ -222,12 +237,13 @@ def contact(request):
         return render(request, 'main/contact.html', {
             'success': True,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+            "RECAPTCHA_PUBLIC_KEY": settings.RECAPTCHA_PUBLIC_KEY,  # ✅ Ensure Key is Passed
         })
 
     return render(request, 'main/contact.html', {
         "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+        "RECAPTCHA_PUBLIC_KEY": settings.RECAPTCHA_PUBLIC_KEY,  # ✅ Ensure Key is Passed
     })
-
 
 
 

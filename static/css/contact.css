@@ -128,6 +128,10 @@ text-align: center;
     margin-bottom: 12px;
 }
 
+.g-recaptcha {
+    margin-top: 15px;
+}
+
 /* Google Map Section */
 .map {
     text-align: center;
@@ -192,6 +196,12 @@ text-align: center;
     .contact-form input,
     .contact-form textarea {
         width: 90%;
+    }
+
+    .contact-form button {
+        width: 50%;
+        font-size: 1rem;
+        font-weight: 400;
     }
 
     .map iframe {
