@@ -1307,7 +1307,7 @@ footer {
 
 
 /* Styles for screens between 768px and 1200px */
-@media (min-width: 769px) and (max-width: 1400px) {
+@media (min-width: 769px) and (max-width: 1800px) {
   
   .checkin-form input {
     padding: 10px;
