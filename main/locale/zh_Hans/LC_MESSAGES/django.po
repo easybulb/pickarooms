@@ -177,6 +177,10 @@ msgstr "步骤4："
 msgid "Enjoy your stay!"
 msgstr "祝您入住愉快！"
 
+#: templates/main/contact.html:5
+msgid "Contact Us"
+msgstr "联系我们"
+
 #: templates/main/home.html:33
 msgid "Phone:"
 msgstr "电话："
