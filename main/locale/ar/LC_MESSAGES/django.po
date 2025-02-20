@@ -597,3 +597,591 @@ msgstr "لم يتم العثور على حجز. يرجى إدخال نفس رق�
 #: views.py:16
 msgid "Details not found. Make sure you input the correct phone number."
 msgstr "لم يتم العثور على التفاصيل. تأكد من إدخال رقم الهاتف الصحيح."
+
+#: Template: room_detail.html (Title)
+msgid "Room Details"
+msgstr "تفاصيل الغرفة"
+
+#: Template: room_detail.html (Hero Section)
+msgid "Instruction Video"
+msgstr "فيديو التعليمات"
+
+#: Template: room_detail.html (Video Iframe title)
+msgid "Room Instructions"
+msgstr "تعليمات الغرفة"
+
+#: Template: room_detail.html (Guest greeting)
+msgid "Welcome, %(guest_name)s"
+msgstr "مرحباً، %(guest_name)s"
+
+#: Template: room_detail.html (Room Access PIN header)
+msgid "🔑 House & Room Access PIN"
+msgstr "🔑 رمز الوصول للمنزل والغرفة"
+
+#: Template: room_detail.html (PIN not yet available)
+msgid "Check-in starts at 2 PM UK time. Your PIN will be available then."
+msgstr "يبدأ تسجيل الوصول في الساعة 2 مساءً بتوقيت المملكة المتحدة. سيكون رمز الوصول متاحًا بعد ذلك."
+
+#: Template: room_detail.html (No PIN message)
+msgid "No PIN assigned yet. Contact support."
+msgstr "لم يتم تعيين رمز وصول بعد. يرجى الاتصال بالدعم."
+
+#: Template: room_detail.html (Room Details header)
+msgid "🛏️ Room Details"
+msgstr "🛏️ تفاصيل الغرفة"
+
+#: Template: room_detail.html (Your Stay header)
+msgid "📅 Your Stay"
+msgstr "📅 إقامتك"
+
+#: Template: room_detail.html (Reservation Number label)
+msgid "Reservation Number:"
+msgstr "رقم الحجز:"
+
+#: Template: room_detail.html (Check-In label)
+msgid "Check-In:"
+msgstr "تسجيل الوصول:"
+
+#: Template: room_detail.html (From 2 PM)
+msgid "From 2 PM"
+msgstr "من الساعة 2 مساءً"
+
+#: Template: room_detail.html (Check-Out label)
+msgid "Check-Out:"
+msgstr "تسجيل المغادرة:"
+
+#: Template: room_detail.html (Before 11 AM)
+msgid "Before 11 AM"
+msgstr "قبل الساعة 11 صباحًا"
+
+#: Template: room_detail.html (Access Expires label)
+msgid "Access Expires:"
+msgstr "تنتهي صلاحية الوصول:"
+
+#: Template: room_detail.html (No guest assigned)
+msgid "No guest assigned to this room. Contact admin for assistance."
+msgstr "لم يتم تعيين ضيف لهذه الغرفة. يرجى الاتصال بالمسؤول للمساعدة."
+
+#: Template: room_detail.html (FAQ header)
+msgid "❓ Frequently Asked Questions"
+msgstr "❓ الأسئلة الشائعة"
+
+#: Template: room_detail.html (FAQ – Property Location question)
+msgid "📍 Where is the property located?"
+msgstr "📍 أين يقع العقار؟"
+
+#: Template: room_detail.html (Arrow down)
+msgid "▼"
+msgstr "▼"
+
+#: Template: room_detail.html (Address text)
+msgid "8 Rylance Street, Beswick, Manchester, M11 3NP"
+msgstr "8 شارع رايلانس، بيسويك، مانشستر، M11 3NP"
+
+#: Template: room_detail.html (Link to Google Maps)
+msgid "📍 Open in Google Maps"
+msgstr "📍 افتح في خرائط جوجل"
+
+#: Template: room_detail.html (Image alt text)
+msgid "Street View of Property"
+msgstr "عرض الشارع للعقار"
+
+#: Template: room_detail.html (FAQ – Directions question)
+msgid "How do I get to the property?"
+msgstr "كيف أصل إلى العقار؟"
+
+#: Template: room_detail.html (Directions – From Manchester Airport heading)
+msgid "Coming from Manchester Airport?"
+msgstr "أتصل من مطار مانشستر؟"
+
+#: Template: room_detail.html (Directions – Taxi label)
+msgid "Taxi:"
+msgstr "تاكسي:"
+
+#: Template: room_detail.html (Directions – Taxi instruction part 1)
+msgid "A direct taxi from"
+msgstr "تاكسي مباشر من"
+
+#: Template: room_detail.html (Directions – Manchester Airport)
+msgid "Manchester Airport"
+msgstr "مطار مانشستر"
+
+#: Template: room_detail.html (Directions – Taxi instruction part 2)
+msgid "takes approximately 25 minutes."
+msgstr "يستغرق حوالي 25 دقيقة."
+
+#: Template: room_detail.html (Directions – Train label)
+msgid "Train:"
+msgstr "قطار:"
+
+#: Template: room_detail.html (Directions – Train instruction part 1)
+msgid "Take a train from"
+msgstr "استقل قطارًا من"
+
+#: Template: room_detail.html (Directions – Train route)
+msgid "Manchester Airport to Piccadilly Station"
+msgstr "مطار مانشستر إلى محطة بيكاديلي"
+
+#: Template: room_detail.html (Directions – Train instruction part 2)
+msgid "then a short"
+msgstr "ثم رحلة قصيرة بـ"
+
+#: Template: room_detail.html (Directions – Taxi ride price)
+msgid "£5 taxi ride"
+msgstr "تاكسي بـ 5 جنيه إسترليني"
+
+#: Template: room_detail.html (Directions – to the property)
+msgid "to the property."
+msgstr "إلى العقار."
+
+#: Template: room_detail.html (Directions – Bus label)
+msgid "Bus:"
+msgstr "حافلة:"
+
+#: Template: room_detail.html (Directions – Bus article)
+msgid "The"
+msgstr "الحافلة"
+
+#: Template: room_detail.html (Directions – Bus number)
+msgid "219 bus"
+msgstr "حافلة 219"
+
+#: Template: room_detail.html (Directions – from preposition)
+msgid "from"
+msgstr "من"
+
+#: Template: room_detail.html (Directions – Piccadilly Station)
+msgid "Piccadilly Station"
+msgstr "محطة بيكاديلي"
+
+#: Template: room_detail.html (Directions – Bus instruction part)
+msgid "stops near the property."
+msgstr "تتوقف بالقرب من العقار."
+
+#: Template: room_detail.html (Directions – Other parts question)
+msgid "Coming from another part of Manchester?"
+msgstr "أتصل من جزء آخر من مانشستر؟"
+
+#: Template: room_detail.html (Directions – Instruction part 1)
+msgid "Make your way to"
+msgstr "توجه إلى"
+
+#: Template: room_detail.html (Directions – Manchester city centre)
+msgid "Manchester city centre"
+msgstr "وسط مدينة مانشستر"
+
+#: Template: room_detail.html (Directions – Instruction part 2)
+msgid "and take the"
+msgstr "واستقل"
+
+#: Template: room_detail.html (Directions – Instruction part 3)
+msgid "to the nearest bus stop close to the property. You can use"
+msgstr "إلى أقرب محطة حافلات بالقرب من العقار. يمكنك استخدام"
+
+#: Template: room_detail.html (Directions – Google Maps repeat)
+msgid "Google Maps"
+msgstr "خرائط جوجل"
+
+#: Template: room_detail.html (Directions – Instruction part 4)
+msgid "or your navigation app to find the closest stop to alight."
+msgstr "أو تطبيق الملاحة لإيجاد أقرب محطة للنزول."
+
+#: Template: room_detail.html (Directions – Driving question)
+msgid "Driving to the property?"
+msgstr "هل ستقود إلى العقار؟"
+
+#: Template: room_detail.html (Directions – Navigation instruction part 1)
+msgid "Use"
+msgstr "استخدم"
+
+#: Template: room_detail.html (Directions – Navigation instruction part 2)
+msgid "or your preferred navigation app and enter the destination:"
+msgstr "أو تطبيق الملاحة المفضل لديك وأدخل الوجهة:"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 1)
+msgid "The property is easily accessible via"
+msgstr "يمكن الوصول إلى العقار بسهولة عبر"
+
+#: Template: room_detail.html (Directions – Ashton Old Road)
+msgid "Ashton Old Road (A635)"
+msgstr "شارع أشتون أولد (A635)"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 2)
+msgid "If coming from the"
+msgstr "إذا كنت قادمًا من"
+
+#: Template: room_detail.html (Directions – M60 motorway)
+msgid "M60 motorway"
+msgstr "الطريق السريع M60"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 3)
+msgid "take Exit 24 and follow signs toward"
+msgstr "اخرج من المخرج 24 واتبع الإشارات نحو"
+
+#: Template: room_detail.html (Directions – Manchester City Centre)
+msgid "Manchester City Centre"
+msgstr "وسط مدينة مانشستر"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 4)
+msgid "Parking is available on-site."
+msgstr "تتوفر مواقف للسيارات في الموقع."
+
+#: Template: room_detail.html (FAQ – How to use the PIN question)
+msgid "How do I use the PIN?"
+msgstr "كيف أستخدم رمز الوصول؟"
+
+#: Template: room_detail.html (FAQ – Instruction step 1)
+msgid "Watch the video at the top of this page for easy instructions."
+msgstr "شاهد الفيديو في أعلى هذه الصفحة للحصول على تعليمات سهلة."
+
+#: Template: room_detail.html (FAQ – Instruction step 2)
+msgid "When you arrive at the property’s front door, touch the keypad area to light up the numbers."
+msgstr "عندما تصل إلى الباب الأمامي للعقار، المس منطقة لوحة المفاتيح لإضاءة الأرقام."
+
+#: Template: room_detail.html (FAQ – Instruction step 3)
+msgid "Enter your PIN:"
+msgstr "أدخل رمز الوصول الخاص بك:"
+
+#: Template: room_detail.html (FAQ – Instruction step 4)
+msgid "Once inside, remove your shoes and make your way upstairs to find"
+msgstr "بمجرد الدخول، اخلع حذاءك وتوجه إلى الطابق العلوي للعثور على"
+
+#: Template: room_detail.html (FAQ – Instruction step 5)
+msgid "Touch the front of the"
+msgstr "اضغط على مقدمة"
+
+#: Template: room_detail.html (FAQ – Instruction step 5 continued)
+msgid "door lock to light up the numbers and enter the same PIN to access your room."
+msgstr "قفل الباب لإضاءة الأرقام وأدخل نفس رمز الوصول للوصول إلى غرفتك."
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 1)
+msgid "Inside your room, you will find a"
+msgstr "داخل غرفتك، ستجد"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 2)
+msgid "keycard"
+msgstr "بطاقة المفتاح"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 3)
+msgid "You can either continue using your PIN or use the keycard to enter and exit the property and your room. Watch the video above on how to use the keycard."
+msgstr "يمكنك الاستمرار في استخدام رمز الوصول الخاص بك أو استخدام بطاقة المفتاح للدخول والخروج من العقار وغرفتك. شاهد الفيديو أعلاه لمعرفة كيفية استخدام بطاقة المفتاح."
+
+#: Template: room_detail.html (FAQ – WiFi Password question)
+msgid "What is the WiFi password?"
+msgstr "ما هو كلمة مرور الواي فاي؟"
+
+#: Template: room_detail.html (FAQ – WiFi details intro)
+msgid "The WiFi details are below."
+msgstr "تفاصيل الواي فاي موضحة أدناه."
+
+#: Template: room_detail.html (FAQ – Wifi Name label)
+msgid "Wifi Name:"
+msgstr "اسم الواي فاي:"
+
+#: Template: room_detail.html (FAQ – Guest_2.4G)
+msgid "Guest_2.4G"
+msgstr "Guest_2.4G"
+
+#: Template: room_detail.html (FAQ – Password label)
+msgid "Password:"
+msgstr "كلمة المرور:"
+
+#: Template: room_detail.html (FAQ – welcome1)
+msgid "welcome1"
+msgstr "welcome1"
+
+#: Template: room_detail.html (FAQ – House Rules question)
+msgid "What are the house rules?"
+msgstr "ما هي قواعد المنزل؟"
+
+#: Template: room_detail.html (FAQ – House Rules rule 1)
+msgid "No smoking inside."
+msgstr "منع التدخين بالداخل."
+
+#: Template: room_detail.html (FAQ – House Rules rule 2)
+msgid "Lost keys incur a fee."
+msgstr "المفاتيح المفقودة تُفرض عليها رسوم."
+
+#: Template: room_detail.html (FAQ – House Rules rule 3)
+msgid "No loud noise or parties allowed."
+msgstr "لا يُسمح بالأصوات العالية أو الحفلات."
+
+#: Template: room_detail.html (FAQ – Shared Kitchen question)
+msgid "Where is the shared kitchen?"
+msgstr "أين المطبخ المشترك؟"
+
+#: Template: room_detail.html (FAQ – Shared Kitchen, first sentence)
+msgid "The kitchen is located downstairs and you have full access to it."
+msgstr "يقع المطبخ في الطابق الأرضي ولديك وصول كامل إليه."
+
+#: Template: room_detail.html (FAQ – Kitchen: Microwave & Oven label)
+msgid "Microwave & Oven:"
+msgstr "الميكروويف والفرن:"
+
+#: Template: room_detail.html (FAQ – Kitchen: Instructions)
+msgid "Located in the kitchen. Instructions are available nearby."
+msgstr "يقع في المطبخ. التعليمات متوفرة بالقرب منه."
+
+#: Template: room_detail.html (FAQ – Kitchen: Plates & Cutlery label)
+msgid "Plates & Cutlery:"
+msgstr "الأطباق وأدوات المائدة:"
+
+#: Template: room_detail.html (FAQ – Kitchen: Plates & Cutlery instructions)
+msgid "Stored in the cabinets. Please wash after use."
+msgstr "محفوظة في الخزائن. يرجى غسلها بعد الاستخدام."
+
+#: Template: room_detail.html (FAQ – Heating question)
+msgid "How do I adjust the heating?"
+msgstr "كيف أضبط التدفئة؟"
+
+#: Template: room_detail.html (FAQ – Heating step 1)
+msgid "To increase the heat, turn both radiator knobs"
+msgstr "لزيادة الحرارة، قم بتدوير مقابض المشعات"
+
+#: Template: room_detail.html (FAQ – Heating – anti-clockwise)
+msgid "anti-clockwise"
+msgstr "عكس اتجاه عقارب الساعة"
+
+#: Template: room_detail.html (FAQ – Heating step 1 continued)
+msgid "to allow hot water to flow in."
+msgstr "لسماح تدفق الماء الساخن."
+
+#: Template: room_detail.html (FAQ – Heating step 2)
+msgid "The heating system will automatically activate when the room temperature drops below"
+msgstr "يعمل نظام التدفئة تلقائياً عندما تنخفض درجة حرارة الغرفة تحت"
+
+#: Template: room_detail.html (FAQ – Heating – 21°C)
+msgid "21°C"
+msgstr "21°C"
+
+#: Template: room_detail.html (FAQ – Heating – Note label)
+msgid "Note:"
+msgstr "ملاحظة:"
+
+#: Template: room_detail.html (FAQ – Heating step 3)
+msgid "Do not force the knobs. If they feel stiff, turn them gently."
+msgstr "لا تجبر المقابض. إذا شعرت بأنها متصلبة، فقم بتدويرها برفق."
+
+#: Template: room_detail.html (FAQ – Getting Around question)
+msgid "How can I get around?"
+msgstr "كيف يمكنني التنقل؟"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi line label)
+msgid "Recommended Taxi:"
+msgstr "تاكسي موصى به:"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi companies)
+msgid "Uber, Bolt, or StreetCars"
+msgstr "Uber, Bolt أو StreetCars"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi phone)
+msgid "(+44 161 223 1066)"
+msgstr "(+44 161 223 1066)"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro label)
+msgid "Metro:"
+msgstr "مترو:"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro instruction part 1)
+msgid "Take"
+msgstr "استقل"
+
+#: Template: room_detail.html (FAQ – Getting Around, bus route)
+msgid "bus 219 from Ashton-Old-Road"
+msgstr "الحافلة 219 من شارع أشتون أولد"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro instruction part 2)
+msgid "to the city centre."
+msgstr "إلى وسط المدينة."
+
+#: Template: room_detail.html (FAQ – Getting Around, additional bus info)
+msgid "For more bus routes and planning go to"
+msgstr "لمزيد من مسارات الحافلات والتخطيط، توجه إلى"
+
+#: Template: room_detail.html (FAQ – Getting Around, Bee Network)
+msgid "Bee Network"
+msgstr "شبكة بي"
+
+#: Template: room_detail.html (FAQ – Check Out question)
+msgid "How do I check out?"
+msgstr "كيف أقوم بتسجيل المغادرة؟"
+
+#: Template: room_detail.html (FAQ – Check Out, step 1)
+msgid "Leave the keycard inside the room"
+msgstr "اترك بطاقة المفتاح داخل الغرفة"
+
+#: Template: room_detail.html (FAQ – Check Out, step 1 extra)
+msgid "—anywhere visible."
+msgstr "—في أي مكان ظاهر."
+
+#: Template: room_detail.html (FAQ – Check Out, step 2)
+msgid "Switch off all electrical appliances"
+msgstr "أوقف تشغيل جميع الأجهزة الكهربائية"
+
+#: Template: room_detail.html (FAQ – Check Out, step 2 extra)
+msgid "and ensure lights are turned off."
+msgstr "وتأكد من إطفاء الأضواء."
+
+#: Template: room_detail.html (FAQ – Check Out, step 3)
+msgid "Close the door securely behind you"
+msgstr "أغلق الباب بإحكام خلفك."
+
+#: Template: room_detail.html (FAQ – Check Out, step 4)
+msgid "Leave used towels"
+msgstr "اترك المناشف المستخدمة"
+
+#: Template: room_detail.html (FAQ – Check Out, step 4 extra)
+msgid "in the bathroom."
+msgstr "في الحمام."
+
+#: Template: room_detail.html (FAQ – Check Out, step 5)
+msgid "Housekeeping staff may enter"
+msgstr "يجوز لطواقم التدبير المنزلي الدخول"
+
+#: Template: room_detail.html (FAQ – Check Out, step 5 extra)
+msgid "after the checkout time."
+msgstr "بعد وقت تسجيل المغادرة."
+
+#: Template: room_detail.html (FAQ – Parking question)
+msgid "🚘 Where can I park?"
+msgstr "🚘 أين يمكنني الوقوف؟"
+
+#: Template: room_detail.html (FAQ – Parking, line 1)
+msgid "Free parking"
+msgstr "مواقف مجانية"
+
+#: Template: room_detail.html (FAQ – Parking, line 1 continuation)
+msgid "is available on the property."
+msgstr "متوفرة في العقار."
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 1)
+msgid "The tarmac area can accommodate two cars. If you arrive before other guests, please park"
+msgstr "يمكن لمنطقة الرصف استيعاب سيارتين. إذا وصلت قبل الضيوف الآخرين، يرجى الوقوف"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 2)
+msgid "well to the left"
+msgstr "إلى اليسار بشكل جيد"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 3)
+msgid "to leave enough space for another car to park beside yours."
+msgstr "لترك مساحة كافية لوقوف سيارة أخرى بجانب سيارتك."
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels question)
+msgid "Where is the bathroom, and do you provide towels?"
+msgstr "أين الحمام وهل توفرون المناشف؟"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 1)
+msgid "Bathrooms & Toilets:"
+msgstr "الحمامات والمراحيض:"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 2)
+msgid "Some rooms have en-suite bathrooms, while others have shared bathrooms located in the hallway."
+msgstr "بعض الغرف تحتوي على حمامات داخلية، بينما توجد حمامات مشتركة في الردهة في غرف أخرى."
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 3)
+msgid "Fresh towels are provided inside your room. Shower gel is also available in the bathroom for your convenience."
+msgstr "تُوفَّر مناشف نظيفة داخل غرفتك. كما يتوفر جل استحمام في الحمام لراحتك."
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer question)
+msgid "Do you provide a pressing iron and hairdryer?"
+msgstr "هل توفرون مكواة ومجفف شعر؟"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 1)
+msgid "Yes, a"
+msgstr "نعم،"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 2)
+msgid "pressing iron"
+msgstr "مكواة"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 3)
+msgid "is available in the hallway for your use."
+msgstr "متوفرة في الردهة لاستخدامك."
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 4)
+msgid "hairdryer"
+msgstr "مجفف شعر"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 5)
+msgid "can be found in the bathroom."
+msgstr "يمكن العثور عليه في الحمام."
+
+#: Template: room_detail.html (FAQ – Internet Network question)
+msgid "How safe is the internet network?"
+msgstr "ما مدى أمان شبكة الإنترنت؟"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 1)
+msgid "Our internet is powered by"
+msgstr "يعمل الإنترنت لدينا بواسطة"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 2)
+msgid "Fibre One"
+msgstr "Fibre One"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 3)
+msgid "and secured with an"
+msgstr "ومؤمَّن بواسطة"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 4)
+msgid "Eero 6+ Gateway"
+msgstr "Eero 6+ Gateway"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 5)
+msgid "The guest network is fully isolated, preventing data sharing between devices."
+msgstr "شبكة الضيوف معزولة تمامًا، مما يمنع تبادل البيانات بين الأجهزة."
+
+#: Template: room_detail.html (FAQ – Digital Lock question)
+msgid "Is my digital lock secure?"
+msgstr "هل قفل غرفتي الرقمي آمن؟"
+
+#: Template: room_detail.html (FAQ – Digital Lock, part 2)
+msgid "Tuya Smart Lock"
+msgstr "Tuya Smart Lock"
+
+#: Template: room_detail.html (FAQ – Digital Lock, part 3)
+msgid "ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure."
+msgstr "يضمن أن الضيف المعين والمسؤول فقط يمكنهما الوصول إلى الغرفة. تنتهي صلاحية رموز الدخول تلقائيًا بعد تسجيل المغادرة، مما يجعله آمنًا للغاية."
+
+#: Template: room_detail.html (FAQ – Amenities question)
+msgid "What amenities are included in the room?"
+msgstr "ما هي المرافق المتوفرة في الغرفة؟"
+
+#: Template: room_detail.html (FAQ – Amenities list intro)
+msgid "The room includes the following amenities:"
+msgstr "تشتمل الغرفة على المرافق التالية:"
+
+#: Template: room_detail.html (FAQ – Amenity 1)
+msgid "Free High-Speed WiFi"
+msgstr "واي فاي عالي السرعة مجاني"
+
+#: Template: room_detail.html (FAQ – Amenity 2)
+msgid "Fresh Towels & Bed Linen"
+msgstr "مناشف نظيفة وبياضات سرير"
+
+#: Template: room_detail.html (FAQ – Amenity 3)
+msgid "Private or Shared Bathroom with body wash and hand wash"
+msgstr "حمام خاص أو مشترك مع غسول للجسم وغسول لليدين"
+
+#: Template: room_detail.html (FAQ – Amenity 4)
+msgid "Smart TV with Netflix, Amazon Prime and others"
+msgstr "تلفزيون ذكي مع نتفليكس وأمازون برايم وغيرها"
+
+#: Template: room_detail.html (FAQ – Amenity 5)
+msgid "Pressing Iron and Hair Dryer"
+msgstr "مكواة ومجفف شعر"
+
+#: Template: room_detail.html (FAQ – Amenity 6)
+msgid "Complimentary Tea, Coffee & Milk (In the kitchen downstairs)"
+msgstr "شاي وقهوة وحليب مجانية (في المطبخ بالطابق الأرضي)"
+
+#: Template: room_detail.html (WhatsApp Chat Button)
+msgid "💬 Chat with Me"
+msgstr "💬 دردش معي"
+
+#: Template: room_detail.html (WhatsApp Chat Box, prompt)
+msgid "Need help? Send me a message on WhatsApp!"
+msgstr "تحتاج إلى مساعدة؟ أرسل لي رسالة عبر واتساب!"
+
+#: Template: room_detail.html (WhatsApp Chat Box, link)
+msgid "Open WhatsApp"
+msgstr "افتح واتساب"
