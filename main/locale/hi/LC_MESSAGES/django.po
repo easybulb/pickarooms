@@ -1249,3 +1249,11 @@ msgstr "“यह जगह बहुत साफ-सुथरी थी और
 #: guest-reviews > p (review 2)
 msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
 msgstr "“उत्कृष्ट स्थान और आरामदायक कमरे। निश्चित रूप से फिर से बुक करूंगा!” – Mark T."
+
+#: checkin template 1
+msgid "No reservation found. Please enter the correct Booking.com confirmation number."
+msgstr "कोई आरक्षण नहीं मिला। कृपया सही Booking.com पुष्टि संख्या दर्ज करें।"
+
+#: checkin template 2
+msgid "Where can I find my confirmation number?"
+msgstr "मैं अपनी पुष्टि संख्या कहाँ पा सकता हूँ?"

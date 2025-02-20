@@ -1246,3 +1246,11 @@ msgstr "「施設は非常に清潔で、チェックインの手続きもスム
 #: guest-reviews > p (review 2)
 msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
 msgstr "「立地が良く、快適な部屋でした。ぜひまた予約します！」 – Mark T."
+
+#: checkin template 1
+msgid "No reservation found. Please enter the correct Booking.com confirmation number."
+msgstr "予約が見つかりません。正しい Booking.com の確認番号を入力してください。"
+
+#: checkin template 2
+msgid "Where can I find my confirmation number?"
+msgstr "確認番号はどこにありますか？"

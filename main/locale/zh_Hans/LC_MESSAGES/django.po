@@ -1244,3 +1244,11 @@ msgstr "“这个地方非常干净，入住流程也非常顺畅。强烈推荐
 #: guest-reviews > p (review 2)
 msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
 msgstr "“地理位置优越，房间舒适。一定会再次预订！” – Mark T."
+
+#: checkin template 1
+msgid "No reservation found. Please enter the correct Booking.com confirmation number."
+msgstr "未找到预订。请输入正确的 Booking.com 确认号码。"
+
+#: checkin template 2
+msgid "Where can I find my confirmation number?"
+msgstr "我在哪里可以找到我的确认号码？"

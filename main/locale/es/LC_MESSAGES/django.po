@@ -1250,3 +1250,11 @@ msgstr "«El lugar estaba súper limpio y el proceso de check-in fue impecable. 
 #: guest-reviews > p (review 2)
 msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
 msgstr "«Excelente ubicación y habitaciones acogedoras. ¡Definitivamente volveré a reservar!» – Mark T."
+
+#: checkin template 1
+msgid "No reservation found. Please enter the correct Booking.com confirmation number."
+msgstr "No se encontró ninguna reserva. Por favor, introduzca el número de confirmación correcto de Booking.com."
+
+#: checkin template 2
+msgid "Where can I find my confirmation number?"
+msgstr "¿Dónde puedo encontrar mi número de confirmación?"

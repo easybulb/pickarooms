@@ -1245,3 +1245,11 @@ msgstr "«المكان نظيف للغاية وعملية تسجيل الوصو�
 #: guest-reviews > p (review 2)
 msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
 msgstr "«موقع رائع وغرف مريحة. بالتأكيد سأحجز مرة أخرى!» – مارك ت."
+
+#: checkin template 1
+msgid "No reservation found. Please enter the correct Booking.com confirmation number."
+msgstr "لم يتم العثور على حجز. الرجاء إدخال رقم التأكيد الصحيح من Booking.com."
+
+#: checkin template 2
+msgid "Where can I find my confirmation number?"
+msgstr "أين يمكنني العثور على رقم التأكيد الخاص بي؟"
