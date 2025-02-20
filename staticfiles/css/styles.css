@@ -715,16 +715,16 @@ footer {
   }
 
   .checkin-form input {
-    padding: 15px 10px;
+    padding: 12px 10px;
     width: 250px;
     margin-right: 10px;
     border: none;
     border-radius: 5px;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   .checkin-form button {
-    padding: 10px 15px;
+    padding: 10px 20px;
     border: solid 1px white;
     background: linear-gradient(90deg, #002147, #003580, #0056b3);
     color: white;
@@ -1301,4 +1301,30 @@ footer {
     border-radius: 5px;
   }
 
+}
+
+
+
+
+/* Styles for screens between 768px and 1200px */
+@media (min-width: 769px) and (max-width: 1400px) {
+  
+  .checkin-form input {
+    padding: 10px;
+    width: 250px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    font-weight: 400;
+  }
+  
+  .checkin-form button {
+    padding: 13px 20px;
+    border: solid 1px white;
+    background: linear-gradient(90deg, #002147, #003580, #0056b3);
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+  }
 }
