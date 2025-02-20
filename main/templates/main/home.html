@@ -69,25 +69,24 @@
                 <!-- Image Container -->
                 <div class="faq-images">
                     <div class="faq-image">
-                        <h3>Using Browser</h3>
+                        <h3>{% trans "Using Browser" %}</h3>
                         <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking.browser_pmzfnq.png"
-                            alt="Booking.com confirmation number on browser">
+                            alt="{% trans 'Booking.com confirmation number on browser' %}">
                     </div>
                     <div class="faq-image">
-                        <h3>On Booking.com App</h3>
+                        <h3>{% trans "On Booking.com App" %}</h3>
                         <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking-app_xbqadd.png"
-                            alt="Booking.com confirmation number on app">
+                            alt="{% trans 'Booking.com confirmation number on app' %}">
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">What is the property address? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What is the property address?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United
-                        Kingdom</strong>.</p>
-
+                <p>{% trans "The property is located at" %} <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, {% trans "United Kingdom" %}</strong>.</p>
+        
                 <!-- Google Maps Embed -->
                 <div class="faq-map-container">
                     <iframe width="600" height="350" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"
@@ -96,47 +95,46 @@
                     </iframe>
                 </div>
             </div>
-        </div>
+        </div>        
 
 
         <div class="faq-item">
-            <button class="faq-question">What are the check-in and check-out times? <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What are the check-in and check-out times?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>Check-in: <strong>From 2:00 PM</strong> <br> Check-out: <strong>Anytime before 11:00 AM on the
-                        checkout day</strong></p>
+                <p>
+                {% trans "Check-in:" %} <strong>{% trans "From 2:00 PM" %}</strong> <br>
+                {% trans "Check-out:" %} <strong>{% trans "Anytime before 11:00 AM on the checkout day" %}</strong>
+                </p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">How do I get my room access PIN? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How do I get my room access PIN?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>Your room access PIN can be found on this site after checkin with your Booking.com confirmation
-                    number.</p>
+                <p>{% trans "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">Is there parking available at the property? <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Is there parking available at the property?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>Yes, free parking is available on the property. Additional paid parking options are nearby.</p>
+                <p>{% trans "Yes, free parking is available on the property. Additional paid parking options are nearby." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">How can I contact support if I need help? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How can I contact support if I need help?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>For assistance, contact us via: <br> <strong>Phone:</strong> +44 (0) 7539029629 <br>
-                    <strong>Email:</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
+                <p>{% trans "For assistance, contact us via:" %} <br>
+                    <strong>{% trans "Phone:" %}</strong> +44 (0) 7539029629 <br>
+                    <strong>{% trans "Email:" %}</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">What is your cancellation policy? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What is your cancellation policy?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>Cancellations depend on the policy selected during booking. Check your Booking.com reservation for
-                    details.</p>
+                <p>{% trans "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details." %}</p>
             </div>
         </div>
     </div>
