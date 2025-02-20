@@ -274,6 +274,9 @@ msgstr "Für Unterstützung kontaktieren Sie uns unter:"
 msgid "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details."
 msgstr "Stornierungen hängen von der bei der Buchung gewählten Richtlinie ab. Überprüfen Sie Ihre Booking.com-Reservierung für Details."
 
+#: template.html:103
+msgid "Explore Our Rooms"
+msgstr "Entdecken Sie unsere Zimmer"
 
 #: templates/main/home.html:47
 msgid "What Our Guests Say"
