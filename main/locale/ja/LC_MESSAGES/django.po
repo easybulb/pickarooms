@@ -126,17 +126,14 @@ msgstr "ホーム - Pick-A-Rooms"
 msgid "Welcome, Your Stay Starts Here!"
 msgstr "ようこそ、ご宿泊はこちらから！"
 
-#: templates/main/home.html:11
-msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
-msgstr "PIN、チェックインガイド、スムーズな体験のための詳細情報にアクセスするために電話番号を入力してください。"
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to get your PIN and check-in details."
-msgstr "PINコードとチェックインの詳細を取得するために電話番号を入力してください。"
+msgid "Enter your Booking.com confirmation number to retrieve your check-in details."
+msgstr "チェックインの詳細を取得するために、Booking.comの確認番号を入力してください。"
 
-#: templates/main/home.html:14
-msgid "Enter your phone number"
-msgstr "電話番号を入力してください"
+#: templates/main/home.html:11
+msgid "Enter your Booking.com confirmation number"
+msgstr "Booking.comの確認番号を入力してください。"
 
 #: templates/main/home.html:15
 msgid "Check In"
@@ -148,15 +145,15 @@ msgstr "使い方"
 
 #: templates/main/home.html:24
 msgid "Step 1:"
-msgstr "ステップ 1:"
+msgstr "ステップ1："
 
 #: templates/main/home.html:24
-msgid "Enter your phone number used during your reservation on Booking.com."
-msgstr "Booking.comでの予約時に使用した電話番号を入力してください。"
+msgid "Enter the confirmation number you received during your reservation on Booking.com."
+msgstr "Booking.comでの予約時に受け取った確認番号を入力してください。"
 
 #: templates/main/home.html:25
 msgid "Step 2:"
-msgstr "ステップ 2:"
+msgstr "ステップ2："
 
 #: templates/main/home.html:25
 msgid "Retrieve your PIN."
@@ -164,35 +161,127 @@ msgstr "PINを取得してください。"
 
 #: templates/main/home.html:26
 msgid "Step 3:"
-msgstr "ステップ 3:"
+msgstr "ステップ3："
 
 #: templates/main/home.html:26
 msgid "Follow the check-in instructions."
-msgstr "チェックインの手順に従ってください。"
+msgstr "チェックインの指示に従ってください。"
 
 #: templates/main/home.html:27
 msgid "Step 4:"
-msgstr "ステップ 4:"
+msgstr "ステップ4："
 
 #: templates/main/home.html:27
 msgid "Enjoy your stay!"
-msgstr "快適な滞在をお楽しみください！"
+msgstr "ご滞在をお楽しみください！"
 
 #: templates/main/home.html:33
 msgid "Phone:"
-msgstr "電話:"
+msgstr "電話："
 
 #: templates/main/home.html:34
 msgid "Whatsapp:"
-msgstr "WhatsApp:"
+msgstr "Whatsapp："
 
 #: templates/main/home.html:35
 msgid "Email:"
-msgstr "メール:"
+msgstr "メール："
 
 #: templates/main/home.html:42
 msgid "Luxury Hotel Room"
 msgstr "高級ホテルの客室"
+
+#: template.html:36
+msgid "Have Questions? Answers Below."
+msgstr "ご質問はありますか？以下に回答があります。"
+
+#: template.html:40
+msgid "Where can I find my Booking.com confirmation number?"
+msgstr "Booking.comの確認番号はどこで確認できますか？"
+
+#: template.html:42
+msgid "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)."
+msgstr "Booking.comの確認番号は、メールや電話の確認で確認できます。また、オンラインでBooking.comのアカウントにログインすることで見つけることもできます。ブラウザを使用している場合は右上に表示されます（最初の画像参照）。Booking.comアプリを使用している場合は、完了した予約の詳細の下に表示されます（2番目の画像参照）。"
+
+#: template.html:47
+msgid "Using Browser"
+msgstr "ブラウザを使用"
+
+#: template.html:48
+msgid "Booking.com confirmation number on browser"
+msgstr "ブラウザ上のBooking.com確認番号"
+
+#: template.html:51
+msgid "On Booking.com App"
+msgstr "Booking.comアプリ上で"
+
+#: template.html:52
+msgid "Booking.com confirmation number on app"
+msgstr "アプリ上のBooking.com確認番号"
+
+#: template.html:58
+msgid "What is the property address?"
+msgstr "施設の住所は何ですか？"
+
+#: template.html:60
+msgid "The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>."
+msgstr "施設は<strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>にあります。"
+
+#: template.html:66
+msgid "What are the check-in and check-out times?"
+msgstr "チェックインおよびチェックアウトの時間は何時ですか？"
+
+#: template.html:68
+msgid "Check-in:"
+msgstr "チェックイン："
+
+#: template.html:68
+msgid "From 2:00 PM"
+msgstr "午後2時から"
+
+#: template.html:69
+msgid "Check-out:"
+msgstr "チェックアウト："
+
+#: template.html:69
+msgid "Anytime before 11:00 AM on the checkout day"
+msgstr "チェックアウト日の午前11時前ならいつでも"
+
+#: template.html:74
+msgid "How do I get my room access PIN?"
+msgstr "部屋のアクセスPINはどうやって取得できますか？"
+
+#: template.html:76
+msgid "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number."
+msgstr "Booking.comの確認番号でチェックインした後、このサイトで部屋のアクセスPINを確認できます。"
+
+#: template.html:81
+msgid "Is there parking available at the property?"
+msgstr "施設に駐車場はありますか？"
+
+#: template.html:83
+msgid "Yes, free parking is available on the property. Additional paid parking options are nearby."
+msgstr "はい、施設内には無料の駐車場があります。さらに、有料の駐車場も近くにあります。"
+
+#: template.html:88
+msgid "How can I contact support if I need help?"
+msgstr "サポートが必要な場合、どうすれば連絡できますか？"
+
+#: template.html:90
+msgid "For assistance, contact us via:"
+msgstr "サポートが必要な場合は、以下の方法でお問い合わせください："
+
+#: template.html:95
+msgid "What is your cancellation policy?"
+msgstr "キャンセルポリシーは何ですか？"
+
+#: template.html:97
+msgid "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details."
+msgstr "キャンセルは予約時に選択したポリシーに依存します。詳細はBooking.comの予約を確認してください。"
+
+#: template.html:103
+msgid "Explore Our Rooms"
+msgstr "客室を探る"
 
 #: templates/main/home.html:47
 msgid "What Our Guests Say"
