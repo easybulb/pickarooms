@@ -127,6 +127,10 @@ msgstr "WebApp por Henry"
 msgid "Home - Pick-A-Rooms"
 msgstr "Inicio - Pick-A-Rooms"
 
+#: templates/main/home.html:5
+msgid "Welcome, Your Stay Starts Here!"
+msgstr "¡Bienvenido, tu estancia comienza aquí!"
+
 #: templates/main/home.html:11
 msgid "Enter your Booking.com confirmation number to retrieve your check-in details."
 msgstr "Introduce tu número de confirmación de Booking.com para recuperar los detalles de tu registro."
