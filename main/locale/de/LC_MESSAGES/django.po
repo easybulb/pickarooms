@@ -1185,3 +1185,59 @@ msgstr "Brauchen Sie Hilfe? Senden Sie mir eine Nachricht auf WhatsApp!"
 #: Template: room_detail.html (WhatsApp Chat Box, link)
 msgid "Open WhatsApp"
 msgstr "WhatsApp öffnen"
+
+#: rebook-container > h1
+msgid "Welcome back!"
+msgstr "Willkommen zurück!"
+
+#: rebook-container > h2
+msgid "We Hope You Enjoyed Your Stay!"
+msgstr "Wir hoffen, dass Ihnen Ihr Aufenthalt gefallen hat!"
+
+#: rebook-container > p (check-out date passed)
+msgid "It looks like your check-out date has passed."
+msgstr "Es sieht so aus, als ob Ihr Check-out-Datum bereits überschritten ist."
+
+#: rebook-container > p (welcome back booking prompt)
+msgid "We'd love to welcome you back! Book your next stay below:"
+msgstr "Wir würden uns freuen, Sie wieder begrüßen zu dürfen! Buchen Sie unten Ihren nächsten Aufenthalt:"
+
+#: rebook-container > a.rebook-button
+msgid "Book Again on Booking.com"
+msgstr "Erneut auf Booking.com buchen"
+
+#: rebook-container > p.discount-text
+msgid "Returning guest? We are always happy to welcome you back!"
+msgstr "Stammgast? Wir freuen uns immer, Sie wieder willkommen zu heißen!"
+
+#: contact-info > h2
+msgid "❓ Need Help?"
+msgstr "❓ Brauchen Sie Hilfe?"
+
+#: contact-info > p (part 1)
+msgid "For inquiries, feel free to"
+msgstr "Bei Anfragen können Sie sich gerne melden per"
+
+#: contact-info > p (email us)
+msgid "email us"
+msgstr "E-Mail an uns"
+
+#: contact-info > p (or)
+msgid "or"
+msgstr "oder"
+
+#: contact-info > p (chat on WhatsApp)
+msgid "chat on WhatsApp"
+msgstr "über WhatsApp chatten"
+
+#: guest-reviews > h2
+msgid "⭐ What Guests Loved"
+msgstr "⭐ Was Gästen gefiel"
+
+#: guest-reviews > p (review 1)
+msgid "“The place was super clean and the check-in process was seamless. Highly recommended!” – Jane D."
+msgstr "„Der Ort war super sauber und der Check-in-Prozess verlief reibungslos. Sehr zu empfehlen!” – Jane D."
+
+#: guest-reviews > p (review 2)
+msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
+msgstr "„Tolle Lage und gemütliche Zimmer. Werde definitiv wieder buchen!” – Mark T."

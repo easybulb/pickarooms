@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Stay Again With Us!{% endblock %}
+{% block title %}Stay Again With Us! - Pickarooms{% endblock %}
 {% load static %}
 {% load i18n %}
 
@@ -9,26 +9,31 @@
 
 {% block content %}
 <section class="rebook-container">
-    <h1>Welcome back!</h1>
-    <h2>We Hope You Enjoyed Your Stay!</h2>
-    <p>It looks like your check-out date has passed.</p>
-    <p>We'd love to welcome you back! Book your next stay below:</p>
+    <h1>{% trans "Welcome back!" %}</h1>
+    <h2>{% trans "We Hope You Enjoyed Your Stay!" %}</h2>
+    <p>{% trans "It looks like your check-out date has passed." %}</p>
+    <p>{% trans "We'd love to welcome you back! Book your next stay below:" %}</p>
     
-    <a href="{{ booking_link }}" class="rebook-button" target="_blank">🔗 Book Again on Booking.com</a>
+    <a href="{{ booking_link }}" class="rebook-button" target="_blank">🔗 {% trans "Book Again on Booking.com" %}</a>
 
-    <p class="discount-text">Returning guest? We are always happy to welcome you back!</p>
+    <p class="discount-text">{% trans "Returning guest? We are always happy to welcome you back!" %}</p>
 
     <!-- ✅ Contact Us -->
     <div class="contact-info">
-        <h2>❓ Need Help?</h2>
-        <p>For inquiries, feel free to <a href="mailto:easybulb@gmail.com">email us</a> or <a href="https://wa.me/447539029629" target="_blank">chat on WhatsApp</a>.</p>
+        <h2>{% trans "❓ Need Help?" %}</h2>
+        <p>
+            {% trans "For inquiries, feel free to" %} 
+            <a href="mailto:easybulb@gmail.com">{% trans "email us" %}</a> 
+            {% trans "or" %} 
+            <a href="https://wa.me/447539029629" target="_blank">{% trans "chat on WhatsApp" %}</a>.
+        </p>
     </div>
 
     <!-- ✅ Featured Guest Reviews -->
     <div class="guest-reviews">
-        <h2>⭐ What Guests Loved</h2>
-        <p>“The place was super clean and the check-in process was seamless. Highly recommended!” – <strong>Jane D.</strong></p>
-        <p>“Great location and cozy rooms. Will definitely book again!” – <strong>Mark T.</strong></p>
+        <h2>{% trans "⭐ What Guests Loved" %}</h2>
+        <p>{% blocktrans %}“The place was super clean and the check-in process was seamless. Highly recommended!” – <strong>Jane D.</strong>{% endblocktrans %}</p>
+        <p>{% blocktrans %}“Great location and cozy rooms. Will definitely book again!” – <strong>Mark T.</strong>{% endblocktrans %}</p>
     </div>
 </section>
 {% endblock %}
