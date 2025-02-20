@@ -1189,3 +1189,63 @@ msgstr "Besoin d'aide ? Envoyez-moi un message sur WhatsApp !"
 #: Template: room_detail.html (WhatsApp Chat Box, link)
 msgid "Open WhatsApp"
 msgstr "Ouvrir WhatsApp"
+
+#: block title
+msgid "Stay Again With Us!"
+msgstr "Réservez à nouveau chez nous!"
+
+#: rebook-container > h1
+msgid "Welcome back!"
+msgstr "Bon retour !"
+
+#: rebook-container > h2
+msgid "We Hope You Enjoyed Your Stay!"
+msgstr "Nous espérons que vous avez apprécié votre séjour !"
+
+#: rebook-container > p (check-out date passed)
+msgid "It looks like your check-out date has passed."
+msgstr "Il semble que votre date de départ soit dépassée."
+
+#: rebook-container > p (welcome back booking prompt)
+msgid "We'd love to welcome you back! Book your next stay below:"
+msgstr "Nous serions ravis de vous accueillir à nouveau ! Réservez votre prochain séjour ci-dessous :"
+
+#: rebook-container > a.rebook-button
+msgid "Book Again on Booking.com"
+msgstr "Réservez à nouveau sur Booking.com"
+
+#: rebook-container > p.discount-text
+msgid "Returning guest? We are always happy to welcome you back!"
+msgstr "Hôte régulier ? Nous sommes toujours heureux de vous revoir !"
+
+#: contact-info > h2
+msgid "❓ Need Help?"
+msgstr "❓ Besoin d'aide ?"
+
+#: contact-info > p (part 1)
+msgid "For inquiries, feel free to"
+msgstr "Pour toute demande, n'hésitez pas à"
+
+#: contact-info > p (email us)
+msgid "email us"
+msgstr "nous envoyer un e-mail"
+
+#: contact-info > p (or)
+msgid "or"
+msgstr "ou"
+
+#: contact-info > p (chat on WhatsApp)
+msgid "chat on WhatsApp"
+msgstr "discuter sur WhatsApp"
+
+#: guest-reviews > h2
+msgid "⭐ What Guests Loved"
+msgstr "⭐ Ce que les clients ont adoré"
+
+#: guest-reviews > p (review 1)
+msgid "“The place was super clean and the check-in process was seamless. Highly recommended!” – Jane D."
+msgstr "« L'endroit était très propre et le processus d'enregistrement était fluide. Hautement recommandé ! » – Jane D."
+
+#: guest-reviews > p (review 2)
+msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
+msgstr "« Emplacement idéal et chambres confortables. Je réserverai à nouveau sans hésiter ! » – Mark T."

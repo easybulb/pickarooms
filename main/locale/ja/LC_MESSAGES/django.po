@@ -1186,3 +1186,63 @@ msgstr "お手伝いが必要ですか？ WhatsAppでメッセージを送って
 #: Template: room_detail.html (WhatsApp Chat Box, link)
 msgid "Open WhatsApp"
 msgstr "WhatsAppを開く"
+
+#: block title
+msgid "Stay Again With Us!"
+msgstr "またご宿泊ください！"
+
+#: rebook-container > h1
+msgid "Welcome back!"
+msgstr "おかえりなさい！"
+
+#: rebook-container > h2
+msgid "We Hope You Enjoyed Your Stay!"
+msgstr "ご滞在をお楽しみいただけたことを願っています！"
+
+#: rebook-container > p (check-out date passed)
+msgid "It looks like your check-out date has passed."
+msgstr "チェックアウト日が過ぎているようです。"
+
+#: rebook-container > p (welcome back booking prompt)
+msgid "We'd love to welcome you back! Book your next stay below:"
+msgstr "またお会いできることを楽しみにしています！下記から次のご予約をどうぞ："
+
+#: rebook-container > a.rebook-button
+msgid "Book Again on Booking.com"
+msgstr "Booking.comで再予約する"
+
+#: rebook-container > p.discount-text
+msgid "Returning guest? We are always happy to welcome you back!"
+msgstr "リピーターの皆様、いつでもお待ちしております！"
+
+#: contact-info > h2
+msgid "❓ Need Help?"
+msgstr "❓ お困りですか？"
+
+#: contact-info > p (part 1)
+msgid "For inquiries, feel free to"
+msgstr "お問い合わせはお気軽に"
+
+#: contact-info > p (email us)
+msgid "email us"
+msgstr "メールしてください"
+
+#: contact-info > p (or)
+msgid "or"
+msgstr "または"
+
+#: contact-info > p (chat on WhatsApp)
+msgid "chat on WhatsApp"
+msgstr "WhatsAppでチャットする"
+
+#: guest-reviews > h2
+msgid "⭐ What Guests Loved"
+msgstr "⭐ ゲストが気に入った点"
+
+#: guest-reviews > p (review 1)
+msgid "“The place was super clean and the check-in process was seamless. Highly recommended!” – Jane D."
+msgstr "「施設は非常に清潔で、チェックインの手続きもスムーズでした。大変おすすめです！」 – Jane D."
+
+#: guest-reviews > p (review 2)
+msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
+msgstr "「立地が良く、快適な部屋でした。ぜひまた予約します！」 – Mark T."

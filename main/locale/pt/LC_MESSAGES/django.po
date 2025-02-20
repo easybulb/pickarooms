@@ -1185,3 +1185,63 @@ msgstr "Precisa de ajuda? Envie-me uma mensagem pelo WhatsApp!"
 #: Template: room_detail.html (WhatsApp Chat Box, link)
 msgid "Open WhatsApp"
 msgstr "Abrir WhatsApp"
+
+#: block title
+msgid "Stay Again With Us!"
+msgstr "Fique Conosco Novamente!"
+
+#: rebook-container > h1
+msgid "Welcome back!"
+msgstr "Bem-vindo de volta!"
+
+#: rebook-container > h2
+msgid "We Hope You Enjoyed Your Stay!"
+msgstr "Esperamos que você tenha desfrutado da sua estadia!"
+
+#: rebook-container > p (check-out date passed)
+msgid "It looks like your check-out date has passed."
+msgstr "Parece que a data do seu check-out já passou."
+
+#: rebook-container > p (welcome back booking prompt)
+msgid "We'd love to welcome you back! Book your next stay below:"
+msgstr "Adoraríamos recebê-lo novamente! Reserve sua próxima estadia abaixo:"
+
+#: rebook-container > a.rebook-button
+msgid "Book Again on Booking.com"
+msgstr "Reserve novamente no Booking.com"
+
+#: rebook-container > p.discount-text
+msgid "Returning guest? We are always happy to welcome you back!"
+msgstr "Hóspede de retorno? Estamos sempre felizes em recebê-lo novamente!"
+
+#: contact-info > h2
+msgid "❓ Need Help?"
+msgstr "❓ Precisa de ajuda?"
+
+#: contact-info > p (part 1)
+msgid "For inquiries, feel free to"
+msgstr "Para dúvidas, sinta-se à vontade para"
+
+#: contact-info > p (email us)
+msgid "email us"
+msgstr "nos enviar um e-mail"
+
+#: contact-info > p (or)
+msgid "or"
+msgstr "ou"
+
+#: contact-info > p (chat on WhatsApp)
+msgid "chat on WhatsApp"
+msgstr "conversar no WhatsApp"
+
+#: guest-reviews > h2
+msgid "⭐ What Guests Loved"
+msgstr "⭐ O que os hóspedes amaram"
+
+#: guest-reviews > p (review 1)
+msgid "“The place was super clean and the check-in process was seamless. Highly recommended!” – Jane D."
+msgstr "“O local estava super limpo e o processo de check-in foi impecável. Altamente recomendado!” – Jane D."
+
+#: guest-reviews > p (review 2)
+msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
+msgstr "“Excelente localização e quartos aconchegantes. Com certeza reservarei novamente!” – Mark T."

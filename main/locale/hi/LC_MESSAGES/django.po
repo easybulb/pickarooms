@@ -1189,3 +1189,63 @@ msgstr "मदद चाहिए? मुझे WhatsApp पर संदेश 
 #: Template: room_detail.html (WhatsApp Chat Box, link)
 msgid "Open WhatsApp"
 msgstr "WhatsApp खोलें"
+
+#: block title
+msgid "Stay Again With Us!"
+msgstr "हमारे साथ फिर से ठहरें!"
+
+#: rebook-container > h1
+msgid "Welcome back!"
+msgstr "फिर से स्वागत है!"
+
+#: rebook-container > h2
+msgid "We Hope You Enjoyed Your Stay!"
+msgstr "हमें उम्मीद है कि आपका ठहराव आनंददायक रहा!"
+
+#: rebook-container > p (check-out date passed)
+msgid "It looks like your check-out date has passed."
+msgstr "ऐसा लगता है कि आपकी चेक-आउट तिथि बीत चुकी है।"
+
+#: rebook-container > p (welcome back booking prompt)
+msgid "We'd love to welcome you back! Book your next stay below:"
+msgstr "हमें खुशी होगी कि आप फिर से हमारे साथ ठहरें! अपनी अगली बुकिंग नीचे करें:"
+
+#: rebook-container > a.rebook-button
+msgid "Book Again on Booking.com"
+msgstr "Booking.com पर फिर से बुक करें"
+
+#: rebook-container > p.discount-text
+msgid "Returning guest? We are always happy to welcome you back!"
+msgstr "क्या आप पुनः आगमन करने वाले मेहमान हैं? हमें हमेशा आपको फिर से स्वागत करने में खुशी होती है!"
+
+#: contact-info > h2
+msgid "❓ Need Help?"
+msgstr "❓ सहायता चाहिए?"
+
+#: contact-info > p (part 1)
+msgid "For inquiries, feel free to"
+msgstr "पूछताछ के लिए, कृपया बेझिझक"
+
+#: contact-info > p (email us)
+msgid "email us"
+msgstr "हमें ईमेल करें"
+
+#: contact-info > p (or)
+msgid "or"
+msgstr "या"
+
+#: contact-info > p (chat on WhatsApp)
+msgid "chat on WhatsApp"
+msgstr "WhatsApp पर चैट करें"
+
+#: guest-reviews > h2
+msgid "⭐ What Guests Loved"
+msgstr "⭐ मेहमानों को क्या पसंद आया"
+
+#: guest-reviews > p (review 1)
+msgid "“The place was super clean and the check-in process was seamless. Highly recommended!” – Jane D."
+msgstr "“यह जगह बहुत साफ-सुथरी थी और चेक-इन प्रक्रिया बेहद सरल थी। अत्यधिक अनुशंसित!” – Jane D."
+
+#: guest-reviews > p (review 2)
+msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
+msgstr "“उत्कृष्ट स्थान और आरामदायक कमरे। निश्चित रूप से फिर से बुक करूंगा!” – Mark T."

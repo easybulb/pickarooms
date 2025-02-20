@@ -1185,3 +1185,63 @@ msgstr "Hai bisogno di aiuto? Inviami un messaggio su WhatsApp!"
 #: Template: room_detail.html (WhatsApp Chat Box, link)
 msgid "Open WhatsApp"
 msgstr "Apri WhatsApp"
+
+#: block title
+msgid "Stay Again With Us!"
+msgstr "Torna a soggiornare con noi!"
+
+#: rebook-container > h1
+msgid "Welcome back!"
+msgstr "Bentornato!"
+
+#: rebook-container > h2
+msgid "We Hope You Enjoyed Your Stay!"
+msgstr "Speriamo che tu abbia apprezzato il tuo soggiorno!"
+
+#: rebook-container > p (check-out date passed)
+msgid "It looks like your check-out date has passed."
+msgstr "Sembra che la tua data di check-out sia passata."
+
+#: rebook-container > p (welcome back booking prompt)
+msgid "We'd love to welcome you back! Book your next stay below:"
+msgstr "Ci farebbe piacere riaccoglierti! Prenota il tuo prossimo soggiorno qui sotto:"
+
+#: rebook-container > a.rebook-button
+msgid "Book Again on Booking.com"
+msgstr "Prenota di nuovo su Booking.com"
+
+#: rebook-container > p.discount-text
+msgid "Returning guest? We are always happy to welcome you back!"
+msgstr "Ospite abituale? Siamo sempre felici di riaccoglierti!"
+
+#: contact-info > h2
+msgid "❓ Need Help?"
+msgstr "❓ Hai bisogno di aiuto?"
+
+#: contact-info > p (part 1)
+msgid "For inquiries, feel free to"
+msgstr "Per domande, sentiti libero di"
+
+#: contact-info > p (email us)
+msgid "email us"
+msgstr "scrivici un'email"
+
+#: contact-info > p (or)
+msgid "or"
+msgstr "oppure"
+
+#: contact-info > p (chat on WhatsApp)
+msgid "chat on WhatsApp"
+msgstr "chattare su WhatsApp"
+
+#: guest-reviews > h2
+msgid "⭐ What Guests Loved"
+msgstr "⭐ Cosa hanno amato gli ospiti"
+
+#: guest-reviews > p (review 1)
+msgid "“The place was super clean and the check-in process was seamless. Highly recommended!” – Jane D."
+msgstr "«Il posto era estremamente pulito e il processo di check-in è stato impeccabile. Altamente consigliato!» – Jane D."
+
+#: guest-reviews > p (review 2)
+msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
+msgstr "«Ottima posizione e camere accoglienti. Sicuramente prenoterò di nuovo!» – Mark T."

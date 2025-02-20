@@ -1185,3 +1185,63 @@ msgstr "تحتاج إلى مساعدة؟ أرسل لي رسالة عبر وات�
 #: Template: room_detail.html (WhatsApp Chat Box, link)
 msgid "Open WhatsApp"
 msgstr "افتح واتساب"
+
+#: block title
+msgid "Stay Again With Us!"
+msgstr "ابق معنا مرة أخرى!"
+
+#: rebook-container > h1
+msgid "Welcome back!"
+msgstr "مرحبًا بعودتك!"
+
+#: rebook-container > h2
+msgid "We Hope You Enjoyed Your Stay!"
+msgstr "نأمل أن تكون قد استمتعت بإقامتك!"
+
+#: rebook-container > p (check-out date passed)
+msgid "It looks like your check-out date has passed."
+msgstr "يبدو أن تاريخ خروجك قد مضى."
+
+#: rebook-container > p (welcome back booking prompt)
+msgid "We'd love to welcome you back! Book your next stay below:"
+msgstr "يسعدنا أن نرحب بعودتك! احجز إقامتك القادمة أدناه:"
+
+#: rebook-container > a.rebook-button
+msgid "Book Again on Booking.com"
+msgstr "احجز مرة أخرى على Booking.com"
+
+#: rebook-container > p.discount-text
+msgid "Returning guest? We are always happy to welcome you back!"
+msgstr "ضيف عائد؟ نحن دائماً سعداء باستقبالكم مجددًا!"
+
+#: contact-info > h2
+msgid "❓ Need Help?"
+msgstr "❓ هل تحتاج مساعدة؟"
+
+#: contact-info > p (part 1)
+msgid "For inquiries, feel free to"
+msgstr "للاستفسارات، لا تتردد في"
+
+#: contact-info > p (email us)
+msgid "email us"
+msgstr "مراسلتنا عبر البريد الإلكتروني"
+
+#: contact-info > p (or)
+msgid "or"
+msgstr "أو"
+
+#: contact-info > p (chat on WhatsApp)
+msgid "chat on WhatsApp"
+msgstr "الدردشة على واتساب"
+
+#: guest-reviews > h2
+msgid "⭐ What Guests Loved"
+msgstr "⭐ ما أحبه الضيوف"
+
+#: guest-reviews > p (review 1)
+msgid "“The place was super clean and the check-in process was seamless. Highly recommended!” – Jane D."
+msgstr "«المكان نظيف للغاية وعملية تسجيل الوصول كانت سلسة. أنصح به بشدة!» – جين د."
+
+#: guest-reviews > p (review 2)
+msgid "“Great location and cozy rooms. Will definitely book again!” – Mark T."
+msgstr "«موقع رائع وغرف مريحة. بالتأكيد سأحجز مرة أخرى!» – مارك ت."
