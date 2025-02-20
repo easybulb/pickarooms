@@ -127,16 +127,12 @@ msgid "Welcome, Your Stay Starts Here!"
 msgstr "مرحبًا، إقامتك تبدأ هنا!"
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
-msgstr "أدخل رقم هاتفك للوصول إلى رقم التعريف الشخصي (PIN)، ودليل تسجيل الوصول، وجميع التفاصيل لتجربة سلسة."
+msgid "Enter your Booking.com confirmation number to retrieve your check-in details."
+msgstr "أدخل رقم التأكيد الخاص بك من Booking.com لاسترداد تفاصيل تسجيل الوصول الخاصة بك."
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to get your PIN and check-in details."
-msgstr "أدخل رقم هاتفك للحصول على رقم التعريف الشخصي وتفاصيل تسجيل الوصول."
-
-#: templates/main/home.html:14
-msgid "Enter your phone number"
-msgstr "أدخل رقم هاتفك"
+msgid "Enter your Booking.com confirmation number"
+msgstr "أدخل رقم التأكيد الخاص بك من Booking.com"
 
 #: templates/main/home.html:15
 msgid "Check In"
@@ -151,8 +147,8 @@ msgid "Step 1:"
 msgstr "الخطوة 1:"
 
 #: templates/main/home.html:24
-msgid "Enter your phone number used during your reservation on Booking.com."
-msgstr "أدخل رقم هاتفك المستخدم أثناء الحجز على Booking.com."
+msgid "Enter the confirmation number you received during your reservation on Booking.com."
+msgstr "أدخل رقم التأكيد الذي استلمته أثناء حجزك على Booking.com."
 
 #: templates/main/home.html:25
 msgid "Step 2:"
@@ -160,7 +156,7 @@ msgstr "الخطوة 2:"
 
 #: templates/main/home.html:25
 msgid "Retrieve your PIN."
-msgstr "احصل على رقم التعريف الشخصي (PIN)."
+msgstr "استخرج رمز الدخول الخاص بك."
 
 #: templates/main/home.html:26
 msgid "Step 3:"
@@ -193,6 +189,98 @@ msgstr "البريد الإلكتروني:"
 #: templates/main/home.html:42
 msgid "Luxury Hotel Room"
 msgstr "غرفة فندقية فاخرة"
+
+#: template.html:36
+msgid "Have Questions? Answers Below."
+msgstr "هل لديك أسئلة؟ تجد الإجابات أدناه."
+
+#: template.html:40
+msgid "Where can I find my Booking.com confirmation number?"
+msgstr "أين يمكنني العثور على رقم التأكيد الخاص بحجزك في Booking.com؟"
+
+#: template.html:42
+msgid "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)."
+msgstr "يمكن العثور على رقم التأكيد الخاص بحجزك في Booking.com في بريدك الإلكتروني وفي تأكيد الهاتف. يمكنك أيضاً العثور عليه عن طريق تسجيل الدخول إلى حسابك على Booking.com عبر الإنترنت. عند استخدام المتصفح، يظهر في أعلى اليمين (انظر الصورة الأولى). وعند استخدام تطبيق Booking.com، يتم عرضه تحت تفاصيل الحجز المكتملة (انظر الصورة الثانية)."
+
+#: template.html:47
+msgid "Using Browser"
+msgstr "باستخدام المتصفح"
+
+#: template.html:48
+msgid "Booking.com confirmation number on browser"
+msgstr "رقم التأكيد الخاص بـ Booking.com على المتصفح"
+
+#: template.html:51
+msgid "On Booking.com App"
+msgstr "على تطبيق Booking.com"
+
+#: template.html:52
+msgid "Booking.com confirmation number on app"
+msgstr "رقم تأكيد حجز Booking.com في التطبيق"
+
+#: template.html:58
+msgid "What is the property address?"
+msgstr "ما هو عنوان المنشأة؟"
+
+#: template.html:60
+msgid "The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>."
+msgstr "المنشأة تقع في <strong>8 شارع رايلانس، بيسويك، مانشستر، M11 3NP، المملكة المتحدة</strong>."
+
+#: template.html:66
+msgid "What are the check-in and check-out times?"
+msgstr "ما هي مواعيد تسجيل الوصول والمغادرة؟"
+
+#: template.html:68
+msgid "Check-in:"
+msgstr "تسجيل الوصول:"
+
+#: template.html:68
+msgid "From 2:00 PM"
+msgstr "من الساعة 2:00 مساءً"
+
+#: template.html:69
+msgid "Check-out:"
+msgstr "تسجيل المغادرة:"
+
+#: template.html:69
+msgid "Anytime before 11:00 AM on the checkout day"
+msgstr "في أي وقت قبل الساعة 11:00 صباحًا في يوم المغادرة"
+
+#: template.html:74
+msgid "How do I get my room access PIN?"
+msgstr "كيف أحصل على رمز الدخول إلى غرفتي؟"
+
+#: template.html:76
+msgid "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number."
+msgstr "يمكن العثور على رمز الدخول إلى غرفتك على هذا الموقع بعد تسجيل الوصول باستخدام رقم تأكيد حجزك في Booking.com."
+
+#: template.html:81
+msgid "Is there parking available at the property?"
+msgstr "هل توجد مواقف للسيارات متوفرة في المنشأة؟"
+
+#: template.html:83
+msgid "Yes, free parking is available on the property. Additional paid parking options are nearby."
+msgstr "نعم، تتوفر مواقف مجانية في المنشأة. وهناك خيارات إضافية لمواقف مدفوعة القريبة."
+
+#: template.html:88
+msgid "How can I contact support if I need help?"
+msgstr "كيف يمكنني التواصل مع الدعم إذا كنت بحاجة للمساعدة؟"
+
+#: template.html:90
+msgid "For assistance, contact us via:"
+msgstr "للمساعدة، اتصل بنا عبر:"
+
+#: template.html:95
+msgid "What is your cancellation policy?"
+msgstr "ما هي سياسة الإلغاء الخاصة بكم؟"
+
+#: template.html:97
+msgid "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details."
+msgstr "يعتمد الإلغاء على السياسة المختارة أثناء الحجز. يرجى التحقق من حجزك في Booking.com لمزيد من التفاصيل."
+
+#: template.html:103
+msgid "Explore Our Rooms"
+msgstr "استكشف غرفنا"
 
 #: templates/main/home.html:47
 msgid "What Our Guests Say"
