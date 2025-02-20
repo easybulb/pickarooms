@@ -38,6 +38,35 @@ ALLOWED_HOSTS = os.environ.get(
 
 GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
 
+# Enforce HTTPS only in production, disable for local development
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True  # Cookies only sent over HTTPS
+    CSRF_COOKIE_SECURE = True  # CSRF protection only works over HTTPS
+
+# CSRF Trusted Origins (Includes Localhost and Dev Tunnels for Testing)
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://1ls3qkr5-8000.uks1.devtunnels.ms",  # Dev Tunnel
+    "https://www.pickarooms.com",
+    "https://pickarooms.com",
+]
+
+# HTTP Strict Transport Security (HSTS) - Forces HTTPS (Only in Production)
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year (recommended by Google)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply to subdomains too
+    SECURE_HSTS_PRELOAD = True  # Allow browser preload list
+
+
+
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
