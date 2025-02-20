@@ -131,20 +131,16 @@ msgid "Welcome, Your Stay Starts Here!"
 msgstr "स्वागत है, आपकी यात्रा यहाँ से शुरू होती है!"
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
-msgstr "अपने पिन, चेक-इन गाइड और सभी विवरणों तक पहुंचने के लिए अपना फोन नंबर दर्ज करें ताकि आपका अनुभव सुगम हो।"
+msgid "Enter your Booking.com confirmation number to retrieve your check-in details."
+msgstr "अपने चेक-इन विवरण प्राप्त करने के लिए अपना Booking.com पुष्टिकरण संख्या दर्ज करें।"
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to get your PIN and check-in details."
-msgstr "अपना फोन नंबर दर्ज करें ताकि आपको अपना पिन और चेक-इन विवरण मिल सके।"
-
-#: templates/main/home.html:14
-msgid "Enter your phone number"
-msgstr "अपना फोन नंबर दर्ज करें"
+msgid "Enter your Booking.com confirmation number"
+msgstr "अपना Booking.com पुष्टिकरण संख्या दर्ज करें।"
 
 #: templates/main/home.html:15
 msgid "Check In"
-msgstr "चेक-इन करें"
+msgstr "चेक इन"
 
 #: templates/main/home.html:19
 msgid "How to Use"
@@ -155,8 +151,8 @@ msgid "Step 1:"
 msgstr "चरण 1:"
 
 #: templates/main/home.html:24
-msgid "Enter your phone number used during your reservation on Booking.com."
-msgstr "Booking.com पर अपनी बुकिंग के दौरान उपयोग किया गया फोन नंबर दर्ज करें।"
+msgid "Enter the confirmation number you received during your reservation on Booking.com."
+msgstr "Booking.com पर अपनी बुकिंग के दौरान प्राप्त पुष्टिकरण संख्या दर्ज करें।"
 
 #: templates/main/home.html:25
 msgid "Step 2:"
@@ -180,11 +176,11 @@ msgstr "चरण 4:"
 
 #: templates/main/home.html:27
 msgid "Enjoy your stay!"
-msgstr "अपने प्रवास का आनंद लें!"
+msgstr "अपने ठहराव का आनंद लें!"
 
 #: templates/main/home.html:33
 msgid "Phone:"
-msgstr "फोन:"
+msgstr "फ़ोन:"
 
 #: templates/main/home.html:34
 msgid "Whatsapp:"
@@ -196,7 +192,99 @@ msgstr "ईमेल:"
 
 #: templates/main/home.html:42
 msgid "Luxury Hotel Room"
-msgstr "लक्ज़री होटल का कमरा"
+msgstr "लक्ज़री होटल कमरा"
+
+#: template.html:36
+msgid "Have Questions? Answers Below."
+msgstr "क्या आपके पास प्रश्न हैं? नीचे उत्तर दिए गए हैं।"
+
+#: template.html:40
+msgid "Where can I find my Booking.com confirmation number?"
+msgstr "मैं अपना Booking.com पुष्टिकरण संख्या कहाँ पा सकता हूँ?"
+
+#: template.html:42
+msgid "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)."
+msgstr "आपका Booking.com पुष्टिकरण संख्या आपके ईमेल और फ़ोन पुष्टिकरण में पाया जा सकता है। आप इसे अपनी Booking.com खाता में ऑनलाइन लॉग इन करके भी खोज सकते हैं। यदि ब्राउज़र का उपयोग करते हैं, तो यह ऊपर-दाएँ कोने में दिखाई देता है (पहली छवि देखें)। यदि आप Booking.com ऐप का उपयोग करते हैं, तो यह आपकी पूर्ण बुकिंग विवरण के नीचे दिखाया जाता है (दूसरी छवि देखें)।"
+
+#: template.html:47
+msgid "Using Browser"
+msgstr "ब्राउज़र का उपयोग करते हुए"
+
+#: template.html:48
+msgid "Booking.com confirmation number on browser"
+msgstr "ब्राउज़र पर Booking.com पुष्टिकरण संख्या"
+
+#: template.html:51
+msgid "On Booking.com App"
+msgstr "Booking.com ऐप पर"
+
+#: template.html:52
+msgid "Booking.com confirmation number on app"
+msgstr "ऐप पर Booking.com पुष्टिकरण संख्या"
+
+#: template.html:58
+msgid "What is the property address?"
+msgstr "संपत्ति का पता क्या है?"
+
+#: template.html:60
+msgid "The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>."
+msgstr "संपत्ति <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong> पर स्थित है।"
+
+#: template.html:66
+msgid "What are the check-in and check-out times?"
+msgstr "चेक-इन और चेक-आउट के समय क्या हैं?"
+
+#: template.html:68
+msgid "Check-in:"
+msgstr "चेक-इन:"
+
+#: template.html:68
+msgid "From 2:00 PM"
+msgstr "दोपहर 2:00 बजे से"
+
+#: template.html:69
+msgid "Check-out:"
+msgstr "चेक-आउट:"
+
+#: template.html:69
+msgid "Anytime before 11:00 AM on the checkout day"
+msgstr "चेक-आउट के दिन सुबह 11:00 बजे से पहले कभी भी"
+
+#: template.html:74
+msgid "How do I get my room access PIN?"
+msgstr "मैं अपना कमरे का प्रवेश पिन कैसे प्राप्त करूँ?"
+
+#: template.html:76
+msgid "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number."
+msgstr "आपका कमरे का प्रवेश पिन इस साइट पर चेक-इन करने के बाद, आपके Booking.com पुष्टिकरण संख्या के साथ पाया जा सकता है।"
+
+#: template.html:81
+msgid "Is there parking available at the property?"
+msgstr "क्या संपत्ति पर पार्किंग उपलब्ध है?"
+
+#: template.html:83
+msgid "Yes, free parking is available on the property. Additional paid parking options are nearby."
+msgstr "हाँ, संपत्ति पर नि:शुल्क पार्किंग उपलब्ध है। पास में अतिरिक्त भुगतान वाली पार्किंग विकल्प भी उपलब्ध हैं।"
+
+#: template.html:88
+msgid "How can I contact support if I need help?"
+msgstr "यदि मुझे सहायता की आवश्यकता हो तो मैं सपोर्ट से कैसे संपर्क करूँ?"
+
+#: template.html:90
+msgid "For assistance, contact us via:"
+msgstr "सहायता के लिए, हमसे इस माध्यम से संपर्क करें:"
+
+#: template.html:95
+msgid "What is your cancellation policy?"
+msgstr "आपकी रद्दीकरण नीति क्या है?"
+
+#: template.html:97
+msgid "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details."
+msgstr "बुकिंग के दौरान चयनित नीति पर रद्दीकरण निर्भर करते हैं। विवरण के लिए अपनी Booking.com आरक्षण की जांच करें।"
+
+#: template.html:103
+msgid "Explore Our Rooms"
+msgstr "हमारे कमरों का अन्वेषण करें"
 
 #: templates/main/home.html:47
 msgid "What Our Guests Say"
