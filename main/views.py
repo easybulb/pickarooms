@@ -215,7 +215,7 @@ def contact(request):
                 "RECAPTCHA_PUBLIC_KEY": settings.RECAPTCHA_PUBLIC_KEY,  # ✅ Pass Public Key
             })
 
-        subject = f"Contact Us Message from {name}"
+        subject = f"Pick-A-Rooms Contact Us Message from {name}"
         body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
 
         try:
