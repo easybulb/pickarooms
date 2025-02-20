@@ -1,5 +1,4 @@
 {% load static %}
-
 {% load i18n %}
 
 <!DOCTYPE html>
@@ -7,14 +6,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Pick A Rooms{% endblock %}</title>
+    
+    <title>{% block title %}Pick A Rooms - Seamless Check-In for Airbnb Guests{% endblock %}</title>
+
+    <!-- ✅ SEO Meta Description -->
+    <meta name="description" content="Pick-A-Rooms offers hassle-free check-ins for Airbnb guests in Manchester. Book rooms with easy self-check-in and enjoy your stay.">
+
+    <!-- ✅ Open Graph Meta for Facebook, WhatsApp, LinkedIn -->
+    <meta property="og:title" content="Pick A Rooms - Hassle-Free Check-Ins">
+    <meta property="og:description" content="Find and check in to the best rooms in Manchester with Pick-A-Rooms.">
+    <meta property="og:image" content="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739524006/pickarooms-logo-gold_c1wca9.png">
+    <meta property="og:url" content="https://pickarooms.com">
+    <meta property="og:type" content="website">
+
+    <!-- ✅ Twitter Card for Twitter Sharing -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pick A Rooms - Hassle-Free Check-Ins">
+    <meta name="twitter:description" content="Easily check into your Airbnb stay with Pick-A-Rooms.">
+    <meta name="twitter:image" content="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739524006/pickarooms-logo-gold_c1wca9.png">
+
+    <!-- ✅ Canonical URL (Prevents Duplicate Page Issues) -->
+    <link rel="canonical" href="https://pickarooms.com/">
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <!-- ✅ Structured Data for Google Search -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LodgingBusiness",
+        "name": "Pick A Rooms",
+        "image": "https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739524006/pickarooms-logo-gold_c1wca9.png",
+        "description": "Pick-A-Rooms offers a seamless check-in experience for Booking.com guests in Manchester.",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "8 Rylance Street",
+            "addressLocality": "Manchester",
+            "postalCode": "M11 3NP",
+            "addressCountry": "GB"
+        },
+        "telephone": "+44 (0) 7539 029 629",
+        "priceRange": "£50 - £150 per night"
+    }
+    </script>
 
     <!-- Block for additional CSS -->
     {% block extra_css %}{% endblock %}
 
-    <!-- Favicon links -->
+    <!-- ✅ Favicon Links -->
     <link rel="apple-touch-icon" sizes="180x180" href="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739524319/apple-touch-icon_hmhyh0.png">
     <link rel="icon" type="image/png" sizes="32x32" href="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739524320/favicon-32x32_fs7v5j.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739524320/favicon-16x16_zymkro.png">
