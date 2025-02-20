@@ -130,16 +130,12 @@ msgid "Welcome, Your Stay Starts Here!"
 msgstr "欢迎，您的入住从这里开始！"
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
-msgstr "输入您的电话号码以获取 PIN 码、入住指南和所有详细信息，确保流畅体验。"
+msgid "Enter your Booking.com confirmation number to retrieve your check-in details."
+msgstr "请输入您的 Booking.com 确认号以获取入住详情。"
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to get your PIN and check-in details."
-msgstr "输入您的电话号码以获取您的PIN码和入住详情。"
-
-#: templates/main/home.html:14
-msgid "Enter your phone number"
-msgstr "输入您的电话号码"
+msgid "Enter your Booking.com confirmation number"
+msgstr "请输入您的 Booking.com 确认号"
 
 #: templates/main/home.html:15
 msgid "Check In"
@@ -147,43 +143,39 @@ msgstr "入住"
 
 #: templates/main/home.html:19
 msgid "How to Use"
-msgstr "使用指南"
-
-#: templates/main/home.html:20
-msgid "Contact Us"
-msgstr "联系我们"
+msgstr "使用方法"
 
 #: templates/main/home.html:24
 msgid "Step 1:"
-msgstr "步骤 1："
+msgstr "步骤1："
 
 #: templates/main/home.html:24
-msgid "Enter your phone number used during your reservation on Booking.com."
-msgstr "输入您在 Booking.com 预订时使用的电话号码。"
+msgid "Enter the confirmation number you received during your reservation on Booking.com."
+msgstr "请输入您在 Booking.com 预订时收到的确认号码。"
 
 #: templates/main/home.html:25
 msgid "Step 2:"
-msgstr "步骤 2："
+msgstr "步骤2："
 
 #: templates/main/home.html:25
 msgid "Retrieve your PIN."
-msgstr "获取您的 PIN 码。"
+msgstr "获取您的 PIN。"
 
 #: templates/main/home.html:26
 msgid "Step 3:"
-msgstr "步骤 3："
+msgstr "步骤3："
 
 #: templates/main/home.html:26
 msgid "Follow the check-in instructions."
-msgstr "按照入住指南操作。"
+msgstr "请按照入住指示操作。"
 
 #: templates/main/home.html:27
 msgid "Step 4:"
-msgstr "步骤 4："
+msgstr "步骤4："
 
 #: templates/main/home.html:27
 msgid "Enjoy your stay!"
-msgstr "享受您的入住！"
+msgstr "祝您入住愉快！"
 
 #: templates/main/home.html:33
 msgid "Phone:"
@@ -191,7 +183,7 @@ msgstr "电话："
 
 #: templates/main/home.html:34
 msgid "Whatsapp:"
-msgstr "WhatsApp："
+msgstr "Whatsapp："
 
 #: templates/main/home.html:35
 msgid "Email:"
@@ -199,7 +191,99 @@ msgstr "电子邮件："
 
 #: templates/main/home.html:42
 msgid "Luxury Hotel Room"
-msgstr "豪华酒店房间"
+msgstr "豪华酒店客房"
+
+#: template.html:36
+msgid "Have Questions? Answers Below."
+msgstr "有疑问？答案如下。"
+
+#: template.html:40
+msgid "Where can I find my Booking.com confirmation number?"
+msgstr "我在哪里可以找到我的 Booking.com 确认号？"
+
+#: template.html:42
+msgid "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)."
+msgstr "您的 Booking.com 确认号可以在您的电子邮件和电话确认中找到。您也可以通过登录您的 Booking.com 账户在线查找。如果使用浏览器，它会显示在右上角（见第一张图片）；如果使用 Booking.com 应用程序，它会显示在您完成的预订详情下方（见第二张图片）。"
+
+#: template.html:47
+msgid "Using Browser"
+msgstr "使用浏览器"
+
+#: template.html:48
+msgid "Booking.com confirmation number on browser"
+msgstr "浏览器上的 Booking.com 确认号"
+
+#: template.html:51
+msgid "On Booking.com App"
+msgstr "在 Booking.com 应用上"
+
+#: template.html:52
+msgid "Booking.com confirmation number on app"
+msgstr "应用中的 Booking.com 确认号"
+
+#: template.html:58
+msgid "What is the property address?"
+msgstr "物业地址是什么？"
+
+#: template.html:60
+msgid "The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>."
+msgstr "该物业位于 <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>。"
+
+#: template.html:66
+msgid "What are the check-in and check-out times?"
+msgstr "入住和退房时间是什么？"
+
+#: template.html:68
+msgid "Check-in:"
+msgstr "入住："
+
+#: template.html:68
+msgid "From 2:00 PM"
+msgstr "下午2:00开始"
+
+#: template.html:69
+msgid "Check-out:"
+msgstr "退房："
+
+#: template.html:69
+msgid "Anytime before 11:00 AM on the checkout day"
+msgstr "退房当天上午11:00之前的任何时间"
+
+#: template.html:74
+msgid "How do I get my room access PIN?"
+msgstr "如何获取房间访问 PIN？"
+
+#: template.html:76
+msgid "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number."
+msgstr "使用您的 Booking.com 确认号入住后，您可以在本网站上找到房间访问 PIN。"
+
+#: template.html:81
+msgid "Is there parking available at the property?"
+msgstr "该物业提供停车吗？"
+
+#: template.html:83
+msgid "Yes, free parking is available on the property. Additional paid parking options are nearby."
+msgstr "是的，该物业提供免费停车场，附近还有付费停车选项。"
+
+#: template.html:88
+msgid "How can I contact support if I need help?"
+msgstr "如果需要帮助，我该如何联系支持？"
+
+#: template.html:90
+msgid "For assistance, contact us via:"
+msgstr "如需帮助，请通过以下方式联系我们："
+
+#: template.html:95
+msgid "What is your cancellation policy?"
+msgstr "您的取消政策是什么？"
+
+#: template.html:97
+msgid "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details."
+msgstr "取消政策取决于预订时选择的条款。详情请查看您的 Booking.com 预订。"
+
+#: template.html:103
+msgid "Explore Our Rooms"
+msgstr "探索我们的房间"
 
 #: templates/main/home.html:47
 msgid "What Our Guests Say"
