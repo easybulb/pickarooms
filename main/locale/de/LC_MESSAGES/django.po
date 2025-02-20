@@ -270,6 +270,10 @@ msgstr "Wie kann ich den Support kontaktieren, wenn ich Hilfe benötige?"
 msgid "For assistance, contact us via:"
 msgstr "Für Unterstützung kontaktieren Sie uns unter:"
 
+#: template.html:95
+msgid "What is your cancellation policy?"
+msgstr "Wie ist Ihre Stornierungsrichtlinie?"
+
 #: template.html:97
 msgid "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details."
 msgstr "Stornierungen hängen von der bei der Buchung gewählten Richtlinie ab. Überprüfen Sie Ihre Booking.com-Reservierung für Details."

@@ -58,13 +58,9 @@
     <h2>{% trans "Have Questions? Answers Below." %}</h2>
     <div class="faq-container">
         <div class="faq-item">
-            <button class="faq-question">Where can I find my Booking.com confirmation number? <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Where can I find my Booking.com confirmation number?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>Your Booking.com confirmation number can be found in your email and phone confirmation. You can also
-                    locate it by logging into your Booking.com account online. If using a browser, it appears at the
-                    top-right (see first image). If using the Booking.com app, it is displayed under your completed
-                    booking details (see second image).</p>
+                <p>{% trans "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)." %}</p>
 
                 <!-- Image Container -->
                 <div class="faq-images">
@@ -85,7 +81,7 @@
         <div class="faq-item">
             <button class="faq-question">{% trans "What is the property address?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "The property is located at" %} <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, {% trans "United Kingdom" %}</strong>.</p>
+                {% blocktrans %}The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>.{% endblocktrans %}
         
                 <!-- Google Maps Embed -->
                 <div class="faq-map-container">
