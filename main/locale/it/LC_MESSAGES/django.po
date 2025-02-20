@@ -127,16 +127,12 @@ msgid "Welcome, Your Stay Starts Here!"
 msgstr "Benvenuto, il tuo soggiorno inizia qui!"
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to access your PIN, check-in guide, and all the details for a smooth experience"
-msgstr "Inserisci il tuo numero di telefono per accedere al PIN, alla guida per il check-in e a tutti i dettagli per un'esperienza senza problemi."
+msgid "Enter your Booking.com confirmation number to retrieve your check-in details."
+msgstr "Inserisci il tuo numero di conferma di Booking.com per recuperare i dettagli del check-in."
 
 #: templates/main/home.html:11
-msgid "Enter your phone number to get your PIN and check-in details."
-msgstr "Inserisci il tuo numero di telefono per ottenere il PIN e i dettagli del check-in."
-
-#: templates/main/home.html:14
-msgid "Enter your phone number"
-msgstr "Inserisci il tuo numero di telefono"
+msgid "Enter your Booking.com confirmation number"
+msgstr "Inserisci il tuo numero di conferma di Booking.com"
 
 #: templates/main/home.html:15
 msgid "Check In"
@@ -148,15 +144,15 @@ msgstr "Come usare"
 
 #: templates/main/home.html:24
 msgid "Step 1:"
-msgstr "Passaggio 1:"
+msgstr "Passo 1:"
 
 #: templates/main/home.html:24
-msgid "Enter your phone number used during your reservation on Booking.com."
-msgstr "Inserisci il numero di telefono utilizzato durante la prenotazione su Booking.com."
+msgid "Enter the confirmation number you received during your reservation on Booking.com."
+msgstr "Inserisci il numero di conferma che hai ricevuto durante la tua prenotazione su Booking.com."
 
 #: templates/main/home.html:25
 msgid "Step 2:"
-msgstr "Passaggio 2:"
+msgstr "Passo 2:"
 
 #: templates/main/home.html:25
 msgid "Retrieve your PIN."
@@ -164,7 +160,7 @@ msgstr "Recupera il tuo PIN."
 
 #: templates/main/home.html:26
 msgid "Step 3:"
-msgstr "Passaggio 3:"
+msgstr "Passo 3:"
 
 #: templates/main/home.html:26
 msgid "Follow the check-in instructions."
@@ -172,11 +168,11 @@ msgstr "Segui le istruzioni per il check-in."
 
 #: templates/main/home.html:27
 msgid "Step 4:"
-msgstr "Passaggio 4:"
+msgstr "Passo 4:"
 
 #: templates/main/home.html:27
 msgid "Enjoy your stay!"
-msgstr "Goditi il tuo soggiorno!"
+msgstr "Buon soggiorno!"
 
 #: templates/main/home.html:33
 msgid "Phone:"
@@ -184,15 +180,107 @@ msgstr "Telefono:"
 
 #: templates/main/home.html:34
 msgid "Whatsapp:"
-msgstr "WhatsApp:"
+msgstr "Whatsapp:"
 
 #: templates/main/home.html:35
 msgid "Email:"
-msgstr "E-mail:"
+msgstr "Email:"
 
 #: templates/main/home.html:42
 msgid "Luxury Hotel Room"
-msgstr "Camera d'hotel di lusso"
+msgstr "Camera d'albergo di lusso"
+
+#: template.html:36
+msgid "Have Questions? Answers Below."
+msgstr "Hai domande? Risposte qui sotto."
+
+#: template.html:40
+msgid "Where can I find my Booking.com confirmation number?"
+msgstr "Dove posso trovare il mio numero di conferma di Booking.com?"
+
+#: template.html:42
+msgid "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)."
+msgstr "Il tuo numero di conferma di Booking.com può essere trovato nella tua email e nella conferma telefonica. Puoi anche trovarlo accedendo al tuo account Booking.com online. Se usi un browser, appare in alto a destra (vedi la prima immagine). Se usi l'app di Booking.com, viene visualizzato sotto i dettagli della tua prenotazione completata (vedi la seconda immagine)."
+
+#: template.html:47
+msgid "Using Browser"
+msgstr "Utilizzando il browser"
+
+#: template.html:48
+msgid "Booking.com confirmation number on browser"
+msgstr "Numero di conferma di Booking.com sul browser"
+
+#: template.html:51
+msgid "On Booking.com App"
+msgstr "Sull'app di Booking.com"
+
+#: template.html:52
+msgid "Booking.com confirmation number on app"
+msgstr "Numero di conferma di Booking.com sull'app"
+
+#: template.html:58
+msgid "What is the property address?"
+msgstr "Qual è l'indirizzo della struttura?"
+
+#: template.html:60
+msgid "The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>."
+msgstr "La struttura si trova in <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, Regno Unito</strong>."
+
+#: template.html:66
+msgid "What are the check-in and check-out times?"
+msgstr "Quali sono gli orari di check-in e check-out?"
+
+#: template.html:68
+msgid "Check-in:"
+msgstr "Check-in:"
+
+#: template.html:68
+msgid "From 2:00 PM"
+msgstr "Dalle 14:00"
+
+#: template.html:69
+msgid "Check-out:"
+msgstr "Check-out:"
+
+#: template.html:69
+msgid "Anytime before 11:00 AM on the checkout day"
+msgstr "In qualsiasi momento prima delle 11:00 del giorno di check-out"
+
+#: template.html:74
+msgid "How do I get my room access PIN?"
+msgstr "Come posso ottenere il PIN di accesso alla mia camera?"
+
+#: template.html:76
+msgid "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number."
+msgstr "Il PIN di accesso alla tua camera è disponibile su questo sito dopo il check-in con il tuo numero di conferma di Booking.com."
+
+#: template.html:81
+msgid "Is there parking available at the property?"
+msgstr "È disponibile un parcheggio presso la struttura?"
+
+#: template.html:83
+msgid "Yes, free parking is available on the property. Additional paid parking options are nearby."
+msgstr "Sì, è disponibile un parcheggio gratuito presso la struttura. Inoltre, ci sono opzioni di parcheggio a pagamento nelle vicinanze."
+
+#: template.html:88
+msgid "How can I contact support if I need help?"
+msgstr "Come posso contattare l'assistenza se ho bisogno di aiuto?"
+
+#: template.html:90
+msgid "For assistance, contact us via:"
+msgstr "Per assistenza, contattaci tramite:"
+
+#: template.html:95
+msgid "What is your cancellation policy?"
+msgstr "Qual è la vostra politica di cancellazione?"
+
+#: template.html:97
+msgid "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details."
+msgstr "Le cancellazioni dipendono dalla politica scelta durante la prenotazione. Controlla la tua prenotazione su Booking.com per maggiori dettagli."
+
+#: template.html:103
+msgid "Explore Our Rooms"
+msgstr "Esplora le nostre camere"
 
 #: templates/main/home.html:47
 msgid "What Our Guests Say"
