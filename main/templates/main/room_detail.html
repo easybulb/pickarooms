@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
 {% endblock %}
 
-{% block title %}{{ room.name }} - Room Details{% endblock %}
+{% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
 
 {% block content %}
 
@@ -20,12 +20,12 @@
         <button class="play-button" id="playVideo">
             <i class="fas fa-play"></i>
         </button>
-        <p class="play-text" style="font-weight: 400;">Instruction Video</p>  <!-- ✅ Play Video Text -->
+        <p class="play-text" style="font-weight: 400;">{% trans "Instruction Video" %}</p>  <!-- ✅ Play Video Text -->
     </div>
 
     <!-- ✅ Hidden Video (Revealed on Click) -->
     <div class="room-video-container" id="videoContainer" style="display: none;">
-        <iframe id="videoFrame" src="{{ room.video_url }}" title="Room Instructions"
+        <iframe id="videoFrame" src="{{ room.video_url }}" title="{% trans 'Room Instructions' %}"
                 frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen>
         </iframe>
     </div>
@@ -35,222 +35,245 @@
 <section class="room-header">
     <h1>{{ room.name }}</h1>
     {% if guest %}
-        <p>Welcome, {{ guest.full_name }}</p>
+        {% blocktrans with guest_name=guest.full_name %}<p>Welcome, {{ guest_name }}</p>{% endblocktrans %}
     {% endif %}
 </section>
-
 
 <!-- ✅ Room Details -->
 <section class="room-container">
     <div class="room-info">
-        <h2>🔑 House & Room Access PIN</h2>
+        <h2>{% trans "🔑 House & Room Access PIN" %}</h2>
         {% if not show_pin %}
-            <p class="pin-wait">Check-in starts at 2 PM UK time. Your PIN will be available then.</p>
+            <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your PIN will be available then." %}</p>
         {% else %}
-            <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
+            {% if room.access_pin %}
+                <p class="pin-code">{{ room.access_pin }}</p>
+            {% else %}
+                <p class="pin-code">{% trans "No PIN assigned yet. Contact support." %}</p>
+            {% endif %}
         {% endif %}
     
-        <h2>🛏️ Room Details</h2>
+        <h2>{% trans "🛏️ Room Details" %}</h2>
         <p>{{ room.description }}</p>
 
         {% if guest %}
-        <h2>📅 Your Stay</h2>
-        <p><strong>Reservation Number:</strong> {{ guest.reservation_number }}</p>
-        <p><strong>Check-In:</strong> {{ guest.check_in_date }} (From 2 PM)</p>
-        <p><strong>Check-Out:</strong> {{ guest.check_out_date }} (Before 11 AM)</p>
-        <p class="expiration"><strong>Access Expires:</strong> {{ expiration_message }}</p>
+            <h2>{% trans "📅 Your Stay" %}</h2>
+            <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
+            <p><strong>{% trans "Check-In:" %}</strong> {{ guest.check_in_date }} ({% trans "From 2 PM" %})</p>
+            <p><strong>{% trans "Check-Out:" %}</strong> {{ guest.check_out_date }} ({% trans "Before 11 AM" %})</p>
+            <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
         {% else %}
-        <p class="no-guest">❌ No guest assigned to this room. Contact admin for assistance.</p>
+            <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
         {% endif %}
     </div>
 <br>
 <!-- ✅ FAQ Section -->
 <div id="faq" class="room-info">
-    <h2>❓ Frequently Asked Questions</h2>
+    <h2>{% trans "❓ Frequently Asked Questions" %}</h2>
     <div class="faq-container">
 
         <!-- ✅ House Address -->
         <div class="faq-item">
-            <button class="faq-question">📍 Where is the property located? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "📍 Where is the property located?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p><strong>8 Rylance Street, Beswick, Manchester, M11 3NP</strong></p>
+                <p><strong>{% trans "8 Rylance Street, Beswick, Manchester, M11 3NP" %}</strong></p>
                 <p>
                     <a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">
-                        📍 Open in Google Maps
+                        {% trans "📍 Open in Google Maps" %}
                     </a>
                 </p>
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" 
-                alt="Street View of Property" 
-                class="street-image">
+                     alt="{% trans 'Street View of Property' %}" 
+                     class="street-image">
             </div>
         </div>
 
         <!-- ✅ Directions to Property -->
         <div class="faq-item">
-            <button class="faq-question">How do I get to the property? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How do I get to the property?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p><strong>Coming from Manchester Airport?</strong></p>
+                <p><strong>{% trans "Coming from Manchester Airport?" %}</strong></p>
                 <ul>
-                    <li>🚕 <strong>Taxi:</strong> A direct taxi from <strong>Manchester Airport</strong> takes approximately 25 minutes.</li>
-                    <li>🚆 <strong>Train:</strong> Take a train from <strong>Manchester Airport to Piccadilly Station</strong>, then a short <strong>£5 taxi ride</strong> to the property.</li>
-                    <li>🚌 <strong>Bus:</strong> The <strong>219 bus</strong> from <strong>Piccadilly Station</strong> stops near the property.</li>
+                    <li>
+                        🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "A direct taxi from" %} <strong>{% trans "Manchester Airport" %}</strong> {% trans "takes approximately 25 minutes." %}
+                    </li>
+                    <li>
+                        🚆 <strong>{% trans "Train:" %}</strong> {% trans "Take a train from" %} <strong>{% trans "Manchester Airport to Piccadilly Station" %}</strong>, {% trans "then a short" %} <strong>{% trans "£5 taxi ride" %}</strong> {% trans "to the property." %}
+                    </li>
+                    <li>
+                        🚌 <strong>{% trans "Bus:" %}</strong> {% trans "The" %} <strong>{% trans "219 bus" %}</strong> {% trans "from" %} <strong>{% trans "Piccadilly Station" %}</strong> {% trans "stops near the property." %}
+                    </li>
                 </ul>
 
-                <p><strong>Coming from another part of Manchester?</strong></p>
-                <p>Make your way to <strong>Manchester city centre</strong> and take the <strong>219 bus</strong> to the nearest bus stop close to the property. You can use <strong>Google Maps</strong> or your navigation app to find the closest stop to alight.</p>
+                <p><strong>{% trans "Coming from another part of Manchester?" %}</strong></p>
+                <p>
+                    {% trans "Make your way to" %} <strong>{% trans "Manchester city centre" %}</strong> {% trans "and take the" %} <strong>{% trans "219 bus" %}</strong> {% trans "to the nearest bus stop close to the property. You can use" %} <strong>{% trans "Google Maps" %}</strong> {% trans "or your navigation app to find the closest stop to alight." %}
+                </p>
 
-                <p><strong>Driving to the property?</strong></p>
-                <p>Use <strong>Google Maps</strong> or your preferred navigation app and enter the destination:</p>
-                <p><strong>8 Rylance Street, Beswick, Manchester, M11 3NP</strong></p>
-                <p>The property is easily accessible via <strong>Ashton Old Road (A635)</strong>. If coming from the <strong>M60 motorway</strong>, take Exit 24 and follow signs toward <strong>Manchester City Centre</strong>. Parking is available on-site.</p>
+                <p><strong>{% trans "Driving to the property?" %}</strong></p>
+                <p>
+                    {% trans "Use" %} <strong>{% trans "Google Maps" %}</strong> {% trans "or your preferred navigation app and enter the destination:" %}
+                </p>
+                <p><strong>{% trans "8 Rylance Street, Beswick, Manchester, M11 3NP" %}</strong></p>
+                <p>
+                    {% trans "The property is easily accessible via" %} <strong>{% trans "Ashton Old Road (A635)" %}</strong>. {% trans "If coming from the" %} <strong>{% trans "M60 motorway" %}</strong>, {% trans "take Exit 24 and follow signs toward" %} <strong>{% trans "Manchester City Centre" %}</strong>. {% trans "Parking is available on-site." %}
+                </p>
             </div>
         </div>
 
-
+        <!-- ✅ How to Use PIN -->
         <div class="faq-item">
-            <button class="faq-question">How do I use the PIN? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How do I use the PIN?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
                 <ol>
-                    <li>Watch the video at the top of this page for easy instructions.</li>
-                    <li>When you arrive at the property’s front door, touch the keypad area to light up the numbers.</li>
-                    <li>Enter your PIN: 
+                    <li>{% trans "Watch the video at the top of this page for easy instructions." %}</li>
+                    <li>{% trans "When you arrive at the property’s front door, touch the keypad area to light up the numbers." %}</li>
+                    <li>
+                        {% trans "Enter your PIN:" %}
                         {% if not show_pin %}
-                            <p class="pin-wait">Check-in starts at 2 PM UK time. Your PIN will be available then.</p>
+                            <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your PIN will be available then." %}</p>
                         {% else %}
-                            <p class="pin-code">{{ room.access_pin|default:"No PIN assigned yet. Contact support." }}</p>
+                            {% if room.access_pin %}
+                                <p class="pin-code">{{ room.access_pin }}</p>
+                            {% else %}
+                                <p class="pin-code">{% trans "No PIN assigned yet. Contact support." %}</p>
+                            {% endif %}
                         {% endif %}
                     </li>
-                    <li>Once inside, <strong>remove your shoes</strong> and make your way upstairs to find <strong>{{ room.name }}</strong>.</li>
-                    <li>Touch the front of the {{ room.name }} door lock to light up the numbers and enter the same PIN to access your room.</li>
-                    <li>Inside your room, you will find a <strong>keycard</strong>. You can either continue using your PIN or use the keycard to enter and exit the property and your room. Watch the video above on how to use the keycard.</li>
+                    <li>
+                        {% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{ room.name }}</strong>.
+                    </li>
+                    <li>
+                        {% trans "Touch the front of the" %} <strong>{{ room.name }}</strong> {% trans "door lock to light up the numbers and enter the same PIN to access your room." %}
+                    </li>
+                    <li>
+                        {% trans "Inside your room, you will find a" %} <strong>{% trans "keycard" %}</strong>. {% trans "You can either continue using your PIN or use the keycard to enter and exit the property and your room. Watch the video above on how to use the keycard." %}
+                    </li>
                 </ol>
             </div>
         </div>
         
         <!-- ✅ Wifi Password -->
         <div class="faq-item">
-            <button class="faq-question">What is the WiFi password? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What is the WiFi password?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>The WiFi details are below.</p>
+                <p>{% trans "The WiFi details are below." %}</p>
                 <ul>
-                    <li><strong>Wifi Name:</strong> Guest_2.4G</li>
-                    <li><strong>Password:</strong> welcome1</li>
+                    <li><strong>{% trans "Wifi Name:" %}</strong> {% trans "Guest_2.4G" %}</li>
+                    <li><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</li>
                 </ul>  
             </div>
         </div>
 
         <!-- ✅ House Rules -->
         <div class="faq-item">
-            <button class="faq-question">What are the house rules? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What are the house rules?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
                 <ul>
-                    <li>❗ No smoking inside.</li>
-                    <li>🔑 Lost keys incur a fee.</li>
-                    <li>🎉 No loud noise or parties allowed.</li>
+                    <li>❗ {% trans "No smoking inside." %}</li>
+                    <li>🔑 {% trans "Lost keys incur a fee." %}</li>
+                    <li>🎉 {% trans "No loud noise or parties allowed." %}</li>
                 </ul>
             </div>
         </div>
 
         <!-- ✅ Kitchen Info -->
         <div class="faq-item">
-            <button class="faq-question">Where is the shared kitchen? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>🍕 The kitchen is located downstairs and you have full access to it.</p>
-                <p>🍕 <strong>Microwave & Oven:</strong> Located in the kitchen. Instructions are available nearby.</p>
-                <p>🍽 <strong>Plates & Cutlery:</strong> Stored in the cabinets. Please wash after use.</p>
+                <p>🍕 {% trans "The kitchen is located downstairs and you have full access to it." %}</p>
+                <p>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "Located in the kitchen. Instructions are available nearby." %}</p>
+                <p>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "Stored in the cabinets. Please wash after use." %}</p>
             </div>
         </div>
 
         <!-- ✅ Heating Instructions -->
         <div class="faq-item">
-            <button class="faq-question">How do I adjust the heating? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How do I adjust the heating?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>❄️ To increase the heat, turn both radiator knobs <strong>anti-clockwise</strong> to allow hot water to flow in.</p>
-                <p>🔥 The heating system will automatically activate when the room temperature drops below <strong>21°C</strong>.</p>
-                <p>⚠️ <strong>Note:</strong> Do not force the knobs. If they feel stiff, turn them gently.</p>
+                <p>❄️ {% trans "To increase the heat, turn both radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans "to allow hot water to flow in." %}</p>
+                <p>🔥 {% trans "The heating system will automatically activate when the room temperature drops below" %} <strong>{% trans "21°C" %}</strong>.</p>
+                <p>⚠️ <strong>{% trans "Note:" %}</strong> {% trans "Do not force the knobs. If they feel stiff, turn them gently." %}</p>
             </div>
         </div>
 
-
         <!-- ✅ Transport and Taxi Services -->
         <div class="faq-item">
-            <button class="faq-question">How can I get around? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How can I get around?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>🚕 <stong>Recommended Taxi:</stong> Uber, Bolt, or StreetCars <stong>(+44 161 223 1066)</stong></p>
-                <p>🚇 <stong>Metro:</stong> Take <strong>bus 219 from Ashton-Old-Road</strong> to the city centre.</p>
-                <p>For more bus routes and planning go to <a href="https://tfgm.com/" target="blank">Bee Network</a></p>
+                <p>🚕 <strong>{% trans "Recommended Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars" %} <strong>{% trans "(+44 161 223 1066)" %}</strong></p>
+                <p>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "Take" %} <strong>{% trans "bus 219 from Ashton-Old-Road" %}</strong> {% trans "to the city centre." %}</p>
+                <p>{% trans "For more bus routes and planning go to" %} <a href="https://tfgm.com/" target="blank">{% trans "Bee Network" %}</a></p>
             </div>
         </div>
 
         <!-- ✅ Check-Out Instructions -->
         <div class="faq-item">
-            <button class="faq-question">How do I check out? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How do I check out?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
                 <ul>
-                    <li>🛑 <strong>Leave the keycard inside the room</strong>—anywhere visible.</li>
-                    <li>🔌 <strong>Switch off all electrical appliances</strong> and ensure lights are turned off.</li>
-                    <li>🚪 <strong>Close the door securely behind you</strong>.</li>
-                    <li>🛏️ <strong>Leave used towels</strong> in the bathroom.</li>
-                    <li>📅 <strong>Housekeeping staff may enter</strong> after the checkout time.</li>
+                    <li>🛑 <strong>{% trans "Leave the keycard inside the room" %}</strong> {% trans "—anywhere visible." %}</li>
+                    <li>🔌 <strong>{% trans "Switch off all electrical appliances" %}</strong> {% trans "and ensure lights are turned off." %}</li>
+                    <li>🚪 <strong>{% trans "Close the door securely behind you" %}</strong>.</li>
+                    <li>🛏️ <strong>{% trans "Leave used towels" %}</strong> {% trans "in the bathroom." %}</li>
+                    <li>📅 <strong>{% trans "Housekeeping staff may enter" %}</strong> {% trans "after the checkout time." %}</li>
                 </ul>
             </div>
         </div>
 
-
         <!-- ✅ Parking Info -->
         <div class="faq-item">
-            <button class="faq-question">🚘 Where can I park? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "🚘 Where can I park?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>✅ <strong>Free parking</strong> is available on the property.</p>
-                <p>✅ The tarmac area can accommodate two cars. If you arrive before other guests, please park <strong>well to the left</strong> to leave enough space for another car to park beside yours.</p>
+                <p>✅ <strong>{% trans "Free parking" %}</strong> {% trans "is available on the property." %}</p>
+                <p>✅ {% trans "The tarmac area can accommodate two cars. If you arrive before other guests, please park" %} <strong>{% trans "well to the left" %}</strong> {% trans "to leave enough space for another car to park beside yours." %}</p>
             </div>
         </div>
 
         <!-- ✅ Bathroom & Towels -->
         <div class="faq-item">
-            <button class="faq-question">Where is the bathroom, and do you provide towels? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Where is the bathroom, and do you provide towels?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>🚿 <strong>Bathrooms & Toilets:</strong> Some rooms have en-suite bathrooms, while others have shared bathrooms located in the hallway.</p>
-                <p>🛏 Fresh towels are provided inside your room. Shower gel is also available in the bathroom for your convenience.</p>
+                <p>🚿 <strong>{% trans "Bathrooms & Toilets:" %}</strong> {% trans "Some rooms have en-suite bathrooms, while others have shared bathrooms located in the hallway." %}</p>
+                <p>🛏 {% trans "Fresh towels are provided inside your room. Shower gel is also available in the bathroom for your convenience." %}</p>
             </div>
         </div>
-
 
         <!-- ✅ Pressing Iron and Hairdryer -->
         <div class="faq-item">
-            <button class="faq-question">Do you provide a pressing iron and hairdryer? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>🧺 Yes, a <strong>pressing iron</strong> is available in the hallway for your use.</p>
-                <p>💨 A <strong>hairdryer</strong> can be found in the bathroom.</p>
+                <p>🧺 {% trans "Yes, a" %} <strong>{% trans "pressing iron" %}</strong> {% trans "is available in the hallway for your use." %}</p>
+                <p>💨 <strong>{% trans "hairdryer" %}</strong> {% trans "can be found in the bathroom." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">How safe is the internet network? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How safe is the internet network?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>Our internet is powered by <strong>Fibre One</strong> and secured with an <strong>Eero 6+ Gateway</strong>. The guest network is fully isolated, preventing data sharing between devices.</p>
+                <p>{% trans "Our internet is powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "The guest network is fully isolated, preventing data sharing between devices." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">Is my digital lock secure? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Is my digital lock secure?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>The <strong>Tuya Smart Lock</strong> ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure.</p>
+                <p>{% trans "The" %} <strong>{% trans "Tuya Smart Lock" %}</strong> {% trans "ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure." %}</p>
             </div>
         </div>
 
         <!-- ✅ Room Amenities -->
         <div class="faq-item">
-            <button class="faq-question">What amenities are included in the room? <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What amenities are included in the room?" %} <span class="arrow">{% trans "▼" %}</span></button>
             <div class="faq-answer">
-                <p>The room includes the following amenities:</p>
+                <p>{% trans "The room includes the following amenities:" %}</p>
                 <ul>
-                    <li>✅ Free High-Speed WiFi</li>
-                    <li>✅ Fresh Towels & Bed Linen</li>
-                    <li>✅ Private or Shared Bathroom with body wash and hand wash</li>
-                    <li>✅ Smart TV with Netflix, Amazon Prime and others</li>
-                    <li>✅ Pressing Iron and Hair Dryer</li>
-                    <li>✅ Complimentary Tea, Coffee & Milk (In the kitchen downstairs)</li>
+                    <li>✅ {% trans "Free High-Speed WiFi" %}</li>
+                    <li>✅ {% trans "Fresh Towels & Bed Linen" %}</li>
+                    <li>✅ {% trans "Private or Shared Bathroom with body wash and hand wash" %}</li>
+                    <li>✅ {% trans "Smart TV with Netflix, Amazon Prime and others" %}</li>
+                    <li>✅ {% trans "Pressing Iron and Hair Dryer" %}</li>
+                    <li>✅ {% trans "Complimentary Tea, Coffee & Milk (In the kitchen downstairs)" %}</li>
                 </ul>  
             </div>
         </div>
@@ -259,10 +282,10 @@
 </div>
 
 <!-- ✅ WhatsApp Chat Button -->
-<div id="chat-button"  class="room-info" onclick="toggleChat()">💬 Chat with Me</div>
+<div id="chat-button" class="room-info" onclick="toggleChat()">{% trans "💬 Chat with Me" %}</div>
 <div class="chat-box" id="chatBox">
-    <p>Need help? Send me a message on WhatsApp!</p>
-    <a href="https://wa.me/447539029629" target="_blank">Open WhatsApp</a>
+    <p>{% trans "Need help? Send me a message on WhatsApp!" %}</p>
+    <a href="https://wa.me/447539029629" target="_blank">{% trans "Open WhatsApp" %}</a>
 </div>
 
 </section>
@@ -307,12 +330,12 @@
                 // Close all other answers
                 faqItems.forEach(faq => {
                     faq.querySelector(".faq-answer").style.display = "none";
-                    faq.querySelector(".arrow").textContent = "▼";
+                    faq.querySelector(".arrow").textContent = "{% trans '▼' %}";
                 });
 
                 // Toggle clicked item
                 answer.style.display = isActive ? "none" : "block";
-                arrow.textContent = isActive ? "▼" : "▲";
+                arrow.textContent = isActive ? "{% trans '▼' %}" : "{% trans '▲' %}";
             });
         });
 
