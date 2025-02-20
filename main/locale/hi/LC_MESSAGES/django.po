@@ -601,3 +601,591 @@ msgstr "कोई आरक्षण नहीं मिला। कृपय�
 #: views.py:16
 msgid "Details not found. Make sure you input the correct phone number."
 msgstr "विवरण नहीं मिला। सुनिश्चित करें कि आपने सही फोन नंबर दर्ज किया है।"
+
+#: Template: room_detail.html (Title)
+msgid "Room Details"
+msgstr "कमरे का विवरण"
+
+#: Template: room_detail.html (Hero Section)
+msgid "Instruction Video"
+msgstr "निर्देश वीडियो"
+
+#: Template: room_detail.html (Video Iframe title)
+msgid "Room Instructions"
+msgstr "कमरे के निर्देश"
+
+#: Template: room_detail.html (Guest greeting)
+msgid "Welcome, %(guest_name)s"
+msgstr "स्वागत है, %(guest_name)s"
+
+#: Template: room_detail.html (Room Access PIN header)
+msgid "🔑 House & Room Access PIN"
+msgstr "🔑 घर और कमरे का प्रवेश पिन"
+
+#: Template: room_detail.html (PIN not yet available)
+msgid "Check-in starts at 2 PM UK time. Your PIN will be available then."
+msgstr "यूके समय के अनुसार दोपहर 2 बजे चेक-इन शुरू होता है। आपका पिन तब उपलब्ध होगा।"
+
+#: Template: room_detail.html (No PIN message)
+msgid "No PIN assigned yet. Contact support."
+msgstr "अभी तक कोई पिन असाइन नहीं किया गया है। सहायता के लिए संपर्क करें।"
+
+#: Template: room_detail.html (Room Details header)
+msgid "🛏️ Room Details"
+msgstr "🛏️ कमरे का विवरण"
+
+#: Template: room_detail.html (Your Stay header)
+msgid "📅 Your Stay"
+msgstr "📅 आपका प्रवास"
+
+#: Template: room_detail.html (Reservation Number label)
+msgid "Reservation Number:"
+msgstr "आरक्षण संख्या:"
+
+#: Template: room_detail.html (Check-In label)
+msgid "Check-In:"
+msgstr "चेक-इन:"
+
+#: Template: room_detail.html (From 2 PM)
+msgid "From 2 PM"
+msgstr "दोपहर 2 बजे से"
+
+#: Template: room_detail.html (Check-Out label)
+msgid "Check-Out:"
+msgstr "चेक-आउट:"
+
+#: Template: room_detail.html (Before 11 AM)
+msgid "Before 11 AM"
+msgstr "सुबह 11 बजे से पहले"
+
+#: Template: room_detail.html (Access Expires label)
+msgid "Access Expires:"
+msgstr "प्रवेश समाप्त:"
+
+#: Template: room_detail.html (No guest assigned)
+msgid "No guest assigned to this room. Contact admin for assistance."
+msgstr "इस कमरे को कोई अतिथि निर्धारित नहीं है। सहायता के लिए व्यवस्थापक से संपर्क करें।"
+
+#: Template: room_detail.html (FAQ header)
+msgid "❓ Frequently Asked Questions"
+msgstr "❓ अक्सर पूछे जाने वाले प्रश्न"
+
+#: Template: room_detail.html (FAQ – Property Location question)
+msgid "📍 Where is the property located?"
+msgstr "📍 संपत्ति कहाँ स्थित है?"
+
+#: Template: room_detail.html (Arrow down)
+msgid "▼"
+msgstr "▼"
+
+#: Template: room_detail.html (Address text)
+msgid "8 Rylance Street, Beswick, Manchester, M11 3NP"
+msgstr "8 Rylance Street, Beswick, Manchester, M11 3NP"
+
+#: Template: room_detail.html (Link to Google Maps)
+msgid "📍 Open in Google Maps"
+msgstr "📍 Google Maps में खोलें"
+
+#: Template: room_detail.html (Image alt text)
+msgid "Street View of Property"
+msgstr "संपत्ति का स्ट्रीट व्यू"
+
+#: Template: room_detail.html (FAQ – Directions question)
+msgid "How do I get to the property?"
+msgstr "मैं संपत्ति तक कैसे पहुँचूँ?"
+
+#: Template: room_detail.html (Directions – From Manchester Airport heading)
+msgid "Coming from Manchester Airport?"
+msgstr "क्या आप मैन्चेस्टर एयरपोर्ट से आ रहे हैं?"
+
+#: Template: room_detail.html (Directions – Taxi label)
+msgid "Taxi:"
+msgstr "टैक्सी:"
+
+#: Template: room_detail.html (Directions – Taxi instruction part 1)
+msgid "A direct taxi from"
+msgstr "से सीधी टैक्सी"
+
+#: Template: room_detail.html (Directions – Manchester Airport)
+msgid "Manchester Airport"
+msgstr "मैन्चेस्टर एयरपोर्ट"
+
+#: Template: room_detail.html (Directions – Taxi instruction part 2)
+msgid "takes approximately 25 minutes."
+msgstr "लगभग 25 मिनट लेती है।"
+
+#: Template: room_detail.html (Directions – Train label)
+msgid "Train:"
+msgstr "ट्रेन:"
+
+#: Template: room_detail.html (Directions – Train instruction part 1)
+msgid "Take a train from"
+msgstr "से ट्रेन लें"
+
+#: Template: room_detail.html (Directions – Train route)
+msgid "Manchester Airport to Piccadilly Station"
+msgstr "मैन्चेस्टर एयरपोर्ट से पिककैडिली स्टेशन तक"
+
+#: Template: room_detail.html (Directions – Train instruction part 2)
+msgid "then a short"
+msgstr "फिर एक छोटी"
+
+#: Template: room_detail.html (Directions – Taxi ride price)
+msgid "£5 taxi ride"
+msgstr "£5 टैक्सी सवारी"
+
+#: Template: room_detail.html (Directions – to the property)
+msgid "to the property."
+msgstr "संपत्ति तक।"
+
+#: Template: room_detail.html (Directions – Bus label)
+msgid "Bus:"
+msgstr "बस:"
+
+#: Template: room_detail.html (Directions – Bus article)
+msgid "The"
+msgstr "यह"
+
+#: Template: room_detail.html (Directions – Bus number)
+msgid "219 bus"
+msgstr "219 बस"
+
+#: Template: room_detail.html (Directions – from preposition)
+msgid "from"
+msgstr "से"
+
+#: Template: room_detail.html (Directions – Piccadilly Station)
+msgid "Piccadilly Station"
+msgstr "पिककैडिली स्टेशन"
+
+#: Template: room_detail.html (Directions – Bus instruction part)
+msgid "stops near the property."
+msgstr "संपत्ति के पास रुकती है।"
+
+#: Template: room_detail.html (Directions – Other parts question)
+msgid "Coming from another part of Manchester?"
+msgstr "क्या आप मैन्चेस्टर के किसी अन्य हिस्से से आ रहे हैं?"
+
+#: Template: room_detail.html (Directions – Instruction part 1)
+msgid "Make your way to"
+msgstr "की ओर जाएँ"
+
+#: Template: room_detail.html (Directions – Manchester city centre)
+msgid "Manchester city centre"
+msgstr "मैन्चेस्टर सिटी सेंटर"
+
+#: Template: room_detail.html (Directions – Instruction part 2)
+msgid "and take the"
+msgstr "और लें"
+
+#: Template: room_detail.html (Directions – Instruction part 3)
+msgid "to the nearest bus stop close to the property. You can use"
+msgstr "संपत्ति के नजदीकी बस स्टॉप तक। आप उपयोग कर सकते हैं"
+
+#: Template: room_detail.html (Directions – Google Maps)
+msgid "Google Maps"
+msgstr "Google Maps"
+
+#: Template: room_detail.html (Directions – Instruction part 4)
+msgid "or your navigation app to find the closest stop to alight."
+msgstr "या अपनी नेविगेशन ऐप का उपयोग करें ताकि सबसे नजदीकी स्टॉप पा सकें।"
+
+#: Template: room_detail.html (Directions – Driving question)
+msgid "Driving to the property?"
+msgstr "क्या आप संपत्ति तक ड्राइव कर रहे हैं?"
+
+#: Template: room_detail.html (Directions – Navigation instruction part 1)
+msgid "Use"
+msgstr "उपयोग करें"
+
+#: Template: room_detail.html (Directions – Navigation instruction part 2)
+msgid "or your preferred navigation app and enter the destination:"
+msgstr "या अपनी पसंदीदा नेविगेशन ऐप का उपयोग करें और गंतव्य दर्ज करें:"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 1)
+msgid "The property is easily accessible via"
+msgstr "संपत्ति तक आसानी से पहुँचने के लिए"
+
+#: Template: room_detail.html (Directions – Ashton Old Road)
+msgid "Ashton Old Road (A635)"
+msgstr "Ashton Old Road (A635)"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 2)
+msgid "If coming from the"
+msgstr "यदि आप ... से आ रहे हैं"
+
+#: Template: room_detail.html (Directions – M60 motorway)
+msgid "M60 motorway"
+msgstr "M60 मोटरवे"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 3)
+msgid "take Exit 24 and follow signs toward"
+msgstr "एक्जिट 24 लें और संकेतों का पालन करें"
+
+#: Template: room_detail.html (Directions – Manchester City Centre)
+msgid "Manchester City Centre"
+msgstr "मैन्चेस्टर सिटी सेंटर"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 4)
+msgid "Parking is available on-site."
+msgstr "स्थल पर पार्किंग उपलब्ध है।"
+
+#: Template: room_detail.html (FAQ – How do I use the PIN question)
+msgid "How do I use the PIN?"
+msgstr "मैं पिन का उपयोग कैसे करूँ?"
+
+#: Template: room_detail.html (FAQ – Instruction step 1)
+msgid "Watch the video at the top of this page for easy instructions."
+msgstr "सरल निर्देशों के लिए इस पृष्ठ के शीर्ष पर वीडियो देखें।"
+
+#: Template: room_detail.html (FAQ – Instruction step 2)
+msgid "When you arrive at the property’s front door, touch the keypad area to light up the numbers."
+msgstr "जब आप संपत्ति के मुख्य द्वार पर पहुँचें, तो नंबर जगाने के लिए कीपैड क्षेत्र को छुएँ।"
+
+#: Template: room_detail.html (FAQ – Instruction step 3)
+msgid "Enter your PIN:"
+msgstr "अपना पिन दर्ज करें:"
+
+#: Template: room_detail.html (FAQ – Instruction step 4)
+msgid "Once inside, remove your shoes and make your way upstairs to find"
+msgstr "एक बार अंदर पहुँचने पर, अपने जूते उतारें और ऊपर जाएँ ताकि आप पा सकें"
+
+#: Template: room_detail.html (FAQ – Instruction step 5)
+msgid "Touch the front of the"
+msgstr "दरवाजे के सामने छुएँ"
+
+#: Template: room_detail.html (FAQ – Instruction step 5 continued)
+msgid "door lock to light up the numbers and enter the same PIN to access your room."
+msgstr "ताले को छूएँ ताकि नंबर जल उठें और उसी पिन को दर्ज करें ताकि आप अपने कमरे में प्रवेश कर सकें।"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 1)
+msgid "Inside your room, you will find a"
+msgstr "आपके कमरे के अंदर, आपको एक मिलेगा"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 2)
+msgid "keycard"
+msgstr "प्रवेश कार्ड"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 3)
+msgid "You can either continue using your PIN or use the keycard to enter and exit the property and your room. Watch the video above on how to use the keycard."
+msgstr "आप या तो अपना पिन जारी रख सकते हैं या प्रवेश कार्ड का उपयोग करके संपत्ति और अपने कमरे में प्रवेश और निकास कर सकते हैं। प्रवेश कार्ड का उपयोग कैसे करें, इसके लिए ऊपर दिए गए वीडियो को देखें।"
+
+#: Template: room_detail.html (FAQ – WiFi Password question)
+msgid "What is the WiFi password?"
+msgstr "WiFi पासवर्ड क्या है?"
+
+#: Template: room_detail.html (FAQ – WiFi details intro)
+msgid "The WiFi details are below."
+msgstr "WiFi विवरण नीचे दिए गए हैं।"
+
+#: Template: room_detail.html (FAQ – Wifi Name label)
+msgid "Wifi Name:"
+msgstr "WiFi नाम:"
+
+#: Template: room_detail.html (FAQ – Guest_2.4G)
+msgid "Guest_2.4G"
+msgstr "Guest_2.4G"
+
+#: Template: room_detail.html (FAQ – Password label)
+msgid "Password:"
+msgstr "पासवर्ड:"
+
+#: Template: room_detail.html (FAQ – welcome1)
+msgid "welcome1"
+msgstr "welcome1"
+
+#: Template: room_detail.html (FAQ – House Rules question)
+msgid "What are the house rules?"
+msgstr "हाउस नियम क्या हैं?"
+
+#: Template: room_detail.html (FAQ – House Rules rule 1)
+msgid "No smoking inside."
+msgstr "अंदर धूम्रपान मना है।"
+
+#: Template: room_detail.html (FAQ – House Rules rule 2)
+msgid "Lost keys incur a fee."
+msgstr "खोई हुई चाबियाँ शुल्क लगती हैं।"
+
+#: Template: room_detail.html (FAQ – House Rules rule 3)
+msgid "No loud noise or parties allowed."
+msgstr "जोरदार शोर या पार्टी की अनुमति नहीं है।"
+
+#: Template: room_detail.html (FAQ – Shared Kitchen question)
+msgid "Where is the shared kitchen?"
+msgstr "साझी रसोई कहाँ है?"
+
+#: Template: room_detail.html (FAQ – Shared Kitchen, first sentence)
+msgid "The kitchen is located downstairs and you have full access to it."
+msgstr "रसोई नीचे स्थित है और आपको इसका पूरा उपयोग है।"
+
+#: Template: room_detail.html (FAQ – Kitchen: Microwave & Oven label)
+msgid "Microwave & Oven:"
+msgstr "माइक्रोवेव और ओवन:"
+
+#: Template: room_detail.html (FAQ – Kitchen: Instructions)
+msgid "Located in the kitchen. Instructions are available nearby."
+msgstr "रसोई में स्थित है। पास में निर्देश उपलब्ध हैं।"
+
+#: Template: room_detail.html (FAQ – Kitchen: Plates & Cutlery label)
+msgid "Plates & Cutlery:"
+msgstr "प्लेट्स और कटलरी:"
+
+#: Template: room_detail.html (FAQ – Kitchen: Plates & Cutlery instructions)
+msgid "Stored in the cabinets. Please wash after use."
+msgstr "कैबिनेट में रखा गया है। कृपया उपयोग के बाद धो लें।"
+
+#: Template: room_detail.html (FAQ – Heating question)
+msgid "How do I adjust the heating?"
+msgstr "मैं हीटिंग कैसे समायोजित करूँ?"
+
+#: Template: room_detail.html (FAQ – Heating step 1)
+msgid "To increase the heat, turn both radiator knobs"
+msgstr "ताप बढ़ाने के लिए, दोनों रेडिएटर की नॉब्स घुमाएँ"
+
+#: Template: room_detail.html (FAQ – Heating – anti-clockwise)
+msgid "anti-clockwise"
+msgstr "विपरीत दिशा में"
+
+#: Template: room_detail.html (FAQ – Heating step 1 continued)
+msgid "to allow hot water to flow in."
+msgstr "ताकि गर्म पानी बह सके।"
+
+#: Template: room_detail.html (FAQ – Heating step 2)
+msgid "The heating system will automatically activate when the room temperature drops below"
+msgstr "जब कमरे का तापमान नीचे गिरता है, तो हीटिंग सिस्टम स्वचालित रूप से सक्रिय हो जाएगा"
+
+#: Template: room_detail.html (FAQ – Heating – 21°C)
+msgid "21°C"
+msgstr "21°C"
+
+#: Template: room_detail.html (FAQ – Heating – Note label)
+msgid "Note:"
+msgstr "नोट:"
+
+#: Template: room_detail.html (FAQ – Heating step 3)
+msgid "Do not force the knobs. If they feel stiff, turn them gently."
+msgstr "नॉब्स को जबरदस्ती न घुमाएँ। अगर वे कठोर महसूस हों, तो धीरे-धीरे घुमाएँ।"
+
+#: Template: room_detail.html (FAQ – Getting Around question)
+msgid "How can I get around?"
+msgstr "मैं कैसे घूम सकता हूँ?"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi line label)
+msgid "Recommended Taxi:"
+msgstr "अनुशंसित टैक्सी:"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi companies)
+msgid "Uber, Bolt, or StreetCars"
+msgstr "Uber, Bolt, या StreetCars"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi phone)
+msgid "(+44 161 223 1066)"
+msgstr "(+44 161 223 1066)"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro label)
+msgid "Metro:"
+msgstr "मेट्रो:"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro instruction part 1)
+msgid "Take"
+msgstr "लें"
+
+#: Template: room_detail.html (FAQ – Getting Around, bus route)
+msgid "bus 219 from Ashton-Old-Road"
+msgstr "Ashton-Old-Road से बस 219"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro instruction part 2)
+msgid "to the city centre."
+msgstr "शहर के केंद्र तक।"
+
+#: Template: room_detail.html (FAQ – Getting Around, additional bus info)
+msgid "For more bus routes and planning go to"
+msgstr "अधिक बस मार्ग और योजना के लिए जाएँ"
+
+#: Template: room_detail.html (FAQ – Getting Around, Bee Network)
+msgid "Bee Network"
+msgstr "Bee Network"
+
+#: Template: room_detail.html (FAQ – Check Out question)
+msgid "How do I check out?"
+msgstr "मैं चेक-आउट कैसे करूँ?"
+
+#: Template: room_detail.html (FAQ – Check Out, step 1)
+msgid "Leave the keycard inside the room"
+msgstr "कमरे के अंदर प्रवेश कार्ड छोड़ दें"
+
+#: Template: room_detail.html (FAQ – Check Out, step 1 extra)
+msgid "—anywhere visible."
+msgstr "—जहाँ भी दिखाई दे।"
+
+#: Template: room_detail.html (FAQ – Check Out, step 2)
+msgid "Switch off all electrical appliances"
+msgstr "सभी विद्युत उपकरण बंद करें"
+
+#: Template: room_detail.html (FAQ – Check Out, step 2 extra)
+msgid "and ensure lights are turned off."
+msgstr "और सुनिश्चित करें कि सभी लाइटें बंद हैं।"
+
+#: Template: room_detail.html (FAQ – Check Out, step 3)
+msgid "Close the door securely behind you"
+msgstr "अपने पीछे दरवाजा सुरक्षित रूप से बंद करें।"
+
+#: Template: room_detail.html (FAQ – Check Out, step 4)
+msgid "Leave used towels"
+msgstr "उपयोग की गई तौलिये छोड़ दें"
+
+#: Template: room_detail.html (FAQ – Check Out, step 4 extra)
+msgid "in the bathroom."
+msgstr "बाथरूम में।"
+
+#: Template: room_detail.html (FAQ – Check Out, step 5)
+msgid "Housekeeping staff may enter"
+msgstr "हाउसकीपिंग स्टाफ प्रवेश कर सकता है"
+
+#: Template: room_detail.html (FAQ – Check Out, step 5 extra)
+msgid "after the checkout time."
+msgstr "चेक-आउट के बाद।"
+
+#: Template: room_detail.html (FAQ – Parking question)
+msgid "🚘 Where can I park?"
+msgstr "🚘 मैं कहाँ पार्क कर सकता हूँ?"
+
+#: Template: room_detail.html (FAQ – Parking, line 1)
+msgid "Free parking"
+msgstr "मुफ्त पार्किंग"
+
+#: Template: room_detail.html (FAQ – Parking, line 1 continuation)
+msgid "is available on the property."
+msgstr "संपत्ति पर उपलब्ध है।"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 1)
+msgid "The tarmac area can accommodate two cars. If you arrive before other guests, please park"
+msgstr "टारमैक्स क्षेत्र में दो कारों के लिए जगह है। यदि आप अन्य मेहमानों से पहले पहुँचते हैं, तो कृपया पार्क करें"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 2)
+msgid "well to the left"
+msgstr "अच्छी तरह से बाईं ओर"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 3)
+msgid "to leave enough space for another car to park beside yours."
+msgstr "ताकि आपकी कार के बगल में एक अन्य कार के पार्क करने के लिए पर्याप्त जगह बच सके।"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels question)
+msgid "Where is the bathroom, and do you provide towels?"
+msgstr "बाथरूम कहाँ है, और क्या आप तौलिये प्रदान करते हैं?"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 1)
+msgid "Bathrooms & Toilets:"
+msgstr "बाथरूम और शौचालय:"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 2)
+msgid "Some rooms have en-suite bathrooms, while others have shared bathrooms located in the hallway."
+msgstr "कुछ कमरों में निजी बाथरूम होते हैं, जबकि अन्य में हॉलवे में साझा बाथरूम होते हैं।"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 3)
+msgid "Fresh towels are provided inside your room. Shower gel is also available in the bathroom for your convenience."
+msgstr "आपके कमरे में ताजे तौलिये प्रदान किए जाते हैं। आपकी सुविधा के लिए बाथरूम में शावर जेल भी उपलब्ध है।"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer question)
+msgid "Do you provide a pressing iron and hairdryer?"
+msgstr "क्या आप प्रेसिंग आयरन और हेयर ड्रायर प्रदान करते हैं?"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 1)
+msgid "Yes, a"
+msgstr "हाँ, एक"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 2)
+msgid "pressing iron"
+msgstr "प्रेसिंग आयरन"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 3)
+msgid "is available in the hallway for your use."
+msgstr "हॉलवे में आपके उपयोग के लिए उपलब्ध है।"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 4)
+msgid "hairdryer"
+msgstr "हेयर ड्रायर"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 5)
+msgid "can be found in the bathroom."
+msgstr "बाथरूम में पाया जा सकता है।"
+
+#: Template: room_detail.html (FAQ – Internet Network question)
+msgid "How safe is the internet network?"
+msgstr "इंटरनेट नेटवर्क कितना सुरक्षित है?"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 1)
+msgid "Our internet is powered by"
+msgstr "हमारा इंटरनेट इस पर चलता है"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 2)
+msgid "Fibre One"
+msgstr "Fibre One"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 3)
+msgid "and secured with an"
+msgstr "और इसके साथ सुरक्षित है"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 4)
+msgid "Eero 6+ Gateway"
+msgstr "Eero 6+ Gateway"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 5)
+msgid "The guest network is fully isolated, preventing data sharing between devices."
+msgstr "अतिथि नेटवर्क पूरी तरह से अलग है, जिससे उपकरणों के बीच डेटा साझा करना रोका जाता है।"
+
+#: Template: room_detail.html (FAQ – Digital Lock question)
+msgid "Is my digital lock secure?"
+msgstr "क्या मेरा डिजिटल लॉक सुरक्षित है?"
+
+#: Template: room_detail.html (FAQ – Digital Lock, part 2)
+msgid "Tuya Smart Lock"
+msgstr "Tuya Smart Lock"
+
+#: Template: room_detail.html (FAQ – Digital Lock, part 3)
+msgid "ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure."
+msgstr "यह सुनिश्चित करता है कि केवल निर्धारित अतिथि और व्यवस्थापक ही कमरे में प्रवेश कर सकें। चेक-आउट के बाद पिन स्वचालित रूप से समाप्त हो जाते हैं, जिससे यह अत्यधिक सुरक्षित हो जाता है।"
+
+#: Template: room_detail.html (FAQ – Amenities question)
+msgid "What amenities are included in the room?"
+msgstr "कमरे में कौन-कौन सी सुविधाएँ शामिल हैं?"
+
+#: Template: room_detail.html (FAQ – Amenities list intro)
+msgid "The room includes the following amenities:"
+msgstr "कमरे में निम्नलिखित सुविधाएँ शामिल हैं:"
+
+#: Template: room_detail.html (FAQ – Amenity 1)
+msgid "Free High-Speed WiFi"
+msgstr "निःशुल्क हाई-स्पीड WiFi"
+
+#: Template: room_detail.html (FAQ – Amenity 2)
+msgid "Fresh Towels & Bed Linen"
+msgstr "ताजे तौलिये और बेड लिनन"
+
+#: Template: room_detail.html (FAQ – Amenity 3)
+msgid "Private or Shared Bathroom with body wash and hand wash"
+msgstr "निजी या साझा बाथरूम (जिसमें बॉडी वॉश और हैंड वॉश शामिल हैं)"
+
+#: Template: room_detail.html (FAQ – Amenity 4)
+msgid "Smart TV with Netflix, Amazon Prime and others"
+msgstr "नेटफ्लिक्स, Amazon Prime और अन्य के साथ स्मार्ट टीवी"
+
+#: Template: room_detail.html (FAQ – Amenity 5)
+msgid "Pressing Iron and Hair Dryer"
+msgstr "प्रेसिंग आयरन और हेयर ड्रायर"
+
+#: Template: room_detail.html (FAQ – Amenity 6)
+msgid "Complimentary Tea, Coffee & Milk (In the kitchen downstairs)"
+msgstr "नि:शुल्क चाय, कॉफी और दूध (नीचे की रसोई में)"
+
+#: Template: room_detail.html (WhatsApp Chat Button)
+msgid "💬 Chat with Me"
+msgstr "💬 मुझसे चैट करें"
+
+#: Template: room_detail.html (WhatsApp Chat Box, prompt)
+msgid "Need help? Send me a message on WhatsApp!"
+msgstr "मदद चाहिए? मुझे WhatsApp पर संदेश भेजें!"
+
+#: Template: room_detail.html (WhatsApp Chat Box, link)
+msgid "Open WhatsApp"
+msgstr "WhatsApp खोलें"
