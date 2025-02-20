@@ -596,3 +596,591 @@ msgstr "餐饮与夜生活"
 #: templates/main/about.html:31
 msgid "Visit New Islington Marina, Northern Quarter, and Manchester's top restaurants."
 msgstr "探索新伊斯灵顿码头、北区及曼彻斯特顶级餐厅。"
+
+#: Template: room_detail.html (Title)
+msgid "Room Details"
+msgstr "房间详情"
+
+#: Template: room_detail.html (Hero Section)
+msgid "Instruction Video"
+msgstr "说明视频"
+
+#: Template: room_detail.html (Video Iframe title)
+msgid "Room Instructions"
+msgstr "房间指引"
+
+#: Template: room_detail.html (Guest greeting)
+msgid "Welcome, %(guest_name)s"
+msgstr "欢迎, %(guest_name)s"
+
+#: Template: room_detail.html (Room Access PIN header)
+msgid "🔑 House & Room Access PIN"
+msgstr "🔑 房屋及房间访问PIN码"
+
+#: Template: room_detail.html (PIN not yet available)
+msgid "Check-in starts at 2 PM UK time. Your PIN will be available then."
+msgstr "英国时间下午2点开始办理入住，届时您的PIN码将可用。"
+
+#: Template: room_detail.html (No PIN message)
+msgid "No PIN assigned yet. Contact support."
+msgstr "尚未分配PIN码，请联系支持。"
+
+#: Template: room_detail.html (Room Details header)
+msgid "🛏️ Room Details"
+msgstr "🛏️ 房间详情"
+
+#: Template: room_detail.html (Your Stay header)
+msgid "📅 Your Stay"
+msgstr "📅 您的入住"
+
+#: Template: room_detail.html (Reservation Number label)
+msgid "Reservation Number:"
+msgstr "预订号："
+
+#: Template: room_detail.html (Check-In label)
+msgid "Check-In:"
+msgstr "入住："
+
+#: Template: room_detail.html (From 2 PM)
+msgid "From 2 PM"
+msgstr "下午2点起"
+
+#: Template: room_detail.html (Check-Out label)
+msgid "Check-Out:"
+msgstr "退房："
+
+#: Template: room_detail.html (Before 11 AM)
+msgid "Before 11 AM"
+msgstr "上午11点前"
+
+#: Template: room_detail.html (Access Expires label)
+msgid "Access Expires:"
+msgstr "访问截止："
+
+#: Template: room_detail.html (No guest assigned)
+msgid "No guest assigned to this room. Contact admin for assistance."
+msgstr "此房间尚未分配客人，如需帮助请联系管理员。"
+
+#: Template: room_detail.html (FAQ header)
+msgid "❓ Frequently Asked Questions"
+msgstr "❓ 常见问题"
+
+#: Template: room_detail.html (FAQ – Property Location question)
+msgid "📍 Where is the property located?"
+msgstr "📍 该物业位于何处？"
+
+#: Template: room_detail.html (Arrow down)
+msgid "▼"
+msgstr "▼"
+
+#: Template: room_detail.html (Address text)
+msgid "8 Rylance Street, Beswick, Manchester, M11 3NP"
+msgstr "8 Rylance Street, Beswick, Manchester, M11 3NP"
+
+#: Template: room_detail.html (Link to Google Maps)
+msgid "📍 Open in Google Maps"
+msgstr "📍 在Google地图中打开"
+
+#: Template: room_detail.html (Image alt text)
+msgid "Street View of Property"
+msgstr "物业街景"
+
+#: Template: room_detail.html (FAQ – Directions question)
+msgid "How do I get to the property?"
+msgstr "如何前往该物业？"
+
+#: Template: room_detail.html (Directions – From Manchester Airport heading)
+msgid "Coming from Manchester Airport?"
+msgstr "从曼彻斯特机场出发？"
+
+#: Template: room_detail.html (Directions – Taxi label)
+msgid "Taxi:"
+msgstr "出租车："
+
+#: Template: room_detail.html (Directions – Taxi instruction part 1)
+msgid "A direct taxi from"
+msgstr "直接乘出租车从"
+
+#: Template: room_detail.html (Directions – Manchester Airport)
+msgid "Manchester Airport"
+msgstr "曼彻斯特机场"
+
+#: Template: room_detail.html (Directions – Taxi instruction part 2)
+msgid "takes approximately 25 minutes."
+msgstr "大约需要25分钟。"
+
+#: Template: room_detail.html (Directions – Train label)
+msgid "Train:"
+msgstr "火车："
+
+#: Template: room_detail.html (Directions – Train instruction part 1)
+msgid "Take a train from"
+msgstr "乘火车从"
+
+#: Template: room_detail.html (Directions – Train route)
+msgid "Manchester Airport to Piccadilly Station"
+msgstr "曼彻斯特机场到Piccadilly站"
+
+#: Template: room_detail.html (Directions – Train instruction part 2)
+msgid "then a short"
+msgstr "然后短途"
+
+#: Template: room_detail.html (Directions – Taxi ride price)
+msgid "£5 taxi ride"
+msgstr "£5出租车费"
+
+#: Template: room_detail.html (Directions – to the property)
+msgid "to the property."
+msgstr "前往该物业。"
+
+#: Template: room_detail.html (Directions – Bus label)
+msgid "Bus:"
+msgstr "公交："
+
+#: Template: room_detail.html (Directions – Bus article)
+msgid "The"
+msgstr "这"
+
+#: Template: room_detail.html (Directions – Bus number)
+msgid "219 bus"
+msgstr "219路公交"
+
+#: Template: room_detail.html (Directions – from preposition)
+msgid "from"
+msgstr "从"
+
+#: Template: room_detail.html (Directions – Piccadilly Station)
+msgid "Piccadilly Station"
+msgstr "Piccadilly站"
+
+#: Template: room_detail.html (Directions – Bus instruction part)
+msgid "stops near the property."
+msgstr "在物业附近停靠。"
+
+#: Template: room_detail.html (Directions – Other parts question)
+msgid "Coming from another part of Manchester?"
+msgstr "来自曼彻斯特其他地区？"
+
+#: Template: room_detail.html (Directions – Instruction part 1)
+msgid "Make your way to"
+msgstr "前往"
+
+#: Template: room_detail.html (Directions – Manchester city centre)
+msgid "Manchester city centre"
+msgstr "曼彻斯特市中心"
+
+#: Template: room_detail.html (Directions – Instruction part 2)
+msgid "and take the"
+msgstr "并乘坐"
+
+#: Template: room_detail.html (Directions – Instruction part 3)
+msgid "to the nearest bus stop close to the property. You can use"
+msgstr "到达物业附近的最近公交站。您可以使用"
+
+#: Template: room_detail.html (Directions – Google Maps)
+msgid "Google Maps"
+msgstr "Google地图"
+
+#: Template: room_detail.html (Directions – Instruction part 4)
+msgid "or your navigation app to find the closest stop to alight."
+msgstr "或使用您的导航应用查找最近的下车站。"
+
+#: Template: room_detail.html (Directions – Driving question)
+msgid "Driving to the property?"
+msgstr "开车前往该物业？"
+
+#: Template: room_detail.html (Directions – Navigation instruction part 1)
+msgid "Use"
+msgstr "使用"
+
+#: Template: room_detail.html (Directions – Navigation instruction part 2)
+msgid "or your preferred navigation app and enter the destination:"
+msgstr "或使用您喜欢的导航应用，并输入目的地："
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 1)
+msgid "The property is easily accessible via"
+msgstr "该物业可通过以下方式轻松到达："
+
+#: Template: room_detail.html (Directions – Ashton Old Road)
+msgid "Ashton Old Road (A635)"
+msgstr "Ashton Old Road (A635)"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 2)
+msgid "If coming from the"
+msgstr "如果您从"
+
+#: Template: room_detail.html (Directions – M60 motorway)
+msgid "M60 motorway"
+msgstr "M60高速公路"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 3)
+msgid "take Exit 24 and follow signs toward"
+msgstr "请走24号出口，并按指示前往"
+
+#: Template: room_detail.html (Directions – Manchester City Centre)
+msgid "Manchester City Centre"
+msgstr "曼彻斯特市中心"
+
+#: Template: room_detail.html (Directions – Accessibility instruction part 4)
+msgid "Parking is available on-site."
+msgstr "现场提供停车位。"
+
+#: Template: room_detail.html (FAQ – How do I use the PIN question)
+msgid "How do I use the PIN?"
+msgstr "我如何使用PIN码？"
+
+#: Template: room_detail.html (FAQ – Instruction step 1)
+msgid "Watch the video at the top of this page for easy instructions."
+msgstr "请观看本页顶部的视频，了解操作说明。"
+
+#: Template: room_detail.html (FAQ – Instruction step 2)
+msgid "When you arrive at the property’s front door, touch the keypad area to light up the numbers."
+msgstr "到达物业正门时，请触摸键盘区域以使数字亮起。"
+
+#: Template: room_detail.html (FAQ – Instruction step 3)
+msgid "Enter your PIN:"
+msgstr "请输入您的PIN码："
+
+#: Template: room_detail.html (FAQ – Instruction step 4)
+msgid "Once inside, remove your shoes and make your way upstairs to find"
+msgstr "进入后，请脱下鞋子并上楼寻找"
+
+#: Template: room_detail.html (FAQ – Instruction step 5)
+msgid "Touch the front of the"
+msgstr "触摸……的前部"
+
+#: Template: room_detail.html (FAQ – Instruction step 5 continued)
+msgid "door lock to light up the numbers and enter the same PIN to access your room."
+msgstr "门锁以点亮数字，并输入相同的PIN码以进入您的房间。"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 1)
+msgid "Inside your room, you will find a"
+msgstr "在您的房间内，您将看到一个"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 2)
+msgid "keycard"
+msgstr "门卡"
+
+#: Template: room_detail.html (FAQ – Instruction step 6, part 3)
+msgid "You can either continue using your PIN or use the keycard to enter and exit the property and your room. Watch the video above on how to use the keycard."
+msgstr "您可以继续使用PIN码，或使用门卡进出该物业及您的房间。请观看上方视频了解如何使用门卡。"
+
+#: Template: room_detail.html (FAQ – WiFi Password question)
+msgid "What is the WiFi password?"
+msgstr "WiFi密码是什么？"
+
+#: Template: room_detail.html (FAQ – WiFi details intro)
+msgid "The WiFi details are below."
+msgstr "WiFi详细信息如下："
+
+#: Template: room_detail.html (FAQ – Wifi Name label)
+msgid "Wifi Name:"
+msgstr "WiFi名称："
+
+#: Template: room_detail.html (FAQ – Guest_2.4G)
+msgid "Guest_2.4G"
+msgstr "Guest_2.4G"
+
+#: Template: room_detail.html (FAQ – Password label)
+msgid "Password:"
+msgstr "密码："
+
+#: Template: room_detail.html (FAQ – welcome1)
+msgid "welcome1"
+msgstr "welcome1"
+
+#: Template: room_detail.html (FAQ – House Rules question)
+msgid "What are the house rules?"
+msgstr "房屋规定是什么？"
+
+#: Template: room_detail.html (FAQ – House Rules rule 1)
+msgid "No smoking inside."
+msgstr "室内禁止吸烟。"
+
+#: Template: room_detail.html (FAQ – House Rules rule 2)
+msgid "Lost keys incur a fee."
+msgstr "钥匙丢失需支付费用。"
+
+#: Template: room_detail.html (FAQ – House Rules rule 3)
+msgid "No loud noise or parties allowed."
+msgstr "禁止大声喧哗或举办派对。"
+
+#: Template: room_detail.html (FAQ – Shared Kitchen question)
+msgid "Where is the shared kitchen?"
+msgstr "共用厨房在哪里？"
+
+#: Template: room_detail.html (FAQ – Shared Kitchen, first sentence)
+msgid "The kitchen is located downstairs and you have full access to it."
+msgstr "厨房位于楼下，您可以完全使用。"
+
+#: Template: room_detail.html (FAQ – Kitchen: Microwave & Oven label)
+msgid "Microwave & Oven:"
+msgstr "微波炉和烤箱："
+
+#: Template: room_detail.html (FAQ – Kitchen: Instructions)
+msgid "Located in the kitchen. Instructions are available nearby."
+msgstr "位于厨房中，附近提供使用说明。"
+
+#: Template: room_detail.html (FAQ – Kitchen: Plates & Cutlery label)
+msgid "Plates & Cutlery:"
+msgstr "餐具："
+
+#: Template: room_detail.html (FAQ – Kitchen: Plates & Cutlery instructions)
+msgid "Stored in the cabinets. Please wash after use."
+msgstr "存放于橱柜中，请使用后清洗。"
+
+#: Template: room_detail.html (FAQ – Heating question)
+msgid "How do I adjust the heating?"
+msgstr "如何调节供暖？"
+
+#: Template: room_detail.html (FAQ – Heating step 1)
+msgid "To increase the heat, turn both radiator knobs"
+msgstr "要提高温度，请转动两个暖气旋钮"
+
+#: Template: room_detail.html (FAQ – Heating – anti-clockwise)
+msgid "anti-clockwise"
+msgstr "逆时针"
+
+#: Template: room_detail.html (FAQ – Heating step 1 continued)
+msgid "to allow hot water to flow in."
+msgstr "以便热水流动。"
+
+#: Template: room_detail.html (FAQ – Heating step 2)
+msgid "The heating system will automatically activate when the room temperature drops below"
+msgstr "当房间温度降至以下时，供暖系统将自动启动："
+
+#: Template: room_detail.html (FAQ – Heating – 21°C)
+msgid "21°C"
+msgstr "21°C"
+
+#: Template: room_detail.html (FAQ – Heating – Note label)
+msgid "Note:"
+msgstr "注意："
+
+#: Template: room_detail.html (FAQ – Heating step 3)
+msgid "Do not force the knobs. If they feel stiff, turn them gently."
+msgstr "请勿用力转动旋钮。如感觉僵硬，请轻轻转动。"
+
+#: Template: room_detail.html (FAQ – Getting Around question)
+msgid "How can I get around?"
+msgstr "我如何出行？"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi line label)
+msgid "Recommended Taxi:"
+msgstr "推荐出租车："
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi companies)
+msgid "Uber, Bolt, or StreetCars"
+msgstr "Uber、Bolt或StreetCars"
+
+#: Template: room_detail.html (FAQ – Getting Around, Taxi phone)
+msgid "(+44 161 223 1066)"
+msgstr "(+44 161 223 1066)"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro label)
+msgid "Metro:"
+msgstr "地铁："
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro instruction part 1)
+msgid "Take"
+msgstr "乘坐"
+
+#: Template: room_detail.html (FAQ – Getting Around, bus route)
+msgid "bus 219 from Ashton-Old-Road"
+msgstr "从Ashton-Old-Road乘219路公交"
+
+#: Template: room_detail.html (FAQ – Getting Around, Metro instruction part 2)
+msgid "to the city centre."
+msgstr "到市中心。"
+
+#: Template: room_detail.html (FAQ – Getting Around, additional bus info)
+msgid "For more bus routes and planning go to"
+msgstr "更多公交线路及规划请访问"
+
+#: Template: room_detail.html (FAQ – Getting Around, Bee Network)
+msgid "Bee Network"
+msgstr "Bee Network"
+
+#: Template: room_detail.html (FAQ – Check Out question)
+msgid "How do I check out?"
+msgstr "我如何退房？"
+
+#: Template: room_detail.html (FAQ – Check Out, step 1)
+msgid "Leave the keycard inside the room"
+msgstr "请将门卡留在房间内"
+
+#: Template: room_detail.html (FAQ – Check Out, step 1 extra)
+msgid "—anywhere visible."
+msgstr "—放在显眼处。"
+
+#: Template: room_detail.html (FAQ – Check Out, step 2)
+msgid "Switch off all electrical appliances"
+msgstr "请关闭所有电器"
+
+#: Template: room_detail.html (FAQ – Check Out, step 2 extra)
+msgid "and ensure lights are turned off."
+msgstr "并确保灯光关闭。"
+
+#: Template: room_detail.html (FAQ – Check Out, step 3)
+msgid "Close the door securely behind you"
+msgstr "请在身后将门牢固关闭。"
+
+#: Template: room_detail.html (FAQ – Check Out, step 4)
+msgid "Leave used towels"
+msgstr "请留置使用过的毛巾"
+
+#: Template: room_detail.html (FAQ – Check Out, step 4 extra)
+msgid "in the bathroom."
+msgstr "在浴室内。"
+
+#: Template: room_detail.html (FAQ – Check Out, step 5)
+msgid "Housekeeping staff may enter"
+msgstr "客房服务人员可能会进入"
+
+#: Template: room_detail.html (FAQ – Check Out, step 5 extra)
+msgid "after the checkout time."
+msgstr "退房时间后。"
+
+#: Template: room_detail.html (FAQ – Parking question)
+msgid "🚘 Where can I park?"
+msgstr "🚘 我可以在哪里停车？"
+
+#: Template: room_detail.html (FAQ – Parking, line 1)
+msgid "Free parking"
+msgstr "免费停车"
+
+#: Template: room_detail.html (FAQ – Parking, line 1 continuation)
+msgid "is available on the property."
+msgstr "在物业内提供。"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 1)
+msgid "The tarmac area can accommodate two cars. If you arrive before other guests, please park"
+msgstr "铺装区域可容纳两辆车。如果您比其他客人提前到达，请停车"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 2)
+msgid "well to the left"
+msgstr "靠左停好"
+
+#: Template: room_detail.html (FAQ – Parking, line 2 part 3)
+msgid "to leave enough space for another car to park beside yours."
+msgstr "以便为另一辆车停靠留出足够空间。"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels question)
+msgid "Where is the bathroom, and do you provide towels?"
+msgstr "浴室在哪里？您提供毛巾吗？"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 1)
+msgid "Bathrooms & Toilets:"
+msgstr "浴室及厕所："
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 2)
+msgid "Some rooms have en-suite bathrooms, while others have shared bathrooms located in the hallway."
+msgstr "部分房间设有独立浴室，其他房间则共用走廊内的浴室。"
+
+#: Template: room_detail.html (FAQ – Bathroom & Towels, part 3)
+msgid "Fresh towels are provided inside your room. Shower gel is also available in the bathroom for your convenience."
+msgstr "房间内提供干净毛巾，浴室内亦提供沐浴露，方便使用。"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer question)
+msgid "Do you provide a pressing iron and hairdryer?"
+msgstr "您是否提供熨斗和吹风机？"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 1)
+msgid "Yes, a"
+msgstr "是的，提供"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 2)
+msgid "pressing iron"
+msgstr "熨斗"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 3)
+msgid "is available in the hallway for your use."
+msgstr "放置在走廊，供您使用。"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 4)
+msgid "hairdryer"
+msgstr "吹风机"
+
+#: Template: room_detail.html (FAQ – Pressing Iron & Hairdryer, part 5)
+msgid "can be found in the bathroom."
+msgstr "可在浴室找到。"
+
+#: Template: room_detail.html (FAQ – Internet Network question)
+msgid "How safe is the internet network?"
+msgstr "互联网网络有多安全？"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 1)
+msgid "Our internet is powered by"
+msgstr "我们的网络由"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 2)
+msgid "Fibre One"
+msgstr "Fibre One"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 3)
+msgid "and secured with an"
+msgstr "并采用"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 4)
+msgid "Eero 6+ Gateway"
+msgstr "Eero 6+ Gateway"
+
+#: Template: room_detail.html (FAQ – Internet Network, part 5)
+msgid "The guest network is fully isolated, preventing data sharing between devices."
+msgstr "访客网络完全隔离，防止设备间数据共享。"
+
+#: Template: room_detail.html (FAQ – Digital Lock question)
+msgid "Is my digital lock secure?"
+msgstr "我的数字锁安全吗？"
+
+#: Template: room_detail.html (FAQ – Digital Lock, part 2)
+msgid "Tuya Smart Lock"
+msgstr "Tuya智能锁"
+
+#: Template: room_detail.html (FAQ – Digital Lock, part 3)
+msgid "ensures only the assigned guest and admin can access the room. PINs automatically expire after checkout, making it highly secure."
+msgstr "确保只有指定的客人和管理员可以进入房间，且退房后PIN码会自动失效，非常安全。"
+
+#: Template: room_detail.html (FAQ – Amenities question)
+msgid "What amenities are included in the room?"
+msgstr "房间包含哪些设施？"
+
+#: Template: room_detail.html (FAQ – Amenities list intro)
+msgid "The room includes the following amenities:"
+msgstr "房间包括以下设施："
+
+#: Template: room_detail.html (FAQ – Amenity 1)
+msgid "Free High-Speed WiFi"
+msgstr "免费高速WiFi"
+
+#: Template: room_detail.html (FAQ – Amenity 2)
+msgid "Fresh Towels & Bed Linen"
+msgstr "干净毛巾及床品"
+
+#: Template: room_detail.html (FAQ – Amenity 3)
+msgid "Private or Shared Bathroom with body wash and hand wash"
+msgstr "配有沐浴露和洗手液的独立或共用浴室"
+
+#: Template: room_detail.html (FAQ – Amenity 4)
+msgid "Smart TV with Netflix, Amazon Prime and others"
+msgstr "带有Netflix、Amazon Prime等的智能电视"
+
+#: Template: room_detail.html (FAQ – Amenity 5)
+msgid "Pressing Iron and Hair Dryer"
+msgstr "熨斗和吹风机"
+
+#: Template: room_detail.html (FAQ – Amenity 6)
+msgid "Complimentary Tea, Coffee & Milk (In the kitchen downstairs)"
+msgstr "楼下厨房提供免费茶、咖啡及牛奶"
+
+#: Template: room_detail.html (WhatsApp Chat Button)
+msgid "💬 Chat with Me"
+msgstr "💬 与我聊天"
+
+#: Template: room_detail.html (WhatsApp Chat Box, prompt)
+msgid "Need help? Send me a message on WhatsApp!"
+msgstr "需要帮助？请通过WhatsApp给我发送消息！"
+
+#: Template: room_detail.html (WhatsApp Chat Box, link)
+msgid "Open WhatsApp"
+msgstr "打开WhatsApp"
