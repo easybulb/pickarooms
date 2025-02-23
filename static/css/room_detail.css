@@ -217,6 +217,153 @@ body {
     margin: auto;
 }
 
+/* ✅ PIN Confirmation Section Styling */
+.pin-confirmation {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pin-confirmation h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #1B263B;
+    font-weight: 500;
+}
+
+.pin-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 5px;
+    transition: 0.3s;
+}
+
+.pin-btn:hover {
+    background: #0056b3;
+}
+
+/* ✅ Hidden sections */
+.hidden {
+    display: none;
+}
+
+/* ✅ Video Wrapper: Keeps Videos in One Row */
+.video-wrapper {
+    display: flex;
+    justify-content: center; /* Centering */
+    align-items: center;
+    gap: 10px; /* Space between videos */
+    margin-top: 15px;
+    flex-wrap: nowrap; /* Prevents wrapping */
+}
+
+/* ✅ Video Containers: Ensures Equal Sizing */
+.video-container {
+    flex: 1;
+    width: 50%; /* Forces two per row */
+    max-width: 50%; /* Ensures they take equal space */
+    min-width: 150px; /* Prevents videos from shrinking too much */
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+/* ✅ Expand on Click (Mobile) */
+.video-container.expanded {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+.back-btn {
+    display: none; /* Initially hidden */
+    margin-top: 10px;
+    background: none;
+    color: black;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    text-align: center;
+    width: 30%;
+    transition: background 0.3s ease-in-out;
+    justify-self: flex-end;
+}
+
+.back-btn span {
+    text-decoration: underline;
+}
+
+
+.back-btn:hover {
+    background: #e03e00;
+}
+
+/* ✅ Video Sizing */
+.video-container iframe {
+    width: 100%;
+    height: 220px;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* ✅ Ensures Two Videos Stay in One Row on Small Screens */
+@media (max-width: 480px) {
+    .pin-confirmation {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pin-confirmation h3 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        color: #1B263B;
+        font-weight: 400;
+    }
+
+    .pin-btn {
+        margin: -5px 6px 8px 6px;
+    }
+
+    .video-wrapper {
+        display: flex;
+        justify-content: space-between; /* Even spacing */
+        flex-wrap: nowrap; /* No wrapping */
+        overflow-x: auto; /* Prevents breaking */
+        gap: 5px;
+    }
+
+    .video-container {
+        flex: 1;
+        max-width: 48%; /* Ensures they fit */
+    }
+
+    .video-container.expanded iframe {
+        height: 280px; /* Increase size when expanded */
+    }
+
+    .video-h3 {
+        font-size: 1rem;
+        text-align: center;
+        font-weight: 400;
+        margin-top: -5px;
+        margin-bottom: 2px;
+    }
+
+    .video-container iframe {
+        width: 100%;
+        height: 110px;
+        border-radius: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+}
+
+
+
 /* ✅ Guest Access Expiration */
 .expiration {
     color: red;
@@ -422,6 +569,10 @@ body {
         font-size: 1.1rem;
         margin-top: -15px;
         margin-bottom: -5px;
+    }
+
+    .room-info {
+        padding: 15px;
     }
 
     .room-info h2 {
