@@ -337,8 +337,6 @@ hr {
     margin: 20px 0; /* Space above and below */
 }
 
-
-
 /* ✅ Ensures Two Videos Stay in One Row on Small Screens */
 @media (max-width: 480px) {
     .pin-confirmation {
