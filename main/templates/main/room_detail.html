@@ -489,87 +489,48 @@
         }
 
 
-
-
         const videoContainers = document.querySelectorAll(".video-container");
         const videoWrapper = document.querySelector(".video-wrapper");
         const backButtons = document.querySelectorAll(".back-btn");
-
-        // ✅ Detect if the user is on an iPhone or iPad
-        const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
 
         // Initially hide all back buttons
         backButtons.forEach(button => button.style.display = "none");
 
         videoContainers.forEach(container => {
             const backButton = container.querySelector(".back-btn");
-            const iframe = container.querySelector("iframe");
 
-            // ✅ Function to expand the video and start playing
-            function expandAndPlayVideo() {
-                // ✅ Fix iOS issue: Ensure reflow before expansion
-                container.offsetHeight; // Force reflow (triggers layout update)
-
-                // ✅ Prevent about:blank issue on iOS
-                if (isIOS) {
-                    iframe.setAttribute("allowfullscreen", "");
-                }
-
-                // ✅ Reset all videos to normal size
+            container.addEventListener("click", function () {
+                // Reset all videos to normal size
                 videoContainers.forEach(video => {
                     video.classList.remove("expanded");
                     video.style.display = "block"; // Ensure both are visible again
                     video.querySelector(".back-btn").style.display = "none"; // Hide back button
                 });
 
-                // ✅ Expand the clicked video and hide the other one
-                container.classList.add("expanded");
+                // Expand the clicked video and hide the other one
+                this.classList.add("expanded");
                 videoContainers.forEach(video => {
-                    if (video !== container) {
+                    if (video !== this) {
                         video.style.display = "none"; // Hide the other video
                     }
                 });
 
-                // ✅ Show the back button only for the expanded video
+                // Show the back button only for the expanded video
                 backButton.style.display = "block";
-
-                // ✅ Start playing the video (Fix for iOS autoplay)
-                let videoSrc = iframe.getAttribute("src").split("?")[0]; // Remove any old params
-                iframe.setAttribute("src", videoSrc); // Reset src to avoid autoplay conflicts
-
-                // ✅ Delay autoplay to allow the expansion animation to finish
-                setTimeout(() => {
-                    iframe.setAttribute("src", videoSrc + "?autoplay=1&playsinline=1");
-                }, 300); // Small delay to ensure smooth expansion before playback
-            }
-
-            // ✅ Expand when clicking anywhere in the container
-            container.addEventListener("click", expandAndPlayVideo);
-
-            // ✅ Fix: For iOS, use a workaround to trigger autoplay properly
-            iframe.addEventListener("touchstart", function (event) {
-                event.stopPropagation(); // Stop event bubbling
-                expandAndPlayVideo();
             });
 
             // ✅ Back button functionality
             backButton.addEventListener("click", function (event) {
                 event.stopPropagation(); // Prevents triggering the video expand event
 
-                // ✅ Reset all videos to normal side-by-side layout
+                // Reset all videos to normal side-by-side layout
                 videoContainers.forEach(video => {
                     video.classList.remove("expanded");
                     video.style.display = "block"; // Make both videos visible again
                     video.querySelector(".back-btn").style.display = "none"; // Hide back button again
                 });
-
-                // ✅ Stop the video when exiting (iOS workaround)
-                let originalSrc = iframe.getAttribute("src").split("?")[0]; // Remove autoplay param
-                iframe.setAttribute("src", originalSrc); // Reset video
             });
         });
-
-
 
 
 
