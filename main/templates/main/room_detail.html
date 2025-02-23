@@ -489,6 +489,8 @@
         }
 
 
+
+
         const videoContainers = document.querySelectorAll(".video-container");
         const videoWrapper = document.querySelector(".video-wrapper");
         const backButtons = document.querySelectorAll(".back-btn");
@@ -505,7 +507,7 @@
 
             // ✅ Function to expand the video and start playing
             function expandAndPlayVideo() {
-                // ✅ Prevent about:blank issue on iPhone
+                // ✅ Prevent about:blank issue on iOS
                 if (isIOS) {
                     iframe.setAttribute("allowfullscreen", "");
                 }
@@ -528,19 +530,17 @@
                 // ✅ Show the back button only for the expanded video
                 backButton.style.display = "block";
 
-                // ✅ Start playing the video (forces autoplay)
-                let videoSrc = iframe.getAttribute("src");
-                if (!videoSrc.includes("autoplay=1")) {
-                    iframe.setAttribute("src", videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1");
-                }
+                // ✅ Start playing the video (Fix for iOS autoplay)
+                let videoSrc = iframe.getAttribute("src").split("?")[0]; // Remove any old params
+                iframe.setAttribute("src", videoSrc + "?autoplay=1&playsinline=1"); // Force inline playback
             }
 
             // ✅ Expand when clicking anywhere in the container
             container.addEventListener("click", expandAndPlayVideo);
 
-            // ✅ Ensure clicking inside the iframe (YouTube play button) also expands & plays
-            iframe.addEventListener("click", function (event) {
-                event.stopPropagation(); // Stop event bubbling to prevent unwanted resets
+            // ✅ Fix: For iOS, use a workaround to trigger autoplay properly
+            iframe.addEventListener("touchstart", function (event) {
+                event.stopPropagation(); // Stop event bubbling
                 expandAndPlayVideo();
             });
 
@@ -555,14 +555,11 @@
                     video.querySelector(".back-btn").style.display = "none"; // Hide back button again
                 });
 
-                // ✅ Stop the video when exiting
+                // ✅ Stop the video when exiting (iOS workaround)
                 let originalSrc = iframe.getAttribute("src").split("?")[0]; // Remove autoplay param
                 iframe.setAttribute("src", originalSrc); // Reset video
             });
         });
-
-
-
 
 
 
