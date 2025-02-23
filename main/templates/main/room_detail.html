@@ -503,10 +503,10 @@
             const backButton = container.querySelector(".back-btn");
             const iframe = container.querySelector("iframe");
 
-            container.addEventListener("click", function () {
+            // ✅ Function to expand the video and start playing
+            function expandAndPlayVideo() {
                 // ✅ Prevent about:blank issue on iPhone
                 if (isIOS) {
-                    // Open video in fullscreen mode (works on iOS)
                     iframe.setAttribute("allowfullscreen", "");
                 }
 
@@ -518,15 +518,30 @@
                 });
 
                 // ✅ Expand the clicked video and hide the other one
-                this.classList.add("expanded");
+                container.classList.add("expanded");
                 videoContainers.forEach(video => {
-                    if (video !== this) {
+                    if (video !== container) {
                         video.style.display = "none"; // Hide the other video
                     }
                 });
 
                 // ✅ Show the back button only for the expanded video
                 backButton.style.display = "block";
+
+                // ✅ Start playing the video (forces autoplay)
+                let videoSrc = iframe.getAttribute("src");
+                if (!videoSrc.includes("autoplay=1")) {
+                    iframe.setAttribute("src", videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1");
+                }
+            }
+
+            // ✅ Expand when clicking anywhere in the container
+            container.addEventListener("click", expandAndPlayVideo);
+
+            // ✅ Ensure clicking inside the iframe (YouTube play button) also expands & plays
+            iframe.addEventListener("click", function (event) {
+                event.stopPropagation(); // Stop event bubbling to prevent unwanted resets
+                expandAndPlayVideo();
             });
 
             // ✅ Back button functionality
@@ -539,8 +554,14 @@
                     video.style.display = "block"; // Make both videos visible again
                     video.querySelector(".back-btn").style.display = "none"; // Hide back button again
                 });
+
+                // ✅ Stop the video when exiting
+                let originalSrc = iframe.getAttribute("src").split("?")[0]; // Remove autoplay param
+                iframe.setAttribute("src", originalSrc); // Reset video
             });
         });
+
+
 
 
 
