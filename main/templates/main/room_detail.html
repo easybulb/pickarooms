@@ -67,12 +67,18 @@
                 <div class="video-container">
                     <h3 class="video-h3">Front Door</h3>
                     <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0" allowfullscreen></iframe>
+                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
+                        allow="autoplay; encrypted-media" allowfullscreen>
+                    </iframe>
+
                 </div>
                 <div class="video-container">
                     <h3 class="video-h3">Room Door</h3>
                     <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/8BbQ30RFx5U" frameborder="0" allowfullscreen></iframe>
+                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
+                        allow="autoplay; encrypted-media" allowfullscreen>
+                    </iframe>
+
                 </div>
             </div>
         </div>
@@ -83,12 +89,18 @@
                 <div class="video-container">
                     <h3 class="video-h3">Front Door</h3>
                     <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0" allowfullscreen></iframe>
+                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
+                        allow="autoplay; encrypted-media" allowfullscreen>
+                    </iframe>
+
                 </div>
                 <div class="video-container">
                     <h3 class="video-h3">Room Door</h3>
                     <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/8BbQ30RFx5U" frameborder="0" allowfullscreen></iframe>
+                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
+                        allow="autoplay; encrypted-media" allowfullscreen>
+                    </iframe>
+
                 </div>
             </div>
             <div class="not-working">
@@ -446,17 +458,17 @@
                     headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" },
                     credentials: "same-origin"
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        pinAdminAlert.innerHTML = `<p>${data.success}</p>`;
-                    } else {
-                        pinAdminAlert.innerHTML = `<p style="color: red;">${data.error}</p>`;
-                    }
-                })
-                .catch(error => {
-                    pinAdminAlert.innerHTML = `<p style="color: red;">An error occurred. Try again later.</p>`;
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            pinAdminAlert.innerHTML = `<p>${data.success}</p>`;
+                        } else {
+                            pinAdminAlert.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                        }
+                    })
+                    .catch(error => {
+                        pinAdminAlert.innerHTML = `<p style="color: red;">An error occurred. Try again later.</p>`;
+                    });
             });
         }
 
@@ -520,7 +532,7 @@
             });
         });
 
-        
+
 
         // ✅ Select elements
         const heroImage = document.getElementById("heroImage");
