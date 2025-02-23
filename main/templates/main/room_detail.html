@@ -493,21 +493,31 @@
         const videoWrapper = document.querySelector(".video-wrapper");
         const backButtons = document.querySelectorAll(".back-btn");
 
+        // ✅ Detect if the user is on an iPhone or iPad
+        const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
+
         // Initially hide all back buttons
         backButtons.forEach(button => button.style.display = "none");
 
         videoContainers.forEach(container => {
             const backButton = container.querySelector(".back-btn");
+            const iframe = container.querySelector("iframe");
 
             container.addEventListener("click", function () {
-                // Reset all videos to normal size
+                // ✅ Prevent about:blank issue on iPhone
+                if (isIOS) {
+                    // Open video in fullscreen mode (works on iOS)
+                    iframe.setAttribute("allowfullscreen", "");
+                }
+
+                // ✅ Reset all videos to normal size
                 videoContainers.forEach(video => {
                     video.classList.remove("expanded");
                     video.style.display = "block"; // Ensure both are visible again
                     video.querySelector(".back-btn").style.display = "none"; // Hide back button
                 });
 
-                // Expand the clicked video and hide the other one
+                // ✅ Expand the clicked video and hide the other one
                 this.classList.add("expanded");
                 videoContainers.forEach(video => {
                     if (video !== this) {
@@ -515,7 +525,7 @@
                     }
                 });
 
-                // Show the back button only for the expanded video
+                // ✅ Show the back button only for the expanded video
                 backButton.style.display = "block";
             });
 
@@ -523,7 +533,7 @@
             backButton.addEventListener("click", function (event) {
                 event.stopPropagation(); // Prevents triggering the video expand event
 
-                // Reset all videos to normal side-by-side layout
+                // ✅ Reset all videos to normal side-by-side layout
                 videoContainers.forEach(video => {
                     video.classList.remove("expanded");
                     video.style.display = "block"; // Make both videos visible again
@@ -531,6 +541,8 @@
                 });
             });
         });
+
+
 
 
 
