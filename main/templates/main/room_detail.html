@@ -507,6 +507,9 @@
 
             // ✅ Function to expand the video and start playing
             function expandAndPlayVideo() {
+                // ✅ Fix iOS issue: Ensure reflow before expansion
+                container.offsetHeight; // Force reflow (triggers layout update)
+
                 // ✅ Prevent about:blank issue on iOS
                 if (isIOS) {
                     iframe.setAttribute("allowfullscreen", "");
@@ -532,7 +535,12 @@
 
                 // ✅ Start playing the video (Fix for iOS autoplay)
                 let videoSrc = iframe.getAttribute("src").split("?")[0]; // Remove any old params
-                iframe.setAttribute("src", videoSrc + "?autoplay=1&playsinline=1"); // Force inline playback
+                iframe.setAttribute("src", videoSrc); // Reset src to avoid autoplay conflicts
+
+                // ✅ Delay autoplay to allow the expansion animation to finish
+                setTimeout(() => {
+                    iframe.setAttribute("src", videoSrc + "?autoplay=1&playsinline=1");
+                }, 300); // Small delay to ensure smooth expansion before playback
             }
 
             // ✅ Expand when clicking anywhere in the container
@@ -560,6 +568,7 @@
                 iframe.setAttribute("src", originalSrc); // Reset video
             });
         });
+
 
 
 
