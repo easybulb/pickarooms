@@ -6,12 +6,14 @@ from .views import (
     cookie_policy, sitemap
 )
 from .views import how_to_use
+from .views import report_pin_issue
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('checkin/', views.checkin, name='checkin'),
     path('room/<str:room_token>/', views.room_detail, name='room_detail'),  # Secure Token URL
+    path("report_pin_issue/", report_pin_issue, name="report_pin_issue"),
     path("rebook/", views.rebook_guest, name="rebook_guest"),
     path('explore-manchester/', views.explore_manchester, name='explore_manchester'),
     path('contact/', views.contact, name='contact'),

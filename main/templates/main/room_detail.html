@@ -91,9 +91,11 @@
                     <iframe src="https://www.youtube.com/embed/8BbQ30RFx5U" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
-            <h3>Does it work now?</h3>
-            <button id="pin-fixed" class="pin-btn">Yes</button>
-            <button id="pin-still-issue" class="pin-btn">Still Doesn’t Work</button>
+            <div class="not-working">
+                <h3>Does it work now?</h3>
+                <button id="pin-fixed" class="pin-btn">Yes</button>
+                <button id="pin-still-issue" class="pin-btn">Still Doesn’t Work</button>
+            </div>
         </div>
 
         <div id="pin-admin-alert" class="hidden">
@@ -102,6 +104,8 @@
             </p>
         </div>
         {% endif %}
+
+        <hr>
 
         <h2>{% trans "🛏️ Room Details" %}</h2>
         <p>{{ room.description }}</p>
@@ -433,20 +437,43 @@
 
         if (pinStillIssue) {
             pinStillIssue.addEventListener("click", function () {
-                pinAdminAlert.style.display = "block"; // Show admin alert
-                pinIssue.style.display = "none"; // Hide issue section
+                // ✅ Show the alert message
+                pinAdminAlert.style.display = "block";
 
-                // ✅ Send report to admin
+                // ✅ Send request to backend
                 fetch("/report_pin_issue/", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        guest_name: "{{ guest.full_name }}",
-                        reservation_number: "{{ guest.reservation_number }}",
-                        room_name: "{{ room.name }}"
-                    })
+                    headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" },
+                    credentials: "same-origin"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        pinAdminAlert.innerHTML = `<p>${data.success}</p>`;
+                    } else {
+                        pinAdminAlert.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                    }
+                })
+                .catch(error => {
+                    pinAdminAlert.innerHTML = `<p style="color: red;">An error occurred. Try again later.</p>`;
                 });
             });
+        }
+
+        // ✅ Function to Retrieve CSRF Token from Cookies (Required for Django)
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith("csrftoken=")) {
+                        cookieValue = cookie.substring("csrftoken=".length, cookie.length);
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
 
 
@@ -493,8 +520,7 @@
             });
         });
 
-
-
+        
 
         // ✅ Select elements
         const heroImage = document.getElementById("heroImage");
@@ -560,5 +586,4 @@
     });
 
 </script>
-
 {% endblock %}

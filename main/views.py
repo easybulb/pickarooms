@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.utils.timezone import now, localtime
 from django.utils import timezone
 from datetime import date, datetime, time
+from django.core.mail import send_mail
 from django.http import Http404, JsonResponse
 from django.db import IntegrityError
 from django.db.models import Q
@@ -182,6 +183,54 @@ def room_detail(request, room_token):
             "show_pin": not enforce_2pm_rule,  # ✅ PIN shows from 2 PM UK time onwards
         },
     )
+
+
+
+
+
+@ratelimit(key='ip', rate='3/m', method='POST', block=True)
+def report_pin_issue(request):
+    """Handles the 'Still Doesn’t Work' button, notifying the admin via email."""
+    if request.method == 'POST':
+        reservation_number = request.session.get("reservation_number", None)
+        
+        if not reservation_number:
+            return JsonResponse({"error": "No active reservation found."}, status=400)
+
+        # ✅ Retrieve the guest from the database
+        try:
+            guest = Guest.objects.get(reservation_number=reservation_number)
+        except Guest.DoesNotExist:
+            return JsonResponse({"error": "Guest not found."}, status=404)
+
+        # ✅ Compose email with phone number
+        subject = "🔴 URGENT: Guest Reporting PIN Issue!"
+        message = (
+            f"Guest Name: {guest.full_name}\n"
+            f"Phone Number: {guest.phone_number if guest.phone_number else 'Not provided'}\n"
+            f"Reservation Number: {guest.reservation_number}\n"
+            f"Room: {guest.assigned_room.name}\n"
+            f"Check-in: {guest.check_in_date.strftime('%d %b %Y')}\n"
+            f"Check-out: {guest.check_out_date.strftime('%d %b %Y')}\n\n"
+            "🔴 Guest is unable to use their PIN and requires urgent assistance.\n\n"
+            "Please contact the guest as soon as possible."
+        )
+
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,  # ✅ Your configured email in settings.py
+                ["easybulb@gmail.com"],  # ✅ Send email to admin
+                fail_silently=False,
+            )
+        except Exception as e:
+            return JsonResponse({"error": f"Email failed: {str(e)}"}, status=500)
+
+        return JsonResponse({"success": "Admin has been notified. We will contact you shortly. If you do not hear from us please call +44 0 7539029629"})
+    
+    return JsonResponse({"error": "Invalid request method."}, status=405)
+
 
 
 
