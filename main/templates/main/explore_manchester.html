@@ -299,65 +299,65 @@
 <script>
     // Custom Modal Functions
     function openModal(lat, lng) {
-    console.log("openModal called with lat:", lat, "lng:", lng);
-    const modal = document.getElementById("directionsModal");
-    if (!modal) {
-        console.error("Modal element not found!");
-        return;
-    }
-
-    const userLocation = new Promise((resolve, reject) => {
-        console.log("Attempting to get user location...");
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    console.log("Geolocation success:", position.coords);
-                    resolve(`${position.coords.latitude},${position.coords.longitude}`);
-                },
-                (error) => {
-                    console.error("Geolocation error:", error);
-                    resolve("53.480759,-2.244644"); // Fallback to Manchester
-                }
-            );
-        } else {
-            console.log("Geolocation not supported, using fallback...");
-            resolve("53.480759,-2.244644"); // Fallback for no geolocation
-        }
-    });
-
-    userLocation.then(location => {
-        console.log("User location resolved:", location);
-        const apiKey = "{{ GOOGLE_MAPS_API_KEY }}"; // Use Django template variable
-        console.log("API Key:", apiKey); // Log the API key to verify it’s rendered correctly
-        if (!apiKey || apiKey.trim() === "") {
-            console.error("API Key is empty or not set in template!");
-            alert("API Key is missing. Please configure GOOGLE_MAPS_API_KEY in Django settings.");
+        console.log("openModal called with lat:", lat, "lng:", lng);
+        const modal = document.getElementById("directionsModal");
+        if (!modal) {
+            console.error("Modal element not found!");
             return;
         }
-        const url = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}&origin=${location}&destination=${lat},${lng}&mode=driving`;
-        console.log("Loading directions with URL:", url); // Log the URL for debugging
-        const modalMap = document.getElementById("modalMap");
-        const externalDirections = document.getElementById("externalDirections");
 
-        if (modalMap && externalDirections) {
-            console.log("Setting iframe src and link href...");
-            modalMap.src = url;
-            externalDirections.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-            modal.style.display = "block";
-        } else {
-            console.error("Modal map or external directions element not found!");
-        }
-    }).catch(error => {
-        console.error('Error loading directions:', error);
-        const modalMap = document.getElementById("modalMap");
-        if (modalMap) {
-            console.log("Setting error message in iframe...");
-            modalMap.src = '';
-            modalMap.innerHTML = '<p>Directions failed to load. Please check your internet connection, API key, or ensure the Maps Embed API is enabled.</p>';
-            modal.style.display = "block";
-        }
-    });
-}
+        const userLocation = new Promise((resolve, reject) => {
+            console.log("Attempting to get user location...");
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        console.log("Geolocation success:", position.coords);
+                        resolve(`${position.coords.latitude},${position.coords.longitude}`);
+                    },
+                    (error) => {
+                        console.error("Geolocation error:", error);
+                        resolve("53.480759,-2.244644"); // Fallback to Manchester
+                    }
+                );
+            } else {
+                console.log("Geolocation not supported, using fallback...");
+                resolve("53.480759,-2.244644"); // Fallback for no geolocation
+            }
+        });
+
+        userLocation.then(location => {
+            console.log("User location resolved:", location);
+            const apiKey = "{{ GOOGLE_MAPS_API_KEY }}"; // Use Django template variable
+            console.log("API Key:", apiKey); // Log the API key to verify it’s rendered correctly
+            if (!apiKey || apiKey.trim() === "") {
+                console.error("API Key is empty or not set in template!");
+                alert("API Key is missing. Please configure GOOGLE_MAPS_API_KEY in Django settings.");
+                return;
+            }
+            const url = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}&origin=${location}&destination=${lat},${lng}&mode=driving`;
+            console.log("Loading directions with URL:", url); // Log the URL for debugging
+            const modalMap = document.getElementById("modalMap");
+            const externalDirections = document.getElementById("externalDirections");
+
+            if (modalMap && externalDirections) {
+                console.log("Setting iframe src and link href...");
+                modalMap.src = url;
+                externalDirections.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+                modal.style.display = "block";
+            } else {
+                console.error("Modal map or external directions element not found!");
+            }
+        }).catch(error => {
+            console.error('Error loading directions:', error);
+            const modalMap = document.getElementById("modalMap");
+            if (modalMap) {
+                console.log("Setting error message in iframe...");
+                modalMap.src = '';
+                modalMap.innerHTML = '<p>Directions failed to load. Please check your internet connection, API key, or ensure the Maps Embed API is enabled.</p>';
+                modal.style.display = "block";
+            }
+        });
+    }
 
     function closeModal() {
         console.log("closeModal called...");
