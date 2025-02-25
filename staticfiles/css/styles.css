@@ -9,12 +9,12 @@ main {
   padding-top: 85px; /* Adjust this based on header height */
 }
 
-
-html, body {
+html,
+body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   margin: 0;
   padding: 0;
-  background: #F5F5F5;
+  background: #f5f5f5;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -35,7 +35,7 @@ header {
   z-index: 1000;
   /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
   /* background: linear-gradient(90deg, #002147, #003580, #0056b3); */
-  /* background: linear-gradient(90deg, #0c0d12, #272d38, #5B647A); */
+  /* background: linear-gradient(90deg, #0c0d12, #272d38, #5b647a); */
   background: linear-gradient(90deg, #0c0f18, #1e2530, #747f91);
 }
 
@@ -51,8 +51,6 @@ header {
   display: flex;
   align-items: center;
 }
-
-
 
 /* Language Switcher */
 .language-switcher {
@@ -99,7 +97,7 @@ nav {
 .nav-links a {
   text-decoration: none;
   font-size: 15px;
-  color: #F5F5F5;
+  color: #f5f5f5;
   transition: color 0.3s ease-in-out;
 }
 
@@ -118,15 +116,15 @@ nav {
   display: none;
   flex-direction: column;
   cursor: pointer;
-  color: #F5F5F5 !important;
+  color: #f5f5f5 !important;
 }
 
-#mobile-menu{
-  color: #F5F5F5;
+#mobile-menu {
+  color: #f5f5f5;
 }
 
 .menu-toggle .bar {
-  background: #F5F5F5 !important;
+  background: #f5f5f5 !important;
   height: 3px;
   width: 25px;
   margin: 4px 0;
@@ -136,14 +134,14 @@ nav {
   list-style: none;
   padding: 10px;
   margin: 10px auto;
-  max-width: 90%;  /* Use a percentage for better responsiveness */
+  max-width: 90%; /* Use a percentage for better responsiveness */
   text-align: left;
   position: fixed;
   top: 10%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  font-size: 16px;  /* Default font size */
+  font-size: 16px; /* Default font size */
   white-space: normal; /* Allow text to wrap */
 }
 
@@ -165,12 +163,11 @@ nav {
   font-weight: bold;
 }
 
-
 /* Hero Section */
 .hero {
   position: relative;
   text-align: center;
-  color: #F5F5F5;
+  color: #f5f5f5;
 }
 
 .hero img {
@@ -231,14 +228,14 @@ nav {
 }
 
 .how-to-use-link a {
-  color: #FFD700; /* Gold color */
+  color: #ffd700; /* Gold color */
   text-decoration: underline;
   font-weight: 600;
   font-size: 1rem;
 }
 
 .how-to-use-link a:hover {
-  color: #FFC107; /* Lighter gold on hover */
+  color: #ffc107; /* Lighter gold on hover */
 }
 
 /* Modal Background */
@@ -298,7 +295,7 @@ nav {
 
 .logout-btn {
   padding: 7px 12px;
-  margin-top: -10px ;
+  margin-top: -10px;
   border: solid 1px white;
   background: linear-gradient(90deg, #002147, #003580, #0056b3);
   color: white;
@@ -310,7 +307,7 @@ nav {
 footer {
   /* background: linear-gradient(90deg, #002147, #003580, #0056b3); */
   background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
-  color: #F5F5F5;
+  color: #f5f5f5;
   padding: 5px 10px;
   text-align: center;
 }
@@ -342,7 +339,7 @@ footer {
 }
 
 .footer-links a {
-  color: #F5F5F5;
+  color: #f5f5f5;
   text-decoration: none;
   font-size: 13px;
 }
@@ -387,22 +384,21 @@ footer {
 }
 
 .email a {
-  color: #F5F5F5; /* Default color */
+  color: #f5f5f5; /* Default color */
   text-decoration: none; /* Remove underline */
 }
 
 .email a:visited {
-  color: #F5F5F5; /* Ensures visited links do not change color */
+  color: #f5f5f5; /* Ensures visited links do not change color */
 }
 
 .email a:hover {
-  color: #FFD700; /* Optional: Change color on hover */
+  color: #ffd700; /* Optional: Change color on hover */
 }
 
 .email a:active {
-  color: #F5F5F5; /* Ensures active/clicked state remains the same */
+  color: #f5f5f5; /* Ensures active/clicked state remains the same */
 }
-
 
 /* Privacy Policy Page */
 .privacy-policy-container {
@@ -426,7 +422,8 @@ footer {
   color: #003580;
 }
 
-.privacy-policy-container p, .privacy-policy-container ul {
+.privacy-policy-container p,
+.privacy-policy-container ul {
   font-size: 1.1rem;
   line-height: 1.6;
   color: #333;
@@ -472,7 +469,7 @@ footer {
 }
 
 .cookie-banner a {
-  color: #FFD700;
+  color: #ffd700;
   text-decoration: underline;
 }
 
@@ -495,13 +492,11 @@ footer {
   background: #dc3545;
 }
 
-
-
 @media (max-width: 480px) {
   #confirmation-message {
-      font-size: 13px;
-      top: 5px; /* Move higher for very small screens */
-      padding: 6px;
+    font-size: 13px;
+    top: 5px; /* Move higher for very small screens */
+    padding: 6px;
   }
 
   .logo {
@@ -540,7 +535,7 @@ footer {
     padding: 5px;
     font-weight: 300;
     z-index: 1000;
-}
+  }
 
   /* Custom arrow */
   .language-switcher::after {
@@ -553,7 +548,6 @@ footer {
     transform: translateY(-50%);
     pointer-events: none; /* Prevent interaction */
   }
-
 
   nav {
     margin-left: -53px;
@@ -569,12 +563,10 @@ footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-  @media (max-width: 768px) {
-    .logo img {
-      max-height: 40px; /* Slightly smaller for mobile */
-    }
+  .logo img {
+    max-height: 40px; /* Slightly smaller for mobile */
   }
-  
+
   /* Mobile Menu Button */
   .menu-toggle {
     display: flex;
@@ -585,54 +577,52 @@ footer {
     padding-bottom: 13px;
     background: linear-gradient(90deg, #10131f, #1c232d, #262e3c);
   }
-  
+
   nav {
     margin-right: -120px;
   }
 
-/* Mobile Navigation - Hidden Initially */
-.nav-links {
-  /* display: none; */
-  flex-direction: column;
-  position: absolute;
-  top: 60px;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
-  padding: 20px;
-  color: #F5F5F5;
-  font-weight: 300;
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
-  transform: translateY(-10px); /* Start slightly above */
-  transition: opacity 1s ease, transform 0s ease, visibility 0s ease;
-}
-
-/* Active Class for Menu */
-.nav-links.active {
-  display: flex;
-  opacity: 1;
-  height: auto;
-  visibility: visible;
-  overflow: visible;
-  margin: 0;
-  transform: translateY(0); /* Move to normal position */
-}
-
-/* Fade-in Effect */
-@keyframes fadeIn {
-  from {
+  /* Mobile Navigation - Hidden Initially */
+  .nav-links {
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
+    padding: 20px;
+    color: #f5f5f5;
+    font-weight: 300;
     opacity: 0;
-    transform: translateY(-10px);
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    transform: translateY(-10px); /* Start slightly above */
+    transition: opacity 1s ease, transform 0s ease, visibility 0s ease;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
+  /* Active Class for Menu */
+  .nav-links.active {
+    display: flex;
+    opacity: 1;
+    height: auto;
+    visibility: visible;
+    overflow: visible;
+    margin: 0;
+    transform: translateY(0); /* Move to normal position */
+  }
+
+  /* Fade-in Effect */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   .nav-links a {
     font-size: 1.3rem;
@@ -649,10 +639,10 @@ footer {
   }
 
   .logout-btn {
-    margin-top: 10px ;
+    margin-top: 10px;
   }
 
-  .hero{
+  .hero {
     overflow: visible;
   }
 
@@ -689,9 +679,8 @@ footer {
     color: white;
     text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
     margin-bottom: 1rem;
-    
   }
-  
+
   .hero-content p {
     line-height: 1.1;
     width: 115%;
@@ -702,16 +691,16 @@ footer {
   }
 
   #confirmation-message {
-      font-size: 14px;  /* Slightly smaller font for mobile */
-      top: 10%; /* Adjust position */
-      max-width: 95%; /* Increase width on smaller screens */
-      padding: 8px; /* Reduce padding */
+    font-size: 14px; /* Slightly smaller font for mobile */
+    top: 10%; /* Adjust position */
+    max-width: 95%; /* Increase width on smaller screens */
+    padding: 8px; /* Reduce padding */
   }
-  
+
   #confirmation-message .success,
   #confirmation-message .error {
-      padding: 10px; /* Reduce padding */
-      font-size: 14px; /* Smaller text for mobile */
+    padding: 10px; /* Reduce padding */
+    font-size: 14px; /* Smaller text for mobile */
   }
 
   .checkin-form input {
@@ -737,7 +726,7 @@ footer {
 
   footer {
     background: linear-gradient(90deg, #0c0f18, #1e2530, #262e3c);
-    color: #F5F5F5;
+    color: #f5f5f5;
     padding: 10px 15px;
     text-align: left;
   }
@@ -771,11 +760,12 @@ footer {
     font-size: 1.2rem;
   }
 
-  .footer-page-container p, ul {
+  .footer-page-container p,
+  .footer-page-container ul {
     font-size: 1rem;
   }
 
-  .footer-page-container ul li{
+  .footer-page-container ul li {
     padding-bottom: 10px;
   }
 
@@ -797,7 +787,8 @@ footer {
     font-size: 1.3rem;
   }
 
-  .privacy-policy-container p, ul {
+  .privacy-policy-container p,
+  .privacy-policy-container ul {
     font-size: 1rem;
   }
 
@@ -821,9 +812,6 @@ footer {
   }
 }
 
-
-
-
 /* Responsive Adjustments */
 @media (max-width: 600px) {
   .how-to-use-link {
@@ -831,9 +819,9 @@ footer {
     font-size: 1rem;
     text-align: left;
   }
-  
+
   .how-to-use-link a {
-    color: #FFD700; /* Gold color */
+    color: #ffd700; /* Gold color */
     text-decoration: underline;
     font-weight: 400;
     font-size: 1rem;
@@ -867,7 +855,6 @@ footer {
     right: 12px;
   }
 }
-
 
 /* Reviews & Awards Section */
 .reviews-awards {
@@ -949,38 +936,34 @@ footer {
 @media (max-width: 768px) {
   .reviews-awards {
     padding: 15px;
-    background: #F5F5F5;
+    background: #f5f5f5;
     margin-top: -4px;
     border-radius: 0;
     box-shadow: none;
   }
 
   .reviews-awards h2 {
-      font-size: 1.5rem;
-      line-height: 1.0;
-      word-spacing: -2px;
-      font-size: 1.8rem;
-      font-weight: 350;
-      margin-top: 35px;
+    font-weight: 400;
+    font-size: 1.8rem;
+    font-weight: 350;
+    margin-top: 35px;
   }
 
   .awards-container img {
-      max-width: 90%;
-      margin-top: 20px;
+    max-width: 90%;
+    margin-top: 20px;
   }
 
   .review {
-      padding: 12px;
-      font-size: 0.9rem;
+    padding: 12px;
+    font-size: 0.9rem;
   }
 
   .read-more-btn {
-      font-size: 0.9rem;
-      padding: 8px 12px;
+    font-size: 0.9rem;
+    padding: 8px 12px;
   }
 }
-
-
 
 /* FAQ Section */
 .faq-section {
@@ -1005,8 +988,10 @@ footer {
 }
 
 .faq-item {
+  margin-bottom: 15px;
   border-bottom: 1px solid #ddd;
-  padding: 10px 0;
+  padding-bottom: 15px;
+  display: block; /* Ensure items are visible by default for toggling */
 }
 
 .faq-item strong {
@@ -1014,76 +999,105 @@ footer {
 }
 
 .faq-question {
-  width: 100%;
-  text-align: left;
-  font-size: 1.3rem;
   background: #e8eaef;
   border: solid 5px #e8eaef;
   border-radius: 5px;
-  padding: 10px;
+  font-size: 1.2rem;
+  width: 100%;
+  text-align: left;
   cursor: pointer;
+  color: #000;
+  font-weight: 300;
+  padding: 12px 15px;
+  transition: background 0.2s, color 0.2s;
+  outline: none; /* Remove default outline for accessibility */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 300;
-  color: black;
+}
+
+.faq-question:hover,
+.faq-question:focus {
+  background: #d9dee7;
+  color: #0056b3;
 }
 
 .faq-answer {
   background: #e8eaef;
   border-radius: 0 0 5px 5px;
-  display: none;
-  padding: 10px;
-  margin-top: -20px;
-  color: black;
-  font-size: 1.2rem;
+  padding: 15px;
+  color: #000;
+  font-size: 1.1rem;
   font-weight: 300;
+  line-height: 1.6;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
 }
 
-.faq-question:hover {
-  color: #0056b3;
+.faq-answer.show {
+  display: block;
+  opacity: 1;
+  max-height: 500px; /* Adjust based on content */
+}
+
+.faq-answer.highlight {
+  background: #fff3cd;
+  border-radius: 8px;
 }
 
 .arrow {
   font-size: 1.2rem;
+  color: #718096;
+  transition: transform 0.3s ease;
 }
 
-* FAQ Images */
+.faq-question[aria-expanded="true"] .arrow {
+  transform: rotate(180deg);
+}
+
+/* Ensure accessibility focus styles */
+.faq-question:focus {
+  box-shadow: 0 0 5px #4a90e2;
+}
+
+/* FAQ Images */
 .faq-images {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-    gap: 15px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  gap: 15px;
 }
 
 .faq-image {
-    flex: 1;
-    text-align: center;
+  flex: 1;
+  text-align: center;
 }
 
 .faq-image h3 {
-    font-size: 1rem;
-    margin-bottom: 5px;
-    color: #003580;
-    font-weight: 500;
+  font-size: 1rem;
+  margin-bottom: 5px;
+  color: #003580;
+  font-weight: 500;
 }
 
 .faq-image img {
-    width: 100%;
-    max-width: 500px;
-    height: 300px;
-    border-radius: 5px;
-    object-fit: contain;
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+  border-radius: 5px;
+  object-fit: contain;
 }
 
 .faq-map-container {
-  text-align: center; 
+  text-align: center;
   margin-top: 10px;
 }
 
 .faq-map-container iframe {
-  width: 100%; 
-  max-width: 600px; 
+  width: 100%;
+  max-width: 600px;
   height: 300px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
@@ -1092,15 +1106,10 @@ footer {
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .faq-section {
-      padding: 30px 15px;
-      border-radius: 0;
-      box-shadow: none;
-      margin-top: -20px;
-  }
-
-  .faq-item {
-    border-bottom: none;
-    padding: 3px 0;
+    padding: 30px 15px;
+    border-radius: 0;
+    box-shadow: none;
+    margin-top: -20px;
   }
 
   .faq-section h2 {
@@ -1108,13 +1117,15 @@ footer {
   }
 
   .faq-question {
-      font-size: 1.1rem;
-      font-weight: 350;
+    font-size: 1.1rem;
+    font-weight: 350;
+    padding: 10px 12px;
   }
 
   .faq-answer {
-      font-size: 1.1rem;
-      font-weight: 350;
+    font-size: 1.1rem;
+    font-weight: 350;
+    padding: 12px;
   }
 
   .faq-images {
@@ -1124,7 +1135,6 @@ footer {
 
   .faq-image {
     width: 100%;
-    object-fit: contain;
     margin-top: 10px;
   }
 
@@ -1135,10 +1145,8 @@ footer {
   .faq-map-container iframe {
     width: 100%;
     height: 250px;
+  }
 }
-}
-
-
 
 /* Property Slider Section */
 .property-slider {
@@ -1195,7 +1203,8 @@ footer {
 }
 
 /* Navigation Arrows */
-.prev, .next {
+.prev,
+.next {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -1208,10 +1217,15 @@ footer {
   border-radius: 50%;
 }
 
-.prev { left: 10px; }
-.next { right: 10px; }
+.prev {
+  left: 10px;
+}
+.next {
+  right: 10px;
+}
 
-.prev:hover, .next:hover {
+.prev:hover,
+.next:hover {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
@@ -1221,8 +1235,12 @@ footer {
 }
 
 @keyframes fadeEffect {
-  from { opacity: 0.3; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Responsive Adjustments */
@@ -1246,30 +1264,30 @@ footer {
     display: flex;
     overflow: hidden;
     justify-content: center;
-    position: relative; 
+    position: relative;
   }
 
   .slide {
     display: none;
     width: 100%;
-    position: relative; 
+    position: relative;
   }
 
   .slide img {
     width: 100%;
     height: 100%;
-    max-height: 350px; 
+    max-height: 350px;
     object-fit: cover;
     margin-top: 10px;
     border-radius: 0;
   }
 
   .slide:first-child {
-    display: block; 
+    display: block;
   }
 
- 
-  .prev, .next {
+  .prev,
+  .next {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -1282,14 +1300,18 @@ footer {
     border-radius: 50%;
   }
 
-  .prev { left: 10px; }
-  .next { right: 10px; }
+  .prev {
+    left: 10px;
+  }
+  .next {
+    right: 10px;
+  }
 
-  .prev:hover, .next:hover {
+  .prev:hover,
+  .next:hover {
     background-color: rgba(0, 0, 0, 0.8);
   }
 
- 
   .caption {
     font-size: 0.9rem;
     padding: 5px 8px;
@@ -1300,15 +1322,10 @@ footer {
     color: white;
     border-radius: 5px;
   }
-
 }
-
-
-
 
 /* Styles for screens between 768px and 1200px */
 @media (min-width: 769px) and (max-width: 1800px) {
-  
   .checkin-form input {
     padding: 10px;
     width: 250px;
@@ -1318,7 +1335,7 @@ footer {
     font-size: 1.2rem;
     font-weight: 400;
   }
-  
+
   .checkin-form button {
     padding: 13px 20px;
     border: solid 1px white;

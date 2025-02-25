@@ -21,96 +21,250 @@
 <section class="content">
     <h2>{% trans "Top Attractions" %}</h2>
     <div class="attractions">
-        <div class="attraction">
+        <div class="attraction" data-lat="53.4778" data-lng="-2.2458">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738679218/John_Rylands_Library_Reading_Room_hr3v6g.jpg"
-                alt="{% trans 'John Rylands Library' %}">
+                alt="{% trans 'John Rylands Library' %}" loading="lazy">
             <h3>{% trans "John Rylands Library" %}</h3>
             <p>{% trans "A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts." %}</p>
+            <button class="get-directions-btn" data-lat="53.4778" data-lng="-2.2458">{% trans "Get Directions" %}</button>
         </div>
-        <div class="attraction">
+        <div class="attraction" data-lat="53.4830" data-lng="-2.2000">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678963/manchester13_mtl3ev.webp"
-                alt="{% trans 'Etihad Stadium' %}">
+                alt="{% trans 'Etihad Stadium' %}" loading="lazy">
             <h3>{% trans "Etihad Stadium" %}</h3>
             <p>{% trans "Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue." %}</p>
+            <button class="get-directions-btn" data-lat="53.4830" data-lng="-2.2000">{% trans "Get Directions" %}</button>
         </div>
-        <div class="attraction">
+        <div class="attraction" data-lat="53.4791" data-lng="-2.2500">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678963/manchester7_h7ntsy.jpg"
-                alt="{% trans 'Science and Industry Museum' %}">
+                alt="{% trans 'Science and Industry Museum' %}" loading="lazy">
             <h3>{% trans "Science and Industry Museum" %}</h3>
-            <p>{% trans "Delve into Manchester's industrial past with interactive exhibits and historical artifacts." %}</p>
+            <p>{% trans "Delve into Manchester\'s industrial past with interactive exhibits and historical artifacts." %}</p>
+            <button class="get-directions-btn" data-lat="53.4791" data-lng="-2.2500">{% trans "Get Directions" %}</button>
         </div>
-        <div class="attraction">
+        <div class="attraction" data-lat="53.4659" data-lng="-2.2337">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678962/manchester11_gyrvwm.jpg"
-                alt="{% trans 'Manchester Museum' %}">
+                alt="{% trans 'Manchester Museum' %}" loading="lazy">
             <h3>{% trans "Manchester Museum" %}</h3>
             <p>{% trans "Home to one of the UK’s most extensive collections of natural history, archaeology, and anthropology, the Manchester Museum offers a fascinating journey through time." %}</p>
+            <button class="get-directions-btn" data-lat="53.4659" data-lng="-2.2337">{% trans "Get Directions" %}</button>
         </div>
     </div>
 
     <h2>{% trans "Culinary Delights" %}</h2>
     <div class="culinary">
-        <div class="culinary-spot">
+        <div class="culinary-spot" data-lat="53.4790" data-lng="-2.2440">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738679945/vermilion_1_lny7st.jpg"
-                alt="{% trans 'Vermilion' %}">
+                alt="{% trans 'Vermilion' %}" loading="lazy">
             <h3>{% trans "Vermilion" %}</h3>
             <p>{% trans "An opulent dining destination offering a fusion of Asian and world cuisines, known for its striking decor, exotic cocktails, and immersive fine dining experience." %}</p>
+            <button class="get-directions-btn" data-lat="53.4790" data-lng="-2.2440">{% trans "Get Directions" %}</button>
         </div>
-        <div class="culinary-spot">
+        <div class="culinary-spot" data-lat="53.4570" data-lng="-2.2190">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738679450/Curry-Mile_bmfnu9.webp"
-                alt="{% trans 'Curry Mile' %}">
+                alt="{% trans 'Curry Mile' %}" loading="lazy">
             <h3>{% trans "Curry Mile" %}</h3>
             <p>{% trans "Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes." %}</p>
+            <button class="get-directions-btn" data-lat="53.4570" data-lng="-2.2190">{% trans "Get Directions" %}</button>
         </div>
-        <div class="culinary-spot">
+        <div class="culinary-spot" data-lat="53.4830" data-lng="-2.2370">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738679565/mackie-mayor_1_eqdfw7.jpg"
-                alt="{% trans 'Mackie Mayor' %}">
+                alt="{% trans 'Mackie Mayor' %}" loading="lazy">
             <h3>{% trans "Mackie Mayor" %}</h3>
             <p>{% trans "A bustling food hall housed in a restored Victorian market, featuring diverse food vendors." %}</p>
+            <button class="get-directions-btn" data-lat="53.4830" data-lng="-2.2370">{% trans "Get Directions" %}</button>
         </div>
-        <div class="culinary-spot">
+        <div class="culinary-spot" data-lat="53.4835" data-lng="-2.2375">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738680065/63-degrees_w5xxwv.jpg"
-                alt="{% trans '63 Degrees' %}">
+                alt="{% trans '63 Degrees' %}" loading="lazy">
             <h3>{% trans "63 Degrees" %}</h3>
             <p>{% trans "A chic French restaurant offering exquisite Parisian-inspired dishes, fine wines, and a cozy yet elegant atmosphere in the heart of Manchester’s Northern Quarter." %}</p>
+            <button class="get-directions-btn" data-lat="53.4835" data-lng="-2.2375">{% trans "Get Directions" %}</button>
         </div>
     </div>
 
     <h2>{% trans "Shopping Destinations" %}</h2>
     <div class="shopping">
-        <div class="shopping-spot">
+        <div class="shopping-spot" data-lat="53.4835" data-lng="-2.2430">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678964/manchester3_dqqx1n.jpg"
-                alt="{% trans 'Manchester Arndale' %}">
+                alt="{% trans 'Manchester Arndale' %}" loading="lazy">
             <h3>{% trans "Manchester Arndale" %}</h3>
-            <p>{% trans "One of the UK's largest shopping centers, offering a wide range of retail stores and eateries." %}</p>
+            <p>{% trans "One of the UK\'s largest shopping centers, offering a wide range of retail stores and eateries." %}</p>
+            <button class="get-directions-btn" data-lat="53.4835" data-lng="-2.2430">{% trans "Get Directions" %}</button>
         </div>
-        <div class="shopping-spot">
+        <div class="shopping-spot" data-lat="53.4661" data-lng="-2.3499">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678963/manchester9_npnzld.jpg"
-                alt="{% trans 'Trafford Centre' %}">
+                alt="{% trans 'Trafford Centre' %}" loading="lazy">
             <h3>{% trans "Trafford Centre" %}</h3>
             <p>{% trans "A grand shopping and leisure complex with unique architecture, shops, and entertainment options." %}</p>
+            <button class="get-directions-btn" data-lat="53.4661" data-lng="-2.3499">{% trans "Get Directions" %}</button>
         </div>
     </div>
 
     <h2>{% trans "Cultural Experiences" %}</h2>
     <div class="cultural">
-        <div class="cultural-spot">
-            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738681996/The-Northern-Quarter_1_worr1l.png" alt="{% trans 'Northern Quarter' %}">
+        <div class="cultural-spot" data-lat="53.4830" data-lng="-2.2380">
+            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738681996/The-Northern-Quarter_1_worr1l.png" alt="{% trans 'Northern Quarter' %}" loading="lazy">
             <h3>{% trans "Northern Quarter" %}</h3>
             <p>{% trans "A trendy district known for its street art, independent shops, and vibrant nightlife." %}</p>
+            <button class="get-directions-btn" data-lat="53.4830" data-lng="-2.2380">{% trans "Get Directions" %}</button>
         </div>
-        <div class="cultural-spot">
+        <div class="cultural-spot" data-lat="53.4570" data-lng="-2.2300">
             <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1738678964/manchester1_tnxsj8.jpg"
-                alt="{% trans 'The Whitworth' %}">
+                alt="{% trans 'The Whitworth' %}" loading="lazy">
             <h3>{% trans "The Whitworth" %}</h3>
             <p>{% trans "An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting." %}</p>
+            <button class="get-directions-btn" data-lat="53.4570" data-lng="-2.2300">{% trans "Get Directions" %}</button>
         </div>
     </div>
 
     <h2>{% trans "Map of Manchester" %}</h2>
     <div class="map">
         <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3049.9539480946986!2d-2.244644084622946!3d53.4807596800016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487bb1c6b7f6f1b5%3A0x123456789abcdef0!2sManchester!5e0!3m2!1sen!2suk!4v1617844118965!5m2!1sen!2suk"
-            width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3049.9539480946986!2d-2.244644084622946!3d53.4807596800016!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487bb1c6b7f6f1b5%3A0x123456789abcdef0!2sManchester!5e0!3m2!1sen!2suk!4v1617844118965!5m2!1sen!2suk"
+        width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
     </div>
 </section>
+
+<!-- Google Maps API Script -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCbti0Hd-smPBgEnXxAmxvK03mog_9u_0&callback=initMap" async defer></script>
+
+<!-- JavaScript for Map Markers and Directions Buttons -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get Directions Button Functionality
+    const directionButtons = document.querySelectorAll(".get-directions-btn");
+
+    directionButtons.forEach(button => {
+      button.addEventListener("click", function () {
+        const lat = this.getAttribute("data-lat");
+        const lng = this.getAttribute("data-lng");
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        window.open(url, "_blank");
+      });
+    });
+
+    // Initialize Google Map with Markers
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 53.480759, lng: -2.244644 },
+        zoom: 12,
+      });
+
+      // Array of locations with coordinates and details
+      const locations = [
+        {
+          title: "{% trans 'John Rylands Library' %}",
+          lat: 53.4778,
+          lng: -2.2458,
+          type: "attraction",
+          description: "{% trans 'A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts.' %}"
+        },
+        {
+          title: "{% trans 'Etihad Stadium' %}",
+          lat: 53.4830,
+          lng: -2.2000,
+          type: "attraction",
+          description: "{% trans 'Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue.' %}"
+        },
+        {
+          title: "{% trans 'Science and Industry Museum' %}",
+          lat: 53.4791,
+          lng: -2.2500,
+          type: "attraction",
+          description: "{% trans 'Delve into Manchester\'s industrial past with interactive exhibits and historical artifacts.' %}"
+        },
+        {
+          title: "{% trans 'Manchester Museum' %}",
+          lat: 53.4659,
+          lng: -2.2337,
+          type: "attraction",
+          description: "{% trans 'Home to one of the UK’s most extensive collections of natural history, archaeology, and anthropology, the Manchester Museum offers a fascinating journey through time.' %}"
+        },
+        {
+          title: "{% trans 'Vermilion' %}",
+          lat: 53.4790,
+          lng: -2.2440,
+          type: "culinary",
+          description: "{% trans 'An opulent dining destination offering a fusion of Asian and world cuisines, known for its striking decor, exotic cocktails, and immersive fine dining experience.' %}"
+        },
+        {
+          title: "{% trans 'Curry Mile' %}",
+          lat: 53.4570,
+          lng: -2.2190,
+          type: "culinary",
+          description: "{% trans 'Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes.' %}"
+        },
+        {
+          title: "{% trans 'Mackie Mayor' %}",
+          lat: 53.4830,
+          lng: -2.2370,
+          type: "culinary",
+          description: "{% trans 'A bustling food hall housed in a restored Victorian market, featuring diverse food vendors.' %}"
+        },
+        {
+          title: "{% trans '63 Degrees' %}",
+          lat: 53.4835,
+          lng: -2.2375,
+          type: "culinary",
+          description: "{% trans 'A chic French restaurant offering exquisite Parisian-inspired dishes, fine wines, and a cozy yet elegant atmosphere in the heart of Manchester’s Northern Quarter.' %}"
+        },
+        {
+          title: "{% trans 'Manchester Arndale' %}",
+          lat: 53.4835,
+          lng: -2.2430,
+          type: "shopping",
+          description: "{% trans 'One of the UK\'s largest shopping centers, offering a wide range of retail stores and eateries.' %}"
+        },
+        {
+          title: "{% trans 'Trafford Centre' %}",
+          lat: 53.4661,
+          lng: -2.3499,
+          type: "shopping",
+          description: "{% trans 'A grand shopping and leisure complex with unique architecture, shops, and entertainment options.' %}"
+        },
+        {
+          title: "{% trans 'Northern Quarter' %}",
+          lat: 53.4830,
+          lng: -2.2380,
+          type: "cultural",
+          description: "{% trans 'A trendy district known for its street art, independent shops, and vibrant nightlife.' %}"
+        },
+        {
+          title: "{% trans 'The Whitworth' %}",
+          lat: 53.4570,
+          lng: -2.2300,
+          type: "cultural",
+          description: "{% trans 'An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting.' %}"
+        },
+      ];
+
+      // Add markers to the map
+      locations.forEach(location => {
+        const marker = new google.maps.Marker({
+          position: { lat: location.lat, lng: location.lng },
+          map: map,
+          title: location.title,
+        });
+
+        // Add info window (popup) for each marker with Get Directions
+        const infowindow = new google.maps.InfoWindow({
+          content: `
+            <h3>${location.title}</h3>
+            <p>${location.description}</p>
+            <p>Type: ${location.type}</p>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}" target="_blank">{% trans "Get Directions" %}</a>
+          `,
+        });
+
+        // Show info window when marker is clicked
+        marker.addListener("click", () => {
+          infowindow.open(map, marker);
+        });
+      });
+    }
+
+    // Call initMap when the API script loads (already handled by callback in script tag)
+  });
+</script>
 {% endblock %}

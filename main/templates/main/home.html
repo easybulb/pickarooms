@@ -12,10 +12,12 @@
     <div class="hero-content">
         <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
         <p>{% trans "Enter your Booking.com confirmation number to retrieve your check-in details." %}</p>
-        
+
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="reservation_number" placeholder="{% trans 'Enter your Booking.com confirmation number' %}" value="{{ reservation_number|default:'' }}">
+            <input type="text" name="reservation_number"
+                placeholder="{% trans 'Enter your Booking.com confirmation number' %}"
+                value="{{ reservation_number|default:'' }}">
             <button type="submit">{% trans "Check In" %}</button>
         </form>
 
@@ -30,7 +32,8 @@
             <div class="modal-content">
                 <span class="close" data-modal="how-to-use-modal">&times;</span>
                 <h2>{% trans "How to Use" %}</h2>
-                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter the confirmation number you received during your reservation on Booking.com." %}</p>
+                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter the confirmation number you received during
+                    your reservation on Booking.com." %}</p>
                 <p><strong>{% trans "Step 2:" %}</strong> {% trans "Retrieve your PIN." %}</p>
                 <p><strong>{% trans "Step 3:" %}</strong> {% trans "Follow the check-in instructions." %}</p>
                 <p><strong>{% trans "Step 4:" %}</strong> {% trans "Enjoy your stay!" %}</p>
@@ -58,9 +61,13 @@
     <h2>{% trans "Have Questions? Answers Below." %}</h2>
     <div class="faq-container">
         <div class="faq-item">
-            <button class="faq-question">{% trans "Where can I find my Booking.com confirmation number?" %} <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Where can I find my Booking.com confirmation number?" %} <span
+                    class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)." %}</p>
+                <p>{% trans "Your Booking.com confirmation number can be found in your email amd phone confirmation. You
+                    can also locate it by logging into your Booking.com account online. If using a browser, it appears
+                    at the top-right (see first image). If using the Booking.com app, it is displayed under your
+                    completed booking details (see second image)." %}</p>
 
                 <!-- Image Container -->
                 <div class="faq-images">
@@ -79,10 +86,12 @@
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "What is the property address?" %} <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What is the property address?" %} <span
+                    class="arrow">▼</span></button>
             <div class="faq-answer">
-                {% blocktrans %}The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>.{% endblocktrans %}
-        
+                {% blocktrans %}The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP,
+                    United Kingdom</strong>.{% endblocktrans %}
+
                 <!-- Google Maps Embed -->
                 <div class="faq-map-container">
                     <iframe width="600" height="350" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"
@@ -91,46 +100,55 @@
                     </iframe>
                 </div>
             </div>
-        </div>        
+        </div>
 
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "What are the check-in and check-out times?" %} <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What are the check-in and check-out times?" %} <span
+                    class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>
-                {% trans "Check-in:" %} <strong>{% trans "From 2:00 PM" %}</strong> <br>
-                {% trans "Check-out:" %} <strong>{% trans "Anytime before 11:00 AM on the checkout day" %}</strong>
+                    {% trans "Check-in:" %} <strong>{% trans "From 2:00 PM" %}</strong> <br>
+                    {% trans "Check-out:" %} <strong>{% trans "Anytime before 11:00 AM on the checkout day" %}</strong>
                 </p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "How do I get my room access PIN?" %} <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How do I get my room access PIN?" %} <span
+                    class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number." %}</p>
+                <p>{% trans "Your room access PIN can be found on this site after checkin with your Booking.com
+                    confirmation number." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "Is there parking available at the property?" %} <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Is there parking available at the property?" %} <span
+                    class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Yes, free parking is available on the property. Additional paid parking options are nearby." %}</p>
+                <p>{% trans "Yes, free parking is available on the property. Additional paid parking options are
+                    nearby." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "How can I contact support if I need help?" %} <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How can I contact support if I need help?" %} <span
+                    class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>{% trans "For assistance, contact us via:" %} <br>
                     <strong>{% trans "Phone:" %}</strong> +44 (0) 7539029629 <br>
-                    <strong>{% trans "Email:" %}</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
+                    <strong>{% trans "Email:" %}</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a>
+                </p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "What is your cancellation policy?" %} <span class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What is your cancellation policy?" %} <span
+                    class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details." %}</p>
+                <p>{% trans "Cancellations depend on the policy selected during booking. Check your Booking.com
+                    reservation for details." %}</p>
             </div>
         </div>
     </div>
@@ -267,28 +285,109 @@
             event.stopPropagation(); // Prevents document.body click from firing
         });
 
-        // FAQ Functionality
+
+        // FAQ Functionality with Enhancements
         const faqItems = document.querySelectorAll(".faq-item");
+        const faqQuestions = document.querySelectorAll(".faq-question");
 
-        faqItems.forEach(item => {
-            const question = item.querySelector(".faq-question");
-            const answer = item.querySelector(".faq-answer");
-            const arrow = item.querySelector(".arrow");
+        // Initialize FAQs to collapsed state
+        function initializeFAQs() {
+            faqItems.forEach(item => {
+                const answer = item.querySelector(".faq-answer");
+                const arrow = item.querySelector(".arrow");
+                answer.style.display = "none"; // Ensure all answers start hidden
+                answer.classList.remove("show"); // Remove show class if present
+                arrow.textContent = "▼"; // Reset arrows
+            });
+        }
 
-            question.addEventListener("click", function () {
-                const isActive = answer.style.display === "block";
+        // Toggle Individual FAQ with Animation and Accessibility
+        faqQuestions.forEach(question => {
+            question.addEventListener("click", function (event) {
+                event.preventDefault(); // Prevent default if needed (though not strictly necessary here)
+                const item = question.closest(".faq-item");
+                const answer = item.querySelector(".faq-answer");
+                const arrow = question.querySelector(".arrow");
+                const isExpanded = answer.style.display === "block";
 
                 // Close all other answers
                 faqItems.forEach(faq => {
-                    faq.querySelector(".faq-answer").style.display = "none";
-                    faq.querySelector(".arrow").textContent = "▼";
+                    const otherAnswer = faq.querySelector(".faq-answer");
+                    const otherArrow = faq.querySelector(".arrow");
+                    otherAnswer.style.display = "none";
+                    otherAnswer.classList.remove("show");
+                    otherArrow.textContent = "▼";
+                    faq.querySelector(".faq-question").setAttribute("aria-expanded", "false");
                 });
 
-                // Toggle clicked item
-                answer.style.display = isActive ? "none" : "block";
-                arrow.textContent = isActive ? "▼" : "▲";
+                // Toggle the clicked answer
+                answer.style.display = isExpanded ? "none" : "block";
+                answer.classList.toggle("show", !isExpanded); // For CSS transitions
+                arrow.textContent = isExpanded ? "▼" : "▲";
+                question.setAttribute("aria-expanded", !isExpanded);
+
+                // Update ARIA for accessibility
+                question.setAttribute("aria-controls", answer.id || `faq-answer-${item.dataset.index || Math.random().toString(36).substr(2, 9)}`);
+                if (!answer.id) answer.id = question.getAttribute("aria-controls");
+            });
+
+            // Keyboard Accessibility
+            question.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    question.click();
+                }
             });
         });
+
+        // Initialize FAQ IDs for accessibility (if not already present)
+        faqQuestions.forEach((question, index) => {
+            if (!question.getAttribute("aria-controls")) {
+                const answer = question.nextElementSibling;
+                const id = `faq-answer-${index}`;
+                question.setAttribute("aria-controls", id);
+                if (!answer.id) answer.id = id;
+            }
+            question.setAttribute("aria-expanded", "false");
+        });
+
+        // Initialize FAQs on load
+        initializeFAQs();
+
+        // FAQ Filter (Your existing function, unchanged but with slight tweak for compatibility)
+        window.filterFAQs = function () {
+            const input = document.getElementById("faq-search").value.toLowerCase();
+            const items = document.querySelectorAll(".faq-item");
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const question = item.querySelector(".faq-question").textContent.toLowerCase();
+                const answer = item.querySelector(".faq-answer");
+                const answerText = answer.textContent.toLowerCase();
+                const matches = question.includes(input) || answerText.includes(input);
+
+                if (input === "") {
+                    item.style.display = ""; // Reset to CSS default
+                    answer.style.display = "none"; // Ensure answers stay collapsed
+                    answer.classList.remove("highlight");
+                } else {
+                    item.style.display = matches ? "block" : "none";
+                    if (matches) {
+                        visibleCount++;
+                        answer.classList.toggle("highlight", question.includes(input) || answerText.includes(input));
+                        const category = item.closest(".faq-category"); // Assuming each faq-item is directly under faq-category, adjust if needed
+                        if (category && !category.classList.contains("active")) {
+                            category.classList.add("active");
+                        }
+                    } else {
+                        answer.classList.remove("highlight");
+                    }
+                }
+            });
+
+            const noResults = document.getElementById("faq-no-results");
+            if (noResults) noResults.classList.toggle("hidden", visibleCount > 0);
+        };
 
         // ✅ IMAGE SLIDER FUNCTIONALITY ✅
         const slides = document.querySelectorAll(".slide");

@@ -1,42 +1,55 @@
 /* General Styles */
 body {
-    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: "Poppins", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Modern, friendly font */
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa;
+    background-color: #f5f7fa; /* Softer off-white */
+    color: #2d3748; /* Slightly warmer dark gray */
 }
 
-/* ✅ Section Navigation Buttons */
+/* Sticky Tab Navigation */
 .section-nav {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    padding: 15px;
-    background: #ffffff;
-    border-bottom: 1px solid #ddd;
+    padding: 12px 10px;
+    background: linear-gradient(135deg, #ffffff 0%, #eef2f7 100%); /* Subtle gradient */
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Softer shadow */
 }
 
-.section-nav button {
-    background: #007bff;
+.tab-btn {
+    background: #4a90e2; /* Richer blue */
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 10px 14px;
     font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
-    border-radius: 5px;
-    transition: 0.3s;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.section-nav button:hover {
-    background: #0056b3;
+.tab-btn:hover {
+    background: #357abd; /* Darker hover */
+    transform: translateY(-2px); /* Subtle lift */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* ✅ HERO SECTION - Default Room Image with Play Button */
+.tab-btn.active {
+    background: #2b6cb0; /* Even darker for active */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle inset */
+}
+
+/* Hero Section (Unchanged) */
 .room-hero {
     position: relative;
     width: 100%;
-    height: 450px; /* Adjusted height */
+    height: 450px;
     background-size: cover;
     background-position: center;
     display: flex;
@@ -68,7 +81,6 @@ body {
     display: block;
 }
 
-/* ✅ Play Button Styling */
 .play-button {
     position: absolute;
     top: 50%;
@@ -81,7 +93,7 @@ body {
     cursor: pointer;
     font-size: 2rem;
     border-radius: 50%;
-    transition: 0.3s;
+    transition: background 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -91,7 +103,6 @@ body {
     background: rgba(0, 0, 0, 0.9);
 }
 
-/* ✅ Play Video Text Below Play Button */
 .play-text {
     position: absolute;
     top: 60%;
@@ -105,415 +116,455 @@ body {
     font-weight: bold;
 }
 
-/* ✅ Position Video Absolutely */
 .room-video-container {
-    position: absolute; /* Make it float over the hero section */
-    top: 46%; /* Move to the middle */
+    position: absolute;
+    top: 46%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Adjust to center properly */
+    transform: translate(-50%, -50%);
     width: 100%;
     background: #000;
     text-align: center;
     display: none;
 }
 
-/* ✅ Make the Video Responsive */
 .room-video-container iframe {
     width: 80%;
     max-width: 800px;
     height: 400px;
     border: none;
-    display: block; /* Ensures proper centering */
-    margin: 0 auto; /* Keeps it centered within the flexbox container */
+    display: block;
+    margin: 0 auto;
 }
 
-/* ✅ Room Header (Name & Guest Welcome) */
+/* Room Header */
 .room-header {
     text-align: center;
-    padding: 15px;
+    padding: 20px;
     background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .room-header h1 {
-    font-size: 1.8rem;
-    color: #1B263B;
+    font-size: 2rem; /* Slightly larger */
+    color: #2d3748;
+    margin: 0;
+    font-weight: 600;
 }
 
 .room-header p {
     font-size: 1.2rem;
-    color: #6c757d;
+    color: #718096; /* Softer gray */
+    margin: 5px 0 0;
 }
 
-/* ✅ Room Details Section */
+/* Room Containers */
 .room-container {
-    padding: 20px;
+    padding: 25px;
     max-width: 1000px;
     margin: auto;
+    display: none;
 }
 
-/* ✅ Room Info Box */
+.room-container.active {
+    display: block;
+}
+
 .room-info {
     background: #ffffff;
-    border-radius: 10px;
-    padding: 25px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Deeper shadow */
+    transition: transform 0.2s ease;
+}
+
+.room-info:hover {
+    transform: translateY(-3px); /* Subtle hover lift */
 }
 
 .room-info h2 {
-    font-size: 1.4rem;
-    color: #1B263B;
-    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-weight: 600;
 }
 
 .room-info p {
     font-size: 1.1rem;
-    color: #333;
+    color: #4a5568; /* Warmer gray */
+    line-height: 1.6;
 }
 
-/* ✅ PIN Code Display */
-/* ✅ Styling for PIN Wait Message */
+/* PIN Styling */
 .pin-wait {
     font-size: 1.2rem;
     font-weight: 500;
-    color: #dc3545; /* Red color for alert */
-    background: #fdecea; /* Light red background */
-    border: 2px solid #dc3545; /* Matching border */
-    padding: 12px 18px;
-    display: block;
-    text-align: left;
-    border-radius: 8px;
+    color: #e53e3e; /* Softer red */
+    background: #fef6f5;
+    border: 2px solid #feb2b2;
+    padding: 12px 20px;
+    border-radius: 10px;
     width: fit-content;
-    margin: 15px auto; /* Centering */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 .pin-code {
     display: block;
-    font-size: 2rem;
-    font-weight: bold;
-    letter-spacing: 4px;
-    text-align: left;
+    font-size: 2.2rem; /* Bigger for emphasis */
+    font-weight: 700;
+    letter-spacing: 5px;
     color: white;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%); /* Teal gradient */
+    padding: 18px 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     width: fit-content;
-    margin: 20px auto;
-    border: 2px solid #218838; /* Darker green border */
+    margin: 25px auto;
+    border: none;
+    text-align: center;
 }
 
 .pin-code:empty::before,
-.pin-code[data-content="No PIN assigned yet. Contact support."]::before {
-    content: "No PIN assigned yet. Contact support.";
+.pin-code:empty {
+    content: "Contact support for PIN";
     font-size: 1.2rem;
     letter-spacing: normal;
-    border: 2px solid #c82333;
-    padding: 12px 18px;
-    display: block;
-    color: white;
-    border-radius: 8px;
-    text-align: left;
-    width: fit-content;
-    margin: auto;
+    background: #e53e3e;
+    border: 2px solid #c53030;
+    padding: 12px 20px;
+    border-radius: 10px;
 }
 
-/* ✅ PIN Confirmation Section Styling */
 .pin-confirmation {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .pin-confirmation h3 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     margin-bottom: 15px;
-    color: #1B263B;
+    color: #2d3748;
+    font-weight: 500;
 }
 
 .pin-btn {
-    background: #007bff;
+    background: #4a90e2;
     color: white;
     border: none;
-    padding: 10px 15px;
-    font-size: 1rem;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    font-weight: 500;
     cursor: pointer;
-    border-radius: 5px;
-    margin: 5px;
-    transition: 0.3s;
+    border-radius: 8px;
+    margin: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .pin-btn:hover {
-    background: #0056b3;
+    background: #357abd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* ✅ Hidden sections */
-.hidden {
+/* Modal */
+.modal {
     display: none;
-}
-
-.hidden h3 {
-    text-align: center;
-}
-
-/* ✅ Video Wrapper: Keeps Videos in One Row */
-.video-wrapper {
-    display: flex;
-    justify-content: center; /* Centering */
-    align-items: center;
-    gap: 10px; /* Space between videos */
-    margin-top: 15px;
-    flex-wrap: nowrap; /* Prevents wrapping */
-}
-
-/* ✅ Video Containers: Ensures Equal Sizing */
-.video-container {
-    flex: 1;
-    width: 50%; /* Forces two per row */
-    max-width: 50%; /* Ensures they take equal space */
-    min-width: 150px; /* Prevents videos from shrinking too much */
-    position: relative;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-/* ✅ Expand on Click (Mobile) */
-.video-container.expanded {
-    width: 100% !important;
-    max-width: 100%;
-}
-
-.back-btn {
-    display: none; /* Initially hidden */
-    margin-top: 10px;
-    background: none;
-    color: black;
-    border: none;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    text-align: center;
-    width: 30%;
-    transition: background 0.3s ease-in-out;
-    justify-self: flex-end;
-}
-
-.back-btn span {
-    text-decoration: underline;
-}
-
-
-.back-btn:hover {
-    background: #e03e00;
-}
-
-/* ✅ Video Sizing */
-.video-container iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 220px;
-    border-radius: 10px;
-    transition: all 0.3s ease-in-out;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-#pin-admin-alert {
-    display: none;
-    background: #ecfdea;
-    color: #b02a37;
-    padding: 10px;
-    border-radius: 8px;
-    border-left: 4px solid #dc3545;
-    margin-top: 15px;
+.modal-content {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content .video-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-item {
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+}
+
+.video-item h4 {
+    font-size: 1.2rem;
+    color: #2d3748;
+    margin-bottom: 10px;
     font-weight: 500;
     text-align: center;
 }
 
-.not-working {
-    text-align: center;
-}
-
-hr {
-    border: none; /* Removes default styling */
-    height: 2px; /* Line thickness */
-    background-color: #ccc; /* Line color */
-    margin: 20px 0; /* Space above and below */
-}
-
-/* ✅ Ensures Two Videos Stay in One Row on Small Screens */
-@media (max-width: 480px) {
-    .pin-confirmation {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    .pin-confirmation h3 {
-        font-size: 1.2rem;
-        margin-bottom: 15px;
-        color: #1B263B;
-    }
-
-    .pin-btn {
-        margin: -5px 6px 8px 6px;
-    }
-
-    .video-wrapper {
-        display: flex;
-        justify-content: space-between; /* Even spacing */
-        flex-wrap: nowrap; /* No wrapping */
-        overflow-x: auto; /* Prevents breaking */
-        gap: 5px;
-    }
-
-    .video-container {
-        flex: 1;
-        max-width: 48%; /* Ensures they fit */
-    }
-
-    .video-container.expanded iframe {
-        height: 280px; /* Increase size when expanded */
-    }
-
-    .video-h3 {
-        font-size: 1rem;
-        text-align: center;
-        font-weight: 400;
-        margin-top: -5px;
-        margin-bottom: 2px;
-    }
-
-    .video-container iframe {
-        width: 100%;
-        height: 110px;
-        border-radius: 10px;
-        transition: all 0.3s ease-in-out;
-    }
-}
-
-
-
-/* ✅ Guest Access Expiration */
-.expiration {
-    color: red;
-    font-weight: bold;
-}
-
-/* ✅ No Guest Warning */
-.no-guest {
-    color: red;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-/* ✅ Expandable "More Instructions" Section */
-.room-resources {
-    margin-top: 30px;
-    text-align: center;
-}
-
-.room-resources h2 {
-    font-size: 1.5rem;
-    color: #1B263B;
-}
-
-.room-resources a {
-    font-size: 1.1rem;
-    color: #ff4500;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.room-resources a:hover {
-    text-decoration: underline;
-}
-
-/* ✅ House Map & Street Image */
-
-.street-image {
+.video-overlay {
+    position: relative;
     width: 100%;
-    max-width: 800px;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* ✅ FAQ Section */
-.faq-section {
-    margin-top: 40px;
-    background: #ffffff;
-    padding: 20px;
+    height: 250px; /* Matches hero iframe height */
+    cursor: pointer;
+    overflow: hidden;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 900px;
-    margin: auto;
 }
 
-.faq-section h2 {
+.modal-video-container {
+    width: 100%;
+    height: 250px; /* Matches .video-overlay height */
+    background: #000;
     text-align: center;
-    color: #1B263B;
-    font-size: 1.5rem;
+    display: none; /* Initially hidden */
 }
 
-.faq-container {
+.modal-video-container iframe {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.video-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.video-overlay iframe {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0; /* Behind overlay until played */
+}
+
+.video-overlay .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 2rem;
+    border-radius: 50%;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.video-overlay .play-button:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.video-overlay .play-text {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: #718096;
+    transition: color 0.2s;
+}
+
+.close:hover {
+    color: #2d3748;
+}
+
+#pin-admin-alert {
+    background: #f0fff4;
+    color: #2f855a;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid #38b2ac;
     margin-top: 15px;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Stay Section */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent); /* Faded line */
+    margin: 25px 0;
+}
+
+.expiration {
+    color: #e53e3e;
+    font-weight: 600;
+}
+
+.no-guest {
+    color: #e53e3e;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* FAQ Section */
+.faq-container {
+    margin-top: 20px;
+}
+
+.faq-category h3 {
+    font-size: 1.4rem;
+    color: #4a90e2;
+    cursor: pointer;
+    margin: 15px 0 10px;
+    padding: 8px 12px;
+    background: #edf2f7;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.faq-category h3:hover {
+    background: #e2e8f0;
+}
+
+.faq-category.active .faq-item {
+    display: block;
+}
+
+#faq-search {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #f7fafc;
+    transition: border-color 0.2s;
+}
+
+#faq-search:focus {
+    border-color: #4a90e2;
+    outline: none;
 }
 
 .faq-item {
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 15px;
+    display: none;
 }
 
 .faq-question {
-    background: none;
-    background: #e8eaef;
+    background: #edf2f7;
     border: none;
     font-size: 1.2rem;
     width: 100%;
     text-align: left;
     cursor: pointer;
-    color: #007bff;
-    font-weight: 400;
+    color: #4a90e2;
+    font-weight: 500;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.faq-question:hover {
+    background: #e2e8f0;
 }
 
 .faq-answer {
     display: none;
-    padding-top: 10px;
-    color: #333;
+    padding: 15px 15px 0;
+    color: #4a5568;
+    line-height: 1.6;
+}
+
+.faq-answer.highlight {
+    background: #fff3cd;
+    border-radius: 8px;
 }
 
 .arrow {
     float: right;
     font-size: 1.3rem;
+    color: #718096;
 }
 
-/* ✅ Chat Button */
+.street-image {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 15px;
+}
+
+/* Chat Button */
 #chat-button {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #159c46;
+    bottom: 25px;
+    right: 25px;
+    background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%);
     color: white;
-    padding: 12px 18px;
-    border-radius: 25px;
+    padding: 14px 20px;
+    border-radius: 50px;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: 0.3s;
+    font-size: 1.1rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
 }
 
 #chat-button:hover {
-    background: #1ebc5b;
+    background: linear-gradient(135deg, #2c7a7b 0%, #285e61 100%);
+    transform: scale(1.05);
 }
 
 .chat-box {
     position: fixed;
-    bottom: 70px;
-    right: 20px;
+    bottom: 80px;
+    right: 25px;
     background: #ffffff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     display: none;
-    width: 250px;
+    width: 280px;
 }
 
 .chat-box.show {
@@ -521,52 +572,41 @@ hr {
 }
 
 .chat-box p {
-    margin: 0 0 10px;
-    color: #333;
+    margin: 0 0 15px;
+    color: #4a5568;
     font-size: 1rem;
 }
 
 .chat-box a {
     display: inline-block;
-    background: #159c46;
+    background: #38b2ac;
     color: white;
-    padding: 8px 12px;
-    border-radius: 5px;
+    padding: 10px 15px;
+    border-radius: 8px;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
+    transition: background 0.3s;
 }
 
 .chat-box a:hover {
-    background: #1ebc5b;
+    background: #2c7a7b;
 }
 
-/* ✅ RESPONSIVE DESIGN */
+/* Responsive Design */
 @media (max-width: 768px) {
     .section-nav {
-        align-items: center;
-        gap: 5px;
-        padding: 10px;
-        margin-top: -20px;
+        gap: 6px;
+        padding: 8px;
     }
 
-    strong {
-        font-weight: 500;
-    }
-
-    .section-nav button {
-        /* width: 30%; */
-        font-size: 0.8rem;
-        padding: 10px 8px;
+    .tab-btn {
+        font-size: 0.85rem;
+        padding: 8px 10px;
     }
 
     .room-hero {
-        height: 250px; /* Reduce height on mobile */
+        height: 250px;
         margin-top: -25px;
-    }
-
-    .room-hero-image {
-        width: 100%;
-        height: 100%;
     }
 
     .play-button {
@@ -580,109 +620,189 @@ hr {
     }
 
     .room-video-container iframe {
-        height: 220px; /* Reduce video height on mobile */
+        height: 220px;
         width: 100%;
     }
 
     .room-header h1 {
-        font-size: 1.3rem;
-        font-weight: 400;
+        font-size: 1.5rem;
         margin-top: -1px;
     }
 
     .room-header p {
         font-size: 1.1rem;
-        margin-top: -15px;
+        margin-top: -10px;
         margin-bottom: -5px;
     }
 
     .room-info {
-        padding: 15px;
+        padding: 20px;
     }
 
     .room-info h2 {
-        font-size: 1.2rem;
-        font-size: 400;
+        font-size: 1.3rem;
     }
 
     .pin-wait {
         font-size: 1rem;
-        padding: 10px 14px;
-        border-width: 1.5px;
-        text-align: center;
+        padding: 10px 15px;
     }
 
     .pin-code {
         font-size: 1.8rem;
-        padding: 12px 16px;
+        padding: 14px 20px;
         letter-spacing: 3px;
-        text-align: center;
     }
 
-    .pin-code:empty::before {
-        font-size: 1rem;
-        padding: 10px 14px;
-        text-align: center;
+    .pin-btn {
+        padding: 10px 15px;
+        font-size: 0.95rem;
     }
 
-    .room-container {
-        padding: 15px;
+    .modal {
+        left: -5%;
     }
 
-    .room-container h2 {
-        font-weight: 500;
-    }
-    .room-container p {
-        font-size: 1rem;
+    .modal-content iframe {
+        height: 200px;
     }
 
-    .street-image {
-        max-width: 100%;
-        border-radius: 5px;
-    }
-
-    #street-view a {
-        padding: 8px 12px;
-        font-size: 0.9rem;
+    .modal-video-container {
+        height: 200px; /* Matches mobile .video-overlay height */
     }
 
     .faq-question {
-        font-size: 1rem;
-    }
-
-    .faq-section h2 {
-        font-size: 1.3rem;
-    }
-
-    .faq-container {
-        padding: 0px;
+        font-size: 1.1rem;
+        padding: 8px 12px;
     }
 
     #chat-button {
-        bottom: 15px;
-        right: 15px;
-        padding: 10px 15px;
-        font-size: 0.9rem;
-        font-weight: 300;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 16px;
+        font-size: 1rem;
     }
 
     .chat-box {
-        bottom: 60px;
-        right: 15px;
-        width: 220px;
-        padding: 12px;
+        bottom: 70px;
+        right: 20px;
+        width: 240px;
+        padding: 15px;
     }
-
-    ul {
-        margin: 15px 0;
-        padding-left: 20px; 
-    }
-    
-    li {
-        margin-bottom: 8px;
-        font-size: 1.1rem;
-        line-height: 1.5;
-    }
-    
 }
 
+/* Modal Video Enhancements */
+.modal-content .video-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-item {
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+}
+
+.video-item h4 {
+    font-size: 1.2rem;
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.video-overlay {
+    position: relative;
+    width: 100%;
+    height: 250px; /* Matches hero iframe height */
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.video-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.video-overlay iframe {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0; /* Behind overlay until played */
+}
+
+.video-overlay .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 2rem;
+    border-radius: 50%;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.video-overlay .play-button:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.video-overlay .play-text {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .modal-content .video-wrapper {
+        gap: 20px;
+    }
+
+    .video-item h4 {
+        font-size: 1.1rem;
+    }
+
+    .video-overlay {
+        height: 200px; /* Matches hero mobile height */
+    }
+
+    .video-overlay .play-button {
+        font-size: 1.5rem;
+        padding: 12px 16px;
+    }
+
+    .video-overlay .play-text {
+        font-size: 0.9rem;
+        top: 65%;
+    }
+}

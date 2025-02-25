@@ -10,28 +10,23 @@
 
 {% block content %}
 
-<!-- ✅ Hero Section with Image and Playable Video -->
+<!-- Hero Section with Image and Playable Video (Unchanged) -->
 <section class="room-hero">
     <div class="hero-overlay"></div>
-
-    <!-- ✅ Default Room Image -->
     <div class="room-hero-content">
         <img src="{{ image_url }}" alt="{{ room.name }}" class="room-hero-image" id="heroImage">
         <button class="play-button" id="playVideo">
             <i class="fas fa-play"></i>
         </button>
-        <p class="play-text" style="font-weight: 400;">{% trans "Instruction Video" %}</p> <!-- ✅ Play Video Text -->
+        <p class="play-text" style="font-weight: 400;">{% trans "Instruction Video" %}</p>
     </div>
-
-    <!-- ✅ Hidden Video (Revealed on Click) -->
     <div class="room-video-container" id="videoContainer" style="display: none;">
         <iframe id="videoFrame" src="{{ room.video_url }}" title="{% trans 'Room Instructions' %}" frameborder="0"
-            allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen>
-        </iframe>
+            allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
     </div>
 </section>
 
-<!-- ✅ Room Name & Guest Info -->
+<!-- Room Name & Guest Info -->
 <section class="room-header">
     <h1>{{ room.name }}</h1>
     {% if guest %}
@@ -39,593 +34,407 @@
     {% endif %}
 </section>
 
-<!-- ✅ Room Details -->
-<section class="room-container">
+<!-- Sticky Tab Navigation (Updated) -->
+<div class="section-nav">
+    <button class="tab-btn active" onclick="showSection('pin-section')">PIN</button>
+    <button class="tab-btn" onclick="showSection('location-section')">Location</button>
+    <button class="tab-btn" onclick="showSection('checkin-section')">Checkin</button>
+    <button class="tab-btn" onclick="showSection('checkout-section')">Checkout</button>
+    <button class="tab-btn" onclick="showSection('faq-section')">FAQs</button>
+</div>
+
+<!-- PIN Section (Default) -->
+<section id="pin-section" class="room-container active">
     <div class="room-info">
         <h2>{% trans "🔑 House & Room Access PIN" %}</h2>
         {% if not show_pin %}
         <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your PIN will be available then." %}</p>
         {% else %}
-        {% if room.access_pin %}
-        <p class="pin-code">{{ room.access_pin }}</p>
-        {% else %}
-        <p class="pin-code">{% trans "No PIN assigned yet. Contact support." %}</p>
-        {% endif %}
-
-        <!-- ✅ PIN Confirmation Section -->
+        <p class="pin-code">{{ room.access_pin|default:"Contact support for PIN" }}</p>
         <div class="pin-confirmation">
-            <h3>Did the PIN work for you?</h3>
-            <div class="buttons">
-                <button id="pin-yes" class="pin-btn">Yes</button>
-                <button id="pin-no" class="pin-btn">No</button>
-            </div>
-        </div>
-
-        <div id="pin-success" class="hidden">
-            <p>Enjoy your stay! Below are the PIN instruction videos in case you need it.</p>
-            <div class="video-wrapper">
-                <div class="video-container">
-                    <h3 class="video-h3">Front Door</h3>
-                    <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
-                        allow="autoplay; encrypted-media" allowfullscreen>
-                    </iframe>
-
-                </div>
-                <div class="video-container">
-                    <h3 class="video-h3">Room Door</h3>
-                    <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
-                        allow="autoplay; encrypted-media" allowfullscreen>
-                    </iframe>
-
-                </div>
-            </div>
-        </div>
-
-        <div id="pin-issue" class="hidden">
-            <h3>Watch these videos for help:</h3>
-            <div class="video-wrapper">
-                <div class="video-container">
-                    <h3 class="video-h3">Front Door</h3>
-                    <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
-                        allow="autoplay; encrypted-media" allowfullscreen>
-                    </iframe>
-
-                </div>
-                <div class="video-container">
-                    <h3 class="video-h3">Room Door</h3>
-                    <button id="back" class="back-btn"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ" frameborder="0"
-                        allow="autoplay; encrypted-media" allowfullscreen>
-                    </iframe>
-
-                </div>
-            </div>
-            <div class="not-working">
-                <h3>Does it work now?</h3>
-                <button id="pin-fixed" class="pin-btn">Yes</button>
-                <button id="pin-still-issue" class="pin-btn">Still Doesn’t Work</button>
-            </div>
-        </div>
-
-        <div id="pin-admin-alert" class="hidden">
-            <p>A member of our team will contact you shortly. You can also call or WhatsApp us on
-                <strong>+44(0)7539029629</strong>.
-            </p>
+            <h3>Did the PIN work?</h3>
+            <button id="pin-yes" class="pin-btn">Yes</button>
+            <button id="pin-no" class="pin-btn" onclick="openModal('pin-help-modal')">No</button>
         </div>
         {% endif %}
+    </div>
+</section>
 
+<!-- Location Section -->
+<section id="location-section" class="room-container">
+    <div class="room-info">
+        <h2>{% trans "📍 Location" %}</h2>
+        <p><strong>{% trans "Address:" %}</strong> {% trans "8 Rylance Street, Beswick, Manchester, M11 3NP" %}</p>
+        <p><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">{% trans "📍 Open in Google Maps" %}</a></p>
+        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Street View of Property' %}" class="street-image">
         <hr>
+        <h3>{% trans "How do I get to the property?" %}</h3>
+        <p><strong>{% trans "From Manchester Airport:" %}</strong></p>
+        <ul>
+            <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "25 minutes from Manchester Airport." %}</li>
+            <li>🚆 <strong>{% trans "Train:" %}</strong> {% trans "To Piccadilly Station, then a £5 taxi ride." %}</li>
+            <li>🚌 <strong>{% trans "Bus:" %}</strong> {% trans "219 bus from Piccadilly stops nearby." %}</li>
+        </ul>
+        <p><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
+        <p><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street, via Ashton Old Road (A635) or M60 Exit 24." %}</p>
+    </div>
+</section>
 
-        <h2>{% trans "🛏️ Room Details" %}</h2>
-        <p>{{ room.description }}</p>
-
+<!-- Checkin Section -->
+<section id="checkin-section" class="room-container">
+    <div class="room-info">
+        <h2>{% trans "📥 Check-In" %}</h2>
         {% if guest %}
-        <h2>{% trans "📅 Your Stay" %}</h2>
+        <p><strong>{% trans "Date:" %}</strong> {{ guest.check_in_date }} ({% trans "From 2 PM" %})</p>
         <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
-        <p><strong>{% trans "Check-In:" %}</strong> {{ guest.check_in_date }} ({% trans "From 2 PM" %})</p>
-        <p><strong>{% trans "Check-Out:" %}</strong> {{ guest.check_out_date }} ({% trans "Before 11 AM" %})</p>
+        {% else %}
+        <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
+        {% endif %}
+        <hr>
+        <h3>{% trans "How do I use the PIN?" %}</h3>
+        <ol>
+            <li>{% trans "Watch the video at the top of this page for easy instructions." %}</li>
+            <li>{% trans "When you arrive at the property’s front door, touch the keypad area to light up the numbers." %}</li>
+            <li>{% trans "Enter your PIN:" %} <span class="pin-code">{{ room.access_pin|default:"Contact support" }}</span></li>
+            <li>{% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
+            <li>{% trans "Touch the front of the" %} <strong>{{ room.name }}</strong> {% trans "door lock to light up the numbers and enter the same PIN." %}</li>
+            <li>{% trans "Inside your room, find a" %} <strong>{% trans "keycard" %}</strong>. {% trans "Use it or the PIN to enter/exit. Watch the video above for keycard use." %}</li>
+        </ol>
+    </div>
+</section>
+
+<!-- Checkout Section -->
+<section id="checkout-section" class="room-container">
+    <div class="room-info">
+        <h2>{% trans "📤 Check-Out" %}</h2>
+        {% if guest %}
+        <p><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before 11 AM" %})</p>
         <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
         {% else %}
         <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
         {% endif %}
+        <hr>
+        <h3>{% trans "How do I check out?" %}</h3>
+        <ul>
+            <li>🛑 <strong>{% trans "Leave keycard:" %}</strong> {% trans "Inside room, visible." %}</li>
+            <li>🔌 <strong>{% trans "Switch off:" %}</strong> {% trans "All appliances and lights." %}</li>
+            <li>🚪 <strong>{% trans "Close door:" %}</strong> {% trans "Securely." %}</li>
+            <li>🛏️ {% trans "Leave towels in bathroom." %}</li>
+            <li>📅 {% trans "Housekeeping enters after 11 AM." %}</li>
+        </ul>
     </div>
-    <br>
-    <!-- ✅ FAQ Section -->
-    <div id="faq" class="room-info">
-        <h2>{% trans "❓ Frequently Asked Questions" %}</h2>
-        <div class="faq-container">
-
-            <!-- ✅ House Address -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "📍 Where is the property located?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p><strong>{% trans "8 Rylance Street, Beswick, Manchester, M11 3NP" %}</strong></p>
-                    <p>
-                        <a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">
-                            {% trans "📍 Open in Google Maps" %}
-                        </a>
-                    </p>
-                    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png"
-                        alt="{% trans 'Street View of Property' %}" class="street-image">
-                </div>
-            </div>
-
-            <!-- ✅ Directions to Property -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How do I get to the property?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p><strong>{% trans "Coming from Manchester Airport?" %}</strong></p>
-                    <ul>
-                        <li>
-                            🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "A direct taxi from" %} <strong>{% trans
-                                "Manchester Airport" %}</strong> {% trans "takes approximately 25 minutes." %}
-                        </li>
-                        <li>
-                            🚆 <strong>{% trans "Train:" %}</strong> {% trans "Take a train from" %} <strong>{% trans
-                                "Manchester Airport to Piccadilly Station" %}</strong>, {% trans "then a short" %}
-                            <strong>{% trans "£5 taxi ride" %}</strong> {% trans "to the property." %}
-                        </li>
-                        <li>
-                            🚌 <strong>{% trans "Bus:" %}</strong> {% trans "The" %} <strong>{% trans "219 bus"
-                                %}</strong> {% trans "from" %} <strong>{% trans "Piccadilly Station" %}</strong> {%
-                            trans "stops near the property." %}
-                        </li>
-                    </ul>
-
-                    <p><strong>{% trans "Coming from another part of Manchester?" %}</strong></p>
-                    <p>
-                        {% trans "Make your way to" %} <strong>{% trans "Manchester city centre" %}</strong> {% trans
-                        "and take the" %} <strong>{% trans "219 bus" %}</strong> {% trans "to the nearest bus stop close
-                        to the property. You can use" %} <strong>{% trans "Google Maps" %}</strong> {% trans "or your
-                        navigation app to find the closest stop to alight." %}
-                    </p>
-
-                    <p><strong>{% trans "Driving to the property?" %}</strong></p>
-                    <p>
-                        {% trans "Use" %} <strong>{% trans "Google Maps" %}</strong> {% trans "or your preferred
-                        navigation app and enter the destination:" %}
-                    </p>
-                    <p><strong>{% trans "8 Rylance Street, Beswick, Manchester, M11 3NP" %}</strong></p>
-                    <p>
-                        {% trans "The property is easily accessible via" %} <strong>{% trans "Ashton Old Road (A635)"
-                            %}</strong>. {% trans "If coming from the" %} <strong>{% trans "M60 motorway" %}</strong>,
-                        {% trans "take Exit 24 and follow signs toward" %} <strong>{% trans "Manchester City Centre"
-                            %}</strong>. {% trans "Parking is available on-site." %}
-                    </p>
-                </div>
-            </div>
-
-            <!-- ✅ How to Use PIN -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How do I use the PIN?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ol>
-                        <li>{% trans "Watch the video at the top of this page for easy instructions." %}</li>
-                        <li>{% trans "When you arrive at the property’s front door, touch the keypad area to light up
-                            the numbers." %}</li>
-                        <li>
-                            {% trans "Enter your PIN:" %}
-                            {% if not show_pin %}
-                            <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your PIN will be available
-                                then." %}</p>
-                            {% else %}
-                            {% if room.access_pin %}
-                            <p class="pin-code">{{ room.access_pin }}</p>
-                            {% else %}
-                            <p class="pin-code">{% trans "No PIN assigned yet. Contact support." %}</p>
-                            {% endif %}
-                            {% endif %}
-                        </li>
-                        <li>
-                            {% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{
-                                room.name }}</strong>.
-                        </li>
-                        <li>
-                            {% trans "Touch the front of the" %} <strong>{{ room.name }}</strong> {% trans "door lock to
-                            light up the numbers and enter the same PIN to access your room." %}
-                        </li>
-                        <li>
-                            {% trans "Inside your room, you will find a" %} <strong>{% trans "keycard" %}</strong>. {%
-                            trans "You can either continue using your PIN or use the keycard to enter and exit the
-                            property and your room. Watch the video above on how to use the keycard." %}
-                        </li>
-                    </ol>
-                </div>
-            </div>
-
-            <!-- ✅ Wifi Password -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What is the WiFi password?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>{% trans "The WiFi details are below." %}</p>
-                    <ul>
-                        <li><strong>{% trans "Wifi Name:" %}</strong> {% trans "Guest_2.4G" %}</li>
-                        <li><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- ✅ House Rules -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What are the house rules?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul>
-                        <li>❗ {% trans "No smoking inside." %}</li>
-                        <li>🔑 {% trans "Lost keys incur a fee." %}</li>
-                        <li>🎉 {% trans "No loud noise or parties allowed." %}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- ✅ Kitchen Info -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>🍕 {% trans "The kitchen is located downstairs and you have full access to it." %}</p>
-                    <p>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "Located in the kitchen.
-                        Instructions are available nearby." %}</p>
-                    <p>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "Stored in the cabinets. Please wash
-                        after use." %}</p>
-                </div>
-            </div>
-
-            <!-- ✅ Heating Instructions -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How do I adjust the heating?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>❄️ {% trans "To increase the heat, turn both radiator knobs" %} <strong>{% trans "anti-clockwise"
-                            %}</strong> {% trans "to allow hot water to flow in." %}</p>
-                    <p>🔥 {% trans "The heating system will automatically activate when the room temperature drops
-                        below" %} <strong>{% trans "21°C" %}</strong>.</p>
-                    <p>⚠️ <strong>{% trans "Note:" %}</strong> {% trans "Do not force the knobs. If they feel stiff,
-                        turn them gently." %}</p>
-                </div>
-            </div>
-
-            <!-- ✅ Transport and Taxi Services -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How can I get around?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>🚕 <strong>{% trans "Recommended Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars" %}
-                        <strong>{% trans "(+44 161 223 1066)" %}</strong>
-                    </p>
-                    <p>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "Take" %} <strong>{% trans "bus 219 from
-                            Ashton-Old-Road" %}</strong> {% trans "to the city centre." %}</p>
-                    <p>{% trans "For more bus routes and planning go to" %} <a href="https://tfgm.com/"
-                            target="blank">{% trans "Bee Network" %}</a></p>
-                </div>
-            </div>
-
-            <!-- ✅ Check-Out Instructions -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How do I check out?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul>
-                        <li>🛑 <strong>{% trans "Leave the keycard inside the room" %}</strong> {% trans "—anywhere
-                            visible." %}</li>
-                        <li>🔌 <strong>{% trans "Switch off all electrical appliances" %}</strong> {% trans "and ensure
-                            lights are turned off." %}</li>
-                        <li>🚪 <strong>{% trans "Close the door securely behind you" %}</strong>.</li>
-                        <li>🛏️ <strong>{% trans "Leave used towels" %}</strong> {% trans "in the bathroom." %}</li>
-                        <li>📅 <strong>{% trans "Housekeeping staff may enter" %}</strong> {% trans "after the checkout
-                            time." %}</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- ✅ Parking Info -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "🚘 Where can I park?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>✅ <strong>{% trans "Free parking" %}</strong> {% trans "is available on the property." %}</p>
-                    <p>✅ {% trans "The tarmac area can accommodate two cars. If you arrive before other guests, please
-                        park" %} <strong>{% trans "well to the left" %}</strong> {% trans "to leave enough space for
-                        another car to park beside yours." %}</p>
-                </div>
-            </div>
-
-            <!-- ✅ Bathroom & Towels -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Where is the bathroom, and do you provide towels?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>🚿 <strong>{% trans "Bathrooms & Toilets:" %}</strong> {% trans "Some rooms have en-suite
-                        bathrooms, while others have shared bathrooms located in the hallway." %}</p>
-                    <p>🛏 {% trans "Fresh towels are provided inside your room. Shower gel is also available in the
-                        bathroom for your convenience." %}</p>
-                </div>
-            </div>
-
-            <!-- ✅ Pressing Iron and Hairdryer -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>🧺 {% trans "Yes, a" %} <strong>{% trans "pressing iron" %}</strong> {% trans "is available in
-                        the hallway for your use." %}</p>
-                    <p>💨 <strong>{% trans "hairdryer" %}</strong> {% trans "can be found in the bathroom." %}</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How safe is the internet network?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>{% trans "Our internet is powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and
-                        secured with an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "The guest network
-                        is fully isolated, preventing data sharing between devices." %}</p>
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Is my digital lock secure?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>{% trans "The" %} <strong>{% trans "Tuya Smart Lock" %}</strong> {% trans "ensures only the
-                        assigned guest and admin can access the room. PINs automatically expire after checkout, making
-                        it highly secure." %}</p>
-                </div>
-            </div>
-
-            <!-- ✅ Room Amenities -->
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What amenities are included in the room?" %} <span
-                        class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>{% trans "The room includes the following amenities:" %}</p>
-                    <ul>
-                        <li>✅ {% trans "Free High-Speed WiFi" %}</li>
-                        <li>✅ {% trans "Fresh Towels & Bed Linen" %}</li>
-                        <li>✅ {% trans "Private or Shared Bathroom with body wash and hand wash" %}</li>
-                        <li>✅ {% trans "Smart TV with Netflix, Amazon Prime and others" %}</li>
-                        <li>✅ {% trans "Pressing Iron and Hair Dryer" %}</li>
-                        <li>✅ {% trans "Complimentary Tea, Coffee & Milk (In the kitchen downstairs)" %}</li>
-                    </ul>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ✅ WhatsApp Chat Button -->
-    <div id="chat-button" class="room-info" onclick="toggleChat()">{% trans "💬 Chat with Me" %}</div>
-    <div class="chat-box" id="chatBox">
-        <p>{% trans "Need help? Send me a message on WhatsApp!" %}</p>
-        <a href="https://wa.me/447539029629" target="_blank">{% trans "Open WhatsApp" %}</a>
-    </div>
-
 </section>
 
-<!-- ✅ JavaScript to Control Video and FAQ -->
+<!-- FAQ Section -->
+<section id="faq-section" class="room-container">
+    <div class="room-info">
+        <h2>{% trans "❓ Frequently Asked Questions" %}</h2>
+        <input type="text" id="faq-search" placeholder="Search FAQs..." onkeyup="filterFAQs()">
+        <div class="faq-container">
+            <!-- Access Category -->
+            <div class="faq-category">
+                <h3 onclick="toggleCategory(this)">Access</h3>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "Is my digital lock secure?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>{% trans "The" %} <strong>{% trans "Tuya Smart Lock" %}</strong> {% trans "ensures only the assigned guest and admin can access the room. PINs expire after checkout." %}</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Amenities Category -->
+            <div class="faq-category">
+                <h3 onclick="toggleCategory(this)">Amenities</h3>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "What’s the WiFi password?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <ul>
+                            <li><strong>{% trans "Wifi Name:" %}</strong> {% trans "Guest_2.4G" %}</li>
+                            <li><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "What are the house rules?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <ul>
+                            <li>❗ {% trans "No smoking inside." %}</li>
+                            <li>🔑 {% trans "Lost keys incur a fee." %}</li>
+                            <li>🎉 {% trans "No loud noise or parties allowed." %}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>🍕 {% trans "Downstairs with full access." %}</p>
+                        <p>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with instructions nearby." %}</p>
+                        <p>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "How do I adjust the heating?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>❄️ {% trans "Turn radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans "to increase heat." %}</p>
+                        <p>🔥 {% trans "Heats automatically below" %} <strong>{% trans "21°C" %}</strong>.</p>
+                        <p>⚠️ {% trans "Don’t force stiff knobs—turn gently." %}</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "Where’s the bathroom, and do you provide towels?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>🚿 <strong>{% trans "Bathrooms:" %}</strong> {% trans "En-suite or shared in the hallway." %}</p>
+                        <p>🛏 {% trans "Fresh towels and shower gel provided in your room." %}</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>🧺 <strong>{% trans "Pressing iron:" %}</strong> {% trans "In the hallway." %}</p>
+                        <p>💨 <strong>{% trans "Hairdryer:" %}</strong> {% trans "In the bathroom." %}</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "How safe is the internet network?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>{% trans "Powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "Guest network is isolated." %}</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "What amenities are included?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <ul>
+                            <li>✅ {% trans "Free High-Speed WiFi" %}</li>
+                            <li>✅ {% trans "Fresh Towels & Bed Linen" %}</li>
+                            <li>✅ {% trans "Private or Shared Bathroom with body wash and hand wash" %}</li>
+                            <li>✅ {% trans "Smart TV with Netflix, Amazon Prime" %}</li>
+                            <li>✅ {% trans "Pressing Iron and Hair Dryer" %}</li>
+                            <li>✅ {% trans "Complimentary Tea, Coffee & Milk (in kitchen)" %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- Travel Category -->
+            <div class="faq-category">
+                <h3 onclick="toggleCategory(this)">Travel</h3>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "How can I get around?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223 1066)." %}</p>
+                        <p>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city centre." %}</p>
+                        <p><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus routes." %}</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "Where can I park?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>✅ <strong>{% trans "Free parking:" %}</strong> {% trans "On-site." %}</p>
+                        <p>✅ {% trans "Tarmac fits two cars—park left if first." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PIN Help Modal -->
+<div id="pin-help-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('pin-help-modal')">×</span>
+        <h3>{% trans "Need Help with Your PIN?" %}</h3>
+        <p>{% trans "Watch these videos for assistance:" %}</p>
+        <div class="video-wrapper">
+            <div class="video-item">
+                <h4>Front Door</h4>
+                <div class="video-overlay">
+                    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="Front Door Preview" class="video-preview-image">
+                    <button class="play-button" data-video="front-door-video">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <p class="play-text">{% trans "Watch Video" %}</p>
+                </div>
+                <div class="modal-video-container" id="front-door-video" style="display: none;">
+                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="video-item">
+                <h4>Room Door</h4>
+                <div class="video-overlay">
+                    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="Room Door Preview" class="video-preview-image">
+                    <button class="play-button" data-video="room-door-video">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <p class="play-text">{% trans "Watch Video" %}</p>
+                </div>
+                <div class="modal-video-container" id="room-door-video" style="display: none;">
+                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+        <div id="pin-admin-alert" class="hidden">
+            <p>{% trans "Still not working? A team member will contact you soon. Or call/WhatsApp us at" %} <strong>+44(0)7539029629</strong>.</p>
+        </div>
+        <p><button id="pin-still-issue" class="pin-btn">{% trans "Still Doesn’t Work" %}</button></p>
+    </div>
+</div>
+
+<!-- WhatsApp Chat Button -->
+<div id="chat-button" onclick="toggleChat()">{% trans "💬 Chat with Me" %}</div>
+<div class="chat-box" id="chatBox">
+    <p>{% trans "Need help? Send me a message on WhatsApp!" %}</p>
+    <a href="https://wa.me/447539029629" target="_blank">{% trans "Open WhatsApp" %}</a>
+</div>
+
+<!-- JavaScript -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // ✅ Get Elements
-        const pinYes = document.getElementById("pin-yes");
-        const pinNo = document.getElementById("pin-no");
-        const pinFixed = document.getElementById("pin-fixed");
-        const pinStillIssue = document.getElementById("pin-still-issue");
+// Global functions
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
 
-        const pinSuccess = document.getElementById("pin-success");
-        const pinIssue = document.getElementById("pin-issue");
-        const pinAdminAlert = document.getElementById("pin-admin-alert");
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
 
-        // ✅ Hide all sections initially
-        if (pinSuccess) pinSuccess.style.display = "none";
-        if (pinIssue) pinIssue.style.display = "none";
-        if (pinAdminAlert) pinAdminAlert.style.display = "none";
+function showSection(sectionId) {
+    document.querySelectorAll('.room-container').forEach(section => section.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[onclick="showSection('${sectionId}')"]`).classList.add('active');
+}
 
-        // ✅ PIN Confirmation Logic
-        if (pinYes) {
-            pinYes.addEventListener("click", function () {
-                pinSuccess.style.display = "block"; // Show success message and video
-                pinIssue.style.display = "none"; // Hide issue section if open
-                pinAdminAlert.style.display = "none"; // Hide admin alert
-            });
-        }
+document.addEventListener("DOMContentLoaded", function () {
+    // PIN Confirmation
+    const pinYes = document.getElementById("pin-yes");
+    const pinNo = document.getElementById("pin-no");
+    const pinStillIssue = document.getElementById("pin-still-issue");
+    const pinAdminAlert = document.getElementById("pin-admin-alert");
 
-        if (pinNo) {
-            pinNo.addEventListener("click", function () {
-                pinIssue.style.display = "block"; // Show issue help videos
-                pinSuccess.style.display = "none"; // Hide success message
-                pinAdminAlert.style.display = "none"; // Hide admin alert
-            });
-        }
-
-        if (pinFixed) {
-            pinFixed.addEventListener("click", function () {
-                pinIssue.style.display = "none"; // Hide issue section
-                pinSuccess.style.display = "none"; // Hide success message
-            });
-        }
-
-        if (pinStillIssue) {
-            pinStillIssue.addEventListener("click", function () {
-                // ✅ Show the alert message
-                pinAdminAlert.style.display = "block";
-
-                // ✅ Send request to backend
-                fetch("/report_pin_issue/", {
-                    method: "POST",
-                    headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" },
-                    credentials: "same-origin"
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            pinAdminAlert.innerHTML = `<p>${data.success}</p>`;
-                        } else {
-                            pinAdminAlert.innerHTML = `<p style="color: red;">${data.error}</p>`;
-                        }
-                    })
-                    .catch(error => {
-                        pinAdminAlert.innerHTML = `<p style="color: red;">An error occurred. Try again later.</p>`;
-                    });
-            });
-        }
-
-        // ✅ Function to Retrieve CSRF Token from Cookies (Required for Django)
-        function getCSRFToken() {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== "") {
-                const cookies = document.cookie.split(";");
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.startsWith("csrftoken=")) {
-                        cookieValue = cookie.substring("csrftoken=".length, cookie.length);
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-
-        const videoContainers = document.querySelectorAll(".video-container");
-        const videoWrapper = document.querySelector(".video-wrapper");
-        const backButtons = document.querySelectorAll(".back-btn");
-
-        // ✅ Detect if the user is on an iPhone or iPad
-        const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
-
-        // Initially hide all back buttons
-        backButtons.forEach(button => button.style.display = "none");
-
-        videoContainers.forEach(container => {
-            const backButton = container.querySelector(".back-btn");
-            const iframe = container.querySelector("iframe");
-
-            // ✅ Function to expand the video and start playing
-            function expandAndPlayVideo() {
-                // ✅ Prevent about:blank issue on iPhone
-                if (isIOS) {
-                    iframe.setAttribute("allowfullscreen", "");
-                }
-
-                // ✅ Reset all videos to normal size
-                videoContainers.forEach(video => {
-                    video.classList.remove("expanded");
-                    video.style.display = "block"; // Ensure both are visible again
-                    video.querySelector(".back-btn").style.display = "none"; // Hide back button
-                });
-
-                // ✅ Expand the clicked video and hide the other one
-                container.classList.add("expanded");
-                videoContainers.forEach(video => {
-                    if (video !== container) {
-                        video.style.display = "none"; // Hide the other video
-                    }
-                });
-
-                // ✅ Show the back button only for the expanded video
-                backButton.style.display = "block";
-
-                // ✅ Start playing the video (forces autoplay)
-                let videoSrc = iframe.getAttribute("src");
-                if (!videoSrc.includes("autoplay=1")) {
-                    iframe.setAttribute("src", videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1");
-                }
-            }
-
-            // ✅ Expand when clicking anywhere in the container
-            container.addEventListener("click", expandAndPlayVideo);
-
-            // ✅ Ensure clicking inside the iframe (YouTube play button) also expands & plays
-            iframe.addEventListener("click", function (event) {
-                event.stopPropagation(); // Stop event bubbling to prevent unwanted resets
-                expandAndPlayVideo();
-            });
-
-            // ✅ Back button functionality
-            backButton.addEventListener("click", function (event) {
-                event.stopPropagation(); // Prevents triggering the video expand event
-
-                // ✅ Reset all videos to normal side-by-side layout
-                videoContainers.forEach(video => {
-                    video.classList.remove("expanded");
-                    video.style.display = "block"; // Make both videos visible again
-                    video.querySelector(".back-btn").style.display = "none"; // Hide back button again
-                });
-
-                // ✅ Stop the video when exiting
-                let originalSrc = iframe.getAttribute("src").split("?")[0]; // Remove autoplay param
-                iframe.setAttribute("src", originalSrc); // Reset video
-            });
+    if (pinYes) pinYes.addEventListener("click", () => alert("Enjoy your stay!"));
+    if (pinNo) pinNo.addEventListener("click", () => openModal("pin-help-modal"));
+    if (pinStillIssue) {
+        pinStillIssue.addEventListener("click", function () {
+            pinAdminAlert.style.display = "block";
+            fetch("/report_pin_issue/", {
+                method: "POST",
+                headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" },
+                credentials: "same-origin"
+            })
+            .then(response => response.json())
+            .then(data => {
+                pinAdminAlert.innerHTML = data.success ? `<p>${data.success}</p>` : `<p style="color: red;">${data.error}</p>`;
+            })
+            .catch(() => pinAdminAlert.innerHTML = `<p style="color: red;">Error occurred. Try again.</p>`);
         });
+    }
 
+    function getCSRFToken() {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            if (cookie.trim().startsWith("csrftoken=")) return cookie.split("=")[1];
+        }
+        return null;
+    }
 
+    // Hero Video (Unchanged)
+    const heroImage = document.getElementById("heroImage");
+    const videoContainer = document.getElementById("videoContainer");
+    const playButton = document.getElementById("playVideo");
+    const playText = document.querySelector(".play-text");
+    const heroOverlay = document.querySelector(".hero-overlay");
+    const iframe = document.getElementById("videoFrame");
 
-
-        // ✅ Select elements
-        const heroImage = document.getElementById("heroImage");
-        const videoContainer = document.getElementById("videoContainer");
-        const playButton = document.getElementById("playVideo");
-        const playText = document.querySelector(".play-text");
-        const heroOverlay = document.querySelector(".hero-overlay");
-        const iframe = document.getElementById("videoFrame");
-
-        playButton.addEventListener("click", function () {
-            // ✅ Hide elements
-            heroImage.style.display = "none";
-            playButton.style.display = "none";
-            playText.style.display = "none";
-            heroOverlay.style.display = "none";
-
-            // ✅ Show and autoplay the video
-            videoContainer.style.display = "flex";
-            let videoSrc = iframe.src;
-            if (!videoSrc.includes("autoplay=1")) {
-                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
-            }
-        });
-
-        // ✅ FAQ Functionality (Open/Close Answers)
-        const faqItems = document.querySelectorAll(".faq-item");
-
-        faqItems.forEach(item => {
-            const question = item.querySelector(".faq-question");
-            const answer = item.querySelector(".faq-answer");
-            const arrow = item.querySelector(".arrow");
-
-            question.addEventListener("click", function () {
-                const isActive = answer.style.display === "block";
-
-                // Close all other answers
-                faqItems.forEach(faq => {
-                    faq.querySelector(".faq-answer").style.display = "none";
-                    faq.querySelector(".arrow").textContent = "▼";
-                });
-
-                // Toggle clicked item
-                answer.style.display = isActive ? "none" : "block";
-                arrow.textContent = isActive ? "{% trans '▼' %}" : "{% trans '▲' %}";
-            });
-        });
-
-        // ✅ Smooth Scroll Function for Navigation
-        window.scrollToSection = function (sectionId) {
-            const targetSection = document.getElementById(sectionId);
-            if (targetSection) {
-                window.scrollTo({
-                    top: targetSection.offsetTop - 20, // Adjust for spacing
-                    behavior: "smooth"
-                });
-            }
-        };
-
-        // ✅ Floating Chat Button Functionality
-        window.toggleChat = function () {
-            document.getElementById("chatBox").classList.toggle("show");
-        };
+    playButton.addEventListener("click", function () {
+        heroImage.style.display = "none";
+        playButton.style.display = "none";
+        playText.style.display = "none";
+        heroOverlay.style.display = "none";
+        videoContainer.style.display = "flex";
+        let videoSrc = iframe.src;
+        if (!videoSrc.includes("autoplay=1")) {
+            iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
+            console.log('Hero video src set to:', iframe.src);
+        }
     });
 
+    // FAQ Toggle
+    document.querySelectorAll(".faq-question").forEach(item => {
+        item.addEventListener("click", () => {
+            const answer = item.nextElementSibling;
+            const arrow = item.querySelector(".arrow");
+            const isActive = answer.style.display === "block";
+            answer.style.display = isActive ? "none" : "block";
+            arrow.textContent = isActive ? "▼" : "▲";
+        });
+    });
+
+    window.filterFAQs = function () {
+    const input = document.getElementById("faq-search").value.toLowerCase();
+    const items = document.querySelectorAll(".faq-item");
+    let visibleCount = 0;
+
+    items.forEach(item => {
+        const question = item.querySelector(".faq-question").textContent.toLowerCase();
+        const answer = item.querySelector(".faq-answer");
+        const answerText = answer.textContent.toLowerCase();
+        const matches = question.includes(input) || answerText.includes(input);
+
+        if (input === "") {
+            answer.style.display = "none"; // Reset answers to hidden
+            answer.classList.remove('highlight');
+        } else {
+            answer.style.display = matches ? "block" : "none";
+            if (matches) {
+                visibleCount++;
+                answer.classList.toggle('highlight', question.includes(input) || answerText.includes(input));
+                const category = item.closest('.faq-category');
+                if (!category.classList.contains('active')) {
+                    category.classList.add('active');
+                }
+            } else {
+                answer.classList.remove('highlight');
+            }
+        }
+    });
+
+    const noResults = document.getElementById("faq-no-results");
+    if (noResults) noResults.classList.toggle('hidden', visibleCount > 0);
+};
+
+    // FAQ Category Toggle
+    window.toggleCategory = function (header) {
+        const category = header.parentElement;
+        category.classList.toggle("active");
+    };
+
+    // Chat Button
+    window.toggleChat = function () {
+        document.getElementById("chatBox").classList.toggle("show");
+    };
+
+    // Modal Video Playback
+    document.querySelectorAll('.video-item .play-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const videoId = this.getAttribute('data-video');
+            const videoContainer = document.getElementById(videoId);
+            const overlay = this.closest('.video-overlay');
+            const previewImage = overlay.querySelector('.video-preview-image');
+            const playText = overlay.querySelector('.play-text');
+            const iframe = videoContainer.querySelector('iframe');
+
+            console.log('Modal play button clicked, videoId:', videoId);
+
+            // Hide overlay elements
+            overlay.style.display = 'none'; // Hide entire overlay
+            // Show and play video container
+            videoContainer.style.display = 'block'; // Changed to block for simplicity
+            let videoSrc = iframe.src;
+            if (!videoSrc.includes("autoplay=1")) {
+                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1&rel=0";
+                console.log('Modal video src set to:', iframe.src);
+            }
+        });
+    });
+});
 </script>
+
 {% endblock %}

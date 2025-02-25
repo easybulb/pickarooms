@@ -53,21 +53,27 @@ body {
 
 .content h2 {
     font-size: 2.5rem;
-    color: #1B263B;
+    color: #1b263b;
     margin-bottom: 20px;
-    border-bottom: 2px solid #C7A008;
+    border-bottom: 2px solid #c7a008;
     padding-bottom: 10px;
 }
 
 /* Grid Layout for Attractions, Culinary, Shopping, and Cultural Sections */
-.attractions, .culinary, .shopping, .cultural {
+.attractions,
+.culinary,
+.shopping,
+.cultural {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     margin-bottom: 50px;
 }
 
-.attraction, .culinary-spot, .shopping-spot, .cultural-spot {
+.attraction,
+.culinary-spot,
+.shopping-spot,
+.cultural-spot {
     background: #ffffff;
     border-radius: 10px;
     padding: 20px;
@@ -76,27 +82,57 @@ body {
     transition: transform 0.3s ease-in-out;
 }
 
-.attraction:hover, .culinary-spot:hover, .shopping-spot:hover, .cultural-spot:hover {
+.attraction:hover,
+.culinary-spot:hover,
+.shopping-spot:hover,
+.cultural-spot:hover {
     transform: translateY(-5px);
 }
 
-.attraction img, .culinary-spot img, .shopping-spot img, .cultural-spot img {
+.attraction img,
+.culinary-spot img,
+.shopping-spot img,
+.cultural-spot img {
     width: 100%;
     height: 200px;
     border-radius: 10px;
     object-fit: cover;
 }
 
-.attraction h3, .culinary-spot h3, .shopping-spot h3, .cultural-spot h3 {
+.attraction h3,
+.culinary-spot h3,
+.shopping-spot h3,
+.cultural-spot h3 {
     font-size: 1.6rem;
     color: #333;
     margin-top: 15px;
 }
 
-.attraction p, .culinary-spot p, .shopping-spot p, .cultural-spot p {
+.attraction p,
+.culinary-spot p,
+.shopping-spot p,
+.cultural-spot p {
     font-size: 1rem;
     color: #555;
     margin-top: 10px;
+    margin-bottom: 15px; /* Add space before the button */
+}
+
+/* Get Directions Button */
+.get-directions-btn {
+    background: linear-gradient(90deg, #002147, #003580, #0056b3);
+    border: solid 1px white;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.get-directions-btn:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
 }
 
 /* Google Map Section */
@@ -105,12 +141,12 @@ body {
     margin-top: 50px;
 }
 
-.map iframe {
+#map {
     width: 100%;
     max-width: 800px;
     height: 450px;
     border-radius: 10px;
-    border: 2px solid #C7A008;
+    border: 2px solid #c7a008;
 }
 
 /* Responsive Design */
@@ -139,11 +175,19 @@ body {
         text-align: center;
     }
 
-    .attractions, .culinary, .shopping, .cultural {
+    .attractions,
+    .culinary,
+    .shopping,
+    .cultural {
         grid-template-columns: 1fr;
     }
 
-    .map iframe {
+    .get-directions-btn {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+    }
+
+    #map {
         height: 350px;
     }
 }
