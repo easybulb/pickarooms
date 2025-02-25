@@ -50,13 +50,17 @@ else:
     CSRF_COOKIE_SECURE = True  # CSRF protection only works over HTTPS
 
 # CSRF Trusted Origins (Includes Localhost and Dev Tunnels for Testing)
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "https://1ls3qkr5-8000.uks1.devtunnels.ms",  # Dev Tunnel
-    "https://www.pickarooms.com",
-    "https://pickarooms.com",
-]
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://1ls3qkr5-8000.uks1.devtunnels.ms",
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://www.pickarooms.com",
+        "https://pickarooms.com",
+    ]
 
 # HTTP Strict Transport Security (HSTS) - Forces HTTPS (Only in Production)
 if not DEBUG:
@@ -222,5 +226,3 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 # Media files (uploaded images)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-

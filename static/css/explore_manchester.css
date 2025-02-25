@@ -220,3 +220,94 @@ body {
         margin: 0.5rem;
     }
 }
+
+
+
+
+/* Custom Modal Styles */
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.custom-modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #c7a008; /* Gold border to match your design */
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.custom-modal-header {
+    background: linear-gradient(90deg, #002147, #003580, #0056b3); /* Blue gradient to match your design */
+    color: white;
+    padding: 10px 20px;
+    border-bottom: 2px solid #c7a008; /* Gold border */
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-modal-title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.custom-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: white;
+    padding: 0 10px;
+}
+
+.custom-modal-body {
+    padding: 20px;
+}
+
+.custom-modal-footer {
+    padding: 10px 20px;
+    border-top: 2px solid #c7a008; /* Gold border */
+    display: flex;
+    justify-content: space-between;
+}
+
+.custom-btn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.custom-btn-primary {
+    background: linear-gradient(90deg, #002147, #003580, #0056b3); /* Blue gradient */
+    color: white;
+}
+
+.custom-btn-primary:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.custom-btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.custom-btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
