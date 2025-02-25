@@ -92,10 +92,11 @@ def awards_reviews(request):
 def about(request):
     return render(request, 'main/about.html')
 
+
 def explore_manchester(request):
-    return render(request, 'main/explore_manchester.html')
-
-
+    return render(request, 'main/explore_manchester.html', {
+        'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY
+    })
 
 
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
