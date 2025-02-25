@@ -124,145 +124,188 @@
     </div>
 </section>
 
-<!-- Google Maps API Script -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
+<!-- Modal for Directions -->
+<div class="modal fade" id="directionsModal" tabindex="-1" aria-labelledby="directionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="directionsModalLabel">{% trans "Get Directions" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="modalMap" width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                <a href="#" id="externalDirections" class="btn btn-primary" target="_blank">{% trans "Open in Google Maps" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
 
-<!-- JavaScript for Map Markers and Directions Buttons -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Get Directions Button Functionality
-    const directionButtons = document.querySelectorAll(".get-directions-btn");
-
-    directionButtons.forEach(button => {
-      button.addEventListener("click", function () {
-        const lat = this.getAttribute("data-lat");
-        const lng = this.getAttribute("data-lng");
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-        window.open(url, "_blank");
-      });
-    });
-
     // Initialize Google Map with Markers
     function initMap() {
-      const map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 53.480759, lng: -2.244644 },
-        zoom: 12,
-      });
-
-      // Array of locations with coordinates and details
-      const locations = [
-        {
-          title: "{% trans 'John Rylands Library' %}",
-          lat: 53.4778,
-          lng: -2.2458,
-          type: "attraction",
-          description: "{% trans 'A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts.' %}"
-        },
-        {
-          title: "{% trans 'Etihad Stadium' %}",
-          lat: 53.4830,
-          lng: -2.2000,
-          type: "attraction",
-          description: "{% trans 'Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue.' %}"
-        },
-        {
-          title: "{% trans 'Science and Industry Museum' %}",
-          lat: 53.4791,
-          lng: -2.2500,
-          type: "attraction",
-          description: "{% trans 'Delve into Manchester\'s industrial past with interactive exhibits and historical artifacts.' %}"
-        },
-        {
-          title: "{% trans 'Manchester Museum' %}",
-          lat: 53.4659,
-          lng: -2.2337,
-          type: "attraction",
-          description: "{% trans 'Home to one of the UK’s most extensive collections of natural history, archaeology, and anthropology, the Manchester Museum offers a fascinating journey through time.' %}"
-        },
-        {
-          title: "{% trans 'Vermilion' %}",
-          lat: 53.4790,
-          lng: -2.2440,
-          type: "culinary",
-          description: "{% trans 'An opulent dining destination offering a fusion of Asian and world cuisines, known for its striking decor, exotic cocktails, and immersive fine dining experience.' %}"
-        },
-        {
-          title: "{% trans 'Curry Mile' %}",
-          lat: 53.4570,
-          lng: -2.2190,
-          type: "culinary",
-          description: "{% trans 'Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes.' %}"
-        },
-        {
-          title: "{% trans 'Mackie Mayor' %}",
-          lat: 53.4830,
-          lng: -2.2370,
-          type: "culinary",
-          description: "{% trans 'A bustling food hall housed in a restored Victorian market, featuring diverse food vendors.' %}"
-        },
-        {
-          title: "{% trans '63 Degrees' %}",
-          lat: 53.4835,
-          lng: -2.2375,
-          type: "culinary",
-          description: "{% trans 'A chic French restaurant offering exquisite Parisian-inspired dishes, fine wines, and a cozy yet elegant atmosphere in the heart of Manchester’s Northern Quarter.' %}"
-        },
-        {
-          title: "{% trans 'Manchester Arndale' %}",
-          lat: 53.4835,
-          lng: -2.2430,
-          type: "shopping",
-          description: "{% trans 'One of the UK\'s largest shopping centers, offering a wide range of retail stores and eateries.' %}"
-        },
-        {
-          title: "{% trans 'Trafford Centre' %}",
-          lat: 53.4661,
-          lng: -2.3499,
-          type: "shopping",
-          description: "{% trans 'A grand shopping and leisure complex with unique architecture, shops, and entertainment options.' %}"
-        },
-        {
-          title: "{% trans 'Northern Quarter' %}",
-          lat: 53.4830,
-          lng: -2.2380,
-          type: "cultural",
-          description: "{% trans 'A trendy district known for its street art, independent shops, and vibrant nightlife.' %}"
-        },
-        {
-          title: "{% trans 'The Whitworth' %}",
-          lat: 53.4570,
-          lng: -2.2300,
-          type: "cultural",
-          description: "{% trans 'An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting.' %}"
-        },
-      ];
-
-      // Add markers to the map
-      locations.forEach(location => {
-        const marker = new google.maps.Marker({
-          position: { lat: location.lat, lng: location.lng },
-          map: map,
-          title: location.title,
+      try {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 53.480759, lng: -2.244644 },
+          zoom: 12,
         });
 
-        // Add info window (popup) for each marker with Get Directions
-        const infowindow = new google.maps.InfoWindow({
-          content: `
-            <h3>${location.title}</h3>
-            <p>${location.description}</p>
-            <p>Type: ${location.type}</p>
-            <a href="https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}" target="_blank">{% trans "Get Directions" %}</a>
-          `,
-        });
+        const locations = [
+          {
+            title: "{% trans 'John Rylands Library' %}",
+            lat: 53.4778,
+            lng: -2.2458,
+            type: "attraction",
+            description: "{% trans 'A neo-Gothic masterpiece housing rare books and manuscripts. A must-visit for history and architecture enthusiasts.' %}"
+          },
+          {
+            title: "{% trans 'Etihad Stadium' %}",
+            lat: 53.4830,
+            lng: -2.2000,
+            type: "attraction",
+            description: "{% trans 'Home to Manchester City FC. Take a stadium tour to explore behind the scenes of this iconic sports venue.' %}"
+          },
+          {
+            title: "{% trans 'Science and Industry Museum' %}",
+            lat: 53.4791,
+            lng: -2.2500,
+            type: "attraction",
+            description: "{% trans 'Delve into Manchester\'s industrial past with interactive exhibits and historical artifacts.' %}"
+          },
+          {
+            title: "{% trans 'Manchester Museum' %}",
+            lat: 53.4659,
+            lng: -2.2337,
+            type: "attraction",
+            description: "{% trans 'Home to one of the UK’s most extensive collections of natural history, archaeology, and anthropology, the Manchester Museum offers a fascinating journey through time.' %}"
+          },
+          {
+            title: "{% trans 'Vermilion' %}",
+            lat: 53.4790,
+            lng: -2.2440,
+            type: "culinary",
+            description: "{% trans 'An opulent dining destination offering a fusion of Asian and world cuisines, known for its striking decor, exotic cocktails, and immersive fine dining experience.' %}"
+          },
+          {
+            title: "{% trans 'Curry Mile' %}",
+            lat: 53.4570,
+            lng: -2.2190,
+            type: "culinary",
+            description: "{% trans 'Experience a mile-long stretch of South Asian restaurants offering a variety of flavorful dishes.' %}"
+          },
+          {
+            title: "{% trans 'Mackie Mayor' %}",
+            lat: 53.4830,
+            lng: -2.2370,
+            type: "culinary",
+            description: "{% trans 'A bustling food hall housed in a restored Victorian market, featuring diverse food vendors.' %}"
+          },
+          {
+            title: "{% trans '63 Degrees' %}",
+            lat: 53.4835,
+            lng: -2.2375,
+            type: "culinary",
+            description: "{% trans 'A chic French restaurant offering exquisite Parisian-inspired dishes, fine wines, and a cozy yet elegant atmosphere in the heart of Manchester’s Northern Quarter.' %}"
+          },
+          {
+            title: "{% trans 'Manchester Arndale' %}",
+            lat: 53.4835,
+            lng: -2.2430,
+            type: "shopping",
+            description: "{% trans 'One of the UK\'s largest shopping centers, offering a wide range of retail stores and eateries.' %}"
+          },
+          {
+            title: "{% trans 'Trafford Centre' %}",
+            lat: 53.4661,
+            lng: -2.3499,
+            type: "shopping",
+            description: "{% trans 'A grand shopping and leisure complex with unique architecture, shops, and entertainment options.' %}"
+          },
+          {
+            title: "{% trans 'Northern Quarter' %}",
+            lat: 53.4830,
+            lng: -2.2380,
+            type: "cultural",
+            description: "{% trans 'A trendy district known for its street art, independent shops, and vibrant nightlife.' %}"
+          },
+          {
+            title: "{% trans 'The Whitworth' %}",
+            lat: 53.4570,
+            lng: -2.2300,
+            type: "cultural",
+            description: "{% trans 'An art gallery set in a park, showcasing a diverse collection of artworks in a serene setting.' %}"
+          },
+        ];
 
-        // Show info window when marker is clicked
-        marker.addListener("click", () => {
-          infowindow.open(map, marker);
+        locations.forEach(location => {
+          const marker = new google.maps.Marker({
+            position: { lat: location.lat, lng: location.lng },
+            map: map,
+            title: location.title,
+          });
+
+          const infowindow = new google.maps.InfoWindow({
+            content: `
+              <h3>${location.title}</h3>
+              <p>${location.description}</p>
+              <p>Type: ${location.type}</p>
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}" target="_blank">{% trans "Get Directions" %}</a>
+            `,
+          });
+
+          marker.addListener("click", () => {
+            infowindow.open(map, marker);
+          });
         });
-      });
+      } catch (error) {
+        console.error('Error initializing Google Map:', error);
+        document.getElementById("map").innerHTML = '<p>Map failed to load. Please check your internet connection or try again later.</p>';
+      }
     }
 
-    // Call initMap when the API script loads (already handled by callback in script tag)
-  });
+    document.addEventListener("DOMContentLoaded", function () {
+      // Get Directions Button Functionality (Modal Version)
+      const directionButtons = document.querySelectorAll(".get-directions-btn");
+      const modal = new bootstrap.Modal(document.getElementById('directionsModal'));
+      let currentLat, currentLng;
+
+      function getUserLocation() {
+        return new Promise((resolve, reject) => {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => resolve(`${position.coords.latitude},${position.coords.longitude}`),
+              () => resolve("53.480759,-2.244644") // Fallback to Manchester
+            );
+          } else {
+            resolve("53.480759,-2.244644"); // Fallback for no geolocation
+          }
+        });
+      }
+
+      directionButtons.forEach(button => {
+        button.addEventListener("click", async function () {
+          currentLat = this.getAttribute("data-lat");
+          currentLng = this.getAttribute("data-lng");
+          try {
+            const userLocation = await getUserLocation();
+            const url = `https://www.google.com/maps/embed/v1/directions?key={{ GOOGLE_MAPS_API_KEY }}&origin=${userLocation}&destination=${currentLat},${currentLng}&mode=driving`;
+            document.getElementById("modalMap").src = url;
+            document.getElementById("externalDirections").href = `https://www.google.com/maps/dir/?api=1&destination=${currentLat},${currentLng}`;
+            modal.show();
+          } catch (error) {
+            console.error('Error loading directions:', error);
+            document.getElementById("modalMap").src = '';
+            document.getElementById("modalMap").innerHTML = '<p>Directions failed to load. Please check your internet connection or try again later.</p>';
+          }
+        });
+      });
+    });
 </script>
+
+<!-- Google Maps API Script -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&callback=initMap" async defer></script>
 {% endblock %}

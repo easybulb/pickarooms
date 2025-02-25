@@ -149,6 +149,31 @@ body {
     border: 2px solid #c7a008;
 }
 
+/* Modal Styles */
+.modal-content {
+    border-radius: 10px;
+    border: 2px solid #c7a008;
+}
+
+.modal-header {
+    background: linear-gradient(90deg, #002147, #003580, #0056b3);
+    color: white;
+    border-bottom: 2px solid #c7a008;
+}
+
+.modal-footer {
+    border-top: 2px solid #c7a008;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #002147, #003580, #0056b3);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .hero {
@@ -189,5 +214,9 @@ body {
 
     #map {
         height: 350px;
+    }
+
+    .modal-dialog {
+        margin: 0.5rem;
     }
 }
