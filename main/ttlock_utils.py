@@ -93,16 +93,17 @@ class TTLockClient:
         return self._make_request("POST", "/lock/lock", data)
 
     def generate_temporary_pin(self, lock_id, pin, start_time, end_time, name=None):
-        """Generate a temporary PIN for a lock."""
+        """Generate a PIN for a lock (using type 2, which maps to Permanent in the app)."""
         data = {
             "lockId": lock_id,
             "keyboardPwd": pin,
-            "keyboardPwdType": 2,  # Temporary PIN
+            "keyboardPwdType": 2,  # Permanent PIN (based on experiment: type 2 is Permanent in the app)
             "startDate": start_time,
             "endDate": end_time,
         }
         if name:
             data["keyboardPwdName"] = name  # Use keyboardPwdName instead of name
+        logger.debug(f"Generating permanent PIN with parameters: {data}")
         return self._make_request("POST", "/keyboardPwd/add", data)
 
     def delete_pin(self, lock_id, keyboard_pwd_id):
@@ -113,6 +114,11 @@ class TTLockClient:
         }
         return self._make_request("POST", "/keyboardPwd/delete", data)
 
-    def list_keyboard_passwords(self, lock_id):
+    def list_keyboard_passwords(self, lock_id, page_no=1, page_size=20):
         """List all keyboard passwords for a lock."""
-        return self._make_request("GET", "/keyboardPwd/list", {"lockId": lock_id})
+        data = {
+            "lockId": lock_id,
+            "pageNo": page_no,
+            "pageSize": page_size,
+        }
+        return self._make_request("GET", "/lock/listKeyboardPwd", data)

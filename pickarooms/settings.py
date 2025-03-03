@@ -76,6 +76,7 @@ if not SCIENER_CLIENT_ID or not SCIENER_CLIENT_SECRET:
 
 TTLOCK_BASE_URL = os.environ.get("TTLOCK_BASE_URL", "https://euapi.sciener.com/v3")
 TTLOCK_OAUTH_BASE_URL = os.environ.get("TTLOCK_OAUTH_BASE_URL", "https://euapi.sciener.com")  # For OAuth endpoints
+TTLOCK_CALLBACK_URL = os.environ.get("TTLOCK_CALLBACK_URL", "https://pickarooms-3203aa136ccc.herokuapp.com/api/callback")  # Callback URL for TTLock API
 
 # Application definition
 INSTALLED_APPS = [

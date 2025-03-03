@@ -28,6 +28,7 @@ import datetime
 from .models import Guest, Room, ReviewCSVUpload, TTLock
 from .ttlock_utils import TTLockClient
 import logging
+from django.views.decorators.csrf import csrf_exempt
 
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
@@ -109,13 +110,12 @@ def checkin(request):
                 try:
                     front_door_lock = TTLock.objects.get(is_front_door=True)
                     client = TTLockClient()
-                    start_time = int(timezone.now().timestamp() * 1000)
                     uk_timezone = pytz.timezone("Europe/London")
-                    check_out_datetime = timezone.make_aware(
-                        datetime.datetime.combine(guest.check_out_date, datetime.time(11, 0)),
-                        datetime.timezone.utc,
-                    ).astimezone(uk_timezone)
-                    end_time = int(check_out_datetime.timestamp() * 1000)
+                    now_uk_time = timezone.now().astimezone(uk_timezone)
+                    start_time = int(now_uk_time.timestamp() * 1000)
+                    # Set endDate to one week from now to ensure the passcode is active
+                    end_date = now_uk_time + datetime.timedelta(days=7)
+                    end_time = int(end_date.timestamp() * 1000)
                     pin = str(random.randint(100000, 999999))
 
                     response = client.generate_temporary_pin(
@@ -123,7 +123,7 @@ def checkin(request):
                         pin=pin,
                         start_time=start_time,
                         end_time=end_time,
-                        name=guest.full_name,  # Pass the guest's full name as the passcode name
+                        name=guest.full_name,
                     )
                     if "keyboardPwdId" not in response:
                         logger.error(f"Failed to generate PIN for guest {guest.reservation_number}: {response.get('errmsg', 'Unknown error')}")
@@ -396,17 +396,11 @@ def admin_page(request):
 
             front_door_pin = str(random.randint(100000, 999999))
             uk_timezone = pytz.timezone("Europe/London")
-            check_in_datetime = timezone.make_aware(
-                datetime.datetime.combine(check_in_date, datetime.time(14, 0)),
-                datetime.timezone.utc,
-            ).astimezone(uk_timezone)
-            check_out_datetime = timezone.make_aware(
-                datetime.datetime.combine(check_out_date, datetime.time(11, 0)),
-                datetime.timezone.utc,
-            ).astimezone(uk_timezone)
-
-            start_time = int(check_in_datetime.timestamp() * 1000)
-            end_time = int(check_out_datetime.timestamp() * 1000)
+            now_uk_time = timezone.now().astimezone(uk_timezone)
+            start_time = int(now_uk_time.timestamp() * 1000)
+            # Set endDate to one week from now to ensure the passcode is active
+            end_date = now_uk_time + datetime.timedelta(days=7)
+            end_time = int(end_date.timestamp() * 1000)
 
             ttlock_client = TTLockClient()
             try:
@@ -415,7 +409,7 @@ def admin_page(request):
                     pin=front_door_pin,
                     start_time=start_time,
                     end_time=end_time,
-                    name=full_name,  # Pass the guest's full name as the passcode name
+                    name=full_name,
                 )
                 if "keyboardPwdId" not in response:
                     logger.error(f"Failed to generate PIN for guest {reservation_number}: {response.get('errmsg', 'Unknown error')}")
@@ -516,16 +510,11 @@ def edit_guest(request, guest_id):
 
             new_pin = str(random.randint(100000, 999999))
             uk_timezone = pytz.timezone("Europe/London")
-            check_in_datetime = timezone.make_aware(
-                datetime.datetime.combine(guest.check_in_date, datetime.time(14, 0)),
-                datetime.timezone.utc,
-            ).astimezone(uk_timezone)
-            check_out_datetime = timezone.make_aware(
-                datetime.datetime.combine(guest.check_out_date, datetime.time(11, 0)),
-                datetime.timezone.utc,
-            ).astimezone(uk_timezone)
-            start_time = int(check_in_datetime.timestamp() * 1000)
-            end_time = int(check_out_datetime.timestamp() * 1000)
+            now_uk_time = timezone.now().astimezone(uk_timezone)
+            start_time = int(now_uk_time.timestamp() * 1000)
+            # Set endDate to one week from now to ensure the passcode is active
+            end_date = now_uk_time + datetime.timedelta(days=7)
+            end_time = int(end_date.timestamp() * 1000)
 
             try:
                 response = ttlock_client.generate_temporary_pin(
@@ -533,7 +522,7 @@ def edit_guest(request, guest_id):
                     pin=new_pin,
                     start_time=start_time,
                     end_time=end_time,
-                    name=guest.full_name,  # Pass the guest's full name as the passcode name
+                    name=guest.full_name,
                 )
                 if "keyboardPwdId" not in response:
                     logger.error(f"Failed to generate new PIN for guest {guest.reservation_number}: {response.get('errmsg', 'Unknown error')}")
@@ -575,23 +564,18 @@ def edit_guest(request, guest_id):
                             # Generate a new PIN with updated validity
                             new_pin = str(random.randint(100000, 999999))
                             uk_timezone = pytz.timezone("Europe/London")
-                            check_in_datetime = timezone.make_aware(
-                                datetime.datetime.combine(check_in_date, datetime.time(14, 0)),
-                                datetime.timezone.utc,
-                            ).astimezone(uk_timezone)
-                            check_out_datetime = timezone.make_aware(
-                                datetime.datetime.combine(check_out_date, datetime.time(11, 0)),
-                                datetime.timezone.utc,
-                            ).astimezone(uk_timezone)
-                            start_time = int(check_in_datetime.timestamp() * 1000)
-                            end_time = int(check_out_datetime.timestamp() * 1000)
+                            now_uk_time = timezone.now().astimezone(uk_timezone)
+                            start_time = int(now_uk_time.timestamp() * 1000)
+                            # Set endDate to one week from now to ensure the passcode is active
+                            end_date = now_uk_time + datetime.timedelta(days=7)
+                            end_time = int(end_date.timestamp() * 1000)
 
                             response = ttlock_client.generate_temporary_pin(
                                 lock_id=front_door_lock.lock_id,
                                 pin=new_pin,
                                 start_time=start_time,
                                 end_time=end_time,
-                                name=guest.full_name,  # Pass the guest's full name as the passcode name
+                                name=guest.full_name,
                             )
                             if "keyboardPwdId" not in response:
                                 logger.error(f"Failed to generate new PIN for guest {guest.reservation_number} after date change: {response.get('errmsg', 'Unknown error')}")
@@ -695,3 +679,12 @@ def sitemap(request):
 
 def how_to_use(request):
     return render(request, 'main/how_to_use.html')
+
+@csrf_exempt
+def ttlock_callback(request):
+    """Handle callback events from TTLock API."""
+    if request.method == 'POST':
+        body = request.body.decode('utf-8')
+        logger.info(f"Received TTLock callback: {body}")
+        return HttpResponse(status=200)
+    return HttpResponse(status=405)

@@ -7,6 +7,7 @@ from .views import (
 )
 from .views import how_to_use
 from .views import report_pin_issue
+from main.views import ttlock_callback
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -32,4 +33,5 @@ urlpatterns = [
     path('sitemap/', sitemap, name='sitemap'),
     path('how-to-use/', how_to_use, name='how_to_use'),
     path('awards_reviews/', views.awards_reviews, name='awards_reviews'),
+    path('api/callback', ttlock_callback, name='ttlock_callback')
 ]
