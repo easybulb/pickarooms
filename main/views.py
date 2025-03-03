@@ -685,6 +685,8 @@ def ttlock_callback(request):
     """Handle callback events from TTLock API."""
     if request.method == 'POST':
         body = request.body.decode('utf-8')
-        logger.info(f"Received TTLock callback: {body}")
+        headers = dict(request.headers)
+        logger.info(f"Received TTLock callback - Headers: {headers}, Body: {body}")
         return HttpResponse(status=200)
+    logger.warning(f"Invalid method for TTLock callback: {request.method}")
     return HttpResponse(status=405)
