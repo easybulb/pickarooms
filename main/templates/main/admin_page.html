@@ -1,41 +1,44 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load i18n %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
 {% endblock %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}{% trans "Admin Dashboard" %}{% endblock %}
 
 {% block content %}
 <section class="admin-container">
-    <h1 class="admin-title">Admin Dashboard</h1>
+    <h1 class="admin-title">{% trans "Admin Dashboard" %}</h1>
 
-    {% if success %}
-        <p id="success-message" class="success-message">Guest added successfully!</p>
-        <input type="hidden" id="guest-added" value="true">
-    {% elif error %}
-        <p class="error-message">{{ error }}</p>
+    {% if messages %}
+        {% for message in messages %}
+            <p class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}" id="message-{{ forloop.counter }}">
+                {{ message }}
+            </p>
+        {% endfor %}
+        <input type="hidden" id="guest-added" value="{% if messages %}true{% else %}false{% endif %}">
     {% endif %}
 
     <!-- Existing Guests -->
     <div class="admin-section">
         <div class="existing-guests-header">
-            <h2>Existing Guests</h2>
-            <!-- Add Guest Button -->
-            <a href="#add-guest-form" class="add-guest-btn">Add Guest</a>
+            <h2>{% trans "Existing Guests" %}</h2>
+            <a href="#add-guest-form" class="add-guest-btn">{% trans "Add Guest" %}</a>
         </div>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Full Name</th>
-                        <th>Room</th>
-                        <th>PIN</th>
-                        <th>Check-In</th>
-                        <th>Check-Out</th>
-                        <th>Actions</th>
+                        <th>{% trans "Full Name" %}</th>
+                        <th>{% trans "Room" %}</th>
+                        <th>{% trans "Front Door PIN" %}</th>
+                        <th>{% trans "PIN Validity" %}</th>
+                        <th>{% trans "Check-In" %}</th>
+                        <th>{% trans "Check-Out" %}</th>
+                        <th>{% trans "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,31 +52,42 @@
                             <br>
                             <small>#: {{ guest.reservation_number }}</small>
                             <br>
-                            <small>Tel: {{ guest.phone_number }}</small>
+                            <small>{% trans "Tel:" %} {{ guest.phone_number|default:"Not provided" }}</small>
                         </td>                        
                         <td>{{ guest.assigned_room.name }}</td>
                         <td class="pin-code">
-                            {% if guest.assigned_room.access_pin %}
-                                {{ guest.assigned_room.access_pin }}
+                            {% if guest.front_door_pin %}
+                                {{ guest.front_door_pin }}
                             {% else %}
-                                <span class="no-pin">N/A</span>
+                                <span class="no-pin">{% trans "N/A" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if guest.front_door_pin %}
+                                {{ guest.check_in_date }} 2:00 PM - {{ guest.check_out_date }} 11:00 AM
+                            {% else %}
+                                <span class="no-pin">{% trans "N/A" %}</span>
                             {% endif %}
                         </td>
                         <td>{{ guest.check_in_date }}</td>
                         <td>{{ guest.check_out_date }}</td>
                         <td>
-                            <a href="{% url 'edit_guest' guest.id %}" class="edit-link">Edit</a> |
-                            <a href="{% url 'delete_guest' guest.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest?');">
-                                Delete
+                            <a href="{% url 'edit_guest' guest.id %}" class="edit-link">{% trans "Edit" %}</a> |
+                            <a href="{% url 'delete_guest' guest.id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest? This will also delete their PIN.');">
+                                {% trans "Delete" %}
                             </a>
                         </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">{% trans "No active guests found." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         <p>
-            <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
+            <a href="{% url 'past_guests' %}" class="past-guests-link">{% trans "View past guests" %}</a>
         </p>
     </div>
 
@@ -81,47 +95,47 @@
 
     <!-- Add Guest Form -->
     <div class="admin-section">
-        <h2>Add New Guest</h2>
+        <h2>{% trans "Add New Guest" %}</h2>
         <form method="POST">
             {% csrf_token %}
-            <label for="full_name">Full Name:</label>
+            <label for="full_name">{% trans "Full Name:" %}</label>
             <input type="text" id="full_name" name="full_name" required>
 
-            <label for="reservation_number">Reservation Number:</label>
+            <label for="reservation_number">{% trans "Reservation Number:" %}</label>
             <input type="text" id="reservation_number" name="reservation_number" required>
 
-            <label for="phone_number">Phone Number (Optional):</label>
+            <label for="phone_number">{% trans "Phone Number (Optional):" %}</label>
             <input type="text" id="phone_number" name="phone_number">
 
-            <label for="check_in_date">Check-In Date:</label>
+            <label for="check_in_date">{% trans "Check-In Date:" %}</label>
             <input type="date" id="check_in_date" name="check_in_date" required>
 
             <!-- Stay Duration -->
-            <label for="stay_duration">Stay Duration:</label>
+            <label for="stay_duration">{% trans "Stay Duration:" %}</label>
             <div class="radio-group">
-                <label for="stay_duration_1"><input type="radio" id="stay_duration_1" name="stay_duration" value="1"> 1 Night</label>
-                <label for="stay_duration_2"><input type="radio" id="stay_duration_2" name="stay_duration" value="2"> 2 Nights</label>
-                <label for="stay_duration_3"><input type="radio" id="stay_duration_3" name="stay_duration" value="3"> 3 Nights</label>
+                <label for="stay_duration_1"><input type="radio" id="stay_duration_1" name="stay_duration" value="1"> 1 {% trans "Night" %}</label>
+                <label for="stay_duration_2"><input type="radio" id="stay_duration_2" name="stay_duration" value="2"> 2 {% trans "Nights" %}</label>
+                <label for="stay_duration_3"><input type="radio" id="stay_duration_3" name="stay_duration" value="3"> 3 {% trans "Nights" %}</label>
             </div>            
-            
-            <label for="check_out_date">Check-Out Date:</label>
+        
+            <label for="check_out_date">{% trans "Check-Out Date:" %}</label>
             <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy">
 
-            <label for="select-room">Assign Room:</label>
+            <label for="select-room">{% trans "Assign Room:" %}</label>
             <select id="select-room" name="room" required>
-                <option value="">-- Select Room --</option>
+                <option value="">-- {% trans "Select Room" %} --</option>
                 {% for room in rooms %}
                     <option value="{{ room.id }}">{{ room.name }}</option>
                 {% endfor %}
             </select>
             <br>
-            <button type="submit" class="admin-button">Add Guest</button>
+            <button type="submit" class="admin-button">{% trans "Add Guest" %}</button>
         </form>
     </div>
 
-    <h2>Past Guests</h2>
+    <h2>{% trans "Past Guests" %}</h2>
     <p>
-        <a href="{% url 'past_guests' %}" class="past-guests-link">View past guests</a>
+        <a href="{% url 'past_guests' %}" class="past-guests-link">{% trans "View past guests" %}</a>
     </p>
 </section>
 
@@ -145,23 +159,16 @@
             });
         });
 
-        // ✅ Ensure available rooms are updated on page load
         updateRooms();
 
-        // ✅ Scroll to top after adding a guest
         const guestAdded = document.getElementById("guest-added");
-
         if (guestAdded && guestAdded.value === "true") {
             window.scrollTo({ top: 0, behavior: "smooth" });
-
             setTimeout(() => {
-                const successMessage = document.getElementById("success-message");
-                if (successMessage) {
-                    successMessage.style.display = "none";
-                }
+                document.querySelectorAll("[id^='message-']").forEach(msg => {
+                    msg.style.display = "none";
+                });
             }, 3000);
-
-            // ✅ Update available rooms after adding a guest
             updateRooms();
         }
     });
@@ -178,7 +185,7 @@
                 .then(response => response.json())
                 .then(data => {
                     const roomSelect = document.getElementById('select-room');
-                    roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
+                    roomSelect.innerHTML = '<option value="">-- {% trans "Select Room" %} --</option>';
                     data.rooms.forEach(room => {
                         const option = document.createElement('option');
                         option.value = room.id;

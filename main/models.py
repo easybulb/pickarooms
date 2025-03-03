@@ -8,58 +8,55 @@ import json
 import cloudinary.uploader
 
 
-import uuid
-from django.db import models
-from django.utils.timezone import now
-from datetime import date, timedelta
-from django.conf import settings
-import cloudinary.uploader  # ✅ Always import Cloudinary
-
 def default_check_out_date():
     """Returns the next day with time set to 11:00 AM."""
     return date.today() + timedelta(days=1)
 
+class TTLock(models.Model):
+    """Stores TTLock-specific data for the front door lock."""
+    lock_id = models.IntegerField(unique=True)  # TTLock lock ID
+    name = models.CharField(max_length=100)  # Friendly name (e.g., "Front Door")
+    is_front_door = models.BooleanField(default=False)  # Mark as front door lock
+
+    def __str__(self):
+        return f"{self.name} (Lock ID: {self.lock_id})"
+
 class Room(models.Model):
-    name = models.CharField(max_length=100)  # Room name
-    access_pin = models.CharField(max_length=10, blank=True, null=True)  # House and Room Access PIN
-    video_url = models.URLField()  # Link to the video instructions
-    description = models.TextField(blank=True, null=True)  # Optional room description
-    image = models.URLField(blank=True, null=True)  # ✅ Always use Cloudinary URL (No local file upload)
+    name = models.CharField(max_length=100)
+    access_pin = models.CharField(max_length=10, blank=True, null=True)  # Will be used for Tuya locks later
+    video_url = models.URLField()
+    description = models.TextField(blank=True, null=True)
+    image = models.URLField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        """Ensure Cloudinary URL is always used."""
         if self.image and not self.image.startswith("http"):
             uploaded_image = cloudinary.uploader.upload(self.image, folder="room_images")
-            self.image = uploaded_image['secure_url']  # ✅ Save URL, not file reference
-
+            self.image = uploaded_image['secure_url']
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
-
-
-
 class Guest(models.Model):
     full_name = models.CharField(max_length=100, default="Guest")
-    phone_number = models.CharField(max_length=15, blank=True, null=True)  # ✅ Make optional
-    reservation_number = models.CharField(max_length=15, unique=True)  # ✅ Required & must be unique
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    reservation_number = models.CharField(max_length=15, unique=True)
     check_in_date = models.DateField(default=date.today)
     check_out_date = models.DateField(default=default_check_out_date)
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
     is_archived = models.BooleanField(default=False)
-    is_returning = models.BooleanField(default=False)  # ✅ Track returning guests
+    is_returning = models.BooleanField(default=False)
     secure_token = models.CharField(max_length=10, unique=True, blank=True)
+    front_door_pin = models.CharField(max_length=10, blank=True, null=True)  # Temporary PIN for front door
+    front_door_pin_id = models.IntegerField(blank=True, null=True)  # TTLock keyboard password ID
 
     def save(self, *args, **kwargs):
-        """Ensure secure token is always generated"""
         if not self.secure_token:
             self.secure_token = str(uuid.uuid4().hex[:10])
         super().save(*args, **kwargs)
 
     def has_access(self):
-        """Check if the guest's access is still valid."""
-        return now().date() <= self.check_out_date and not self.is_archived  
+        return now().date() <= self.check_out_date and not self.is_archived
 
     def __str__(self):
         return f"{self.full_name} - {self.reservation_number} - {self.phone_number or 'No Phone'} - {self.assigned_room.name}"

@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load i18n %}
 
-{% block title %}Past Guests{% endblock %}
+{% block title %}{% trans "Past Guests" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/past_guests.css' %}">
@@ -10,14 +11,14 @@
 
 {% block content %}
 <div class="admin-container">
-    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
     <br>
-    <h1>Past Guests</h1>
+    <h1>{% trans "Past Guests" %}</h1>
 
     <!-- Search Box -->
     <form method="GET" action="{% url 'past_guests' %}" class="search-form">
-        <input type="text" name="search" placeholder="Search guests..." value="{{ search_query }}">
-        <button type="submit">Search</button>
+        <input type="text" name="search" placeholder="{% trans 'Search guests...' %}" value="{{ search_query }}">
+        <button type="submit">{% trans "Search" %}</button>
     </form>
 
     <!-- Guests Table -->
@@ -25,12 +26,13 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>Full Name</th>
-                    <th>Phone Number</th>
-                    <th>Check-In Date</th>
-                    <th>Check-Out Date</th>
-                    <th>Assigned Room</th>
-                    <th>Actions</th>
+                    <th>{% trans "Full Name" %}</th>
+                    <th>{% trans "Phone Number" %}</th>
+                    <th>{% trans "Front Door PIN" %}</th>
+                    <th>{% trans "Check-In Date" %}</th>
+                    <th>{% trans "Check-Out Date" %}</th>
+                    <th>{% trans "Assigned Room" %}</th>
+                    <th>{% trans "Actions" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,9 +44,16 @@
                             <span class="returning-guest" title="Returning Guest"> (R) </span>
                         {% endif %}
                         <br>
-                        <small>Res #: {{ guest.reservation_number }}</small>
+                        <small>{% trans "Res #:" %} {{ guest.reservation_number }}</small>
                     </td>                    
-                    <td>{{ guest.phone_number }}</td>
+                    <td>{{ guest.phone_number|default:"Not provided" }}</td>
+                    <td>
+                        {% if guest.front_door_pin %}
+                            {{ guest.front_door_pin }} <span class="expired-pin">({% trans "Expired" %})</span>
+                        {% else %}
+                            <span class="no-pin">{% trans "N/A" %}</span>
+                        {% endif %}
+                    </td>
                     <td>{{ guest.check_in_date }}</td>
                     <td>{{ guest.check_out_date }}</td>
                     <td>{{ guest.assigned_room.name }}</td>
@@ -52,13 +61,13 @@
                         <button class="reassign-btn" 
                             data-name="{{ guest.full_name }}"
                             data-phone="{{ guest.phone_number }}">
-                            Reassign
+                            {% trans "Reassign" %}
                         </button>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6">No past guests found.</td>
+                    <td colspan="7">{% trans "No past guests found." %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -67,19 +76,19 @@
 
     <div class="pagination">
         {% if past_guests.has_previous %}
-            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
-            <a href="?page={{ past_guests.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+            <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}">{% trans "First" %}</a>
+            <a href="?page={{ past_guests.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">{% trans "Previous" %}</a>
         {% endif %}
 
-        <span>Page {{ past_guests.number }} of {{ past_guests.paginator.num_pages }}</span>
+        <span>{% trans "Page" %} {{ past_guests.number }} {% trans "of" %} {{ past_guests.paginator.num_pages }}</span>
 
         {% if past_guests.has_next %}
-            <a href="?page={{ past_guests.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
-            <a href="?page={{ past_guests.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
+            <a href="?page={{ past_guests.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">{% trans "Next" %}</a>
+            <a href="?page={{ past_guests.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}">{% trans "Last" %}</a>
         {% endif %}
     </div>
 
-    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
 </div>
 
 <!-- JavaScript for Reassigning Guest -->
@@ -92,11 +101,9 @@
                 const name = this.getAttribute("data-name");
                 const phone = this.getAttribute("data-phone");
 
-                // Store guest data in localStorage for use in Admin Page
                 localStorage.setItem("reassign_name", name);
                 localStorage.setItem("reassign_phone", phone);
 
-                // Redirect to Admin Page to reassign
                 window.location.href = "{% url 'admin_page' %}#add-guest-form";
             });
         });

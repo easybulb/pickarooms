@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Stay Again With Us! - Pickarooms{% endblock %}
+{% block title %}{% trans "Stay Again With Us! - Pickarooms" %}{% endblock %}
 {% load static %}
 {% load i18n %}
 
@@ -16,9 +16,14 @@
     
     <a href="{{ booking_link }}" class="rebook-button" target="_blank">🔗 {% trans "Book Again on Booking.com" %}</a>
 
+    <div class="smart-lock-info">
+        <h3>{% trans "Why Stay With Us Again?" %}</h3>
+        <p>{% trans "Enjoy a seamless check-in experience with our smart lock system. Your unique PIN will be ready when you arrive, making your stay effortless and secure." %}</p>
+    </div>
+
     <p class="discount-text">{% trans "Returning guest? We are always happy to welcome you back!" %}</p>
 
-    <!-- ✅ Contact Us -->
+    <!-- Contact Us -->
     <div class="contact-info">
         <h2>{% trans "❓ Need Help?" %}</h2>
         <p>
@@ -29,11 +34,11 @@
         </p>
     </div>
 
-    <!-- ✅ Featured Guest Reviews -->
+    <!-- Featured Guest Reviews -->
     <div class="guest-reviews">
         <h2>{% trans "⭐ What Guests Loved" %}</h2>
-        <p>{% blocktrans %}“The place was super clean and the check-in process was seamless. Highly recommended!” – <strong>Jane D.</strong>{% endblocktrans %}</p>
-        <p>{% blocktrans %}“Great location and cozy rooms. Will definitely book again!” – <strong>Mark T.</strong>{% endblocktrans %}</p>
+        <p>{% trans "“The place was super clean and the check-in process was seamless. Highly recommended!” – <strong>Jane D.</strong>" %}</p>
+        <p>{% trans "“Great location and cozy rooms. Will definitely book again!” – <strong>Mark T.</strong>" %}</p>
     </div>
 </section>
 {% endblock %}

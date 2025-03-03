@@ -68,8 +68,14 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply to subdomains too
     SECURE_HSTS_PRELOAD = True  # Allow browser preload list
 
+# TTLock API Configuration
+SCIENER_CLIENT_ID = os.environ.get("SCIENER_CLIENT_ID")
+SCIENER_CLIENT_SECRET = os.environ.get("SCIENER_CLIENT_SECRET")
+if not SCIENER_CLIENT_ID or not SCIENER_CLIENT_SECRET:
+    raise ValueError("🚨 Sciener API credentials are missing in env.py!")
 
-
+TTLOCK_BASE_URL = os.environ.get("TTLOCK_BASE_URL", "https://euapi.sciener.com/v3")
+TTLOCK_OAUTH_BASE_URL = os.environ.get("TTLOCK_OAUTH_BASE_URL", "https://euapi.sciener.com")  # For OAuth endpoints
 
 # Application definition
 INSTALLED_APPS = [
@@ -83,7 +89,6 @@ INSTALLED_APPS = [
     'cloudinary',
     'cloudinary_storage',
 ]
-
 
 LANGUAGE_CODE = 'en'  # Default language
 
@@ -105,7 +110,6 @@ USE_I18N = True  # Enable internationalization
 USE_L10N = True  # Optional: Localization settings
 USE_TZ = True  # Keep timezone support
 
-
 LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
 
 # ✅ Gmail SMTP Configuration for Django
@@ -120,8 +124,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # ✅ reCAPTCHA Configuration
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
-
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -155,7 +157,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 WSGI_APPLICATION = 'pickarooms.wsgi.application'
 
@@ -193,9 +194,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LOGIN_URL = '/admin/login/'  # Redirect unauthorized users to the login page
-
 
 # Internationalization
 LANGUAGE_CODE = 'en'
@@ -211,7 +210,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # Configure Cloudinary Storage for Media Files
 CLOUDINARY_STORAGE = {

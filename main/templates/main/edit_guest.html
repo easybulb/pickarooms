@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load i18n %}
 
-{% block title %}Edit Guest{% endblock %}
+{% block title %}{% trans "Edit Guest" %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/edit_guest.css' %}">
@@ -10,29 +11,29 @@
 
 {% block content %}
 <div class="admin-container">
-    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
     <br>
-    <h1>Edit Guest</h1>
+    <h1>{% trans "Edit Guest" %}</h1>
     
     <form method="POST" class="admin-form">
         {% csrf_token %}
         
-        <label for="full_name">Full Name:</label>
+        <label for="full_name">{% trans "Full Name:" %}</label>
         <input type="text" id="full_name" name="full_name" value="{{ guest.full_name }}" required>
 
-        <label for="reservation_number">Reservation Number:</label>
-        <input type="text" id="reservation_number" name="reservation_number" value="{{ guest.reservation_number }}" placeholder="Enter reservation number">
+        <label for="reservation_number">{% trans "Reservation Number:" %}</label>
+        <input type="text" id="reservation_number" name="reservation_number" value="{{ guest.reservation_number }}" required>
 
-        <label for="phone_number">Phone Number:</label>
-        <input type="text" id="phone_number" name="phone_number" value="{{ guest.phone_number }}" required>
+        <label for="phone_number">{% trans "Phone Number:" %}</label>
+        <input type="text" id="phone_number" name="phone_number" value="{{ guest.phone_number|default_if_none:'Not provided' }}">
 
-        <label for="check_in_date">Check-In Date:</label>
+        <label for="check_in_date">{% trans "Check-In Date:" %}</label>
         <input type="date" id="check_in_date" name="check_in_date" value="{{ guest.check_in_date|date:'Y-m-d' }}" required>
 
-        <label for="check_out_date">Check-Out Date:</label>
+        <label for="check_out_date">{% trans "Check-Out Date:" %}</label>
         <input type="date" id="check_out_date" name="check_out_date" value="{{ guest.check_out_date|date:'Y-m-d' }}" required>
 
-        <label for="room">Assign Room:</label>
+        <label for="room">{% trans "Assign Room:" %}</label>
         <select id="room" name="room" required>
             {% for room in rooms %}
                 <option value="{{ room.id }}" {% if room.id == guest.assigned_room.id %}selected{% endif %}>
@@ -41,10 +42,36 @@
             {% endfor %}
         </select>
 
-        <button type="submit" class="btn-save">Save Changes</button>
+        <label>{% trans "Front Door PIN:" %}</label>
+        <p>
+            {% if guest.front_door_pin %}
+                {{ guest.front_door_pin }}
+            {% else %}
+                <span class="no-pin">{% trans "Not set" %}</span>
+            {% endif %}
+        </p>
+
+        <label>{% trans "PIN Validity:" %}</label>
+        <p>
+            {% if guest.front_door_pin %}
+                {{ guest.check_in_date }} 2:00 PM - {{ guest.check_out_date }} 11:00 AM
+            {% else %}
+                <span class="no-pin">{% trans "Not set" %}</span>
+            {% endif %}
+        </p>
+
+        <button type="submit" class="btn-save">{% trans "Save Changes" %}</button>
     </form>
+
+    {% if guest.front_door_pin %}
+    <form method="POST" class="regenerate-pin-form">
+        {% csrf_token %}
+        <input type="hidden" name="regenerate_pin" value="true">
+        <button type="submit" class="btn-regenerate">{% trans "Regenerate PIN" %}</button>
+    </form>
+    {% endif %}
     
-    <a href="{% url 'admin_page' %}" class="back-link">Back to Admin Page</a>
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
 </div>
 
 <!-- JavaScript for Updating Available Rooms Dynamically -->
@@ -59,11 +86,15 @@
                     .then(response => response.json())
                     .then(data => {
                         const roomSelect = document.getElementById('room');
-                        roomSelect.innerHTML = '<option value="">-- Select Room --</option>';
+                        const currentRoomId = "{{ guest.assigned_room.id }}";
+                        roomSelect.innerHTML = '';
                         data.rooms.forEach(room => {
                             const option = document.createElement('option');
                             option.value = room.id;
                             option.textContent = room.name;
+                            if (room.id == currentRoomId) {
+                                option.selected = true;
+                            }
                             roomSelect.appendChild(option);
                         });
                     })
@@ -71,7 +102,6 @@
             }
         }
 
-        // Trigger room update when dates change
         document.getElementById('check_in_date').addEventListener('change', updateRooms);
         document.getElementById('check_out_date').addEventListener('change', updateRooms);
     });
