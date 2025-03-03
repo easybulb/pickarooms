@@ -29,6 +29,7 @@ from .models import Guest, Room, ReviewCSVUpload, TTLock
 from .ttlock_utils import TTLockClient
 import logging
 from django.views.decorators.csrf import csrf_exempt
+import json
 
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
@@ -680,13 +681,30 @@ def sitemap(request):
 def how_to_use(request):
     return render(request, 'main/how_to_use.html')
 
+
 @csrf_exempt
 def ttlock_callback(request):
     """Handle callback events from TTLock API."""
     if request.method == 'POST':
-        body = request.body.decode('utf-8')
-        headers = dict(request.headers)
-        logger.info(f"Received TTLock callback - Headers: {headers}, Body: {body}")
-        return HttpResponse(status=200)
+        try:
+            # Log the headers, query parameters, and body
+            headers = dict(request.headers)
+            query_params = dict(request.GET)
+            body = request.body.decode('utf-8')
+            # Try to parse the body as JSON for better readability
+            try:
+                body_json = json.loads(body)
+            except json.JSONDecodeError:
+                body_json = body
+            logger.info(
+                f"Received TTLock callback - "
+                f"Headers: {headers}, "
+                f"Query Params: {query_params}, "
+                f"Body: {body_json}"
+            )
+            return HttpResponse(status=200)
+        except Exception as e:
+            logger.error(f"Error processing TTLock callback: {str(e)}")
+            return HttpResponse(status=500)
     logger.warning(f"Invalid method for TTLock callback: {request.method}")
     return HttpResponse(status=405)
