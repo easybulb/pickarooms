@@ -4,6 +4,67 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
+<style>
+    /* Add some fun styling for the check-in process */
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .welcome-section h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+    .welcome-section p {
+        font-size: 1.2em;
+        color: #7f8c8d;
+    }
+    .unlock-container {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .btn-unlock {
+        background-color: #3498db;
+        color: white;
+        font-size: 1.5em;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .btn-unlock:hover {
+        background-color: #2980b9;
+    }
+    .pin-fallback {
+        margin-top: 20px;
+        background-color: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .pin-fallback h3 {
+        margin-bottom: 10px;
+        color: #34495e;
+    }
+    .pin-code {
+        font-size: 1.5em;
+        color: #e74c3c;
+        font-weight: bold;
+    }
+    .quick-access button {
+        background-color: #ecf0f1;
+        color: #2c3e50;
+        border: 1px solid #bdc3c7;
+        margin: 5px;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .quick-access button:hover {
+        background-color: #dfe6e9;
+    }
+</style>
 {% endblock %}
 
 {% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
@@ -26,70 +87,57 @@
     </div>
 </section>
 
-<!-- Room Name & Guest Info -->
-<section class="room-header">
-    <h1>{{ room.name }}</h1>
-    {% if guest %}
-    {% blocktrans with guest_name=guest.full_name %}<p>Welcome, {{ guest_name }}</p>{% endblocktrans %}
-    {% endif %}
+<!-- Welcome Section -->
+<section class="welcome-section">
+    <h1>🎉 {% trans "Welcome to Your Stay," %} {{ guest.full_name }}! 🎉</h1>
+    <p>{% trans "Let’s get you into your room at" %} {{ room.name }} {% trans "in just a few clicks!" %}</p>
 </section>
 
 <!-- Sticky Tab Navigation -->
 <div class="section-nav">
-    <button class="tab-btn active" onclick="showSection('pin-section')">{% trans "PIN" %}</button>
+    <button class="tab-btn active" onclick="showSection('access-section')">{% trans "Access" %}</button>
     <button class="tab-btn" onclick="showSection('location-section')">{% trans "Location" %}</button>
     <button class="tab-btn" onclick="showSection('checkin-section')">{% trans "Check-In" %}</button>
     <button class="tab-btn" onclick="showSection('checkout-section')">{% trans "Check-Out" %}</button>
     <button class="tab-btn" onclick="showSection('faq-section')">{% trans "FAQs" %}</button>
 </div>
 
-<!-- PIN Section with Check-In Wizard -->
-<section id="pin-section" class="room-container active">
+<!-- Access Section (Simplified Check-In Process) -->
+<section id="access-section" class="room-container active">
     <div class="room-info">
-        <!-- Check-In Wizard -->
-        <section id="checkin-wizard">
-            <div id="wizard-step-1" class="wizard-step active">
-                <h2>🔑 {% trans "Your Access PINs" %}</h2>
-                {% if not show_pin %}
-                <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your PINs will be available then." %}</p>
-                {% else %}
-                <h3>{% trans "Front Door PIN (TTLock)" %}</h3>
-                <p class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}</p>
-                <p class="pin-validity">
-                    {% trans "Valid from" %} {{ guest.check_in_date }} 2:00 PM {% trans "to" %} {{ guest.check_out_date }} 11:00 AM
-                </p>
-                <h3>{% trans "Room Door PIN (Tuya)" %}</h3>
-                <p class="pending-note">{% trans "Tuya lock setup pending. Please use the keycard inside your room to access your room door, as shown in the video." %}</p>
-                <div class="pin-confirmation">
-                    <h3>{% trans "Did the front door PIN work?" %}</h3>
-                    <button id="pin-yes" class="pin-btn">{% trans "Yes" %}</button>
-                    <button id="pin-no" class="pin-btn" onclick="openModal('pin-help-modal')">{% trans "No" %}</button>
-                </div>
-                <button class="next-btn" onclick="nextStep(2)">{% trans "Next" %} →</button>
-                {% endif %}
-            </div>
-
-            <div id="wizard-step-2" class="wizard-step">
-                <h2>🎥 {% trans "How to Enter" %}</h2>
-                <p>{% trans "Watch the instruction video at the top of the page for entry details." %}</p>
-                <button class="watch-video-btn" onclick="scrollToHeroVideo()">{% trans "Watch Video" %}</button>
-                <button class="next-btn" onclick="nextStep(3)">{% trans "Next" %} →</button>
-            </div>
-
-            <div id="wizard-step-3" class="wizard-step">
-                <h2>📜 {% trans "FAQs & Support" %}</h2>
-                <p>{% trans "Need help? Browse our FAQs or contact support via WhatsApp." %}</p>
-                <button class="faq-btn" onclick="showSection('faq-section')">{% trans "View FAQs" %}</button>
-                <button class="next-btn" onclick="finishCheckin()">{% trans "Finish" %} ✅</button>
-            </div>
-        </section>
-
-        <!-- Quick Access Menu (Appears After Wizard Completion) -->
-        <div id="quick-access" style="display: none;">
-            <button onclick="openQuickAccess('pin')">🔑 {% trans "View My PIN" %}</button>
-            <button onclick="openQuickAccess('video')">🎥 {% trans "Watch Video Again" %}</button>
-            <button onclick="openQuickAccess('faq')">📜 {% trans "FAQs & Help" %}</button>
+        {% if not show_pin %}
+        <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your access details will be available then." %}</p>
+        {% else %}
+        <!-- Unlock Door Button -->
+        <div class="unlock-container">
+            <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
+                {% csrf_token %}
+                <button type="submit" name="unlock_door" class="btn-unlock">🚪 {% trans "Unlock the Door Now!" %}</button>
+            </form>
+            <p>{% trans "Click the button above to unlock the front door instantly. It’s the easiest way to enter!" %}</p>
         </div>
+
+        <!-- PIN as a Fallback Option -->
+        <div class="pin-fallback">
+            <h3>🔑 {% trans "Backup Option: Use Your PIN" %}</h3>
+            <p>{% trans "If you don’t have internet access, you can try this PIN on the front door keypad (it may not work currently, so use the button above if possible):" %}</p>
+            <p class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}</p>
+            <p class="pin-validity">
+                {% trans "Valid from" %} {{ guest.check_in_date }} 2:00 PM {% trans "to" %} {{ guest.check_out_date }} 11:00 AM
+            </p>
+            <div class="pin-confirmation">
+                <h3>{% trans "Did the PIN work?" %}</h3>
+                <button id="pin-yes" class="pin-btn">{% trans "Yes" %}</button>
+                <button id="pin-no" class="pin-btn" onclick="openModal('pin-help-modal')">{% trans "No" %}</button>
+            </div>
+        </div>
+
+        <!-- Quick Access Menu -->
+        <div id="quick-access">
+            <button onclick="scrollToHeroVideo()">🎥 {% trans "Watch Entry Video" %}</button>
+            <button onclick="showSection('faq-section')">📜 {% trans "FAQs & Help" %}</button>
+        </div>
+        {% endif %}
     </div>
 </section>
 
@@ -124,18 +172,12 @@
         <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
         {% endif %}
         <hr>
-        <h3>{% trans "How do I use my PINs?" %}</h3>
-        <h4>{% trans "Front Door (TTLock)" %}</h4>
+        <h3>{% trans "How do I enter the property?" %}</h3>
         <ol>
-            <li>{% trans "Watch the video at the top of this page for easy instructions." %}</li>
-            <li>{% trans "When you arrive at the property’s front door, touch the keypad area to light up the numbers." %}</li>
-            <li>{% trans "Enter your PIN:" %} <span class="pin-code">{{ front_door_pin|default:"Contact support" }}</span></li>
+            <li>{% trans "Click the 'Unlock Door Remotely' button in the Access tab to unlock the front door instantly." %}</li>
+            <li>{% trans "If you don’t have internet, try the PIN shown in the Access tab on the front door keypad (note: the PIN may not work currently)." %}</li>
+            <li>{% trans "Watch the video at the top of the page for entry instructions." %}</li>
             <li>{% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
-        </ol>
-        <h4>{% trans "Room Door (Tuya)" %}</h4>
-        <p class="pending-note">{% trans "Tuya lock setup pending. Please use the keycard inside your room to access your room door, as shown in the video." %}</p>
-        <ol start="5">
-            <li>{% trans "Inside your room, find a" %} <strong>{% trans "keycard" %}</strong>. {% trans "Use it to enter/exit your room. Watch the video above for keycard use." %}</li>
         </ol>
     </div>
 </section>
@@ -147,7 +189,7 @@
         {% if guest %}
         <p><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before 11 AM" %})</p>
         <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
-        <p class="expiration-note">{% trans "Note: Your front door PIN will expire at check-out time. Please ensure you check out before 11 AM to avoid being locked out." %}</p>
+        <p class="expiration-note">{% trans "Note: Your front door access will expire at check-out time. Please ensure you check out before 11 AM to avoid being locked out." %}</p>
         {% else %}
         <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
         {% endif %}
@@ -175,7 +217,7 @@
                 <div class="faq-item">
                     <button class="faq-question">{% trans "Is my digital lock secure?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system for the front door and future Tuya Smart Locks for room doors ensure only the assigned guest and admin can access. PINs expire after checkout for added security." %}</p>
+                        <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system for the front door ensures only the assigned guest and admin can access. Access expires after checkout for added security." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
@@ -183,9 +225,10 @@
                     <div class="faq-answer">
                         <p>{% trans "Try the following steps:" %}</p>
                         <ul>
-                            <li>{% trans "Ensure you’re entering the correct PIN as shown above." %}</li>
+                            <li>{% trans "Ensure you’re entering the correct PIN as shown in the Access tab." %}</li>
                             <li>{% trans "Touch the keypad to light up the numbers before entering the PIN." %}</li>
                             <li>{% trans "Check the video instructions for proper usage." %}</li>
+                            <li>{% trans "Use the 'Unlock Door Remotely' button in the Access tab if you have internet access." %}</li>
                             <li>{% trans "If it still doesn’t work, click 'No' in the PIN confirmation section to report the issue, and our team will assist you promptly." %}</li>
                         </ul>
                     </div>
@@ -291,7 +334,7 @@
     <div class="modal-content">
         <span class="close" onclick="closeModal('pin-help-modal')">×</span>
         <h3>{% trans "Need Help with Your PIN?" %}</h3>
-        <p>{% trans "Watch these videos for assistance:" %}</p>
+        <p>{% trans "Watch this video for assistance:" %}</p>
         <div class="video-wrapper">
             <div class="video-item">
                 <h4>{% trans "Front Door" %}</h4>
@@ -303,19 +346,6 @@
                     <p class="play-text">{% trans "Watch Video" %}</p>
                 </div>
                 <div class="modal-video-container" id="front-door-video" style="display: none;">
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
-                </div>
-            </div>
-            <div class="video-item">
-                <h4>{% trans "Room Door" %}</h4>
-                <div class="video-overlay">
-                    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Room Door Preview' %}" class="video-preview-image">
-                    <button class="play-button" data-video="room-door-video">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <p class="play-text">{% trans "Watch Video" %}</p>
-                </div>
-                <div class="modal-video-container" id="room-door-video" style="display: none;">
                     <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
                 </div>
             </div>
@@ -353,22 +383,14 @@ function showSection(sectionId) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Reset wizard state on page load
-    document.querySelectorAll('.wizard-step').forEach(step => step.classList.remove('active'));
-    document.getElementById('wizard-step-1').classList.add('active');
-    let currentStep = 1;
-    document.getElementById("quick-access").style.display = "none";
-
-    // PIN Confirmation (Updated for Wizard)
+    // PIN Confirmation
     const pinYes = document.getElementById("pin-yes");
     const pinNo = document.getElementById("pin-no");
     const pinStillIssue = document.getElementById("pin-still-issue");
     const pinAdminAlert = document.getElementById("pin-admin-alert");
 
     if (pinYes) pinYes.addEventListener("click", () => {
-        alert("Enjoy your stay!");
-        // Show quick access menu after PIN confirmation
-        document.getElementById("quick-access").style.display = "flex";
+        alert("🎉 Enjoy your stay!");
     });
     if (pinNo) pinNo.addEventListener("click", () => openModal("pin-help-modal"));
     if (pinStillIssue) {
@@ -394,33 +416,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         return null;
     }
-
-    // Wizard Navigation
-    window.nextStep = function (step) {
-        document.getElementById(`wizard-step-${currentStep}`).classList.remove("active");
-        document.getElementById(`wizard-step-${step}`).classList.add("active");
-        currentStep = step;
-    };
-
-    window.finishCheckin = function () {
-        alert("✅ Check-in complete! Enjoy your stay.");
-        document.getElementById("quick-access").style.display = "flex";
-    };
-
-    // Quick Access Menu Functionality
-    window.openQuickAccess = function (section) {
-        if (section === "pin") {
-            {% if show_pin %}
-            alert("🔑 Your Front Door PIN: " + document.querySelector(".pin-code").textContent);
-            {% else %}
-            alert("🔑 Check-in starts at 2 PM UK time. Your PINs will be available then.");
-            {% endif %}
-        } else if (section === "video") {
-            scrollToHeroVideo();
-        } else if (section === "faq") {
-            showSection('faq-section');
-        }
-    };
 
     // Scroll to Hero Video
     window.scrollToHeroVideo = function () {

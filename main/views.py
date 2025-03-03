@@ -94,6 +94,9 @@ def explore_manchester(request):
         'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY
     })
 
+# main/views.py
+# ... (other imports remain unchanged)
+
 @ratelimit(key='ip', rate='10/m', method='POST', block=True)
 def checkin(request):
     if request.method == "POST":
@@ -134,6 +137,20 @@ def checkin(request):
                     guest.front_door_pin_id = response["keyboardPwdId"]
                     logger.info(f"Generated PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {response['keyboardPwdId']})")
                     guest.save()
+
+                    # Unlock the door remotely to ensure immediate access
+                    try:
+                        unlock_response = client.unlock_lock(lock_id=str(front_door_lock.lock_id))
+                        if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                            logger.error(f"Failed to unlock door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                            messages.warning(request, f"Generated PIN {pin}, but failed to unlock the door remotely: {unlock_response.get('errmsg', 'Unknown error')}")
+                        else:
+                            logger.info(f"Successfully unlocked door for guest {guest.reservation_number}")
+                            messages.info(request, "The door has been unlocked for you. You can also use your PIN or the unlock button on the next page.")
+                    except Exception as e:
+                        logger.error(f"Failed to unlock door for guest {guest.reservation_number}: {str(e)}")
+                        messages.warning(request, f"Generated PIN {pin}, but failed to unlock the door remotely: {str(e)}")
+
                 except TTLock.DoesNotExist:
                     logger.error("Front door lock not configured in the database.")
                     messages.error(request, "Front door lock not configured. Please contact support.")
@@ -147,7 +164,7 @@ def checkin(request):
                 messages.error(request, "Check-in period has expired or guest is archived.")
                 return redirect("checkin")
 
-            messages.success(request, f"Check-in successful! Your PIN is {guest.front_door_pin}.")
+            messages.success(request, f"Check-in successful! Your PIN is {guest.front_door_pin}. You can also unlock the door using the button on the next page.")
             return redirect('room_detail', room_token=guest.secure_token)
 
         # If the reservation number is incorrect, keep it prefilled in the form
@@ -173,6 +190,9 @@ def checkin(request):
     })
 
 
+
+# main/views.py
+# ... (other imports remain unchanged)
 
 def room_detail(request, room_token):
     reservation_number = request.session.get("reservation_number", None)
@@ -200,6 +220,37 @@ def room_detail(request, room_token):
         return redirect("rebook_guest")
 
     enforce_2pm_rule = now_uk_time < check_in_datetime
+
+    # Handle unlock request if submitted
+    if request.method == "POST" and "unlock_door" in request.POST:
+        try:
+            front_door_lock = TTLock.objects.get(is_front_door=True)
+            client = TTLockClient()
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    unlock_response = client.unlock_lock(lock_id=str(front_door_lock.lock_id))
+                    if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                        logger.error(f"Failed to unlock door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                        if attempt == max_retries - 1:
+                            messages.error(request, "Failed to unlock the door. Please try again or contact support.")
+                        else:
+                            logger.info(f"Retrying unlock for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                            continue
+                    else:
+                        logger.info(f"Successfully unlocked door for guest {guest.reservation_number}")
+                        messages.success(request, "The door has been unlocked for you.")
+                        break
+                except Exception as e:
+                    logger.error(f"Failed to unlock door for guest {guest.reservation_number}: {str(e)}")
+                    if attempt == max_retries - 1:
+                        messages.error(request, "Failed to unlock the door. Please try again or contact support.")
+                    else:
+                        logger.info(f"Retrying unlock for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                        continue
+        except TTLock.DoesNotExist:
+            logger.error("Front door lock not configured in the database.")
+            messages.error(request, "Front door lock not configured. Please contact support.")
 
     return render(
         request,
@@ -319,6 +370,7 @@ class AdminLoginView(LoginView):
     def get_success_url(self):
         return '/admin-page/'
 
+
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
@@ -435,7 +487,7 @@ def admin_page(request):
                 front_door_pin=front_door_pin,
                 front_door_pin_id=keyboard_pwd_id,
             )
-            messages.success(request, f"Guest {guest.full_name} added successfully! Front door PIN: {front_door_pin}")
+            messages.success(request, f"Guest {guest.full_name} added successfully! Front door PIN: {front_door_pin}. They can also unlock the door remotely during check-in or from the room detail page.")
 
             return redirect('admin_page')
 
@@ -483,6 +535,7 @@ def available_rooms(request):
 
 def unauthorized(request):
     return render(request, 'main/unauthorized.html')
+
 
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
@@ -533,7 +586,7 @@ def edit_guest(request, guest_id):
                 guest.front_door_pin_id = response["keyboardPwdId"]
                 guest.save()
                 logger.info(f"Generated new PIN {new_pin} for guest {guest.reservation_number} (Keyboard Password ID: {response['keyboardPwdId']})")
-                messages.success(request, f"New front door PIN generated: {new_pin}")
+                messages.success(request, f"New front door PIN generated: {new_pin}. The guest can also unlock the door remotely during check-in or from the room detail page.")
             except Exception as e:
                 logger.error(f"Failed to generate new PIN for guest {guest.reservation_number}: {str(e)}")
                 messages.error(request, f"Failed to generate new PIN: {str(e)}")
@@ -585,7 +638,7 @@ def edit_guest(request, guest_id):
                                 guest.front_door_pin = new_pin
                                 guest.front_door_pin_id = response["keyboardPwdId"]
                                 logger.info(f"Generated new PIN {new_pin} for guest {guest.reservation_number} after date change (Keyboard Password ID: {response['keyboardPwdId']})")
-                                messages.info(request, f"PIN updated due to date change: {new_pin}")
+                                messages.info(request, f"PIN updated due to date change: {new_pin}. The guest can also unlock the door remotely during check-in or from the room detail page.")
                         except Exception as e:
                             logger.error(f"Failed to update PIN for guest {guest.reservation_number} after date change: {str(e)}")
                             messages.warning(request, f"Failed to update PIN after date change: {str(e)}")
@@ -594,7 +647,7 @@ def edit_guest(request, guest_id):
             guest.check_out_date = check_out_date
             guest.save()
             logger.info(f"Updated guest {guest.reservation_number} details")
-            messages.success(request, f"Guest {guest.full_name} updated successfully.")
+            messages.success(request, f"Guest {guest.full_name} updated successfully. The guest can unlock the door using their PIN or remotely during check-in or from the room detail page.")
 
         return redirect('admin_page')
 
