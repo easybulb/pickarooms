@@ -120,14 +120,14 @@ def checkin(request):
                     # Set endDate to one week from now to ensure the passcode is active
                     end_date = now_uk_time + datetime.timedelta(days=7)
                     end_time = int(end_date.timestamp() * 1000)
-                    pin = str(random.randint(100000, 999999))
+                    pin = str(random.randint(1000, 9999))  # Changed to 4-digit PIN
 
                     response = client.generate_temporary_pin(
                         lock_id=str(front_door_lock.lock_id),
                         pin=pin,
                         start_time=start_time,
                         end_time=end_time,
-                        name=guest.full_name,
+                        name=f"{guest.assigned_room.name} - {guest.full_name}",  # Combine room name and guest name
                     )
                     if "keyboardPwdId" not in response:
                         logger.error(f"Failed to generate PIN for guest {guest.reservation_number}: {response.get('errmsg', 'Unknown error')}")
@@ -447,7 +447,7 @@ def admin_page(request):
                 messages.error(request, "Front door lock not configured. Please contact support.")
                 return redirect('admin_page')
 
-            front_door_pin = str(random.randint(100000, 999999))
+            front_door_pin = str(random.randint(1000, 9999))  # Changed to 4-digit PIN
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
             start_time = int(now_uk_time.timestamp() * 1000)
@@ -462,7 +462,7 @@ def admin_page(request):
                     pin=front_door_pin,
                     start_time=start_time,
                     end_time=end_time,
-                    name=full_name,
+                    name=f"{room.name} - {full_name}",  # Combine room name and guest name
                 )
                 if "keyboardPwdId" not in response:
                     logger.error(f"Failed to generate PIN for guest {reservation_number}: {response.get('errmsg', 'Unknown error')}")
@@ -562,7 +562,7 @@ def edit_guest(request, guest_id):
                     logger.warning(f"Failed to delete old PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete old PIN: {str(e)}")
 
-            new_pin = str(random.randint(100000, 999999))
+            new_pin = str(random.randint(1000, 9999))  # Changed to 4-digit PIN
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
             start_time = int(now_uk_time.timestamp() * 1000)
@@ -576,7 +576,7 @@ def edit_guest(request, guest_id):
                     pin=new_pin,
                     start_time=start_time,
                     end_time=end_time,
-                    name=guest.full_name,
+                    name=f"{guest.assigned_room.name} - {guest.full_name}",  # Combine room name and guest name
                 )
                 if "keyboardPwdId" not in response:
                     logger.error(f"Failed to generate new PIN for guest {guest.reservation_number}: {response.get('errmsg', 'Unknown error')}")
@@ -616,7 +616,7 @@ def edit_guest(request, guest_id):
                             logger.info(f"Deleted old PIN for guest {guest.reservation_number} due to date change (Keyboard Password ID: {guest.front_door_pin_id})")
                             
                             # Generate a new PIN with updated validity
-                            new_pin = str(random.randint(100000, 999999))
+                            new_pin = str(random.randint(1000, 9999))  # Changed to 4-digit PIN
                             uk_timezone = pytz.timezone("Europe/London")
                             now_uk_time = timezone.now().astimezone(uk_timezone)
                             start_time = int(now_uk_time.timestamp() * 1000)
@@ -629,7 +629,7 @@ def edit_guest(request, guest_id):
                                 pin=new_pin,
                                 start_time=start_time,
                                 end_time=end_time,
-                                name=guest.full_name,
+                                name=f"{guest.assigned_room.name} - {guest.full_name}",  # Combine room name and guest name
                             )
                             if "keyboardPwdId" not in response:
                                 logger.error(f"Failed to generate new PIN for guest {guest.reservation_number} after date change: {response.get('errmsg', 'Unknown error')}")
