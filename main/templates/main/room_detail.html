@@ -50,12 +50,18 @@
         {% else %}
         <!-- PIN as the Primary Option -->
         <div class="pin-fallback">
-            <h3>{% trans "At the front door, enter PIN:" %} <span class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}#</span></h3>
-            <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick M11 3NP, United Kingdom <a onclick="showSection('location-section')" href="#">{% trans "Find Address" %}</a></p>
+            <h3>{% trans "At the front door, enter:" %} <span class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}#</span></h3>
+            <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick M11 3NP, UK <a onclick="showSection('location-section')" href="#">{% trans "Find Address" %}</a></p>
             <div class="pin-confirmation">
                 <h3>{% trans "Did the PIN work?" %}</h3>
                 <button id="pin-yes" class="pin-btn">{% trans "Yes" %}</button>
                 <button id="pin-no" class="pin-btn" onclick="openModal('unlock-help-modal')">{% trans "No" %}</button>
+            </div>
+            <!-- WiFi Details -->
+            <div class="wifi-details pin-fallback">
+                <h3><strong>{% trans "WiFi Details" %}</strong></h3>
+                <p><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
+                <p><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
             </div>
         </div>
 
