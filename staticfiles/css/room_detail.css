@@ -49,7 +49,7 @@ body {
 .pin-fallback {
     margin-top: 20px;
     background-color: #f9f9f9;
-    padding: 15px;
+    /* padding: 15px; */
     border-radius: 5px;
     text-align: center;
 }
@@ -820,6 +820,8 @@ hr {
 
     .pin-fallback {
         margin-top: -5px;
+        text-align: left;
+        background: #fff;
     }
 
     .pin-fallback h3 {
