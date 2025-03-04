@@ -164,7 +164,7 @@ def checkin(request):
                 messages.error(request, "Check-in period has expired or guest is archived.")
                 return redirect("checkin")
 
-            messages.success(request, f"Check-in successful! Your PIN is {guest.front_door_pin}. You can also unlock the door using the button on the next page.")
+            messages.success(request, f"Watch the video instruction")
             return redirect('room_detail', room_token=guest.secure_token)
 
         # If the reservation number is incorrect, keep it prefilled in the form
