@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 class TTLockClient:
     def __init__(self):
-        self.base_url = settings.TTLOCK_BASE_URL  # For API calls (e.g., /lock/list)
-        self.oauth_base_url = settings.TTLOCK_OAUTH_BASE_URL  # For OAuth calls (e.g., /oauth2/refresh_token)
+        self.base_url = settings.TTLOCK_BASE_URL  # For API calls (e.g., https://euapi.sciener.com/v3)
+        self.oauth_base_url = settings.TTLOCK_OAUTH_BASE_URL  # For OAuth calls (e.g., https://euapi.sciener.com)
         self.client_id = os.environ.get("SCIENER_CLIENT_ID")
         self.client_secret = os.environ.get("SCIENER_CLIENT_SECRET")
         self.access_token = os.environ.get("SCIENER_ACCESS_TOKEN")
@@ -58,7 +58,7 @@ class TTLockClient:
 
     def refresh_access_token(self):
         """Refresh the access token using the refresh token."""
-        endpoint = "/v3/refresh_token"  # Try /v3/refresh_token
+        endpoint = "/v3/refresh_token"  # OAuth endpoint
         data = {
             "clientId": self.client_id,
             "client_secret": self.client_secret,
@@ -92,7 +92,7 @@ class TTLockClient:
         }
         return self._make_request("POST", "/lock/lock", data)
 
-    def generate_temporary_pin(self, lock_id, pin, start_time, end_time, name=None):
+    def generate_temporary_pin(self, lock_id, pin, start_time, end_time, name=None, add_type=2):
         """Generate a PIN for a lock (using type 2, which maps to Permanent in the app)."""
         data = {
             "lockId": lock_id,
@@ -100,11 +100,13 @@ class TTLockClient:
             "keyboardPwdType": 2,  # Permanent PIN (based on experiment: type 2 is Permanent in the app)
             "startDate": start_time,
             "endDate": end_time,
+            "isCustom": 1,  # Mark as custom, consistent with previous tests
+            "addType": add_type,  # Use gateway (2) instead of default Bluetooth (1)
         }
         if name:
             data["keyboardPwdName"] = name  # Use keyboardPwdName instead of name
         logger.debug(f"Generating permanent PIN with parameters: {data}")
-        return self._make_request("POST", "/keyboardPwd/add", data)
+        return self._make_request("POST", "/keyboardPwd/add", data)  # Removed /v3 prefix
 
     def delete_pin(self, lock_id, keyboard_pwd_id):
         """Delete a PIN from a lock."""
@@ -112,7 +114,7 @@ class TTLockClient:
             "lockId": lock_id,
             "keyboardPwdId": keyboard_pwd_id,
         }
-        return self._make_request("POST", "/keyboardPwd/delete", data)
+        return self._make_request("POST", "/keyboardPwd/delete", data)  # Removed /v3 prefix
 
     def list_keyboard_passwords(self, lock_id, page_no=1, page_size=20):
         """List all keyboard passwords for a lock."""
