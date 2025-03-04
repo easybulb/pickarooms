@@ -1,27 +1,51 @@
 /* General Styles */
 body {
-    font-family: "Poppins", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Modern, friendly font */
+    font-family: "Inter", "Poppins", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Updated to Inter for a modern look */
     margin: 0;
     padding: 0;
-    background-color: #f5f7fa; /* Softer off-white */
-    color: #2d3748; /* Slightly warmer dark gray */
+    background-color: #f8fafc; /* Slightly lighter background for a cleaner feel */
+    color: #1e293b; /* Darker, more modern text color */
+    line-height: 1.6;
 }
 
 /* Welcome Section */
 .welcome-section {
     text-align: center;
-    margin-bottom: 20px;
+    margin: 30px auto;
+    padding: 20px;
+    background: linear-gradient(135deg, #ffffff, #f1f5f9); /* Subtle gradient background */
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Softer, modern shadow */
+    max-width: 800px;
+    transition: transform 0.2s ease;
+}
+
+.welcome-section:hover {
+    transform: translateY(-2px);
 }
 
 .welcome-section h1 {
-    color: #2c3e50;
-    font-size: 2.5em;
-    margin-bottom: 10px;
+    color: #1e293b;
+    font-size: 2.2em;
+    margin-bottom: 8px;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.welcome-section .room-name {
+    font-weight: 800;
+    color: #2563eb; /* Highlight room name with a modern blue */
 }
 
 .welcome-section p {
-    font-size: 1.2em;
-    color: #7f8c8d;
+    font-size: 1.1em;
+    color: #64748b;
+    margin: 0;
+    font-weight: 500;
 }
 
 /* Unlock Container */
@@ -31,18 +55,21 @@ body {
 }
 
 .btn-unlock {
-    background-color: #3498db;
+    background: linear-gradient(135deg, #3b82f6, #2563eb); /* Modern gradient for buttons */
     color: white;
     font-size: 1.5em;
     padding: 15px 30px;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .btn-unlock:hover {
-    background-color: #2980b9;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Access Section (PIN and WiFi Styling) */
@@ -52,27 +79,28 @@ body {
 
 #access-section .room-info {
     background: #ffffff;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s ease;
 }
 
 #access-section .room-info:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 .pin-fallback {
     margin-top: 20px;
-    background-color: #f9f9f9;
+    background: #f9fafb; /* Slightly lighter background */
     padding: 15px;
-    border-radius: 5px;
+    border-radius: 12px;
     text-align: left;
+    border: 1px solid #e2e8f0;
 }
 
 .pin-fallback h3 {
     margin-bottom: 10px;
-    color: #34495e;
+    color: #1e293b;
     font-size: 1.4rem;
     font-weight: 600;
     display: flex;
@@ -87,7 +115,7 @@ body {
     font-weight: 700;
     letter-spacing: 3px;
     color: white;
-    background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%);
+    background: linear-gradient(135deg, #10b981, #059669); /* Modern green gradient */
     padding: 8px 12px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -98,8 +126,8 @@ body {
     content: "Contact support for PIN";
     font-size: 1.2rem;
     letter-spacing: normal;
-    background: #e53e3e;
-    border: 2px solid #c53030;
+    background: #ef4444;
+    border: 2px solid #dc2626;
     padding: 8px 12px;
     border-radius: 8px;
 }
@@ -112,36 +140,36 @@ body {
 .pin-confirmation h3 {
     font-size: 1.3rem;
     margin-bottom: 15px;
-    color: #2d3748;
-    font-weight: 500;
+    color: #1e293b;
+    font-weight: 600;
 }
 
 .pin-btn {
-    background: #4a90e2;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
     border: none;
     padding: 12px 20px;
     font-size: 1.1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 10px;
     margin: 8px 8px 8px 0;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .pin-btn:hover {
-    background: #357abd;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .pin-wait {
     font-size: 1.2rem;
     font-weight: 500;
-    color: #e53e3e;
-    background: #fef6f5;
-    border: 2px solid #feb2b2;
+    color: #ef4444;
+    background: #fef2f2;
+    border: 2px solid #fecaca;
     padding: 12px 20px;
     border-radius: 10px;
     width: fit-content;
@@ -152,17 +180,18 @@ body {
 
 .wifi-details {
     margin-top: 20px;
-    background-color: #f9f9f9;
+    background: #f9fafb;
     padding: 15px;
-    border-radius: 5px;
+    border-radius: 12px;
     text-align: left;
+    border: 1px solid #e2e8f0;
 }
 
 .wifi-details h3 {
     margin-bottom: 5px;
-    color: #34495e;
+    color: #1e293b;
     font-size: 1.4rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* Quick Access Menu */
@@ -174,60 +203,66 @@ body {
 }
 
 #quick-access button {
-    background: #28a745;
+    background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     padding: 0.7rem 1.5rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 #quick-access button:hover {
-    background: #218838;
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Sticky Tab Navigation */
 .section-nav {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     padding: 12px 10px;
-    background: linear-gradient(135deg, #ffffff 0%, #eef2f7 100%); /* Subtle gradient */
-    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff; /* Clean white background */
+    border-bottom: 1px solid #e5e7eb;
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Softer shadow */
-    display: flex !important; /* Ensure it’s always visible */
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    display: flex !important;
 }
 
 .tab-btn {
-    background: #4a90e2; /* Richer blue */
-    color: white;
+    background: #e5e7eb; /* Neutral grey for inactive tabs */
+    color: #64748b;
     border: none;
-    padding: 10px 14px;
+    padding: 10px 16px;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 30px; /* Pill-shaped buttons */
     transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .tab-btn:hover {
-    background: #357abd; /* Darker hover */
-    transform: translateY(-2px); /* Subtle lift */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: #d1d5db;
+    color: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .tab-btn.active {
-    background: #2b6cb0; /* Even darker for active */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle inset */
+    background: linear-gradient(135deg, #3b82f6, #2563eb); /* Modern blue gradient for active tab */
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Hero Section */
@@ -237,7 +272,7 @@ body {
     height: 450px;
     background-size: cover;
     background-position: center;
-    display: flex; /* Ensure it’s always visible */
+    display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
@@ -250,7 +285,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4); /* Slightly darker overlay for better contrast */
 }
 
 .room-hero-content {
@@ -271,34 +306,38 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
     border: none;
-    padding: 15px 20px;
+    padding: 18px 24px;
     cursor: pointer;
-    font-size: 2rem;
+    font-size: 2.2rem;
     border-radius: 50%;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .play-button:hover {
-    background: rgba(0, 0, 0, 0.9);
+    background: #ffffff;
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .play-text {
     position: absolute;
-    top: 60%;
+    top: 62%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: white;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 6px 12px;
-    border-radius: 5px;
-    font-weight: bold;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .room-video-container {
@@ -319,28 +358,7 @@ body {
     border: none;
     display: block;
     margin: 0 auto;
-}
-
-/* Room Header */
-.room-header {
-    text-align: center;
-    padding: 20px;
-    background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
-    display: block; /* Ensure it’s always visible */
-}
-
-.room-header h1 {
-    font-size: 2rem; /* Slightly larger */
-    color: #2d3748;
-    margin: 0;
-    font-weight: 600;
-}
-
-.room-header p {
-    font-size: 1.2rem;
-    color: #718096; /* Softer gray */
-    margin: 5px 0 0;
+    border-radius: 12px;
 }
 
 /* Room Containers */
@@ -357,27 +375,42 @@ body {
 
 .room-info {
     background: #ffffff;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Deeper shadow */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s ease;
 }
 
 .room-info:hover {
-    transform: translateY(-3px); /* Subtle hover lift */
+    transform: translateY(-2px);
 }
 
 .room-info h2 {
-    font-size: 1.5rem;
-    color: #2d3748;
-    margin-bottom: 15px;
+    font-size: 1.8rem;
+    color: #1e293b;
+    margin-bottom: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f1f5f9, #e5e7eb); /* Subtle background for headers */
+    padding: 10px 15px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.room-info h3 {
+    font-size: 1.4rem;
+    color: #1e293b;
+    margin: 20px 0 10px;
     font-weight: 600;
+    background: #f9fafb;
+    padding: 8px 12px;
+    border-radius: 8px;
 }
 
 .room-info p {
     font-size: 1.1rem;
-    color: #4a5568; /* Warmer gray */
+    color: #475569;
     line-height: 1.6;
+    margin: 8px 0;
 }
 
 /* Modal */
@@ -397,12 +430,12 @@ body {
 .modal-content {
     background: #ffffff;
     padding: 25px;
-    border-radius: 12px;
+    border-radius: 16px;
     max-width: 90%;
     max-height: 85vh;
     overflow-y: auto;
     text-align: center;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .modal-content .video-wrapper {
@@ -421,7 +454,7 @@ body {
 
 .video-item h4 {
     font-size: 1.2rem;
-    color: #2d3748;
+    color: #1e293b;
     margin-bottom: 10px;
     font-weight: 500;
     text-align: center;
@@ -430,25 +463,25 @@ body {
 .video-overlay {
     position: relative;
     width: 100%;
-    height: 250px; /* Matches hero iframe height */
+    height: 250px;
     cursor: pointer;
     overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .modal-video-container {
     width: 100%;
-    height: 250px; /* Matches .video-overlay height */
+    height: 250px;
     background: #000;
     text-align: center;
-    display: none; /* Initially hidden */
+    display: none;
 }
 
 .modal-video-container iframe {
     width: 100%;
     height: 100%;
-    border-radius: 10px;
+    border-radius: 12px;
 }
 
 .video-preview-image {
@@ -465,11 +498,11 @@ body {
 .video-overlay iframe {
     width: 100%;
     height: 100%;
-    border-radius: 10px;
+    border-radius: 12px;
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 0; /* Behind overlay until played */
+    z-index: 0;
 }
 
 .video-overlay .play-button {
@@ -477,22 +510,25 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
     border: none;
     padding: 15px 20px;
     cursor: pointer;
     font-size: 2rem;
     border-radius: 50%;
-    transition: background 0.3s;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 2;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .video-overlay .play-button:hover {
-    background: rgba(0, 0, 0, 0.9);
+    background: #ffffff;
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 .video-overlay .play-text {
@@ -502,10 +538,10 @@ body {
     transform: translate(-50%, -50%);
     font-size: 1rem;
     color: white;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 6px 12px;
-    border-radius: 5px;
-    font-weight: bold;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
     z-index: 2;
 }
 
@@ -513,20 +549,20 @@ body {
     float: right;
     cursor: pointer;
     font-size: 1.8rem;
-    color: #718096;
+    color: #64748b;
     transition: color 0.2s;
 }
 
 .close:hover {
-    color: #2d3748;
+    color: #1e293b;
 }
 
 #pin-admin-alert {
     background: #f0fff4;
-    color: #2f855a;
+    color: #15803d;
     padding: 12px;
     border-radius: 8px;
-    border-left: 4px solid #38b2ac;
+    border-left: 4px solid #22c55e;
     margin-top: 15px;
     font-weight: 500;
 }
@@ -539,17 +575,17 @@ body {
 hr {
     border: none;
     height: 1px;
-    background: linear-gradient(to right, transparent, #e2e8f0, transparent); /* Faded line */
+    background: linear-gradient(to right, transparent, #e5e7eb, transparent);
     margin: 25px 0;
 }
 
 .expiration {
-    color: #e53e3e;
+    color: #ef4444;
     font-weight: 600;
 }
 
 .no-guest {
-    color: #e53e3e;
+    color: #ef4444;
     font-size: 1.1rem;
     font-weight: 600;
 }
@@ -561,17 +597,18 @@ hr {
 
 .faq-category h3 {
     font-size: 1.4rem;
-    color: #4a90e2;
+    color: #1e293b;
     cursor: pointer;
     margin: 15px 0 10px;
-    padding: 8px 12px;
-    background: #edf2f7;
-    border-radius: 8px;
-    transition: background 0.2s;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #f1f5f9, #e5e7eb);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+    font-weight: 600;
 }
 
 .faq-category h3:hover {
-    background: #e2e8f0;
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
 }
 
 .faq-category.active .faq-item {
@@ -582,59 +619,60 @@ hr {
     width: 100%;
     padding: 12px 15px;
     margin-bottom: 20px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
     font-size: 1rem;
-    background: #f7fafc;
-    transition: border-color 0.2s;
+    background: #fafafa;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 #faq-search:focus {
-    border-color: #4a90e2;
+    border-color: #3b82f6;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .faq-item {
     margin-bottom: 15px;
-    border-bottom: 1px solid #edf2f7;
+    border-bottom: 1px solid #e5e7eb;
     padding-bottom: 15px;
     display: none;
 }
 
 .faq-question {
-    background: #edf2f7;
+    background: #f9fafb;
     border: none;
     font-size: 1.2rem;
     width: 100%;
     text-align: left;
     cursor: pointer;
-    color: #4a90e2;
-    font-weight: 500;
-    padding: 10px 15px;
-    border-radius: 8px;
-    transition: background 0.2s;
+    color: #2563eb;
+    font-weight: 600;
+    padding: 12px 15px;
+    border-radius: 10px;
+    transition: background 0.3s ease;
 }
 
 .faq-question:hover {
-    background: #e2e8f0;
+    background: #f1f5f9;
 }
 
 .faq-answer {
     display: none;
     padding: 15px 15px 0;
-    color: #4a5568;
+    color: #475569;
     line-height: 1.6;
 }
 
 .faq-answer.highlight {
-    background: #fff3cd;
+    background: #fefcbf;
     border-radius: 8px;
 }
 
 .arrow {
     float: right;
     font-size: 1.3rem;
-    color: #718096;
+    color: #64748b;
 }
 
 .street-image {
@@ -642,7 +680,7 @@ hr {
     max-width: 800px;
     height: auto;
     border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     margin-top: 15px;
 }
 
@@ -651,20 +689,21 @@ hr {
     position: fixed;
     bottom: 25px;
     right: 25px;
-    background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     color: white;
     padding: 14px 20px;
     border-radius: 50px;
     cursor: pointer;
     font-size: 1.1rem;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
 }
 
 #chat-button:hover {
-    background: linear-gradient(135deg, #2c7a7b 0%, #285e61 100%);
+    background: linear-gradient(135deg, #16a34a, #15803d);
     transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .chat-box {
@@ -674,7 +713,7 @@ hr {
     background: #ffffff;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     display: none;
     width: 280px;
 }
@@ -685,23 +724,23 @@ hr {
 
 .chat-box p {
     margin: 0 0 15px;
-    color: #4a5568;
+    color: #475569;
     font-size: 1rem;
 }
 
 .chat-box a {
     display: inline-block;
-    background: #38b2ac;
+    background: #22c55e;
     color: white;
     padding: 10px 15px;
-    border-radius: 8px;
+    border-radius: 10px;
     text-decoration: none;
     font-weight: 600;
-    transition: background 0.3s;
+    transition: background 0.3s ease;
 }
 
 .chat-box a:hover {
-    background: #2c7a7b;
+    background: #16a34a;
 }
 
 /* Check-In Wizard */
@@ -710,7 +749,7 @@ hr {
     padding: 2rem;
     background: #fff;
     border-radius: 10px;
-    box-shadow: none; /* Remove shadow to match screenshot */
+    box-shadow: none;
     text-align: center;
 }
 
@@ -724,7 +763,7 @@ hr {
 
 .wizard-step h2 {
     font-size: 1.8rem;
-    color: #333;
+    color: #1e293b;
     margin-bottom: 1rem;
     font-weight: 600;
     display: flex;
@@ -734,21 +773,21 @@ hr {
 }
 
 .wizard-step h2::before {
-    content: "📜"; /* Match emoji in screenshot */
+    content: "📜";
 }
 
 .wizard-step p {
     font-size: 1.2rem;
-    color: #666;
+    color: #475569;
     margin-bottom: 2rem;
 }
 
 .next-btn {
-    background: #007bff; /* Match blue button in screenshot */
+    background: #3b82f6;
     color: white;
     border: none;
     padding: 0.8rem 2rem;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -756,12 +795,12 @@ hr {
 }
 
 .next-btn:hover {
-    background: #0056b3;
+    background: #2563eb;
 }
 
 .watch-video-btn, .faq-btn {
     background: transparent;
-    color: #007bff;
+    color: #3b82f6;
     border: none;
     padding: 0.8rem 2rem;
     font-size: 1rem;
@@ -770,35 +809,46 @@ hr {
 }
 
 .watch-video-btn:hover, .faq-btn:hover {
-    color: #0056b3;
+    color: #2563eb;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .welcome-section {
+        margin: 15px auto;
+        padding: 15px;
+    }
+
     .welcome-section h1 {
-        font-size: 1.5rem;
-        font-weight: 500;
-        padding: 0px 20px;
-        margin: 12px 0 8px 0;
-        color: #000
+        font-size: 1.6rem;
+        font-weight: 600;
+        padding: 0 20px;
+        margin: 10px 0;
+        color: #1e293b;
+    }
+
+    .welcome-section .room-name {
+        font-size: 1.7rem;
     }
 
     .welcome-section p {
-        font-size: 1rem;
-        padding: 0 25px;
         font-size: 1.1rem;
-        margin: 10px 0px 0px 0px;
-        color: #000
+        padding: 0 25px;
+        margin: 0;
+        color: #475569;
     }
 
     .section-nav {
         gap: 6px;
-        padding: 0px 8px 8px 8px;
+        padding: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .tab-btn {
-        font-size: 0.85rem;
-        padding: 8px 10px;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        border-radius: 20px;
     }
 
     .room-hero {
@@ -808,12 +858,13 @@ hr {
 
     .play-button {
         font-size: 1.5rem;
-        padding: 15px 20px;
+        padding: 12px 16px;
     }
 
     .play-text {
         font-size: 0.9rem;
         top: 65%;
+        padding: 6px 12px;
     }
 
     .room-video-container iframe {
@@ -821,29 +872,23 @@ hr {
         width: 100%;
     }
 
-    .room-header h1 {
-        font-size: 1.5rem;
-        margin-top: -1px;
-    }
-
-    .room-header p {
-        font-size: 1.1rem;
-        margin-top: -10px;
-        margin-bottom: -5px;
-    }
-
     .room-info {
-        padding: 20px;
+        padding: 15px;
     }
 
     .room-info h2 {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
+        padding: 8px 12px;
+    }
+
+    .room-info h3 {
+        font-size: 1.2rem;
+        padding: 6px 10px;
     }
 
     .room-info p {
-        font-size: 1.1rem;
-        color: #000;
-        line-height: 1.6;
+        font-size: 1rem;
+        color: #475569;
     }
 
     #access-section .room-info {
@@ -854,7 +899,7 @@ hr {
         margin-top: 10px;
         padding: 10px;
         background: #fff;
-        text-align: left;
+        border: none;
     }
 
     .pin-fallback h3 {
@@ -892,7 +937,7 @@ hr {
         margin-top: 15px;
         padding: 5px;
         background: #fff;
-        text-align: left;
+        border: none;
     }
 
     .wifi-details h3 {
@@ -901,7 +946,7 @@ hr {
     }
 
     .wifi-details p {
-        font-size: 1.1rem;
+        font-size: 1rem;
         margin: 2px 0;
     }
 
@@ -919,12 +964,21 @@ hr {
         left: -5%;
     }
 
+    .modal-content {
+        padding: 15px;
+    }
+
     .modal-content iframe {
         height: 200px;
     }
 
     .modal-video-container {
-        height: 200px; /* Matches mobile .video-overlay height */
+        height: 200px;
+    }
+
+    .faq-category h3 {
+        font-size: 1.2rem;
+        padding: 8px 12px;
     }
 
     .faq-question {
@@ -946,123 +1000,21 @@ hr {
         padding: 15px;
     }
 
-    /* Responsive Design for Wizard and Quick Access */
     #checkin-wizard {
         padding: 1rem;
     }
 
     .wizard-step h2 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
     }
 
     .next-btn, .watch-video-btn, .faq-btn {
         padding: 0.6rem 1.5rem;
         font-size: 0.9rem;
     }
-
-    #quick-access {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    #quick-access button {
-        padding: 0.6rem 1rem;
-        font-size: 0.9rem;
-    }
 }
 
 /* Modal Video Enhancements */
-.modal-content .video-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    justify-content: center;
-    align-items: center;
-}
-
-.video-item {
-    width: 100%;
-    max-width: 450px;
-    position: relative;
-}
-
-.video-item h4 {
-    font-size: 1.2rem;
-    color: #2d3748;
-    margin-bottom: 10px;
-    font-weight: 500;
-    text-align: center;
-}
-
-.video-overlay {
-    position: relative;
-    width: 100%;
-    height: 250px; /* Matches hero iframe height */
-    cursor: pointer;
-    overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.video-preview-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-}
-
-.video-overlay iframe {
-    width: 100%;
-    height: 100%;
-    border-radius: 10px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0; /* Behind overlay until played */
-}
-
-.video-overlay .play-button {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    padding: 15px 20px;
-    cursor: pointer;
-    font-size: 2rem;
-    border-radius: 50%;
-    transition: background 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-}
-
-.video-overlay .play-button:hover {
-    background: rgba(0, 0, 0, 0.9);
-}
-
-.video-overlay .play-text {
-    position: absolute;
-    top: 60%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1rem;
-    color: white;
-    background: rgba(0, 0, 0, 0.6);
-    padding: 6px 12px;
-    border-radius: 5px;
-    font-weight: bold;
-    z-index: 2;
-}
-
-/* Mobile Adjustments */
 @media (max-width: 768px) {
     .modal-content .video-wrapper {
         gap: 20px;
@@ -1073,7 +1025,7 @@ hr {
     }
 
     .video-overlay {
-        height: 200px; /* Matches hero mobile height */
+        height: 200px;
     }
 
     .video-overlay .play-button {
