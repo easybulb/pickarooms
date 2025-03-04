@@ -54,7 +54,8 @@
         {% else %}
         <!-- PIN as the Primary Option -->
         <div class="pin-fallback">
-            <h3>{% trans "At the front door, enter:" %} <span class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}#</span></h3>
+            <h3>{% trans "At the front door, enter:" %}</h3>
+            <p><span class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}#</span></p>
             <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick M11 3NP, UK <a onclick="showSection('location-section')" href="#">{% trans "Find Address" %}</a></p>
             <div class="pin-confirmation">
                 <h3>{% trans "Did the PIN work?" %}</h3>
