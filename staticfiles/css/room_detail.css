@@ -7,6 +7,162 @@ body {
     color: #2d3748; /* Slightly warmer dark gray */
 }
 
+/* Welcome Section */
+.welcome-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.welcome-section h1 {
+    color: #2c3e50;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.welcome-section p {
+    font-size: 1.2em;
+    color: #7f8c8d;
+}
+
+/* Unlock Container */
+.unlock-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn-unlock {
+    background-color: #3498db;
+    color: white;
+    font-size: 1.5em;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-unlock:hover {
+    background-color: #2980b9;
+}
+
+/* PIN Styling */
+.pin-fallback {
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.pin-fallback h3 {
+    margin-bottom: 10px;
+    color: #34495e;
+}
+
+.pin-code {
+    font-size: 2.2rem; /* Bigger for emphasis */
+    font-weight: 700;
+    letter-spacing: 5px;
+    color: white;
+    background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%); /* Teal gradient */
+    padding: 18px 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    width: fit-content;
+    margin: 25px auto;
+    border: none;
+    text-align: center;
+    display: block; /* Ensures proper centering */
+}
+
+.pin-code:empty::before,
+.pin-code:empty {
+    content: "Contact support for PIN";
+    font-size: 1.2rem;
+    letter-spacing: normal;
+    background: #e53e3e;
+    border: 2px solid #c53030;
+    padding: 12px 20px;
+    border-radius: 10px;
+}
+
+.pin-confirmation {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.pin-confirmation h3 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.pin-btn {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    margin: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pin-btn:hover {
+    background: #357abd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.pin-wait {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #e53e3e;
+    background: #fef6f5;
+    border: 2px solid #feb2b2;
+    padding: 12px 20px;
+    border-radius: 10px;
+    width: fit-content;
+    margin: 20px auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.pin-validity {
+    font-size: 1.1rem;
+    color: #4a5568;
+}
+
+/* Quick Access Menu */
+#quick-access {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+#quick-access button {
+    background: #28a745; /* Match green buttons in screenshot */
+    color: white;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#quick-access button:hover {
+    background: #218838;
+}
+
 /* Sticky Tab Navigation */
 .section-nav {
     display: flex;
@@ -19,6 +175,7 @@ body {
     top: 0;
     z-index: 10;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Softer shadow */
+    display: flex !important; /* Ensure it’s always visible */
 }
 
 .tab-btn {
@@ -45,14 +202,14 @@ body {
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle inset */
 }
 
-/* Hero Section (Unchanged) */
+/* Hero Section */
 .room-hero {
     position: relative;
     width: 100%;
     height: 450px;
     background-size: cover;
     background-position: center;
-    display: flex;
+    display: flex; /* Ensure it’s always visible */
     align-items: center;
     justify-content: center;
     text-align: center;
@@ -142,6 +299,7 @@ body {
     padding: 20px;
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
+    display: block; /* Ensure it’s always visible */
 }
 
 .room-header h1 {
@@ -192,80 +350,6 @@ body {
     font-size: 1.1rem;
     color: #4a5568; /* Warmer gray */
     line-height: 1.6;
-}
-
-/* PIN Styling */
-.pin-wait {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #e53e3e; /* Softer red */
-    background: #fef6f5;
-    border: 2px solid #feb2b2;
-    padding: 12px 20px;
-    border-radius: 10px;
-    width: fit-content;
-    margin: 20px auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
-
-.pin-code {
-    display: block;
-    font-size: 2.2rem; /* Bigger for emphasis */
-    font-weight: 700;
-    letter-spacing: 5px;
-    color: white;
-    background: linear-gradient(135deg, #38b2ac 0%, #2c7a7b 100%); /* Teal gradient */
-    padding: 18px 25px;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    width: fit-content;
-    margin: 25px auto;
-    border: none;
-    text-align: center;
-}
-
-.pin-code:empty::before,
-.pin-code:empty {
-    content: "Contact support for PIN";
-    font-size: 1.2rem;
-    letter-spacing: normal;
-    background: #e53e3e;
-    border: 2px solid #c53030;
-    padding: 12px 20px;
-    border-radius: 10px;
-}
-
-.pin-confirmation {
-    text-align: center;
-    margin-top: 25px;
-}
-
-.pin-confirmation h3 {
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-    color: #2d3748;
-    font-weight: 500;
-}
-
-.pin-btn {
-    background: #4a90e2;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 8px;
-    margin: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.pin-btn:hover {
-    background: #357abd;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* Modal */
@@ -592,11 +676,96 @@ hr {
     background: #2c7a7b;
 }
 
+/* Check-In Wizard */
+#checkin-wizard {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: none; /* Remove shadow to match screenshot */
+    text-align: center;
+}
+
+.wizard-step {
+    display: none;
+}
+
+.wizard-step.active {
+    display: block;
+}
+
+.wizard-step h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.wizard-step h2::before {
+    content: "📜"; /* Match emoji in screenshot */
+}
+
+.wizard-step p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.next-btn {
+    background: #007bff; /* Match blue button in screenshot */
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-left: 1rem;
+}
+
+.next-btn:hover {
+    background: #0056b3;
+}
+
+.watch-video-btn, .faq-btn {
+    background: transparent;
+    color: #007bff;
+    border: none;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.watch-video-btn:hover, .faq-btn:hover {
+    color: #0056b3;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+    .welcome-section h1 {
+        font-size: 1.5rem;
+        font-weight: 500;
+        padding: 0px 20px;
+        margin: 12px 0 8px 0;
+        color: #000
+    }
+
+    .welcome-section p {
+        font-size: 1rem;
+        padding: 0 25px;
+        font-size: 1.1rem;
+        margin: 10px 0px 0px 0px;
+        color: #000
+    }
+
     .section-nav {
         gap: 6px;
-        padding: 8px;
+        padding: 0px 8px 8px 8px;
     }
 
     .tab-btn {
@@ -643,15 +812,35 @@ hr {
         font-size: 1.3rem;
     }
 
+    .room-info p {
+        font-size: 1.1rem;
+        color: #000;
+        line-height: 1.6;
+    }
+
+    .pin-fallback {
+        margin-top: -5px;
+    }
+
+    .pin-fallback h3 {
+        margin-top: -5px;
+        font-weight: 500;
+    }
+
+    .pin-fallback > .pin-code {
+        color: #fff;
+    }
+
     .pin-wait {
         font-size: 1rem;
         padding: 10px 15px;
     }
 
     .pin-code {
-        font-size: 1.8rem;
-        padding: 14px 20px;
+        font-size: 1.3rem;
+        padding: 7px 15px;
         letter-spacing: 3px;
+        color: #fff;
     }
 
     .pin-btn {
@@ -688,6 +877,30 @@ hr {
         right: 20px;
         width: 240px;
         padding: 15px;
+    }
+
+    /* Responsive Design for Wizard and Quick Access */
+    #checkin-wizard {
+        padding: 1rem;
+    }
+
+    .wizard-step h2 {
+        font-size: 1.5rem;
+    }
+
+    .next-btn, .watch-video-btn, .faq-btn {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    #quick-access {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    #quick-access button {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
     }
 }
 

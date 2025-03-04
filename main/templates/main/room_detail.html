@@ -4,67 +4,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
-<style>
-    /* Add some fun styling for the check-in process */
-    .welcome-section {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .welcome-section h1 {
-        color: #2c3e50;
-        font-size: 2.5em;
-        margin-bottom: 10px;
-    }
-    .welcome-section p {
-        font-size: 1.2em;
-        color: #7f8c8d;
-    }
-    .unlock-container {
-        text-align: center;
-        margin: 20px 0;
-    }
-    .btn-unlock {
-        background-color: #3498db;
-        color: white;
-        font-size: 1.5em;
-        padding: 15px 30px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    .btn-unlock:hover {
-        background-color: #2980b9;
-    }
-    .pin-fallback {
-        margin-top: 20px;
-        background-color: #f9f9f9;
-        padding: 15px;
-        border-radius: 5px;
-        text-align: center;
-    }
-    .pin-fallback h3 {
-        margin-bottom: 10px;
-        color: #34495e;
-    }
-    .pin-code {
-        font-size: 1.5em;
-        color: #e74c3c;
-        font-weight: bold;
-    }
-    .quick-access button {
-        background-color: #ecf0f1;
-        color: #2c3e50;
-        border: 1px solid #bdc3c7;
-        margin: 5px;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    .quick-access button:hover {
-        background-color: #dfe6e9;
-    }
-</style>
 {% endblock %}
 
 {% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
@@ -89,13 +28,13 @@
 
 <!-- Welcome Section -->
 <section class="welcome-section">
-    <h1>🎉 {% trans "Welcome to Your Stay," %} {{ guest.full_name }}! 🎉</h1>
-    <p>{% trans "Let’s get you into your room at" %} {{ room.name }} {% trans "in just a few clicks!" %}</p>
+    <h1>{{ room.name }}</h1>
+    <p>{% trans "Welcome," %} {{ guest.full_name }}!</p>
 </section>
 
 <!-- Sticky Tab Navigation -->
 <div class="section-nav">
-    <button class="tab-btn active" onclick="showSection('access-section')">{% trans "Access" %}</button>
+    <button class="tab-btn active" onclick="showSection('access-section')">{% trans "Access PIN" %}</button>
     <button class="tab-btn" onclick="showSection('location-section')">{% trans "Location" %}</button>
     <button class="tab-btn" onclick="showSection('checkin-section')">{% trans "Check-In" %}</button>
     <button class="tab-btn" onclick="showSection('checkout-section')">{% trans "Check-Out" %}</button>
@@ -106,29 +45,17 @@
 <section id="access-section" class="room-container active">
     <div class="room-info">
         {% if not show_pin %}
-        <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your access details will be available then." %}</p>
+        <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your access details will be available then." %}
+        </p>
         {% else %}
-        <!-- Unlock Door Button -->
-        <div class="unlock-container">
-            <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
-                {% csrf_token %}
-                <button type="submit" name="unlock_door" class="btn-unlock">🚪 {% trans "Unlock the Door Now!" %}</button>
-            </form>
-            <p>{% trans "Click the button above to unlock the front door instantly. It’s the easiest way to enter!" %}</p>
-        </div>
-
-        <!-- PIN as a Fallback Option -->
+        <!-- PIN as the Primary Option -->
         <div class="pin-fallback">
-            <h3>🔑 {% trans "Backup Option: Use Your PIN" %}</h3>
-            <p>{% trans "If you don’t have internet access, you can try this PIN on the front door keypad (it may not work currently, so use the button above if possible):" %}</p>
-            <p class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}</p>
-            <p class="pin-validity">
-                {% trans "Valid from" %} {{ guest.check_in_date }} 2:00 PM {% trans "to" %} {{ guest.check_out_date }} 11:00 AM
-            </p>
+            <h3>{% trans "At the front door, enter PIN:" %} <span class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}#</span></h3>
+            <p class="pin-validity">{% trans "Valid:" %} {{ guest.check_in_date }} 2 PM - {{ guest.check_out_date }} 11 AM</p>
             <div class="pin-confirmation">
                 <h3>{% trans "Did the PIN work?" %}</h3>
                 <button id="pin-yes" class="pin-btn">{% trans "Yes" %}</button>
-                <button id="pin-no" class="pin-btn" onclick="openModal('pin-help-modal')">{% trans "No" %}</button>
+                <button id="pin-no" class="pin-btn" onclick="openModal('unlock-help-modal')">{% trans "No" %}</button>
             </div>
         </div>
 
@@ -141,13 +68,27 @@
     </div>
 </section>
 
+<!-- Unlock Help Modal (Remote Unlock Option) -->
+<div id="unlock-help-modal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('unlock-help-modal')">×</span>
+        <h3>{% trans "Unlock the Door Remotely" %}</h3>
+        <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
+            {% csrf_token %}
+            <button type="submit" name="unlock_door" class="btn-unlock">🚪 {% trans "Press to Unlock" %}</button>
+        </form>
+        <p>{% trans "The door will unlock; turn the handle to enter. Ensure you are in front of the door." %}</p>
+    </div>
+</div>
+
 <!-- Location Section -->
 <section id="location-section" class="room-container">
     <div class="room-info">
         <h2>📍 {% trans "Location" %}</h2>
         <p><strong>{% trans "Address:" %}</strong> {% trans "8 Rylance Street, Beswick, Manchester, M11 3NP" %}</p>
-        <p><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">{% trans "📍 Open in Google Maps" %}</a></p>
-        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Street View of Property' %}" class="street-image">
+        <p><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
+        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png"
+            alt="{% trans 'Street View of Property' %}" class="street-image">
         <hr>
         <h3>{% trans "How do I get to the property?" %}</h3>
         <p><strong>{% trans "From Manchester Airport:" %}</strong></p>
@@ -157,7 +98,7 @@
             <li>🚌 <strong>{% trans "Bus:" %}</strong> {% trans "219 bus from Piccadilly stops nearby." %}</li>
         </ul>
         <p><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
-        <p><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street, via Ashton Old Road (A635) or M60 Exit 24." %}</p>
+        <p><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to" %} 8 Rylance Street, {% trans "via" %} Ashton Old Road (A635) {% trans "or" %} M60 Exit 24.</p>
     </div>
 </section>
 
@@ -174,10 +115,13 @@
         <hr>
         <h3>{% trans "How do I enter the property?" %}</h3>
         <ol>
-            <li>{% trans "Click the 'Unlock Door Remotely' button in the Access tab to unlock the front door instantly." %}</li>
-            <li>{% trans "If you don’t have internet, try the PIN shown in the Access tab on the front door keypad (note: the PIN may not work currently)." %}</li>
-            <li>{% trans "Watch the video at the top of the page for entry instructions." %}</li>
-            <li>{% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
+            <li>{% trans "Enter the PIN:" %} <strong>{{ front_door_pin|default:"Contact support for PIN" }}#</strong> {%
+                trans "to unlock the door." %}</li>
+            <li>{% trans "If the PIN doesn’t work, use the 'Press to Unlock' button in the Access tab modal to unlock
+                the door remotely." %}</li>
+            <li>{% trans "Watch the video in the FAQs section for instructions on using the keypad." %}</li>
+            <li>{% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{ room.name
+                    }}</strong>.</li>
         </ol>
     </div>
 </section>
@@ -189,7 +133,8 @@
         {% if guest %}
         <p><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before 11 AM" %})</p>
         <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
-        <p class="expiration-note">{% trans "Note: Your front door access will expire at check-out time. Please ensure you check out before 11 AM to avoid being locked out." %}</p>
+        <p class="expiration-note">{% trans "Note: Your front door access will expire at check-out time. Please ensure
+            you check out before 11 AM to avoid being locked out." %}</p>
         {% else %}
         <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
         {% endif %}
@@ -215,22 +160,52 @@
             <div class="faq-category">
                 <h3 onclick="toggleCategory(this)">{% trans "Access" %}</h3>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Is my digital lock secure?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Is my digital lock secure?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system for the front door ensures only the assigned guest and admin can access. Access expires after checkout for added security." %}</p>
+                        <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system for the front door
+                            ensures only the assigned guest and admin can access. Access expires after checkout for
+                            added security." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What if my front door PIN doesn’t work?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What if my front door PIN doesn’t work?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <p>{% trans "Try the following steps:" %}</p>
                         <ul>
                             <li>{% trans "Ensure you’re entering the correct PIN as shown in the Access tab." %}</li>
                             <li>{% trans "Touch the keypad to light up the numbers before entering the PIN." %}</li>
-                            <li>{% trans "Check the video instructions for proper usage." %}</li>
-                            <li>{% trans "Use the 'Unlock Door Remotely' button in the Access tab if you have internet access." %}</li>
-                            <li>{% trans "If it still doesn’t work, click 'No' in the PIN confirmation section to report the issue, and our team will assist you promptly." %}</li>
+                            <li>{% trans "Check the video instructions below for proper usage." %}</li>
+                            <li>{% trans "Use the 'Press to Unlock' button in the Access tab modal if you have internet
+                                access." %}</li>
+                            <li>{% trans "If it still doesn’t work, click 'No' in the PIN confirmation section to report
+                                the issue, and our team will assist you promptly." %}</li>
                         </ul>
+                    </div>
+                </div>
+                <!-- Instructional Video -->
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "How do I use the front door keypad?" %} <span
+                            class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>{% trans "Watch this video for assistance:" %}</p>
+                        <div class="video-wrapper">
+                            <div class="video-item">
+                                <div class="video-overlay">
+                                    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png"
+                                        alt="{% trans 'Front Door Preview' %}" class="video-preview-image">
+                                    <button class="play-button" data-video="front-door-video">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <p class="play-text">{% trans "Watch Video" %}</p>
+                                </div>
+                                <div class="modal-video-container" id="front-door-video" style="display: none;">
+                                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1"
+                                        frameborder="0" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -238,7 +213,8 @@
             <div class="faq-category">
                 <h3 onclick="toggleCategory(this)">{% trans "Amenities" %}</h3>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What’s the WiFi password?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What’s the WiFi password?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <ul>
                             <li><strong>{% trans "Wifi Name:" %}</strong> {% trans "Guest_2.4G" %}</li>
@@ -247,7 +223,8 @@
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What are the house rules?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What are the house rules?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <ul>
                             <li>❗ {% trans "No smoking inside." %}</li>
@@ -257,43 +234,55 @@
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <p>🍕 {% trans "Downstairs with full access." %}</p>
-                        <p>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with instructions nearby." %}</p>
-                        <p>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}</p>
+                        <p>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with
+                            instructions nearby." %}</p>
+                        <p>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}
+                        </p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "How do I adjust the heating?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "How do I adjust the heating?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>❄️ {% trans "Turn radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans "to increase heat." %}</p>
+                        <p>❄️ {% trans "Turn radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans
+                            "to increase heat." %}</p>
                         <p>🔥 {% trans "Heats automatically below" %} <strong>{% trans "21°C" %}</strong>.</p>
                         <p>⚠️ {% trans "Don’t force stiff knobs—turn gently." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Where’s the bathroom, and do you provide towels?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Where’s the bathroom, and do you provide towels?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>🚿 <strong>{% trans "Bathrooms:" %}</strong> {% trans "En-suite or shared in the hallway." %}</p>
+                        <p>🚿 <strong>{% trans "Bathrooms:" %}</strong> {% trans "En-suite or shared in the hallway." %}
+                        </p>
                         <p>🛏 {% trans "Fresh towels and shower gel provided in your room." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <p>🧺 <strong>{% trans "Pressing iron:" %}</strong> {% trans "In the hallway." %}</p>
                         <p>💨 <strong>{% trans "Hairdryer:" %}</strong> {% trans "In the bathroom." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "How safe is the internet network?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "How safe is the internet network?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>{% trans "Powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "Guest network is isolated." %}</p>
+                        <p>{% trans "Powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with
+                            an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "Guest network is isolated."
+                            %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What amenities are included?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What amenities are included?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <ul>
                             <li>✅ {% trans "Free High-Speed WiFi" %}</li>
@@ -310,11 +299,15 @@
             <div class="faq-category">
                 <h3 onclick="toggleCategory(this)">{% trans "Travel" %}</h3>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "How can I get around?" %} <span class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "How can I get around?" %} <span
+                            class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223 1066)." %}</p>
-                        <p>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city centre." %}</p>
-                        <p><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus routes." %}</p>
+                        <p>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223
+                            1066)." %}</p>
+                        <p>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city
+                            centre." %}</p>
+                        <p><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus
+                            routes." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
@@ -329,34 +322,6 @@
     </div>
 </section>
 
-<!-- PIN Help Modal -->
-<div id="pin-help-modal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('pin-help-modal')">×</span>
-        <h3>{% trans "Need Help with Your PIN?" %}</h3>
-        <p>{% trans "Watch this video for assistance:" %}</p>
-        <div class="video-wrapper">
-            <div class="video-item">
-                <h4>{% trans "Front Door" %}</h4>
-                <div class="video-overlay">
-                    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Front Door Preview' %}" class="video-preview-image">
-                    <button class="play-button" data-video="front-door-video">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <p class="play-text">{% trans "Watch Video" %}</p>
-                </div>
-                <div class="modal-video-container" id="front-door-video" style="display: none;">
-                    <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
-                </div>
-            </div>
-        </div>
-        <div id="pin-admin-alert" class="hidden">
-            <p>{% trans "Still not working? A team member will contact you soon. Or call/WhatsApp us at" %} <strong>+44(0)7539029629</strong>.</p>
-        </div>
-        <p><button id="pin-still-issue" class="pin-btn">{% trans "Still Doesn’t Work" %}</button></p>
-    </div>
-</div>
-
 <!-- WhatsApp Chat Button -->
 <div id="chat-button" onclick="toggleChat()">{% trans "💬 Chat with Me" %}</div>
 <div class="chat-box" id="chatBox">
@@ -366,59 +331,60 @@
 
 <!-- JavaScript -->
 <script>
-// Global functions
-function openModal(modalId) {
-    document.getElementById(modalId).style.display = 'flex';
-}
+    // Global functions
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+    }
 
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
 
-function showSection(sectionId) {
-    document.querySelectorAll('.room-container').forEach(section => section.classList.remove('active'));
-    document.getElementById(sectionId).classList.add('active');
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`[onclick="showSection('${sectionId}')"]`).classList.add('active');
-}
+    function showSection(sectionId) {
+        document.querySelectorAll('.room-container').forEach(section => section.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[onclick="showSection('${sectionId}')"]`).classList.add('active');
+    }
 
-document.addEventListener("DOMContentLoaded", function () {
-    // PIN Confirmation
-    const pinYes = document.getElementById("pin-yes");
-    const pinNo = document.getElementById("pin-no");
-    const pinStillIssue = document.getElementById("pin-still-issue");
-    const pinAdminAlert = document.getElementById("pin-admin-alert");
+    document.addEventListener("DOMContentLoaded", function () {
+        // PIN Confirmation
+        const pinYes = document.getElementById("pin-yes");
+        const pinNo = document.getElementById("pin-no");
 
-    if (pinYes) pinYes.addEventListener("click", () => {
-        alert("🎉 Enjoy your stay!");
-    });
-    if (pinNo) pinNo.addEventListener("click", () => openModal("pin-help-modal"));
-    if (pinStillIssue) {
-        pinStillIssue.addEventListener("click", function () {
-            pinAdminAlert.style.display = "block";
-            fetch("/report_pin_issue/", {
-                method: "POST",
-                headers: { "X-CSRFToken": getCSRFToken(), "Content-Type": "application/json" },
-                credentials: "same-origin"
-            })
-            .then(response => response.json())
-            .then(data => {
-                pinAdminAlert.innerHTML = data.success ? `<p>${data.success}</p>` : `<p style="color: red;">${data.error}</p>`;
-            })
-            .catch(() => pinAdminAlert.innerHTML = `<p style="color: red;">Error occurred. Try again.</p>`);
+        if (pinYes) pinYes.addEventListener("click", () => {
+            alert("🎉 {% trans 'Enjoy your stay!' %}");
         });
-    }
+        if (pinNo) pinNo.addEventListener("click", () => openModal("unlock-help-modal"));
 
-    function getCSRFToken() {
-        const cookies = document.cookie.split(";");
-        for (let cookie of cookies) {
-            if (cookie.trim().startsWith("csrftoken=")) return cookie.split("=")[1];
-        }
-        return null;
-    }
+        // Scroll to Hero Video
+        window.scrollToHeroVideo = function () {
+            const heroImage = document.getElementById("heroImage");
+            const videoContainer = document.getElementById("videoContainer");
+            const playButton = document.getElementById("playVideo");
+            const playText = document.querySelector(".play-text");
+            const heroOverlay = document.querySelector(".hero-overlay");
+            const iframe = document.getElementById("videoFrame");
 
-    // Scroll to Hero Video
-    window.scrollToHeroVideo = function () {
+            // Show the video and hide other elements
+            heroImage.style.display = "none";
+            playButton.style.display = "none";
+            playText.style.display = "none";
+            heroOverlay.style.display = "none";
+            videoContainer.style.display = "flex";
+
+            // Autoplay the video
+            let videoSrc = iframe.src;
+            if (!videoSrc.includes("autoplay=1")) {
+                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
+                console.log('Hero video src set to:', iframe.src);
+            }
+
+            // Scroll to the top of the page to ensure the hero section is visible
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+
+        // Hero Video
         const heroImage = document.getElementById("heroImage");
         const videoContainer = document.getElementById("videoContainer");
         const playButton = document.getElementById("playVideo");
@@ -426,119 +392,131 @@ document.addEventListener("DOMContentLoaded", function () {
         const heroOverlay = document.querySelector(".hero-overlay");
         const iframe = document.getElementById("videoFrame");
 
-        heroImage.style.display = "none";
-        playButton.style.display = "none";
-        playText.style.display = "none";
-        heroOverlay.style.display = "none";
-        videoContainer.style.display = "flex";
-        let videoSrc = iframe.src;
-        if (!videoSrc.includes("autoplay=1")) {
-            iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
-            console.log('Hero video src set to:', iframe.src);
-        }
-        heroImage.scrollIntoView({ behavior: "smooth" });
-    };
-
-    // Hero Video
-    const heroImage = document.getElementById("heroImage");
-    const videoContainer = document.getElementById("videoContainer");
-    const playButton = document.getElementById("playVideo");
-    const playText = document.querySelector(".play-text");
-    const heroOverlay = document.querySelector(".hero-overlay");
-    const iframe = document.getElementById("videoFrame");
-
-    playButton.addEventListener("click", function () {
-        heroImage.style.display = "none";
-        playButton.style.display = "none";
-        playText.style.display = "none";
-        heroOverlay.style.display = "none";
-        videoContainer.style.display = "flex";
-        let videoSrc = iframe.src;
-        if (!videoSrc.includes("autoplay=1")) {
-            iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
-            console.log('Hero video src set to:', iframe.src);
-        }
-    });
-
-    // FAQ Toggle
-    document.querySelectorAll(".faq-question").forEach(item => {
-        item.addEventListener("click", () => {
-            const answer = item.nextElementSibling;
-            const arrow = item.querySelector(".arrow");
-            const isActive = answer.style.display === "block";
-            answer.style.display = isActive ? "none" : "block";
-            arrow.textContent = isActive ? "▼" : "▲";
-        });
-    });
-
-    window.filterFAQs = function () {
-        const input = document.getElementById("faq-search").value.toLowerCase();
-        const items = document.querySelectorAll(".faq-item");
-        let visibleCount = 0;
-
-        items.forEach(item => {
-            const question = item.querySelector(".faq-question").textContent.toLowerCase();
-            const answer = item.querySelector(".faq-answer");
-            const answerText = answer.textContent.toLowerCase();
-            const matches = question.includes(input) || answerText.includes(input);
-
-            if (input === "") {
-                answer.style.display = "none"; // Reset answers to hidden
-                answer.classList.remove('highlight');
-            } else {
-                answer.style.display = matches ? "block" : "none";
-                if (matches) {
-                    visibleCount++;
-                    answer.classList.toggle('highlight', question.includes(input) || answerText.includes(input));
-                    const category = item.closest('.faq-category');
-                    if (!category.classList.contains('active')) {
-                        category.classList.add('active');
-                    }
-                } else {
-                    answer.classList.remove('highlight');
-                }
-            }
-        });
-
-        const noResults = document.getElementById("faq-no-results");
-        if (noResults) noResults.classList.toggle('hidden', visibleCount > 0);
-    };
-
-    // FAQ Category Toggle
-    window.toggleCategory = function (header) {
-        const category = header.parentElement;
-        category.classList.toggle("active");
-    };
-
-    // Chat Button
-    window.toggleChat = function () {
-        document.getElementById("chatBox").classList.toggle("show");
-    };
-
-    // Modal Video Playback
-    document.querySelectorAll('.video-item .play-button').forEach(button => {
-        button.addEventListener('click', function () {
-            const videoId = this.getAttribute('data-video');
-            const videoContainer = document.getElementById(videoId);
-            const overlay = this.closest('.video-overlay');
-            const previewImage = overlay.querySelector('.video-preview-image');
-            const playText = overlay.querySelector('.play-text');
-            const iframe = videoContainer.querySelector('iframe');
-
-            console.log('Modal play button clicked, videoId:', videoId);
-
-            // Hide overlay elements
-            overlay.style.display = 'none'; // Hide entire overlay
-            // Show and play video container
-            videoContainer.style.display = 'block'; // Changed to block for simplicity
+        playButton.addEventListener("click", function () {
+            heroImage.style.display = "none";
+            playButton.style.display = "none";
+            playText.style.display = "none";
+            heroOverlay.style.display = "none";
+            videoContainer.style.display = "flex";
             let videoSrc = iframe.src;
             if (!videoSrc.includes("autoplay=1")) {
-                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1&rel=0";
-                console.log('Modal video src set to:', iframe.src);
+                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
+                console.log('Hero video src set to:', iframe.src);
+            }
+        });
+
+        // FAQ Toggle Fixed
+        window.toggleCategory = function (header) {
+            const category = header.parentElement;
+            const isActive = category.classList.contains("active");
+            // Toggle category visibility
+            category.classList.toggle("active");
+            // Show/hide FAQ items based on category state
+            const faqItems = category.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                if (category.classList.contains("active")) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                    // Also hide the answer if the category is closed
+                    const answer = item.querySelector('.faq-answer');
+                    const arrow = item.querySelector('.arrow');
+                    answer.style.display = 'none';
+                    arrow.textContent = '▼';
+                }
+            });
+        };
+
+        // FAQ Question Toggle
+        document.querySelectorAll(".faq-question").forEach(item => {
+            item.addEventListener("click", () => {
+                const answer = item.nextElementSibling;
+                const arrow = item.querySelector(".arrow");
+                const isActive = answer.style.display === "block";
+                answer.style.display = isActive ? "none" : "block";
+                arrow.textContent = isActive ? "▼" : "▲";
+            });
+        });
+
+        // FAQ Search Filter
+        window.filterFAQs = function () {
+            const input = document.getElementById("faq-search").value.toLowerCase();
+            const items = document.querySelectorAll(".faq-item");
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const question = item.querySelector(".faq-question").textContent.toLowerCase();
+                const answer = item.querySelector(".faq-answer");
+                const answerText = answer.textContent.toLowerCase();
+                const matches = question.includes(input) || answerText.includes(input);
+
+                if (input === "") {
+                    // When search is cleared, respect the category toggle state
+                    const category = item.closest('.faq-category');
+                    item.style.display = category.classList.contains('active') ? 'block' : 'none';
+                    answer.style.display = "none";
+                    answer.classList.remove('highlight');
+                    item.querySelector('.arrow').textContent = '▼';
+                } else {
+                    item.style.display = matches ? "block" : "none";
+                    if (matches) {
+                        visibleCount++;
+                        answer.style.display = "block";
+                        answer.classList.add('highlight');
+                        const category = item.closest('.faq-category');
+                        category.classList.add('active');
+                        item.querySelector('.arrow').textContent = '▲';
+                    } else {
+                        answer.style.display = "none";
+                        answer.classList.remove('highlight');
+                        item.querySelector('.arrow').textContent = '▼';
+                    }
+                }
+            });
+
+            const noResults = document.getElementById("faq-no-results");
+            if (noResults) noResults.classList.toggle('hidden', visibleCount > 0);
+        };
+
+        // Chat Button
+        window.toggleChat = function () {
+            document.getElementById("chatBox").classList.toggle("show");
+        };
+
+        // Modal Video Playback
+        document.querySelectorAll('.video-item .play-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const videoId = this.getAttribute('data-video');
+                const videoContainer = document.getElementById(videoId);
+                const overlay = this.closest('.video-overlay');
+                const previewImage = overlay.querySelector('.video-preview-image');
+                const playText = overlay.querySelector('.play-text');
+                const iframe = videoContainer.querySelector('iframe');
+
+                console.log('Modal play button clicked, videoId:', videoId);
+
+                // Hide overlay elements
+                overlay.style.display = 'none';
+                // Show and play video container
+                videoContainer.style.display = 'block';
+                let videoSrc = iframe.src;
+                if (!videoSrc.includes("autoplay=1")) {
+                    iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1&rel=0";
+                    console.log('Modal video src set to:', iframe.src);
+                }
+            });
+        });
+
+        // Initialize FAQ Categories (show items only if category is active)
+        document.querySelectorAll('.faq-category').forEach(category => {
+            const faqItems = category.querySelectorAll('.faq-item');
+            if (!category.classList.contains('active')) {
+                faqItems.forEach(item => {
+                    item.style.display = 'none';
+                });
             }
         });
     });
-});
 </script>
 
 {% endblock %}
