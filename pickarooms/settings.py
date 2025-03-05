@@ -71,12 +71,18 @@ if not DEBUG:
 # TTLock API Configuration
 SCIENER_CLIENT_ID = os.environ.get("SCIENER_CLIENT_ID")
 SCIENER_CLIENT_SECRET = os.environ.get("SCIENER_CLIENT_SECRET")
+SCIENER_ACCESS_TOKEN = os.environ.get("SCIENER_ACCESS_TOKEN")
+SCIENER_REFRESH_TOKEN = os.environ.get("SCIENER_REFRESH_TOKEN")
+
+# Validate required Sciener credentials
 if not SCIENER_CLIENT_ID or not SCIENER_CLIENT_SECRET:
-    raise ValueError("🚨 Sciener API credentials are missing in env.py!")
+    raise ValueError("🚨 Sciener API credentials (client_id or client_secret) are missing in env.py!")
+if not SCIENER_ACCESS_TOKEN or not SCIENER_REFRESH_TOKEN:
+    raise ValueError("🚨 Sciener API tokens (access_token or refresh_token) are missing in env.py!")
 
 TTLOCK_BASE_URL = os.environ.get("TTLOCK_BASE_URL", "https://euapi.sciener.com/v3")
 TTLOCK_OAUTH_BASE_URL = os.environ.get("TTLOCK_OAUTH_BASE_URL", "https://euapi.sciener.com")  # For OAuth endpoints
-TTLOCK_CALLBACK_URL = os.environ.get("TTLOCK_CALLBACK_URL", "https://pickarooms-3203aa136ccc.herokuapp.com/api/callback")  # Callback URL for TTLock API
+TTLOCK_CALLBACK_URL = os.environ.get("TTLOCK_CALLBACK_URL", "https://pickarooms-3203aa136ccc.herokuapp.com/api/callback")
 
 
 LOGGING = {

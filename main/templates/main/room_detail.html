@@ -38,27 +38,28 @@
 
 <!-- Sticky Tab Navigation -->
 <div class="section-nav">
-    <button class="tab-btn active" onclick="showSection('access-section')">{% trans "Access PIN" %}</button>
-    <button class="tab-btn" onclick="showSection('location-section')">{% trans "Location" %}</button>
-    <button class="tab-btn" onclick="showSection('checkin-section')">{% trans "Check-In" %}</button>
-    <button class="tab-btn" onclick="showSection('checkout-section')">{% trans "Check-Out" %}</button>
-    <button class="tab-btn" onclick="showSection('faq-section')">{% trans "FAQs" %}</button>
+    <button class="tab-btn active" data-section="access-section" onclick="showSection('access-section')">{% trans "Access PIN" %}</button>
+    <button class="tab-btn" data-section="location-section" onclick="showSection('location-section')">{% trans "Location" %}</button>
+    <button class="tab-btn" data-section="checkin-section" onclick="showSection('checkin-section')">{% trans "Check-In" %}</button>
+    <button class="tab-btn" data-section="checkout-section" onclick="showSection('checkout-section')">{% trans "Check-Out" %}</button>
+    <button class="tab-btn" data-section="faq-section" onclick="showSection('faq-section')">{% trans "FAQs" %}</button>
 </div>
 
 <!-- Access Section (Simplified Check-In Process) -->
 <section id="access-section" class="room-container active">
     <div class="room-info">
         {% if not show_pin %}
-        <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your access details will be available then." %}
-        </p>
+        <p class="pin-wait">{% trans "Check-in starts at 2 PM UK time. Your access details will be available then." %}</p>
         {% else %}
         <!-- PIN as the Primary Option -->
         <div class="pin-fallback">
             <h3>{% trans "At the front door, enter:" %}</h3>
             <p><span class="pin-code">{{ front_door_pin|default:"Contact support for PIN" }}#</span></p>
+            <p>{% trans "Then, at your room door, enter:" %}</p>
+            <p><span class="pin-code">{{ room.access_pin|default:"Contact support for PIN" }}#</span></p>
             <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick M11 3NP, UK <a onclick="showSection('location-section')" href="#">{% trans "Find Address" %}</a></p>
             <div class="pin-confirmation">
-                <h3>{% trans "Did the PIN work?" %}</h3>
+                <h3>{% trans "Did the front door PIN work?" %}</h3>
                 <button id="pin-yes" class="pin-btn">{% trans "Yes" %}</button>
                 <button id="pin-no" class="pin-btn" onclick="openModal('unlock-help-modal')">{% trans "No" %}</button>
             </div>
@@ -70,6 +71,15 @@
             </div>
         </div>
 
+        <!-- Unlock Door Button (Fallback if PIN Doesn't Work) -->
+        <div class="unlock-container">
+            <p>{% trans "If the front door PIN doesn't work, you can unlock the door remotely using the button below." %}</p>
+            <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
+                {% csrf_token %}
+                <button type="submit" name="unlock_door" class="btn-unlock">🚪 {% trans "Unlock Front Door" %}</button>
+            </form>
+        </div>
+
         <!-- Quick Access Menu -->
         <div id="quick-access">
             <button onclick="scrollToHeroVideo()">🎥 {% trans "Watch Entry Video" %}</button>
@@ -79,16 +89,16 @@
     </div>
 </section>
 
-<!-- Unlock Help Modal (Remote Unlock Option) -->
+<!-- Unlock Help Modal (Remote Unlock Option for Front Door) -->
 <div id="unlock-help-modal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('unlock-help-modal')">×</span>
-        <h3>{% trans "Unlock the Door Remotely" %}</h3>
+        <h3>{% trans "Unlock the Front Door Remotely" %}</h3>
         <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
             {% csrf_token %}
             <button type="submit" name="unlock_door" class="btn-unlock">🚪 {% trans "Press to Unlock" %}</button>
         </form>
-        <p>{% trans "The door will unlock; turn the handle to enter. Ensure you are in front of the door." %}</p>
+        <p>{% trans "The front door will unlock; turn the handle to enter. Ensure you are in front of the door." %}</p>
     </div>
 </div>
 
@@ -126,13 +136,11 @@
         <hr>
         <h3>{% trans "How do I enter the property?" %}</h3>
         <ol>
-            <li>{% trans "Enter the PIN:" %} <strong>{{ front_door_pin|default:"Contact support for PIN" }}#</strong> {%
-                trans "to unlock the door." %}</li>
-            <li>{% trans "If the PIN doesn’t work, use the 'Press to Unlock' button in the Access tab modal to unlock
-                the door remotely." %}</li>
+            <li>{% trans "Enter the Front Door PIN:" %} <strong>{{ front_door_pin|default:"Contact support for PIN" }}#</strong> {% trans "to unlock the door." %}</li>
+            <li>{% trans "Proceed upstairs to your room and enter the Room PIN:" %} <strong>{{ room.access_pin|default:"Contact support for PIN" }}#</strong> {% trans "to unlock the room door." %}</li>
+            <li>{% trans "If the front door PIN doesn’t work, use the 'Unlock Front Door' button in the Access tab." %}</li>
             <li>{% trans "Watch the video in the FAQs section for instructions on using the keypad." %}</li>
-            <li>{% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{ room.name
-                    }}</strong>.</li>
+            <li>{% trans "Once inside, remove your shoes and make your way upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
         </ol>
     </div>
 </section>
@@ -144,8 +152,7 @@
         {% if guest %}
         <p><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before 11 AM" %})</p>
         <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
-        <p class="expiration-note">{% trans "Note: Your front door access will expire at check-out time. Please ensure
-            you check out before 11 AM to avoid being locked out." %}</p>
+        <p class="expiration-note">{% trans "Note: Your front door access will expire at check-out time. Please ensure you check out before 11 AM to avoid being locked out." %}</p>
         {% else %}
         <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
         {% endif %}
@@ -171,34 +178,38 @@
             <div class="faq-category">
                 <h3 onclick="toggleCategory(this)">{% trans "Access" %}</h3>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Is my digital lock secure?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Is my digital lock secure?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system for the front door
-                            ensures only the assigned guest and admin can access. Access expires after checkout for
-                            added security." %}</p>
+                        <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system for the front door ensures only the assigned guest and admin can access. Access expires after checkout for added security." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What if my front door PIN doesn’t work?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What if my front door PIN doesn’t work?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <p>{% trans "Try the following steps:" %}</p>
                         <ul>
                             <li>{% trans "Ensure you’re entering the correct PIN as shown in the Access tab." %}</li>
                             <li>{% trans "Touch the keypad to light up the numbers before entering the PIN." %}</li>
                             <li>{% trans "Check the video instructions below for proper usage." %}</li>
-                            <li>{% trans "Use the 'Press to Unlock' button in the Access tab modal if you have internet
-                                access." %}</li>
-                            <li>{% trans "If it still doesn’t work, click 'No' in the PIN confirmation section to report
-                                the issue, and our team will assist you promptly." %}</li>
+                            <li>{% trans "Use the 'Unlock Front Door' button in the Access tab if you have internet access." %}</li>
+                            <li>{% trans "If it still doesn’t work, click 'No' in the PIN confirmation section to report the issue, and our team will assist you promptly." %}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">{% trans "What if my room door PIN doesn’t work?" %} <span class="arrow">▼</span></button>
+                    <div class="faq-answer">
+                        <p>{% trans "Try the following steps:" %}</p>
+                        <ul>
+                            <li>{% trans "Ensure you’re entering the correct Room PIN as shown in the Access tab." %}</li>
+                            <li>{% trans "Touch the keypad to light up the numbers before entering the PIN." %}</li>
+                            <li>{% trans "Contact support via WhatsApp using the chat button below." %}</li>
                         </ul>
                     </div>
                 </div>
                 <!-- Instructional Video -->
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "How do I use the front door keypad?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "How do I use the front door keypad?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <p>{% trans "Watch this video for assistance:" %}</p>
                         <div class="video-wrapper">
@@ -224,8 +235,7 @@
             <div class="faq-category">
                 <h3 onclick="toggleCategory(this)">{% trans "Amenities" %}</h3>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What’s the WiFi password?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What’s the WiFi password?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <ul>
                             <li><strong>{% trans "Wifi Name:" %}</strong> {% trans "Guest_2.4G" %}</li>
@@ -234,8 +244,7 @@
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What are the house rules?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What are the house rules?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <ul>
                             <li>❗ {% trans "No smoking inside." %}</li>
@@ -245,55 +254,43 @@
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <p>🍕 {% trans "Downstairs with full access." %}</p>
-                        <p>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with
-                            instructions nearby." %}</p>
-                        <p>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}
-                        </p>
+                        <p>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with instructions nearby." %}</p>
+                        <p>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "How do I adjust the heating?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "How do I adjust the heating?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>❄️ {% trans "Turn radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans
-                            "to increase heat." %}</p>
+                        <p>❄️ {% trans "Turn radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans "to increase heat." %}</p>
                         <p>🔥 {% trans "Heats automatically below" %} <strong>{% trans "21°C" %}</strong>.</p>
                         <p>⚠️ {% trans "Don’t force stiff knobs—turn gently." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Where’s the bathroom, and do you provide towels?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Where’s the bathroom, and do you provide towels?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>🚿 <strong>{% trans "Bathrooms:" %}</strong> {% trans "En-suite or shared in the hallway." %}
-                        </p>
+                        <p>🚿 <strong>{% trans "Bathrooms:" %}</strong> {% trans "En-suite or shared in the hallway." %}</p>
                         <p>🛏 {% trans "Fresh towels and shower gel provided in your room." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <p>🧺 <strong>{% trans "Pressing iron:" %}</strong> {% trans "In the hallway." %}</p>
                         <p>💨 <strong>{% trans "Hairdryer:" %}</strong> {% trans "In the bathroom." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "How safe is the internet network?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "How safe is the internet network?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>{% trans "Powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with
-                            an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "Guest network is isolated."
-                            %}</p>
+                        <p>{% trans "Powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "Guest network is isolated." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "What amenities are included?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "What amenities are included?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
                         <ul>
                             <li>✅ {% trans "Free High-Speed WiFi" %}</li>
@@ -310,15 +307,11 @@
             <div class="faq-category">
                 <h3 onclick="toggleCategory(this)">{% trans "Travel" %}</h3>
                 <div class="faq-item">
-                    <button class="faq-question">{% trans "How can I get around?" %} <span
-                            class="arrow">▼</span></button>
+                    <button class="faq-question">{% trans "How can I get around?" %} <span class="arrow">▼</span></button>
                     <div class="faq-answer">
-                        <p>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223
-                            1066)." %}</p>
-                        <p>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city
-                            centre." %}</p>
-                        <p><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus
-                            routes." %}</p>
+                        <p>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223 1066)." %}</p>
+                        <p>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city centre." %}</p>
+                        <p><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus routes." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
@@ -352,10 +345,20 @@
     }
 
     function showSection(sectionId) {
-        document.querySelectorAll('.room-container').forEach(section => section.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
+        // Remove active class from all tabs and sections
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`[onclick="showSection('${sectionId}')"]`).classList.add('active');
+        document.querySelectorAll('.room-container').forEach(section => {
+            section.classList.remove('active');
+            section.classList.remove('active-section-bg');
+        });
+
+        // Add active class to the clicked tab
+        document.querySelector(`.tab-btn[data-section="${sectionId}"]`).classList.add('active');
+
+        // Add active class and background class to the corresponding section
+        const section = document.getElementById(sectionId);
+        section.classList.add('active');
+        section.classList.add('active-section-bg');
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -364,7 +367,7 @@
         const pinNo = document.getElementById("pin-no");
 
         if (pinYes) pinYes.addEventListener("click", () => {
-            alert("🎉 {% trans 'Enjoy your stay!' %}");
+            alert("🎉 {% trans 'Proceed to your room upstairs!' %}");
         });
         if (pinNo) pinNo.addEventListener("click", () => openModal("unlock-help-modal"));
 

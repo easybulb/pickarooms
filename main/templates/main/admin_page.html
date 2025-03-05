@@ -35,6 +35,7 @@
                         <th>{% trans "Full Name" %}</th>
                         <th>{% trans "Room" %}</th>
                         <th>{% trans "Front Door PIN" %}</th>
+                        <th>{% trans "Room PIN" %}</th>
                         <th>{% trans "PIN Validity" %}</th>
                         <th>{% trans "Check-In" %}</th>
                         <th>{% trans "Check-Out" %}</th>
@@ -62,6 +63,13 @@
                                 <span class="no-pin">{% trans "N/A" %}</span>
                             {% endif %}
                         </td>
+                        <td class="pin-code">
+                            {% if guest.assigned_room.access_pin %}
+                                {{ guest.assigned_room.access_pin }}
+                            {% else %}
+                                <span class="no-pin">{% trans "N/A" %}</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if guest.front_door_pin %}
                                 {{ guest.check_in_date }} 2:00 PM - {{ guest.check_out_date }} 11:00 AM
@@ -80,7 +88,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7">{% trans "No active guests found." %}</td>
+                        <td colspan="8">{% trans "No active guests found." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

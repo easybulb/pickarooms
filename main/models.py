@@ -7,7 +7,6 @@ import pandas as pd
 import json
 import cloudinary.uploader
 
-
 def default_check_out_date():
     """Returns the next day with time set to 11:00 AM."""
     return date.today() + timedelta(days=1)
@@ -23,7 +22,7 @@ class TTLock(models.Model):
 
 class Room(models.Model):
     name = models.CharField(max_length=100)
-    access_pin = models.CharField(max_length=10, blank=True, null=True)  # Will be used for Tuya locks later
+    access_pin = models.CharField(max_length=10, blank=True, null=True)  # Hardcoded Tuya PIN for the room
     video_url = models.URLField()
     description = models.TextField(blank=True, null=True)
     image = models.URLField(blank=True, null=True)
@@ -46,13 +45,13 @@ class Guest(models.Model):
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
     is_archived = models.BooleanField(default=False)
     is_returning = models.BooleanField(default=False)
-    secure_token = models.CharField(max_length=10, unique=True, blank=True)
+    secure_token = models.CharField(max_length=36, unique=True, blank=True)  # Adjusted to UUID length
     front_door_pin = models.CharField(max_length=10, blank=True, null=True)  # Temporary PIN for front door
-    front_door_pin_id = models.IntegerField(blank=True, null=True)  # TTLock keyboard password ID
+    front_door_pin_id = models.CharField(max_length=50, blank=True, null=True)  # TTLock keyboard password ID
 
     def save(self, *args, **kwargs):
         if not self.secure_token:
-            self.secure_token = str(uuid.uuid4().hex[:10])
+            self.secure_token = str(uuid.uuid4())
         super().save(*args, **kwargs)
 
     def has_access(self):
@@ -61,24 +60,18 @@ class Guest(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.reservation_number} - {self.phone_number or 'No Phone'} - {self.assigned_room.name}"
 
-
 class ReviewCSVUpload(models.Model):
     file = models.FileField(upload_to="uploads/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    data = models.JSONField(default=dict)  # Store reviews as JSON
+    data = models.JSONField(default=list)
 
     def save(self, *args, **kwargs):
-        # Read CSV and store it as JSON
         if self.file:
-            self.file.seek(0)  # Ensure file is at the beginning
+            self.file.seek(0)
             df = pd.read_csv(self.file)
-
-            # Filter reviews and convert to JSON
             filtered_reviews = df[(df["Review score"] >= 9) & (df["Positive review"].notna()) & (df["Positive review"].str.strip() != "")]
             filtered_reviews = filtered_reviews[["Guest name", "Positive review", "Review score"]].rename(
                 columns={"Guest name": "author", "Positive review": "text", "Review score": "score"}
             )
-
             self.data = filtered_reviews.to_dict(orient="records")
-
         super().save(*args, **kwargs)

@@ -1,3 +1,4 @@
+# main/urls.py
 from django.urls import path
 from . import views
 from django.contrib.auth.views import LogoutView
@@ -13,7 +14,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('checkin/', views.checkin, name='checkin'),
-    path('room/<str:room_token>/', views.room_detail, name='room_detail'),  # Secure Token URL
+    path('room/<str:room_token>/', views.room_detail, name='room_detail'),
     path("report_pin_issue/", report_pin_issue, name="report_pin_issue"),
     path("rebook/", views.rebook_guest, name="rebook_guest"),
     path('explore-manchester/', views.explore_manchester, name='explore_manchester'),
@@ -33,5 +34,5 @@ urlpatterns = [
     path('sitemap/', sitemap, name='sitemap'),
     path('how-to-use/', how_to_use, name='how_to_use'),
     path('awards_reviews/', views.awards_reviews, name='awards_reviews'),
-    path('api/callback', ttlock_callback, name='ttlock_callback')
+    path('api/callback', ttlock_callback, name='ttlock_callback'),
 ]

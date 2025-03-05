@@ -2,8 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Room, Guest, ReviewCSVUpload
-
+from .models import Room, Guest, ReviewCSVUpload, TTLock
 
 # ✅ Always show Cloudinary URL input (No file upload)
 class RoomAdminForm(forms.ModelForm):
@@ -16,10 +15,8 @@ class RoomAdminForm(forms.ModelForm):
         self.fields['image'].widget = forms.TextInput(attrs={'placeholder': 'Enter Cloudinary Image URL'})
         self.fields['image'].required = False  # ✅ Ensure it's optional
 
-
 class RoomAdmin(admin.ModelAdmin):
     form = RoomAdminForm  # ✅ Use the custom form
-
     list_display = ('name', 'access_pin', 'video_url', 'image_preview')
     search_fields = ('name',)
 
@@ -31,11 +28,10 @@ class RoomAdmin(admin.ModelAdmin):
 
     image_preview.short_description = "Image Preview"
 
-
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'phone_number', 'check_in_date', 'check_out_date', 'assigned_room', 'is_archived')
+    list_display = ('full_name', 'phone_number', 'check_in_date', 'check_out_date', 'assigned_room', 'front_door_pin', 'front_door_pin_id', 'is_archived')
     list_filter = ('is_archived', 'check_in_date', 'check_out_date', 'assigned_room')
-    search_fields = ('full_name', 'phone_number')
+    search_fields = ('full_name', 'phone_number', 'reservation_number')
     actions = ['mark_as_archived']
 
     def mark_as_archived(self, request, queryset):
@@ -44,7 +40,6 @@ class GuestAdmin(admin.ModelAdmin):
         self.message_user(request, "Selected guests have been archived.")
 
     mark_as_archived.short_description = "Move selected guests to archive"
-
 
 class ReviewCSVUploadAdmin(admin.ModelAdmin):
     list_display = ('uploaded_at',)
@@ -57,8 +52,13 @@ class ReviewCSVUploadAdmin(admin.ModelAdmin):
         obj.save()  # Call save again to trigger CSV processing
         self.message_user(request, "CSV processed and stored as JSON successfully.")
 
+class TTLockAdmin(admin.ModelAdmin):
+    list_display = ('name', 'lock_id', 'is_front_door')
+    search_fields = ('name', 'lock_id')
+    list_filter = ('is_front_door',)
 
-# ✅ Register models (Ensuring Room is not registered twice)
+# ✅ Register models
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
 admin.site.register(ReviewCSVUpload, ReviewCSVUploadAdmin)
+admin.site.register(TTLock, TTLockAdmin)

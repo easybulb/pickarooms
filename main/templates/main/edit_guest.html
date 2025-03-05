@@ -51,6 +51,15 @@
             {% endif %}
         </p>
 
+        <label>{% trans "Room PIN:" %}</label>
+        <p>
+            {% if guest.assigned_room.access_pin %}
+                {{ guest.assigned_room.access_pin }}
+            {% else %}
+                <span class="no-pin">{% trans "Not set" %}</span>
+            {% endif %}
+        </p>
+
         <label>{% trans "PIN Validity:" %}</label>
         <p>
             {% if guest.front_door_pin %}
@@ -67,7 +76,7 @@
     <form method="POST" class="regenerate-pin-form">
         {% csrf_token %}
         <input type="hidden" name="regenerate_pin" value="true">
-        <button type="submit" class="btn-regenerate">{% trans "Regenerate PIN" %}</button>
+        <button type="submit" class="btn-regenerate">{% trans "Regenerate Front Door PIN" %}</button>
     </form>
     {% endif %}
     

@@ -423,7 +423,7 @@ body {
     opacity: 1;
 }
 
-/* Hero Section */
+/* Hero Section (Unchanged as per your request) */
 .room-hero {
     position: relative;
     width: 100%;
@@ -554,6 +554,12 @@ body {
     animation: fadeIn 0.5s ease-in-out;
 }
 
+/* Apply the purple gradient to active sections */
+.room-container.active-section-bg {
+    background: linear-gradient(135deg, #a855f7, #7e22ce);
+}
+
+/* Ensure child elements retain their backgrounds */
 .room-info {
     background: transparent;
     border-radius: 16px;
@@ -968,7 +974,7 @@ hr {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: linear-gradient(135deg, #34d399, #10b981);
+    background: #25D366; /* WhatsApp green */
     color: white;
     padding: 16px 24px;
     border-radius: 50px;
@@ -981,13 +987,13 @@ hr {
     display: flex;
     align-items: center;
     gap: 8px;
-    animation: bounce 2s infinite;
+    /* Removed animation: bounce */
 }
 
 #chat-button:hover {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: #20c058; /* Slightly darker WhatsApp green on hover */
     transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(52, 211, 153, 0.3);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
 }
 
 .chat-box {
@@ -1019,7 +1025,7 @@ hr {
 
 .chat-box a {
     display: inline-block;
-    background: linear-gradient(135deg, #34d399, #10b981);
+    background: #25D366; /* WhatsApp green */
     color: white;
     padding: 12px 18px;
     border-radius: 12px;
@@ -1032,9 +1038,9 @@ hr {
 }
 
 .chat-box a:hover {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: #20c058; /* Slightly darker WhatsApp green on hover */
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(52, 211, 153, 0.3);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
 }
 
 /* Check-In Wizard */
@@ -1163,17 +1169,7 @@ hr {
     }
 }
 
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(-10px);
-    }
-    60% {
-        transform: translateY(-5px);
-    }
-}
+/* Removed @keyframes bounce as it's no longer needed */
 
 /* Responsive Design */
 @media (max-width: 768px) {
