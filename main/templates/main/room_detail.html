@@ -59,9 +59,6 @@
     <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
     
     <div class="quick-access">
-        <div class="pin-confirmation">
-            <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
-        </div>
         <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button>
         <button onclick="showSection('faq')">📜 {% trans "FAQs & Help" %}</button>
     </div>
@@ -142,9 +139,9 @@
         <h3 class="subsection-title">{% trans "How do I check out?" %}</h3>
         <ul class="content-list">
             <li>🛑 <strong>{% trans "Leave keycard:" %}</strong> {% trans "Inside room, visible." %}</li>
+            <li>🛏️ {% trans "Leave towels in bathroom." %}</li>
             <li>🔌 <strong>{% trans "Switch off:" %}</strong> {% trans "All appliances and lights." %}</li>
             <li>🚪 <strong>{% trans "Close door:" %}</strong> {% trans "Securely." %}</li>
-            <li>🛏️ {% trans "Leave towels in bathroom." %}</li>
             <li>📅 {% trans "Housekeeping enters after 11 AM." %}</li>
         </ul>
     {% else %}
@@ -165,144 +162,189 @@
     <h2 class="section-title">❓ {% trans "Frequently Asked Questions" %}</h2>
     <input type="text" id="faq-search" placeholder="{% trans 'Search FAQs...' %}" onkeyup="filterFAQs()">
     <div class="faq-container">
+        <!-- Access Category -->
         <div class="faq-category" data-category="access">
-            <h3 class="category-toggle" onclick="toggleCategory('access')">{% trans "Access" %}</h3>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Is my digital lock secure?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system ensures only the assigned guest and admin can access. Access expires after checkout." %}</p>
+            <h3 class="category-title" onclick="toggleCategory('access')">
+                {% trans "Access" %} <span class="category-arrow">▼</span>
+            </h3>
+            <div class="faq-items">
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="access-1">
+                        {% trans "Is my digital lock secure?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="access-1">
+                        <p>{% trans "Our" %} <strong>{% trans "TTLock" %}</strong> {% trans "system ensures only the assigned guest and admin can access. Access expires after checkout." %}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What if my front door PIN doesn’t work?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul class="content-list">
-                        <li>{% trans "Ensure you’re entering the correct PIN shown above." %}</li>
-                        <li>{% trans "Touch the keypad to light up the numbers before entering." %}</li>
-                        <li>{% trans "Use the remote unlock option if available." %}</li>
-                        <li>{% trans "Contact support via WhatsApp if issues persist." %}</li>
-                    </ul>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="access-2">
+                        {% trans "What if my front door PIN doesn’t work?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="access-2">
+                        <ul class="content-list">
+                            <li>{% trans "Ensure you’re entering the correct PIN shown above." %}</li>
+                            <li>{% trans "Touch the keypad to light up the numbers before entering." %}</li>
+                            <li>{% trans "Use the remote unlock option if available." %}</li>
+                            <li>{% trans "Contact support via WhatsApp if issues persist." %}</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What if my room door PIN doesn’t work?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul class="content-list">
-                        <li>{% trans "Ensure you’re entering the correct Room PIN." %}</li>
-                        <li>{% trans "Touch the keypad to activate it." %}</li>
-                        <li>{% trans "Contact support via WhatsApp." %}</li>
-                    </ul>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="access-3">
+                        {% trans "What if my room door PIN doesn’t work?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="access-3">
+                        <ul class="content-list">
+                            <li>{% trans "Ensure you’re entering the correct Room PIN." %}</li>
+                            <li>{% trans "Touch the keypad to activate it." %}</li>
+                            <li>{% trans "Contact support via WhatsApp." %}</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How do I use the front door keypad?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p>{% trans "Watch this video for assistance:" %}</p>
-                    <div class="video-item">
-                        <div class="video-overlay">
-                            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Front Door Preview' %}" class="video-preview-image">
-                            <button class="play-button" data-video="front-door-video">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <p class="play-text">{% trans "Watch Video" %}</p>
-                        </div>
-                        <div class="modal-video-container" id="front-door-video" style="display: none;">
-                            <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="access-4">
+                        {% trans "How do I use the front door keypad?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="access-4">
+                        <p>{% trans "Watch this video for assistance:" %}</p>
+                        <div class="video-item">
+                            <div class="video-overlay">
+                                <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Front Door Preview' %}" class="video-preview-image">
+                                <button class="play-button" data-video="front-door-video">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <p class="play-text">{% trans "Watch Video" %}</p>
+                            </div>
+                            <div class="modal-video-container" id="front-door-video" style="display: none;">
+                                <iframe src="https://www.youtube.com/embed/cEDr1tXnmhQ?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Amenities Category -->
         <div class="faq-category" data-category="amenities">
-            <h3 class="category-toggle" onclick="toggleCategory('amenities')">{% trans "Amenities" %}</h3>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What’s the WiFi password?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul class="content-list">
-                        <li><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</li>
-                        <li><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</li>
-                    </ul>
+            <h3 class="category-title" onclick="toggleCategory('amenities')">
+                {% trans "Amenities" %} <span class="category-arrow">▼</span>
+            </h3>
+            <div class="faq-items">
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-1">
+                        {% trans "What’s the WiFi password?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-1">
+                        <ul class="content-list">
+                            <li><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</li>
+                            <li><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What are the house rules?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul class="content-list">
-                        <li>❗ {% trans "No smoking inside." %}</li>
-                        <li>🔑 {% trans "Lost keys incur a fee." %}</li>
-                        <li>🎉 {% trans "No loud noise or parties allowed." %}</li>
-                    </ul>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-2">
+                        {% trans "What are the house rules?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-2">
+                        <ul class="content-list">
+                            <li>❗ {% trans "No smoking inside." %}</li>
+                            <li>🔑 {% trans "Lost keys incur a fee." %}</li>
+                            <li>🎉 {% trans "No loud noise or parties allowed." %}</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Where is the shared kitchen?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p class="content-text">🍕 {% trans "Downstairs with full access." %}</p>
-                    <p class="content-text">🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with instructions nearby." %}</p>
-                    <p class="content-text">🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}</p>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-3">
+                        {% trans "Where is the shared kitchen?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-3">
+                        <p class="content-text">🍕 {% trans "Downstairs with full access." %}</p>
+                        <p class="content-text">🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with instructions nearby." %}</p>
+                        <p class="content-text">🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How do I adjust the heating?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p class="content-text">❄️ {% trans "Turn radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans "to increase heat." %}</p>
-                    <p class="content-text">🔥 {% trans "Heats automatically below" %} <strong>{% trans "21°C" %}</strong>.</p>
-                    <p class="content-text">⚠️ {% trans "Don’t force stiff knobs—turn gently." %}</p>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-4">
+                        {% trans "How do I adjust the heating?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-4">
+                        <p class="content-text">❄️ {% trans "Turn radiator knobs" %} <strong>{% trans "anti-clockwise" %}</strong> {% trans "to increase heat." %}</p>
+                        <p class="content-text">🔥 {% trans "Heats automatically below" %} <strong>{% trans "21°C" %}</strong>.</p>
+                        <p class="content-text">⚠️ {% trans "Don’t force stiff knobs—turn gently." %}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Where’s the bathroom, and do you provide towels?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p class="content-text">🚿 <strong>{% trans "Bathrooms:" %}</strong> {% trans "En-suite or shared in the hallway." %}</p>
-                    <p class="content-text">🛏 {% trans "Fresh towels and shower gel provided in your room." %}</p>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-5">
+                        {% trans "Where’s the bathroom, and do you provide towels?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-5">
+                        <p class="content-text">🚿 <strong>{% trans "Bathrooms:" %}</strong> {% trans "En-suite or shared in the hallway." %}</p>
+                        <p class="content-text">🛏 {% trans "Fresh towels and shower gel provided in your room." %}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Do you provide a pressing iron and hairdryer?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p class="content-text">🧺 <strong>{% trans "Pressing iron:" %}</strong> {% trans "In the hallway." %}</p>
-                    <p class="content-text">💨 <strong>{% trans "Hairdryer:" %}</strong> {% trans "In the bathroom." %}</p>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-6">
+                        {% trans "Do you provide a pressing iron and hairdryer?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-6">
+                        <p class="content-text">🧺 <strong>{% trans "Pressing iron:" %}</strong> {% trans "In the hallway." %}</p>
+                        <p class="content-text">💨 <strong>{% trans "Hairdryer:" %}</strong> {% trans "In the bathroom." %}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How safe is the internet network?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <p class="content-text">{% trans "Powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "Guest network is isolated." %}</p>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-7">
+                        {% trans "How safe is the internet network?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-7">
+                        <p class="content-text">{% trans "Powered by" %} <strong>{% trans "Fibre One" %}</strong> {% trans "and secured with an" %} <strong>{% trans "Eero 6+ Gateway" %}</strong>. {% trans "Guest network is isolated." %}</p>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "What amenities are included?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul class="content-list">
-                        <li>✅ {% trans "Free High-Speed WiFi" %}</li>
-                        <li>✅ {% trans "Fresh Towels & Bed Linen" %}</li>
-                        <li>✅ {% trans "Private or Shared Bathroom with body wash and hand wash" %}</li>
-                        <li>✅ {% trans "Smart TV with Netflix, Amazon Prime" %}</li>
-                        <li>✅ {% trans "Pressing Iron and Hair Dryer" %}</li>
-                        <li>✅ {% trans "Complimentary Tea, Coffee & Milk (in kitchen)" %}</li>
-                    </ul>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="amenities-8">
+                        {% trans "What amenities are included?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="amenities-8">
+                        <ul class="content-list">
+                            <li>✅ {% trans "Free High-Speed WiFi" %}</li>
+                            <li>✅ {% trans "Fresh Towels & Bed Linen" %}</li>
+                            <li>✅ {% trans "Private or Shared Bathroom with body wash and hand wash" %}</li>
+                            <li>✅ {% trans "Smart TV with Netflix, Amazon Prime" %}</li>
+                            <li>✅ {% trans "Pressing Iron and Hair Dryer" %}</li>
+                            <li>✅ {% trans "Complimentary Tea, Coffee & Milk (in kitchen)" %}</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Travel Category -->
         <div class="faq-category" data-category="travel">
-            <h3 class="category-toggle" onclick="toggleCategory('travel')">{% trans "Travel" %}</h3>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "How can I get around?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul class="content-list">
-                        <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223 1066)." %}</li>
-                        <li>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city centre." %}</li>
-                        <li><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus routes." %}</li>
-                    </ul>
+            <h3 class="category-title" onclick="toggleCategory('travel')">
+                {% trans "Travel" %} <span class="category-arrow">▼</span>
+            </h3>
+            <div class="faq-items">
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="travel-1">
+                        {% trans "How can I get around?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="travel-1">
+                        <ul class="content-list">
+                            <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223 1066)." %}</li>
+                            <li>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city centre." %}</li>
+                            <li><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus routes." %}</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question">{% trans "Where can I park?" %} <span class="arrow">▼</span></button>
-                <div class="faq-answer">
-                    <ul class="content-list">
-                        <li>✅ <strong>{% trans "Free parking:" %}</strong> {% trans "On-site." %}</li>
-                        <li>✅ {% trans "Tarmac fits two cars—park left if first." %}</li>
-                    </ul>
+                <div class="faq-item">
+                    <button class="faq-question" data-answer-id="travel-2">
+                        {% trans "Where can I park?" %} <span class="arrow">▼</span>
+                    </button>
+                    <div class="faq-answer" id="travel-2">
+                        <ul class="content-list">
+                            <li>✅ <strong>{% trans "Free parking:" %}</strong> {% trans "On-site." %}</li>
+                            <li>✅ {% trans "Tarmac fits two cars—park left if first." %}</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -349,12 +391,8 @@
         document.getElementById(sectionId).classList.add('active');
     }
 
-    // New function to handle "Watch Entry Video" button
     window.watchEntryVideo = function () {
-        // Switch to the "How to Use PIN" tab
         showSection('access');
-
-        // Wait for the tab switch to complete (using setTimeout for a small delay)
         setTimeout(() => {
             const instructionImage = document.getElementById("instructionImage");
             const videoContainer = document.getElementById("instructionVideoContainer");
@@ -363,24 +401,21 @@
             const videoOverlay = document.querySelector(".video-overlay");
             const iframe = document.getElementById("instructionVideoFrame");
 
-            // Hide image, play button, and overlay, show video
             instructionImage.style.display = "none";
             playButton.style.display = "none";
             playText.style.display = "none";
             videoOverlay.style.display = "none";
             videoContainer.style.display = "flex";
 
-            // Set video to autoplay
             let videoSrc = iframe.src;
             if (!videoSrc.includes("autoplay=1")) {
                 iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
                 console.log('Instruction video src set to:', iframe.src);
             }
 
-            // Scroll to the top of the video container
             const videoContainerElement = document.querySelector(".video-container");
             videoContainerElement.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 100); // Small delay to ensure tab switch completes
+        }, 100);
     };
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -411,48 +446,175 @@
             }
         });
 
-        // FAQ Toggle
-        window.toggleCategory = function (categoryId) {
-            const category = document.querySelector(`.faq-category[data-category="${categoryId}"]`);
-            const isActive = category.classList.contains('active');
-            category.classList.toggle('active');
-            const faqItems = category.querySelectorAll('.faq-item');
-            faqItems.forEach(item => {
-                item.style.display = isActive ? 'none' : 'block';
-                const answer = item.querySelector('.faq-answer');
-                const arrow = item.querySelector('.arrow');
-                answer.style.display = 'none';
-                arrow.textContent = '▼';
-            });
-        };
+        // FAQ Functionality (Adapted from home.html)
+        const faqItems = document.querySelectorAll(".faq-item");
+        const faqQuestions = document.querySelectorAll(".faq-question");
 
-        // FAQ Question Toggle
-        document.querySelectorAll('.faq-question').forEach(item => {
-            item.addEventListener('click', () => {
-                const answer = item.nextElementSibling;
-                const arrow = item.querySelector('.arrow');
-                const isOpen = answer.style.display === 'block';
-                answer.style.display = isOpen ? 'none' : 'block';
-                arrow.textContent = isOpen ? '▼' : '▲';
+        // Initialize FAQs to collapsed state
+        function initializeFAQs() {
+            faqItems.forEach(item => {
+                const answer = item.querySelector(".faq-answer");
+                const arrow = item.querySelector(".arrow");
+                answer.style.display = "none";
+                answer.classList.remove("show");
+                arrow.textContent = "▼";
+            });
+        }
+
+        // Toggle Individual FAQ with Animation and Accessibility
+        faqQuestions.forEach(question => {
+            question.addEventListener("click", function (event) {
+                event.preventDefault();
+                const item = question.closest(".faq-item");
+                const answer = item.querySelector(".faq-answer");
+                const arrow = question.querySelector(".arrow");
+                const isExpanded = answer.classList.contains("show");
+
+                // Close all other answers
+                faqItems.forEach(faq => {
+                    const otherAnswer = faq.querySelector(".faq-answer");
+                    const otherArrow = faq.querySelector(".arrow");
+                    if (otherAnswer !== answer) {
+                        otherAnswer.style.display = "none";
+                        otherAnswer.classList.remove("show");
+                        otherArrow.textContent = "▼";
+                        faq.querySelector(".faq-question").setAttribute("aria-expanded", "false");
+                    }
+                });
+
+                // Ensure the parent category is expanded
+                const category = question.closest('.faq-category');
+                const categoryItems = category.querySelector('.faq-items');
+                const categoryArrow = category.querySelector('.category-arrow');
+                if (!category.classList.contains('expanded')) {
+                    category.classList.add('expanded');
+                    categoryItems.style.display = 'block';
+                    categoryArrow.textContent = '▲';
+                }
+
+                // Toggle the current answer
+                answer.style.display = isExpanded ? "none" : "block";
+                answer.classList.toggle("show", !isExpanded);
+                arrow.textContent = isExpanded ? "▼" : "▲";
+                question.setAttribute("aria-expanded", !isExpanded);
+
+                // Update ARIA for accessibility
+                question.setAttribute("aria-controls", answer.id);
+                if (!answer.id) answer.id = question.getAttribute("aria-controls");
+            });
+
+            // Keyboard Accessibility
+            question.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    question.click();
+                }
             });
         });
 
+        // Initialize FAQ IDs for accessibility
+        faqQuestions.forEach((question, index) => {
+            if (!question.getAttribute("aria-controls")) {
+                const answer = question.nextElementSibling;
+                const id = question.getAttribute("data-answer-id") || `faq-answer-${index}`;
+                question.setAttribute("aria-controls", id);
+                if (!answer.id) answer.id = id;
+            }
+            question.setAttribute("aria-expanded", "false");
+        });
+
+        // Toggle Category
+        window.toggleCategory = function(categoryId) {
+            const category = document.querySelector(`.faq-category[data-category="${categoryId}"]`);
+            const categoryItems = category.querySelector('.faq-items');
+            const categoryArrow = category.querySelector('.category-arrow');
+            const isExpanded = category.classList.contains('expanded');
+
+            // Toggle category visibility
+            category.classList.toggle('expanded');
+            categoryItems.style.display = isExpanded ? 'none' : 'block';
+            categoryArrow.textContent = isExpanded ? '▼' : '▲';
+
+            // Collapse all answers within the category when closing
+            if (isExpanded) {
+                const answers = categoryItems.querySelectorAll('.faq-answer');
+                const arrows = categoryItems.querySelectorAll('.faq-question .arrow');
+                answers.forEach(answer => {
+                    answer.style.display = 'none';
+                    answer.classList.remove('show');
+                });
+                arrows.forEach(arrow => arrow.textContent = '▼');
+            }
+        };
+
         // FAQ Search Filter
-        window.filterFAQs = function () {
+        window.filterFAQs = function() {
             const input = document.getElementById('faq-search').value.toLowerCase();
-            const items = document.querySelectorAll('.faq-item');
-            let visibleCount = 0;
-            items.forEach(item => {
-                const question = item.querySelector('.faq-question').textContent.toLowerCase();
-                const answer = item.querySelector('.faq-answer');
-                const answerText = answer.textContent.toLowerCase();
-                const matches = question.includes(input) || answerText.includes(input);
-                item.style.display = matches ? 'block' : 'none';
-                if (matches) visibleCount++;
-                answer.style.display = 'none';
-                item.querySelector('.arrow').textContent = '▼';
+            const categories = document.querySelectorAll('.faq-category');
+
+            categories.forEach(category => {
+                const categoryItems = category.querySelector('.faq-items');
+                const categoryArrow = category.querySelector('.category-arrow');
+                const items = categoryItems.querySelectorAll('.faq-item');
+                let hasVisibleItems = false;
+
+                items.forEach(item => {
+                    const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                    const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                    const matches = question.includes(input) || answer.includes(input);
+
+                    if (input === "") {
+                        item.style.display = "";
+                        const answerElement = item.querySelector('.faq-answer');
+                        const arrow = item.querySelector('.arrow');
+                        answerElement.style.display = 'none';
+                        answerElement.classList.remove("show");
+                        answerElement.classList.remove("highlight");
+                        arrow.textContent = '▼';
+                    } else {
+                        item.style.display = matches ? "block" : "none";
+                        if (matches) {
+                            hasVisibleItems = true;
+                            const answerElement = item.querySelector('.faq-answer');
+                            answerElement.classList.toggle("highlight", question.includes(input) || answer.includes(input));
+                        } else {
+                            const answerElement = item.querySelector('.faq-answer');
+                            answerElement.classList.remove("highlight");
+                        }
+
+                        // Collapse the answer and reset the arrow
+                        const answerElement = item.querySelector('.faq-answer');
+                        const arrow = item.querySelector('.arrow');
+                        answerElement.style.display = 'none';
+                        answerElement.classList.remove("show");
+                        arrow.textContent = '▼';
+                    }
+                });
+
+                // Expand category if there are visible items
+                if (hasVisibleItems || input === "") {
+                    category.classList.add('expanded');
+                    categoryItems.style.display = 'block';
+                    categoryArrow.textContent = '▲';
+                } else {
+                    category.classList.remove('expanded');
+                    categoryItems.style.display = 'none';
+                    categoryArrow.textContent = '▼';
+                }
             });
         };
+
+        // Initialize FAQ Categories (expanded by default for better UX)
+        document.querySelectorAll('.faq-category').forEach(category => {
+            const categoryItems = category.querySelector('.faq-items');
+            const categoryArrow = category.querySelector('.category-arrow');
+            category.classList.add('expanded');
+            categoryItems.style.display = 'block';
+            categoryArrow.textContent = '▲';
+        });
+
+        // Initialize FAQs on load
+        initializeFAQs();
 
         // Modal Video Playback
         document.querySelectorAll('.video-item .play-button').forEach(button => {
