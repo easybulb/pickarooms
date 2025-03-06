@@ -192,9 +192,10 @@ def checkin(request):
 
 def room_detail(request, room_token):
     reservation_number = request.session.get("reservation_number", None)
-    guest = get_object_or_404(Guest, secure_token=room_token)
+    guest = Guest.objects.filter(secure_token=room_token).first()  # Use filter().first() instead of get_object_or_404
 
-    if not reservation_number or guest.reservation_number != reservation_number:
+    # Redirect to unauthorized if guest doesn't exist or reservation_number doesn't match
+    if not guest or not reservation_number or guest.reservation_number != reservation_number:
         return redirect("unauthorized")
 
     room = guest.assigned_room
@@ -264,7 +265,6 @@ def room_detail(request, room_token):
             "front_door_pin": guest.front_door_pin,
         },
     )
-
 
 
 @ratelimit(key='ip', rate='3/m', method='POST', block=True)
