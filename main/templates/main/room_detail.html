@@ -128,7 +128,15 @@
     <div class="room-info">
         <h2>📥 {% trans "Check-In" %}</h2>
         {% if guest %}
-        <p><strong>{% trans "Date:" %}</strong> {{ guest.check_in_date }} ({% trans "From 2 PM" %})</p>
+        <p>
+            <strong>{% trans "Date:" %}</strong> {{ guest.check_in_date }} 
+            ({% trans "From" %} 
+            {% if guest.early_checkin_time %}
+                {{ guest.early_checkin_time|time:"h:i A" }}
+            {% else %}
+                {% trans "2 PM" %}
+            {% endif %})
+        </p>
         <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
         {% else %}
         <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
@@ -150,9 +158,25 @@
     <div class="room-info">
         <h2>📤 {% trans "Check-Out" %}</h2>
         {% if guest %}
-        <p><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before 11 AM" %})</p>
+        <p>
+            <strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} 
+            ({% trans "Before" %} 
+            {% if guest.late_checkout_time %}
+                {{ guest.late_checkout_time|time:"h:i A" }}
+            {% else %}
+                {% trans "11 AM" %}
+            {% endif %})
+        </p>
         <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
-        <p class="expiration-note">{% trans "Note: Your front door access will expire at check-out time. Please ensure you check out before 11 AM to avoid being locked out." %}</p>
+        <p class="expiration-note">
+            {% trans "Note: Your front door access will expire at check-out time. Please ensure you check out before" %}
+            {% if guest.late_checkout_time %}
+                {{ guest.late_checkout_time|time:"h:i A" }}
+            {% else %}
+                {% trans "11 AM" %}
+            {% endif %}
+            {% trans "to avoid being locked out." %}
+        </p>
         {% else %}
         <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
         {% endif %}

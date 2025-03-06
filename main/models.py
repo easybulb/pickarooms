@@ -1,3 +1,4 @@
+# main/models.py
 import uuid
 from django.db import models
 from django.utils.timezone import now
@@ -48,6 +49,8 @@ class Guest(models.Model):
     secure_token = models.CharField(max_length=36, unique=True, blank=True)  # Adjusted to UUID length
     front_door_pin = models.CharField(max_length=10, blank=True, null=True)  # Temporary PIN for front door
     front_door_pin_id = models.CharField(max_length=50, blank=True, null=True)  # TTLock keyboard password ID
+    early_checkin_time = models.TimeField(null=True, blank=True)  # Custom early check-in time
+    late_checkout_time = models.TimeField(null=True, blank=True)  # Custom late check-out time
 
     def save(self, *args, **kwargs):
         if not self.secure_token:

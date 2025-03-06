@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Manage Check-In/Check-Out Times" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_guest.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+    <br>
+    <h1>{% trans "Manage Check-In/Check-Out Times for" %} {{ guest.full_name }}</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}" id="message-{{ forloop.counter }}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" class="admin-form">
+        {% csrf_token %}
+
+        <label for="early_checkin_time">{% trans "Early Check-In Time (e.g., 12:00):" %}</label>
+        <input type="time" id="early_checkin_time" name="early_checkin_time" value="{{ guest.early_checkin_time|time:'H:i'|default_if_none:'' }}" placeholder="HH:MM">
+        <p>{% trans "Leave blank to use default (2:00 PM)." %}</p>
+
+        <label for="late_checkout_time">{% trans "Late Check-Out Time (e.g., 14:00):" %}</label>
+        <input type="time" id="late_checkout_time" name="late_checkout_time" value="{{ guest.late_checkout_time|time:'H:i'|default_if_none:'' }}" placeholder="HH:MM">
+        <p>{% trans "Leave blank to use default (11:00 AM)." %}</p>
+
+        <button type="submit" class="btn-save">{% trans "Save Changes" %}</button>
+    </form>
+
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+</div>
+{% endblock %}

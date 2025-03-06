@@ -22,7 +22,8 @@
         <input type="text" id="full_name" name="full_name" value="{{ guest.full_name }}" required>
 
         <label for="reservation_number">{% trans "Reservation Number:" %}</label>
-        <input type="text" id="reservation_number" name="reservation_number" value="{{ guest.reservation_number }}" required>
+        <input type="text" id="reservation_number" name="reservation_number" value="{{ guest.reservation_number }}" required maxlength="15">
+        <p class="note">{% trans "Typically 10 characters (Booking.com format). Maximum 15 characters allowed." %}</p>
 
         <label for="phone_number">{% trans "Phone Number:" %}</label>
         <input type="text" id="phone_number" name="phone_number" value="{{ guest.phone_number|default_if_none:'Not provided' }}">

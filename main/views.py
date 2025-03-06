@@ -190,10 +190,6 @@ def checkin(request):
     })
 
 
-
-# main/views.py
-# ... (other imports remain unchanged)
-
 def room_detail(request, room_token):
     reservation_number = request.session.get("reservation_number", None)
     guest = get_object_or_404(Guest, secure_token=room_token)
@@ -205,13 +201,17 @@ def room_detail(request, room_token):
     uk_timezone = pytz.timezone("Europe/London")
     now_uk_time = timezone.now().astimezone(uk_timezone)
 
+    # Use early check-in time if set, otherwise default to 2:00 PM
+    check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
     check_in_datetime = timezone.make_aware(
-        datetime.datetime.combine(guest.check_in_date, datetime.time(14, 0)),
+        datetime.datetime.combine(guest.check_in_date, check_in_time),
         datetime.timezone.utc,
     ).astimezone(uk_timezone)
 
+    # Use late check-out time if set, otherwise default to 11:00 AM
+    check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
     check_out_datetime = timezone.make_aware(
-        datetime.datetime.combine(guest.check_out_date, datetime.time(11, 0)),
+        datetime.datetime.combine(guest.check_out_date, check_out_time),
         datetime.timezone.utc,
     ).astimezone(uk_timezone)
 
@@ -259,7 +259,7 @@ def room_detail(request, room_token):
             "room": room,
             "guest": guest,
             "image_url": room.image or None,
-            "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at 11:00 AM.",
+            "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
             "show_pin": not enforce_2pm_rule,
             "front_door_pin": guest.front_door_pin,
         },
@@ -424,6 +424,11 @@ def admin_page(request):
         phone_number = request.POST.get('phone_number', '').strip() or None
         full_name = request.POST.get('full_name', 'Guest').strip()
         room_id = request.POST.get('room')
+
+        # Validate reservation_number length
+        if len(reservation_number) > 15:
+            messages.error(request, "Reservation number must not exceed 15 characters.")
+            return redirect('admin_page')
 
         if not reservation_number:
             messages.error(request, "Reservation number is required.")
@@ -594,8 +599,14 @@ def edit_guest(request, guest_id):
 
         else:
             # Update guest details
+            new_reservation_number = request.POST.get('reservation_number', '').strip()
+            # Validate reservation_number length
+            if len(new_reservation_number) > 15:
+                messages.error(request, "Reservation number must not exceed 15 characters.")
+                return redirect('edit_guest', guest_id=guest.id)
+
             guest.full_name = request.POST.get('full_name')
-            guest.reservation_number = request.POST.get('reservation_number', '').strip()
+            guest.reservation_number = new_reservation_number
             guest.phone_number = request.POST.get('phone_number')
             check_in_date = date.fromisoformat(request.POST.get('check_in_date'))
             check_out_date = date.fromisoformat(request.POST.get('check_out_date'))
@@ -713,6 +724,46 @@ def past_guests(request):
     return render(request, 'main/past_guests.html', {
         'past_guests': paginated_past_guests,
         'search_query': search_query,
+    })
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def manage_checkin_checkout(request, guest_id):
+    guest = get_object_or_404(Guest, id=guest_id)
+
+    if request.method == 'POST':
+        early_checkin_time = request.POST.get('early_checkin_time')
+        late_checkout_time = request.POST.get('late_checkout_time')
+
+        # Convert time strings (e.g., "12:00") to time objects
+        if early_checkin_time:
+            try:
+                early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+                guest.early_checkin_time = early_checkin_time
+            except ValueError:
+                messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
+                return redirect('manage_checkin_checkout', guest_id=guest.id)
+
+        if late_checkout_time:
+            try:
+                late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
+                guest.late_checkout_time = late_checkout_time
+            except ValueError:
+                messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
+                return redirect('manage_checkin_checkout', guest_id=guest.id)
+
+        # Clear the times if the fields are empty (to revert to default)
+        if not early_checkin_time:
+            guest.early_checkin_time = None
+        if not late_checkout_time:
+            guest.late_checkout_time = None
+
+        guest.save()
+        messages.success(request, f"Check-in/check-out times updated for {guest.full_name}.")
+        return redirect('admin_page')
+
+    return render(request, 'main/manage_checkin_checkout.html', {
+        'guest': guest,
     })
 
 def privacy_policy(request):

@@ -3,6 +3,11 @@ from django.utils.html import format_html
 from django.conf import settings
 from django import forms
 from .models import Room, Guest, ReviewCSVUpload, TTLock
+from .ttlock_utils import TTLockClient
+import logging
+
+# Set up logging for TTLock interactions
+logger = logging.getLogger('main')
 
 # ✅ Always show Cloudinary URL input (No file upload)
 class RoomAdminForm(forms.ModelForm):
@@ -29,7 +34,7 @@ class RoomAdmin(admin.ModelAdmin):
     image_preview.short_description = "Image Preview"
 
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'phone_number', 'check_in_date', 'check_out_date', 'assigned_room', 'front_door_pin', 'front_door_pin_id', 'is_archived')
+    list_display = ('full_name', 'reservation_number', 'phone_number', 'check_in_date', 'check_out_date', 'assigned_room', 'front_door_pin', 'front_door_pin_id', 'is_archived')
     list_filter = ('is_archived', 'check_in_date', 'check_out_date', 'assigned_room')
     search_fields = ('full_name', 'phone_number', 'reservation_number')
     actions = ['mark_as_archived']
@@ -40,6 +45,63 @@ class GuestAdmin(admin.ModelAdmin):
         self.message_user(request, "Selected guests have been archived.")
 
     mark_as_archived.short_description = "Move selected guests to archive"
+
+    def delete_queryset(self, request, queryset):
+        """Override delete to handle bulk deletion with TTLock PIN cleanup."""
+        front_door_lock = TTLock.objects.filter(is_front_door=True).first()
+
+        for guest in queryset:
+            if guest.front_door_pin_id and front_door_lock:
+                try:
+                    ttlock_client = TTLockClient()
+                    logger.info(f"Attempting to delete PIN for guest {guest.reservation_number} with keyboardPwdId: {guest.front_door_pin_id}")
+                    response = ttlock_client.delete_pin(
+                        lock_id=front_door_lock.lock_id,
+                        keyboard_pwd_id=guest.front_door_pin_id,
+                    )
+                    logger.info(f"TTLock delete_pin response: {response}")
+                    if response.get("errcode", 0) == 0:
+                        logger.info(f"Successfully deleted PIN for guest {guest.reservation_number}")
+                    else:
+                        logger.error(f"Failed to delete PIN for guest {guest.reservation_number}: {response.get('errmsg', 'Unknown error')}")
+                        self.message_user(request, f"Failed to delete PIN for {guest.full_name}: {response.get('errmsg', 'Unknown error')}")
+                except Exception as e:
+                    logger.error(f"Exception during PIN deletion for guest {guest.reservation_number}: {str(e)}")
+                    self.message_user(request, f"Error deleting PIN for {guest.full_name}: {str(e)}")
+                finally:
+                    guest.front_door_pin = None
+                    guest.front_door_pin_id = None
+                    guest.save()
+            guest.delete()
+        self.message_user(request, "Selected guests deleted successfully.")
+
+    def delete_model(self, request, obj):
+        """Override delete for a single object to handle TTLock PIN deletion."""
+        front_door_lock = TTLock.objects.filter(is_front_door=True).first()
+
+        if obj.front_door_pin_id and front_door_lock:
+            try:
+                ttlock_client = TTLockClient()
+                logger.info(f"Attempting to delete PIN for guest {obj.reservation_number} with keyboardPwdId: {obj.front_door_pin_id}")
+                response = ttlock_client.delete_pin(
+                    lock_id=front_door_lock.lock_id,
+                    keyboard_pwd_id=obj.front_door_pin_id,
+                )
+                logger.info(f"TTLock delete_pin response: {response}")
+                if response.get("errcode", 0) == 0:
+                    logger.info(f"Successfully deleted PIN for guest {obj.reservation_number}")
+                else:
+                    logger.error(f"Failed to delete PIN for guest {obj.reservation_number}: {response.get('errmsg', 'Unknown error')}")
+                    self.message_user(request, f"Failed to delete PIN for {obj.full_name}: {response.get('errmsg', 'Unknown error')}")
+            except Exception as e:
+                logger.error(f"Exception during PIN deletion for guest {obj.reservation_number}: {str(e)}")
+                self.message_user(request, f"Error deleting PIN for {obj.full_name}: {str(e)}")
+            finally:
+                obj.front_door_pin = None
+                obj.front_door_pin_id = None
+                obj.save()
+        obj.delete()
+        self.message_user(request, "Guest deleted successfully.")
 
 class ReviewCSVUploadAdmin(admin.ModelAdmin):
     list_display = ('uploaded_at',)
