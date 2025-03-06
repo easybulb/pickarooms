@@ -6,7 +6,7 @@
 {% block title %}{% trans "Manage Check-In/Check-Out Times" %}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/edit_guest.css' %}">
+<link rel="stylesheet" href="{% static 'css/manage_checkin_checkout.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
         {% endfor %}
     {% endif %}
 
-    <form method="POST" class="admin-form">
+    <form method="POST" class="manage-checkin-form">
         {% csrf_token %}
 
         <label for="early_checkin_time">{% trans "Early Check-In Time (e.g., 12:00):" %}</label>
