@@ -10,54 +10,36 @@
 
 {% block content %}
 
-<!-- Hero Section with Image and Playable Video (Restored to Original) -->
-<section class="room-hero">
-    <div class="hero-overlay"></div>
-    <div class="room-hero-content">
-        <img src="{{ image_url }}" alt="{{ room.name }}" class="room-hero-image" id="heroImage">
-        <button class="play-button" id="playVideo">
-            <i class="fas fa-play"></i>
-        </button>
-        <p class="play-text" style="font-weight: 400;">{% trans "Instruction Video" %}</p>
-    </div>
-    <div class="room-video-container" id="videoContainer" style="display: none;">
-        <iframe id="videoFrame" src="{{ room.video_url }}" title="{% trans 'Room Instructions' %}" frameborder="0"
-            allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-    </div>
-</section>
-
-<!-- Welcome Section -->
-<section class="welcome-section">
-    <h1 class="welcome-header">
-        <span class="room-name">{{ room.name }}</span>
-        <span>{% trans "Upstairs" %}</span>
-        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1741110376/no-smoking_sw0fnf.png" alt="{% trans 'No Smoking' %}" class="no-smoking-icon">
-    </h1>
-    <p class="welcome-greeting">{% trans "Welcome," %} {{ guest.full_name }}!</p>
-    {% if not show_pin %}
-        <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time.  Your access details will be available then." %}</p>
-    {% else %}
-        <p class="pin-entry"><strong>{% trans "Front Door PIN:" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
-        <p class="pin-entry"><strong>{% trans "Room Door PIN:" %}</strong> <span class="pin-code">{{ room.access_pin|default:"Contact support" }}#</span></p>
-        <div class="pin-confirmation">
-            <button id="pin-success" class="pin-btn">{% trans "PIN Worked" %}</button>
-            <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
-        </div>
-    {% endif %}
-</section>
-
 <!-- Sticky Tab Navigation -->
 <div class="section-nav">
-    <button class="tab-btn active" data-section="location-section" onclick="showSection('location-section')">{% trans "Location" %}</button>
-    <button class="tab-btn" data-section="access-section" onclick="showSection('access-section')">{% trans "How To Use PIN" %}</button>
-    <button class="tab-btn" data-section="checkin-section" onclick="showSection('checkin-section')">{% trans "Check-In" %}</button>
-    <button class="tab-btn" data-section="checkout-section" onclick="showSection('checkout-section')">{% trans "Check-Out" %}</button>
-    <button class="tab-btn" data-section="wifi-detail" onclick="showSection('wifi-detail')">{% trans "WiFi" %}</button>
-    <button class="tab-btn" data-section="faq-section" onclick="showSection('faq-section')">{% trans "FAQs" %}</button>
+    <button class="tab-btn active" data-section="location" onclick="showSection('location')">{% trans "Access" %}</button>
+    <button class="tab-btn" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
+    <button class="tab-btn" data-section="checkin" onclick="showSection('checkin')">{% trans "Check-In" %}</button>
+    <button class="tab-btn" data-section="checkout" onclick="showSection('checkout')">{% trans "Check-Out" %}</button>
+    <button class="tab-btn" data-section="wifi" onclick="showSection('wifi')">{% trans "WiFi" %}</button>
+    <button class="tab-btn" data-section="faq" onclick="showSection('faq')">{% trans "FAQs" %}</button>
 </div>
 
 <!-- Location Section -->
-<section id="location-section" class="section-content active">
+<section id="location" class="section-content active">
+    <div class="welcome-section">
+        <h1 class="welcome-header">
+            <span class="room-name">{{ room.name }}</span>
+            <span>{% trans "Upstairs" %}</span>
+            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1741110376/no-smoking_sw0fnf.png" alt="{% trans 'No Smoking' %}" class="no-smoking-icon">
+        </h1>
+        <p class="welcome-greeting">{% trans "Welcome," %} {{ guest.full_name }}!</p>
+        {% if not show_pin %}
+            <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time.  Your access details will be available then." %}</p>
+        {% else %}
+            <p class="pin-entry"><strong>{% trans "Front Door PIN:" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
+            <p class="pin-entry"><strong>{% trans "Room Door PIN:" %}</strong> <span class="pin-code">{{ room.access_pin|default:"Contact support" }}#</span></p>
+            <div class="quick-access">
+                <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button>
+                <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
+            </div>
+        {% endif %}
+    </div>
     <h2 class="section-title">📍 {% trans "Location" %}</h2>
     <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
     <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
@@ -71,14 +53,36 @@
     </ul>
     <p class="content-text"><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
     <p class="content-text"><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street via Ashton Old Road (A635) or M60 Exit 24." %}</p>
+    
+    <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
+    <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
+    <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
+    
     <div class="quick-access">
-        <button onclick="scrollToHeroVideo()">🎥 {% trans "Watch Entry Video" %}</button>
-        <button onclick="showSection('faq-section')">📜 {% trans "FAQs & Help" %}</button>
+        <div class="pin-confirmation">
+            <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
+        </div>
+        <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button>
+        <button onclick="showSection('faq')">📜 {% trans "FAQs & Help" %}</button>
     </div>
 </section>
 
 <!-- Access Section -->
-<section id="access-section" class="section-content">
+<section id="access" class="section-content">
+    <div class="video-container">
+        <div class="video-overlay"></div>
+        <div class="video-content">
+            <img src="{{ image_url }}" alt="{{ room.name }}" class="video-image" id="instructionImage">
+            <button class="play-button" id="playInstructionVideo">
+                <i class="fas fa-play"></i>
+            </button>
+            <p class="play-text" style="font-weight: 400;">{% trans "Instruction Video" %}</p>
+        </div>
+        <div class="video-player" id="instructionVideoContainer" style="display: none;">
+            <iframe id="instructionVideoFrame" src="{{ room.video_url }}" title="{% trans 'Room Instructions' %}" frameborder="0"
+                allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
     <div class="room-info">
         <h2 class="section-title">🔑 {% trans "How To Use PIN" %}</h2>
         <p class="content-text">{% trans "To enter the property, follow these steps:" %}</p>
@@ -118,7 +122,7 @@
 </section>
 
 <!-- Check-In Section -->
-<section id="checkin-section" class="section-content">
+<section id="checkin" class="section-content">
     <h2 class="section-title">📥 {% trans "Check-In" %}</h2>
     {% if guest %}
         <p class="content-text"><strong>{% trans "Date:" %}</strong> {{ guest.check_in_date }} ({% trans "From" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %})</p>
@@ -129,7 +133,7 @@
 </section>
 
 <!-- Check-Out Section -->
-<section id="checkout-section" class="section-content">
+<section id="checkout" class="section-content">
     <h2 class="section-title">📤 {% trans "Check-Out" %}</h2>
     {% if guest %}
         <p class="content-text"><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %})</p>
@@ -149,7 +153,7 @@
 </section>
 
 <!-- WiFi Section -->
-<section id="wifi-detail" class="section-content">
+<section id="wifi" class="section-content">
     <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
     <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
     <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
@@ -157,7 +161,7 @@
 </section>
 
 <!-- FAQ Section -->
-<section id="faq-section" class="section-content">
+<section id="faq" class="section-content">
     <h2 class="section-title">❓ {% trans "Frequently Asked Questions" %}</h2>
     <input type="text" id="faq-search" placeholder="{% trans 'Search FAQs...' %}" onkeyup="filterFAQs()">
     <div class="faq-container">
@@ -345,6 +349,40 @@
         document.getElementById(sectionId).classList.add('active');
     }
 
+    // New function to handle "Watch Entry Video" button
+    window.watchEntryVideo = function () {
+        // Switch to the "How to Use PIN" tab
+        showSection('access');
+
+        // Wait for the tab switch to complete (using setTimeout for a small delay)
+        setTimeout(() => {
+            const instructionImage = document.getElementById("instructionImage");
+            const videoContainer = document.getElementById("instructionVideoContainer");
+            const playButton = document.getElementById("playInstructionVideo");
+            const playText = document.querySelector(".play-text");
+            const videoOverlay = document.querySelector(".video-overlay");
+            const iframe = document.getElementById("instructionVideoFrame");
+
+            // Hide image, play button, and overlay, show video
+            instructionImage.style.display = "none";
+            playButton.style.display = "none";
+            playText.style.display = "none";
+            videoOverlay.style.display = "none";
+            videoContainer.style.display = "flex";
+
+            // Set video to autoplay
+            let videoSrc = iframe.src;
+            if (!videoSrc.includes("autoplay=1")) {
+                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
+                console.log('Instruction video src set to:', iframe.src);
+            }
+
+            // Scroll to the top of the video container
+            const videoContainerElement = document.querySelector(".video-container");
+            videoContainerElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100); // Small delay to ensure tab switch completes
+    };
+
     document.addEventListener("DOMContentLoaded", function () {
         // PIN Confirmation
         const pinSuccess = document.getElementById("pin-success");
@@ -352,48 +390,24 @@
         if (pinSuccess) pinSuccess.addEventListener("click", () => alert("🎉 {% trans 'Proceed to your room upstairs!' %}"));
         if (pinHelp) pinHelp.addEventListener("click", () => openModal("unlock-help-modal"));
 
-        // Scroll to Hero Video (Unchanged)
-        window.scrollToHeroVideo = function () {
-            const heroImage = document.getElementById("heroImage");
-            const videoContainer = document.getElementById("videoContainer");
-            const playButton = document.getElementById("playVideo");
-            const playText = document.querySelector(".play-text");
-            const heroOverlay = document.querySelector(".hero-overlay");
-            const iframe = document.getElementById("videoFrame");
-
-            heroImage.style.display = "none";
-            playButton.style.display = "none";
-            playText.style.display = "none";
-            heroOverlay.style.display = "none";
-            videoContainer.style.display = "flex";
-
-            let videoSrc = iframe.src;
-            if (!videoSrc.includes("autoplay=1")) {
-                iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
-                console.log('Hero video src set to:', iframe.src);
-            }
-
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        };
-
-        // Hero Video (Unchanged)
-        const playButton = document.getElementById("playVideo");
+        // Instruction Video Playback
+        const playButton = document.getElementById("playInstructionVideo");
         playButton.addEventListener("click", function () {
-            const heroImage = document.getElementById("heroImage");
-            const videoContainer = document.getElementById("videoContainer");
+            const instructionImage = document.getElementById("instructionImage");
+            const videoContainer = document.getElementById("instructionVideoContainer");
             const playText = document.querySelector(".play-text");
-            const heroOverlay = document.querySelector(".hero-overlay");
-            const iframe = document.getElementById("videoFrame");
+            const videoOverlay = document.querySelector(".video-overlay");
+            const iframe = document.getElementById("instructionVideoFrame");
 
-            heroImage.style.display = "none";
+            instructionImage.style.display = "none";
             playButton.style.display = "none";
             playText.style.display = "none";
-            heroOverlay.style.display = "none";
+            videoOverlay.style.display = "none";
             videoContainer.style.display = "flex";
             let videoSrc = iframe.src;
             if (!videoSrc.includes("autoplay=1")) {
                 iframe.src = videoSrc + (videoSrc.includes("?") ? "&" : "?") + "autoplay=1";
-                console.log('Hero video src set to:', iframe.src);
+                console.log('Instruction video src set to:', iframe.src);
             }
         });
 
@@ -462,7 +476,7 @@
         };
 
         // Initialize Active Section
-        showSection('location-section');
+        showSection('location');
     });
 </script>
 
