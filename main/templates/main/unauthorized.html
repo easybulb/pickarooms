@@ -45,7 +45,7 @@
 {% block content %}
 <div class="unauthorized-container">
     <h1>{% trans "Access Denied" %}</h1>
-    <p>{% trans "You do not have permission to access this page. Your reservation may have been deleted, expired, or you may have entered an incorrect reservation number." %}</p>
+    <p>{% trans "You do not have permission to access this page. Your reservation may have been deleted, expired, or you may have tried to use a room URL link in a different browser. Please go back to " %}<a href="{% url 'home' %}" style="text-decoration: underline; font-weight: 600;">{% trans "the home page" %}</a>{% trans " and re-enter your confirmation number." %}</p>
     <p>{% trans "Please contact the administrator for assistance:" %} <a href="{% url 'contact' %}">{% trans "Contact Admin" %}</a></p>
     <a href="/" class="home-link">{% trans "Return to Home" %}</a>
 </div>
