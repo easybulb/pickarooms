@@ -344,10 +344,12 @@
         <span class="close" onclick="closeModal('unlock-help-modal')">×</span>
         <h3 class="modal-title">{% trans "Remote Unlock Assistance" %}</h3>
         <p class="modal-text">{% trans "If your PIN isn’t working, you can remotely unlock the front door or your room door by pressing the buttons below depending on the door you are in front of." %}</p>
-        <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
+        <form method="post" id="unlock-form" action="{% url 'room_detail' room_token=guest.secure_token %}">
             {% csrf_token %}
-            <button type="submit" name="unlock_door" value="front" class="btn-unlock">🚪 {% trans "Unlock Front Door" %}</button>
-            <button type="submit" name="unlock_door" value="room" class="btn-unlock">🔑 {% trans "Unlock Room Door" %}</button>
+            <input type="hidden" name="unlock_door" value="true">
+            <input type="hidden" name="door_type" id="door-type-input">
+            <button type="button" class="btn-unlock" onclick="setDoorTypeAndSubmit('front')">🚪 {% trans "Unlock Front Door" %}</button>
+            <button type="button" class="btn-unlock" onclick="setDoorTypeAndSubmit('room')">🔑 {% trans "Unlock Room Door" %}</button>
         </form>
         <p class="modal-text">{% trans "After unlocking, turn the handle to enter. Ensure you are at the correct door before pressing." %}</p>
     </div>
@@ -378,6 +380,11 @@
         });
         document.querySelector(`.tab-btn[data-section="${sectionId}"]`).classList.add('active');
         document.getElementById(sectionId).classList.add('active');
+    }
+
+    function setDoorTypeAndSubmit(doorType) {
+        document.getElementById('door-type-input').value = doorType;
+        document.getElementById('unlock-form').submit();
     }
 
     window.watchEntryVideo = function () {
