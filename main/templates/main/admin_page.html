@@ -5,12 +5,25 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
+<style>
+    .nav-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .nav-link:hover {
+        text-decoration: underline;
+    }
+</style>
 {% endblock %}
 
 {% block title %}{% trans "Admin Dashboard" %}{% endblock %}
 
 {% block content %}
 <section class="admin-container">
+    <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
     <h1 class="admin-title">{% trans "Admin Dashboard" %}</h1>
 
     {% if messages %}
