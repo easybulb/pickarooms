@@ -99,11 +99,31 @@ def checkin(request):
     if request.method == "POST":
         reservation_number = request.POST.get('reservation_number', '').strip()
 
-        # Find guest using only the unique Booking.com reservation number
+        # Step 1: Check for non-archived (active) guest
         guest = Guest.objects.filter(reservation_number=reservation_number, is_archived=False).order_by('-check_in_date').first()
 
         if guest:
-            # 🔒 Securely store reservation number in session
+            # Check if the guest has checked out (even if not archived)
+            uk_timezone = pytz.timezone("Europe/London")
+            now_uk_time = timezone.now().astimezone(uk_timezone)
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            check_out_datetime = timezone.make_aware(
+                datetime.datetime.combine(guest.check_out_date, check_out_time),
+                datetime.timezone.utc,
+            ).astimezone(uk_timezone)
+
+            if now_uk_time > check_out_datetime:
+                # Guest has checked out but hasn't been archived yet
+                # Optionally, we can archive them here to keep the system consistent
+                guest.is_archived = True
+                guest.front_door_pin = None
+                guest.front_door_pin_id = None
+                guest.room_pin_id = None
+                guest.save()
+                logger.info(f"Archived guest {guest.reservation_number} during check-in as check-out time {check_out_datetime} has passed")
+                return redirect("rebook_guest")
+
+            # Proceed with regular check-in logic
             request.session['reservation_number'] = guest.reservation_number
 
             # Generate a PIN if the guest doesn't have one
@@ -120,7 +140,6 @@ def checkin(request):
                     uk_timezone = pytz.timezone("Europe/London")
                     now_uk_time = timezone.now().astimezone(uk_timezone)
                     start_time = int(now_uk_time.timestamp() * 1000)
-                    # Set endDate to one day after check-out
                     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                     end_date = timezone.make_aware(
                         datetime.datetime.combine(guest.check_out_date, check_out_time),
@@ -155,7 +174,6 @@ def checkin(request):
                     )
                     if "keyboardPwdId" not in room_response:
                         logger.error(f"Failed to generate room PIN for guest {guest.reservation_number}: {room_response.get('errmsg', 'Unknown error')}")
-                        # Roll back the front door PIN if room PIN generation fails
                         try:
                             client.delete_pin(
                                 lock_id=str(front_door_lock.lock_id),
@@ -173,7 +191,7 @@ def checkin(request):
                     logger.info(f"Generated room PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {room_response['keyboardPwdId']})")
                     guest.save()
 
-                    # Unlock the front door remotely to ensure immediate access
+                    # Unlock the front door remotely
                     try:
                         unlock_response = client.unlock_lock(lock_id=str(front_door_lock.lock_id))
                         if "errcode" in unlock_response and unlock_response["errcode"] != 0:
@@ -215,7 +233,37 @@ def checkin(request):
             messages.success(request, f"Welcome")
             return redirect('room_detail', room_token=guest.secure_token)
 
-        # If the reservation number is incorrect, keep it prefilled in the form
+        # Step 2: Check if the reservation number matches a past (archived) guest
+        past_guest = Guest.objects.filter(reservation_number=reservation_number, is_archived=True).first()
+        if past_guest:
+            # Quick check using is_archived to avoid datetime calculation
+            return redirect("rebook_guest")
+
+        # Step 3: Fallback Check for Any Guest
+        guest = Guest.objects.filter(reservation_number=reservation_number).first()
+        if guest:
+            # Guest exists but was either archived (already handled above) or not archived
+            # Double-check the check-out status to be sure
+            uk_timezone = pytz.timezone("Europe/London")
+            now_uk_time = timezone.now().astimezone(uk_timezone)
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            check_out_datetime = timezone.make_aware(
+                datetime.datetime.combine(guest.check_out_date, check_out_time),
+                datetime.timezone.utc,
+            ).astimezone(uk_timezone)
+
+            if now_uk_time > check_out_datetime:
+                # Guest has checked out; ensure they are archived for consistency
+                if not guest.is_archived:
+                    guest.is_archived = True
+                    guest.front_door_pin = None
+                    guest.front_door_pin_id = None
+                    guest.room_pin_id = None
+                    guest.save()
+                    logger.info(f"Archived guest {guest.reservation_number} during check-in as check-out time {check_out_datetime} has passed")
+                return redirect("rebook_guest")
+
+        # Step 4: If no guest is found or none of the conditions match, show error
         request.session['reservation_number'] = reservation_number
 
         error_message = mark_safe(
