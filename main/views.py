@@ -298,17 +298,17 @@ def room_detail(request, room_token):
     now_uk_time = timezone.now().astimezone(uk_timezone)
 
     # Use early check-in time if set, otherwise default to 2:00 PM
-    check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
+    check_in_time = guest.early_checkin_time if guest.early_checkin_time else time(14, 0)
     check_in_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_in_date, check_in_time),
-        datetime.timezone.utc,
+        timezone.get_current_timezone(),
     ).astimezone(uk_timezone)
 
     # Use late check-out time if set, otherwise default to 11:00 AM
-    check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+    check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
     check_out_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_out_date, check_out_time),
-        datetime.timezone.utc,
+        timezone.get_current_timezone(),
     ).astimezone(uk_timezone)
 
     if now_uk_time > check_out_datetime:
@@ -316,6 +316,17 @@ def room_detail(request, room_token):
         return redirect("rebook_guest")
 
     enforce_2pm_rule = now_uk_time < check_in_datetime
+
+    # Handle modal refresh request
+    if request.method == "GET" and request.GET.get('modal'):
+        return render(request, "main/room_detail.html", {
+            "room": room,
+            "guest": guest,
+            "image_url": room.image or None,
+            "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
+            "show_pin": not enforce_2pm_rule,
+            "front_door_pin": guest.front_door_pin,
+        }, content_type="text/html", status=200)
 
     # Handle unlock request if submitted
     if request.method == "POST" and "unlock_door" in request.POST:
@@ -334,18 +345,17 @@ def room_detail(request, room_token):
                         if "errcode" in unlock_response and unlock_response["errcode"] != 0:
                             logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
                             if attempt == max_retries - 1:
-                                messages.error(request, "Failed to unlock the front door. Please try again or contact support.")
+                                return JsonResponse({"error": "Failed to unlock the front door. Please try again or contact support."}, status=400)
                             else:
                                 logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
                                 continue
                         else:
                             logger.info(f"Successfully unlocked front door for guest {guest.reservation_number}")
-                            messages.success(request, "The front door has been unlocked for you.")
-                            break
+                            return JsonResponse({"success": "The front door has been unlocked for you."})
                     except Exception as e:
                         logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {str(e)}")
                         if attempt == max_retries - 1:
-                            messages.error(request, "Failed to unlock the front door. Please try again or contact support.")
+                            return JsonResponse({"error": "Failed to unlock the front door. Please try again or contact report."}, status=400)
                         else:
                             logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
                             continue
@@ -356,28 +366,27 @@ def room_detail(request, room_token):
                         if "errcode" in unlock_response and unlock_response["errcode"] != 0:
                             logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
                             if attempt == max_retries - 1:
-                                messages.warning(request, "Failed to unlock the room door. Please try again or contact support.")
+                                return JsonResponse({"error": "Failed to unlock the room door. Please try again or contact support."}, status=400)
                             else:
                                 logger.info(f"Retrying unlock room door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
                                 continue
                         else:
                             logger.info(f"Successfully unlocked room door for guest {guest.reservation_number}")
-                            messages.success(request, "The room door has been unlocked for you.")
-                            break
+                            return JsonResponse({"success": "The room door has been unlocked for you."})
                     except Exception as e:
                         logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {str(e)}")
                         if attempt == max_retries - 1:
-                            messages.warning(request, "Failed to unlock the room door. Please try again or contact support.")
+                            return JsonResponse({"error": "Failed to unlock the room door. Please try again or contact support."}, status=400)
                         else:
                             logger.info(f"Retrying unlock room door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
                             continue
             else:
                 logger.warning(f"Invalid door_type or no room lock assigned for guest {guest.reservation_number}")
-                messages.warning(request, "Invalid unlock request or no room lock assigned. Please contact support.")
+                return JsonResponse({"error": "Invalid unlock request or no room lock assigned. Please contact support."}, status=400)
 
         except TTLock.DoesNotExist:
             logger.error("Front door lock not configured in the database.")
-            messages.error(request, "Front door lock not configured. Please contact support.")
+            return JsonResponse({"error": "Front door lock not configured. Please contact support."}, status=400)
 
     return render(
         request,

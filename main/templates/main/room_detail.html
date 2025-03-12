@@ -366,7 +366,26 @@
 <script>
     // Global functions
     function openModal(modalId) {
-        document.getElementById(modalId).style.display = 'flex';
+        const modal = document.getElementById(modalId);
+        // Fetch fresh modal content to ensure a new CSRF token
+        fetch(window.location.href + '?modal=' + modalId)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newModalContent = doc.querySelector(`#${modalId} .modal-content`).innerHTML;
+                modal.querySelector('.modal-content').innerHTML = newModalContent;
+                modal.style.display = 'flex';
+
+                // Reattach event listeners after content update
+                const buttons = modal.querySelectorAll('.btn-unlock');
+                buttons.forEach(button => {
+                    button.onclick = function() {
+                        setDoorTypeAndSubmit(this.getAttribute('onclick').includes('front') ? 'front' : 'room');
+                    };
+                });
+            })
+            .catch(error => console.error('Error reloading modal:', error));
     }
 
     function closeModal(modalId) {
@@ -383,8 +402,28 @@
     }
 
     function setDoorTypeAndSubmit(doorType) {
-        document.getElementById('door-type-input').value = doorType;
-        document.getElementById('unlock-form').submit();
+        const form = document.getElementById('unlock-form');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const formData = new FormData(form);
+        formData.append('door_type', doorType);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.success);
+                closeModal('unlock-help-modal');
+            } else if (data.error) {
+                alert(data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     window.watchEntryVideo = function () {
@@ -415,6 +454,11 @@
     };
 
     document.addEventListener("DOMContentLoaded", function () {
+        // Close modal on page load unless reopened
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.style.display = 'none';
+        });
+
         // PIN Confirmation
         const pinSuccess = document.getElementById("pin-success");
         const pinHelp = document.getElementById("pin-help");
