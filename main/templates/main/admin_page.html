@@ -7,8 +7,11 @@
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
 <style>
     .nav-link {
-        display: inline-block;
         margin-bottom: 20px;
+    }
+    .nav-link {
+        display: inline-block;
+        margin-right: 20px;
         color: #007bff;
         text-decoration: none;
         font-size: 16px;
@@ -23,7 +26,14 @@
 
 {% block content %}
 <section class="admin-container">
-    <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
+    <div class="nav-link">
+        {% if 'main.can_give_access' in perms %}
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "User Management" %}</a>
+        {% endif %}
+    </div>
     <h1 class="admin-title">{% trans "Admin Dashboard" %}</h1>
 
     {% if messages %}

@@ -1,4 +1,3 @@
-# main/models.py
 import uuid
 from django.db import models
 from django.utils.timezone import now
@@ -63,6 +62,12 @@ class Guest(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.reservation_number} - {self.phone_number or 'No Phone'} - {self.assigned_room.name}"
+
+    class Meta:
+        permissions = [
+            ("can_give_access", "Can give access to doors"),
+            ("view_admin_dashboard", "Can view the admin dashboard and manage guests"),
+        ]
 
 class ReviewCSVUpload(models.Model):
     file = models.FileField(upload_to="uploads/")

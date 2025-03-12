@@ -30,6 +30,9 @@ from .ttlock_utils import TTLockClient
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
@@ -504,8 +507,15 @@ class AdminLoginView(LoginView):
     def get_success_url(self):
         return '/admin-page/'
 
+    def form_valid(self, form):
+        user = form.get_user()
+        if not user.is_staff:  # Ensure only staff users (admins) can log in
+            messages.error(self.request, "You do not have permission to access the admin dashboard.")
+            return redirect('admin_login')
+        return super().form_valid(form)
+
 @login_required(login_url='/admin-page/login/')
-@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+@user_passes_test(lambda user: user.has_perm('main.view_admin_dashboard'), login_url='/unauthorized/')
 def admin_page(request):
     """Admin Dashboard to manage guests, rooms, and assignments."""
     now_time = localtime(now())  # Current time in server's local timezone (assumed Europe/London)
@@ -741,7 +751,7 @@ def unauthorized(request):
     return render(request, 'main/unauthorized.html')
 
 @login_required(login_url='/admin-page/login/')
-@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+@user_passes_test(lambda user: user.has_perm('main.change_guest'), login_url='/unauthorized/')
 def edit_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
     original_room_id = guest.assigned_room.id  # Store original room ID for comparison
@@ -1085,7 +1095,7 @@ def edit_guest(request, guest_id):
     })
 
 @login_required(login_url='/admin-page/login/')
-@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+@user_passes_test(lambda user: user.has_perm('main.delete_guest'), login_url='/unauthorized/')
 def delete_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
     guest_name = guest.full_name
@@ -1123,7 +1133,7 @@ def delete_guest(request, guest_id):
     return redirect('admin_page')
 
 @login_required(login_url='/admin-page/login/')
-@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+@user_passes_test(lambda user: user.has_perm('main.view_guest'), login_url='/unauthorized/')
 def past_guests(request):
     search_query = request.GET.get('search', '')
     past_guests = Guest.objects.filter(is_archived=True)
@@ -1152,7 +1162,7 @@ def past_guests(request):
     })
 
 @login_required(login_url='/admin-page/login/')
-@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+@user_passes_test(lambda user: user.has_perm('main.change_guest'), login_url='/unauthorized/')
 def manage_checkin_checkout(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
 
@@ -1323,7 +1333,7 @@ def ttlock_callback(request):
     return HttpResponse(status=405)
 
 @login_required(login_url='/admin-page/login/')
-@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+@user_passes_test(lambda user: user.has_perm('main.can_give_access'), login_url='/unauthorized/')
 def give_access(request):
     """Allow admin to remotely unlock doors for active guests and manually for staff/visitors."""
     guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
@@ -1401,4 +1411,101 @@ def give_access(request):
         "guests": guests,
         "all_rooms": all_rooms,
         "front_door_lock": front_door_lock,
+    })
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def user_management(request):
+    """Allow superusers to manage admin users (add, edit, reset password, delete)."""
+    User = get_user_model()
+    users = User.objects.filter(is_superuser=False, is_staff=True).order_by('username')  # Only show admin users (staff, not superusers)
+
+    # Define available groups (roles) for permissions
+    groups = Group.objects.all()
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+
+        if action == "add_user":
+            username = request.POST.get("username").strip()
+            email = request.POST.get("email").strip()
+            password = request.POST.get("password").strip()
+            group_name = request.POST.get("group")
+
+            if not username or not password or not group_name:
+                messages.error(request, "Username, password, and role are required.")
+                return redirect('user_management')
+
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "Username already exists.")
+                return redirect('user_management')
+
+            try:
+                user = User.objects.create(
+                    username=username,
+                    email=email,
+                    password=make_password(password),
+                    is_staff=True,  # Mark as admin user (can log in to admin_page)
+                    is_superuser=False,
+                )
+                group = Group.objects.get(name=group_name)
+                user.groups.add(group)
+                user.save()
+                logger.info(f"Superuser {request.user.username} created new admin user: {username} with role {group_name}")
+                messages.success(request, f"User {username} created successfully and assigned to {group_name} role.")
+            except Exception as e:
+                logger.error(f"Failed to create user {username}: {str(e)}")
+                messages.error(request, f"Failed to create user: {str(e)}")
+
+        elif action == "edit_user":
+            user_id = request.POST.get("user_id")
+            user = get_object_or_404(User, id=user_id, is_superuser=False, is_staff=True)
+            group_name = request.POST.get("group")
+
+            try:
+                group = Group.objects.get(name=group_name)
+                user.groups.clear()  # Remove existing groups
+                user.groups.add(group)
+                user.save()
+                logger.info(f"Superuser {request.user.username} updated role for user {user.username} to {group_name}")
+                messages.success(request, f"User {user.username}'s role updated to {group_name}.")
+            except Exception as e:
+                logger.error(f"Failed to update user {user.username}: {str(e)}")
+                messages.error(request, f"Failed to update user: {str(e)}")
+
+        elif action == "reset_password":
+            user_id = request.POST.get("user_id")
+            user = get_object_or_404(User, id=user_id, is_superuser=False, is_staff=True)
+            new_password = request.POST.get("new_password").strip()
+
+            if not new_password:
+                messages.error(request, "New password is required.")
+                return redirect('user_management')
+
+            try:
+                user.password = make_password(new_password)
+                user.save()
+                logger.info(f"Superuser {request.user.username} reset password for user {user.username}")
+                messages.success(request, f"Password for {user.username} reset successfully. New password: {new_password}")
+            except Exception as e:
+                logger.error(f"Failed to reset password for user {user.username}: {str(e)}")
+                messages.error(request, f"Failed to reset password: {str(e)}")
+
+        elif action == "delete_user":
+            user_id = request.POST.get("user_id")
+            user = get_object_or_404(User, id=user_id, is_superuser=False, is_staff=True)
+            username = user.username
+            try:
+                user.delete()
+                logger.info(f"Superuser {request.user.username} deleted user {username}")
+                messages.success(request, f"User {username} deleted successfully.")
+            except Exception as e:
+                logger.error(f"Failed to delete user {username}: {str(e)}")
+                messages.error(request, f"Failed to delete user: {str(e)}")
+
+        return redirect('user_management')
+
+    return render(request, "main/user_management.html", {
+        "users": users,
+        "groups": groups,
     })
