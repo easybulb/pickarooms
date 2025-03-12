@@ -34,6 +34,14 @@
         <label for="check_out_date">{% trans "Check-Out Date:" %}</label>
         <input type="date" id="check_out_date" name="check_out_date" value="{{ guest.check_out_date|date:'Y-m-d' }}" required>
 
+        <label for="early_checkin_time">{% trans "Early Check-In Time:" %}</label>
+        <input type="time" id="early_checkin_time" name="early_checkin_time" value="{% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:'H:i' }}{% endif %}">
+        <p class="note">{% trans "Leave blank for default (2:00 PM)." %}</p>
+
+        <label for="late_checkout_time">{% trans "Late Check-Out Time:" %}</label>
+        <input type="time" id="late_checkout_time" name="late_checkout_time" value="{% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:'H:i' }}{% endif %}">
+        <p class="note">{% trans "Leave blank for default (11:00 AM)." %}</p>
+
         <label for="room">{% trans "Assign Room:" %}</label>
         <select id="room" name="room" required>
             {% for room in rooms %}
@@ -43,7 +51,7 @@
             {% endfor %}
         </select>
 
-        <label>{% trans "PIN (Front Door & Room):" %}</label> <!-- Updated label -->
+        <label>{% trans "PIN (Front Door & Room):" %}</label>
         <p>
             {% if guest.front_door_pin %}
                 {{ guest.front_door_pin }}
@@ -69,7 +77,7 @@
     <form method="POST" class="regenerate-pin-form">
         {% csrf_token %}
         <input type="hidden" name="regenerate_pin" value="true">
-        <button type="submit" class="btn-regenerate">{% trans "Regenerate PIN (Front Door & Room)" %}</button> <!-- Updated button text -->
+        <button type="submit" class="btn-regenerate">{% trans "Regenerate PIN (Front Door & Room)" %}</button>
     </form>
     {% endif %}
     

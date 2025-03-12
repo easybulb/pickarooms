@@ -451,21 +451,26 @@ class AdminLoginView(LoginView):
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def admin_page(request):
     """Admin Dashboard to manage guests, rooms, and assignments."""
-    now_time = localtime(now())
-    today = now_time.date()
-    current_time = now_time.time()
-    archive_time = time(11, 0)
+    now_time = localtime(now())  # Current time in server's local timezone (assumed Europe/London)
+    uk_timezone = pytz.timezone("Europe/London")
 
-    # Archive guests and delete their PINs after check-out
-    if current_time >= archive_time:
-        guests_to_archive = Guest.objects.filter(
-            Q(check_out_date__lt=today) | 
-            (Q(check_out_date=today) & Q(is_archived=False))
-        )
-        front_door_lock = TTLock.objects.filter(is_front_door=True).first()
-        ttlock_client = TTLockClient()
+    # Archive guests and delete their PINs when their check-out time has passed
+    guests_to_archive = Guest.objects.filter(is_archived=False)
+    front_door_lock = TTLock.objects.filter(is_front_door=True).first()
+    ttlock_client = TTLockClient()
 
-        for guest in guests_to_archive:
+    for guest in guests_to_archive:
+        # Determine the check-out datetime based on late_checkout_time or default to 11:00 AM
+        check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
+        check_out_datetime = timezone.make_aware(
+            datetime.datetime.combine(guest.check_out_date, check_out_time),  # Fixed: Use datetime.datetime.combine
+            datetime.timezone.utc
+        ).astimezone(uk_timezone)
+
+        logger.info(f"Checking archive for guest {guest.reservation_number}: Current time {now_time}, Check-out time {check_out_datetime}")
+
+        if now_time > check_out_datetime:
+            logger.info(f"Archiving guest {guest.reservation_number} as check-out time {check_out_datetime} has passed")
             # Delete front door PIN
             if guest.front_door_pin_id and front_door_lock:
                 try:
@@ -477,7 +482,7 @@ def admin_page(request):
                 except Exception as e:
                     logger.error(f"Failed to delete front door PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete front door PIN for {guest.full_name}: {str(e)}")
-            
+
             # Delete room PIN
             room_lock = guest.assigned_room.ttlock
             if guest.room_pin_id and room_lock:
@@ -491,11 +496,18 @@ def admin_page(request):
                     logger.error(f"Failed to delete room PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete room PIN for {guest.full_name}: {str(e)}")
 
+            # Update guest status
             guest.front_door_pin = None
             guest.front_door_pin_id = None
             guest.room_pin_id = None
             guest.is_archived = True
-            guest.save()
+            try:
+                guest.save()
+                logger.info(f"Successfully archived guest {guest.reservation_number}")
+                messages.success(request, f"Guest {guest.full_name} has been archived.")
+            except Exception as e:
+                logger.error(f"Failed to save archived guest {guest.reservation_number}: {str(e)}")
+                messages.error(request, f"Failed to archive {guest.full_name}: {str(e)}")
 
     guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
 
@@ -551,8 +563,18 @@ def admin_page(request):
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
             start_time = int(now_uk_time.timestamp() * 1000)
-            # Set endDate to one day after check-out
-            end_date = (now_uk_time + datetime.timedelta(days=(check_out_date - check_in_date).days + 1)).replace(hour=11, minute=0, second=0, microsecond=0)
+            # Set endDate to one day after check-out, considering late_checkout_time if provided
+            check_out_time = time(11, 0)  # Default if not set
+            if request.POST.get('late_checkout_time'):
+                try:
+                    check_out_time = datetime.datetime.strptime(request.POST.get('late_checkout_time'), '%H:%M').time()
+                except ValueError:
+                    messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
+                    return redirect('admin_page')
+            end_date = timezone.make_aware(
+                datetime.datetime.combine(check_out_date, check_out_time),
+                datetime.timezone.utc
+            ).astimezone(uk_timezone) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             ttlock_client = TTLockClient()
@@ -608,6 +630,7 @@ def admin_page(request):
                     front_door_pin=pin,
                     front_door_pin_id=keyboard_pwd_id_front,
                     room_pin_id=keyboard_pwd_id_room,
+                    late_checkout_time=check_out_time if check_out_time != time(11, 0) else None,  # Only save if different from default
                 )
                 messages.success(request, f"Guest {guest.full_name} added successfully! PIN (for both front door and room): {pin}. They can also unlock the doors remotely during check-in or from the room detail page.")
             except Exception as e:
@@ -664,6 +687,7 @@ def unauthorized(request):
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def edit_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
+    original_room_id = guest.assigned_room.id  # Store original room ID for comparison
 
     if request.method == 'POST':
         if 'regenerate_pin' in request.POST:
@@ -753,6 +777,7 @@ def edit_guest(request, guest_id):
                         logger.error(f"Failed to roll back new front door PIN for guest {guest.reservation_number}: {str(e)}")
                     guest.front_door_pin = None
                     guest.front_door_pin_id = None
+                    guest.room_pin_id = None
                     guest.save()
                     messages.error(request, f"Failed to generate new room PIN: {room_response.get('errmsg', 'Unknown error')}")
                     return redirect('edit_guest', guest_id=guest.id)
@@ -778,9 +803,126 @@ def edit_guest(request, guest_id):
             guest.phone_number = request.POST.get('phone_number')
             check_in_date = date.fromisoformat(request.POST.get('check_in_date'))
             check_out_date = date.fromisoformat(request.POST.get('check_out_date'))
-            guest.assigned_room_id = request.POST.get('room')
+            new_room_id = request.POST.get('room')
+            early_checkin_time = request.POST.get('early_checkin_time')
+            late_checkout_time = request.POST.get('late_checkout_time')
 
-            # If dates have changed, update the PIN validity period
+            # Update early_checkin_time if provided
+            if early_checkin_time:
+                try:
+                    guest.early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+                except ValueError:
+                    messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
+                    return redirect('edit_guest', guest_id=guest.id)
+            else:
+                guest.early_checkin_time = None  # Revert to default if empty
+
+            # Update late_checkout_time if provided
+            if late_checkout_time:
+                try:
+                    guest.late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:M').time()
+                except ValueError:
+                    messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
+                    return redirect('edit_guest', guest_id=guest.id)
+            else:
+                guest.late_checkout_time = None  # Revert to default if empty
+
+            # Check for room change
+            if str(new_room_id) != str(original_room_id):
+                logger.info(f"Room changed for guest {guest.reservation_number} from {original_room_id} to {new_room_id}")
+                front_door_lock = TTLock.objects.filter(is_front_door=True).first()
+                old_room_lock = Room.objects.get(id=original_room_id).ttlock
+                new_room_lock = Room.objects.get(id=new_room_id).ttlock
+                ttlock_client = TTLockClient()
+
+                # Delete old room PIN
+                if guest.room_pin_id and old_room_lock:
+                    try:
+                        ttlock_client.delete_pin(
+                            lock_id=old_room_lock.lock_id,
+                            keyboard_pwd_id=guest.room_pin_id,
+                        )
+                        logger.info(f"Deleted old room PIN for guest {guest.reservation_number} from room {original_room_id} (Keyboard Password ID: {guest.room_pin_id})")
+                    except Exception as e:
+                        logger.warning(f"Failed to delete old room PIN for guest {guest.reservation_number}: {str(e)}")
+                        messages.warning(request, f"Failed to delete old room PIN: {str(e)}")
+
+                # Regenerate PIN for new room and front door
+                if front_door_lock and new_room_lock:
+                    try:
+                        # Delete existing front door PIN if present
+                        if guest.front_door_pin_id:
+                            ttlock_client.delete_pin(
+                                lock_id=front_door_lock.lock_id,
+                                keyboard_pwd_id=guest.front_door_pin_id,
+                            )
+                            logger.info(f"Deleted old front door PIN for guest {guest.reservation_number} due to room change (Keyboard Password ID: {guest.front_door_pin_id})")
+
+                        new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
+                        uk_timezone = pytz.timezone("Europe/London")
+                        now_uk_time = timezone.now().astimezone(uk_timezone)
+                        start_time = int(now_uk_time.timestamp() * 1000)
+                        check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+                        end_date = timezone.make_aware(
+                            datetime.datetime.combine(check_out_date, check_out_time),
+                            datetime.timezone.utc,
+                        ).astimezone(uk_timezone) + datetime.timedelta(days=1)
+                        end_time = int(end_date.timestamp() * 1000)
+
+                        # Generate new PIN for front door
+                        front_door_response = ttlock_client.generate_temporary_pin(
+                            lock_id=front_door_lock.lock_id,
+                            pin=new_pin,
+                            start_time=start_time,
+                            end_time=end_time,
+                            name=f"Front Door - {Room.objects.get(id=new_room_id).name} - {guest.full_name} - {new_pin}",
+                        )
+                        if "keyboardPwdId" not in front_door_response:
+                            logger.error(f"Failed to generate new front door PIN for guest {guest.reservation_number} after room change: {front_door_response.get('errmsg', 'Unknown error')}")
+                            messages.error(request, f"Failed to generate new front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
+                            return redirect('edit_guest', guest_id=guest.id)
+                        guest.front_door_pin = new_pin
+                        guest.front_door_pin_id = front_door_response["keyboardPwdId"]
+                        logger.info(f"Generated new front door PIN {new_pin} for guest {guest.reservation_number} after room change (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
+
+                        # Generate the same PIN for the new room lock
+                        room_response = ttlock_client.generate_temporary_pin(
+                            lock_id=new_room_lock.lock_id,
+                            pin=new_pin,
+                            start_time=start_time,
+                            end_time=end_time,
+                            name=f"Room - {Room.objects.get(id=new_room_id).name} - {guest.full_name} - {new_pin}",
+                        )
+                        if "keyboardPwdId" not in room_response:
+                            logger.error(f"Failed to generate new room PIN for guest {guest.reservation_number} after room change: {room_response.get('errmsg', 'Unknown error')}")
+                            # Roll back the front door PIN
+                            try:
+                                ttlock_client.delete_pin(
+                                    lock_id=front_door_lock.lock_id,
+                                    keyboard_pwd_id=guest.front_door_pin_id,
+                                )
+                                logger.info(f"Rolled back new front door PIN for guest {guest.reservation_number} after room change")
+                            except Exception as e:
+                                logger.error(f"Failed to roll back new front door PIN for guest {guest.reservation_number}: {str(e)}")
+                            guest.front_door_pin = None
+                            guest.front_door_pin_id = None
+                            guest.room_pin_id = None
+                            guest.save()
+                            messages.error(request, f"Failed to generate new room PIN: {room_response.get('errmsg', 'Unknown error')}")
+                            return redirect('edit_guest', guest_id=guest.id)
+                        guest.room_pin_id = room_response["keyboardPwdId"]
+                        logger.info(f"Generated new room PIN {new_pin} for guest {guest.reservation_number} after room change (Keyboard Password ID: {room_response['keyboardPwdId']})")
+                    except Exception as e:
+                        logger.error(f"Failed to generate new PIN for guest {guest.reservation_number} after room change: {str(e)}")
+                        messages.error(request, f"Failed to generate new PIN after room change: {str(e)}")
+                        return redirect('edit_guest', guest_id=guest.id)
+
+            # Update dates and room
+            guest.check_in_date = check_in_date
+            guest.check_out_date = check_out_date
+            guest.assigned_room_id = new_room_id
+
+            # Handle date changes (similar to previous logic)
             if (guest.check_in_date != check_in_date or guest.check_out_date != check_out_date):
                 if guest.front_door_pin_id or guest.room_pin_id:
                     front_door_lock = TTLock.objects.filter(is_front_door=True).first()
@@ -809,7 +951,6 @@ def edit_guest(request, guest_id):
                             uk_timezone = pytz.timezone("Europe/London")
                             now_uk_time = timezone.now().astimezone(uk_timezone)
                             start_time = int(now_uk_time.timestamp() * 1000)
-                            # Set endDate to one day after check-out
                             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                             end_date = timezone.make_aware(
                                 datetime.datetime.combine(check_out_date, check_out_time),
@@ -873,8 +1014,6 @@ def edit_guest(request, guest_id):
                             guest.room_pin_id = None
                             guest.save()
 
-            guest.check_in_date = check_in_date
-            guest.check_out_date = check_out_date
             guest.save()
             logger.info(f"Updated guest {guest.reservation_number} details")
             messages.success(request, f"Guest {guest.full_name} updated successfully. The guest can unlock the doors using their PIN or remotely during check-in or from the room detail page.")
