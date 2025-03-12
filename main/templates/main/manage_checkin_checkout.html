@@ -23,6 +23,30 @@
         {% endfor %}
     {% endif %}
 
+    <!-- PIN Information (Read-Only) -->
+    <div class="pin-info">
+        <h3>{% trans "PIN Information" %}</h3>
+        <p>
+            <strong>{% trans "PIN (Front Door & Room):" %}</strong>
+            {% if guest.front_door_pin %}
+                {{ guest.front_door_pin }}
+            {% else %}
+                <span class="no-pin">{% trans "Not set" %}</span>
+            {% endif %}
+        </p>
+        <p>
+            <strong>{% trans "PIN Validity:" %}</strong>
+            {% if guest.front_door_pin %}
+                {{ guest.check_in_date }} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %} - 
+                {{ guest.check_out_date }} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %}
+            {% else %}
+                <span class="no-pin">{% trans "Not set" %}</span>
+            {% endif %}
+        </p>
+        <p>{% trans "Note: Changing check-in/check-out times may update the PIN validity period if a PIN is set." %}</p>
+    </div>
+
+    <!-- Check-In/Check-Out Form -->
     <form method="POST" class="manage-checkin-form">
         {% csrf_token %}
 

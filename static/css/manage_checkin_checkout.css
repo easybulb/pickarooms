@@ -115,6 +115,22 @@ p {
     background-color: #0056b3;
 }
 
+.pin-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.pin-info p {
+    margin: 5px 0;
+}
+
+.no-pin {
+    color: #888;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .admin-container {

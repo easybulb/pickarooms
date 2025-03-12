@@ -1,3 +1,4 @@
+# main/admin.py
 from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
@@ -22,7 +23,7 @@ class RoomAdminForm(forms.ModelForm):
 
 class RoomAdmin(admin.ModelAdmin):
     form = RoomAdminForm  # ✅ Use the custom form
-    list_display = ('name', 'access_pin', 'video_url', 'image_preview')
+    list_display = ('name', 'video_url', 'image_preview')  # Removed 'access_pin'
     search_fields = ('name',)
 
     def image_preview(self, obj):

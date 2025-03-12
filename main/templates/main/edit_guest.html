@@ -43,7 +43,7 @@
             {% endfor %}
         </select>
 
-        <label>{% trans "Front Door PIN:" %}</label>
+        <label>{% trans "PIN (Front Door & Room):" %}</label> <!-- Updated label -->
         <p>
             {% if guest.front_door_pin %}
                 {{ guest.front_door_pin }}
@@ -52,19 +52,11 @@
             {% endif %}
         </p>
 
-        <label>{% trans "Room PIN:" %}</label>
-        <p>
-            {% if guest.assigned_room.access_pin %}
-                {{ guest.assigned_room.access_pin }}
-            {% else %}
-                <span class="no-pin">{% trans "Not set" %}</span>
-            {% endif %}
-        </p>
-
         <label>{% trans "PIN Validity:" %}</label>
         <p>
             {% if guest.front_door_pin %}
-                {{ guest.check_in_date }} 2:00 PM - {{ guest.check_out_date }} 11:00 AM
+                {{ guest.check_in_date }} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %} - 
+                {{ guest.check_out_date }} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %}
             {% else %}
                 <span class="no-pin">{% trans "Not set" %}</span>
             {% endif %}
@@ -77,7 +69,7 @@
     <form method="POST" class="regenerate-pin-form">
         {% csrf_token %}
         <input type="hidden" name="regenerate_pin" value="true">
-        <button type="submit" class="btn-regenerate">{% trans "Regenerate Front Door PIN" %}</button>
+        <button type="submit" class="btn-regenerate">{% trans "Regenerate PIN (Front Door & Room)" %}</button> <!-- Updated button text -->
     </form>
     {% endif %}
     

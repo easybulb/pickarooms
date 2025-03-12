@@ -13,9 +13,9 @@ def default_check_out_date():
     return date.today() + timedelta(days=1)
 
 class TTLock(models.Model):
-    """Stores TTLock-specific data for the front door lock."""
+    """Stores TTLock-specific data for locks."""
     lock_id = models.IntegerField(unique=True)  # TTLock lock ID
-    name = models.CharField(max_length=100)  # Friendly name (e.g., "Front Door")
+    name = models.CharField(max_length=100)  # Friendly name (e.g., "Front Door", "Room 1")
     is_front_door = models.BooleanField(default=False)  # Mark as front door lock
 
     def __str__(self):
@@ -23,7 +23,7 @@ class TTLock(models.Model):
 
 class Room(models.Model):
     name = models.CharField(max_length=100)
-    access_pin = models.CharField(max_length=10, blank=True, null=True)  # Hardcoded Tuya PIN for the room
+    ttlock = models.ForeignKey(TTLock, on_delete=models.SET_NULL, null=True, blank=True)  # Link to TTLock for this room
     video_url = models.URLField()
     description = models.TextField(blank=True, null=True)
     image = models.URLField(blank=True, null=True)
@@ -48,7 +48,8 @@ class Guest(models.Model):
     is_returning = models.BooleanField(default=False)
     secure_token = models.CharField(max_length=36, unique=True, blank=True)  # Adjusted to UUID length
     front_door_pin = models.CharField(max_length=10, blank=True, null=True)  # Temporary PIN for front door
-    front_door_pin_id = models.CharField(max_length=50, blank=True, null=True)  # TTLock keyboard password ID
+    front_door_pin_id = models.CharField(max_length=50, blank=True, null=True)  # TTLock keyboard password ID for front door
+    room_pin_id = models.CharField(max_length=50, blank=True, null=True)  # TTLock keyboard password ID for room lock
     early_checkin_time = models.TimeField(null=True, blank=True)  # Custom early check-in time
     late_checkout_time = models.TimeField(null=True, blank=True)  # Custom late check-out time
 

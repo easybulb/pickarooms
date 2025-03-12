@@ -32,8 +32,7 @@
         {% if not show_pin %}
             <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time.  Your access details will be available then." %}</p>
         {% else %}
-            <p class="pin-entry"><strong>{% trans "Front Door PIN:" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
-            <p class="pin-entry"><strong>{% trans "Room Door PIN:" %}</strong> <span class="pin-code">{{ room.access_pin|default:"Contact support" }}#</span></p>
+            <p class="pin-entry"><strong>{% trans "PIN (Front Door & Room):" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
             <div class="quick-access">
                 <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button>
                 <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
@@ -82,11 +81,11 @@
     </div>
     <div class="room-info">
         <h2 class="section-title">🔑 {% trans "How To Use PIN" %}</h2>
-        <p class="content-text">{% trans "To enter the property, follow these steps:" %}</p>
+        <p class="content-text">{% trans "To enter the property and access your room, follow these steps:" %}</p>
         <ol class="content-list">
             <li class="pin-step">
                 <div class="step-container">
-                    <span class="step-text">{% trans "Enter the Front Door PIN:" %}</span>
+                    <span class="step-text">{% trans "Enter the PIN:" %}</span>
                     <span class="pin-display">
                         {% if show_pin %}{{ front_door_pin|default:"Contact support" }}#{% else %}<span class="hidden-till-checkin">{% trans "Hidden till check-in" %}</span>{% endif %}
                     </span>
@@ -95,14 +94,14 @@
             </li>
             <li class="pin-step">
                 <div class="step-container">
-                    <span class="step-text">{% trans "Proceed upstairs to your room and use the Room PIN:" %}</span>
+                    <span class="step-text">{% trans "Proceed upstairs to your room and use the same PIN:" %}</span>
                     <span class="pin-display">
-                        {% if show_pin %}{{ room.access_pin|default:"Contact support" }}#{% else %}<span class="hidden-till-checkin">{% trans "Hidden till check-in" %}</span>{% endif %}
+                        {% if show_pin %}{{ front_door_pin|default:"Contact support" }}#{% else %}<span class="hidden-till-checkin">{% trans "Hidden till check-in" %}</span>{% endif %}
                     </span>
                     <span class="step-text">{% trans "to unlock the room door." %}</span>
                 </div>
             </li>
-            <li>{% if show_pin %}{% trans "If the front door PIN doesn’t work, use the remote unlock option in the modal below." %}{% endif %}</li>
+            <li>{% if show_pin %}{% trans "If the PIN doesn’t work, use the remote unlock option in the modal below." %}{% endif %}</li>
             <li>{% trans "Watch the instructional video in the FAQs section for keypad usage." %}</li>
             <li>{% trans "Once inside, remove your shoes and head upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
         </ol>
@@ -135,7 +134,7 @@
     {% if guest %}
         <p class="content-text"><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %})</p>
         <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
-        <p class="content-text expiration-note">{% trans "Note: Your front door access will expire at check-out time. Please ensure you check out before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %} {% trans "to avoid being locked out." %}</p>
+        <p class="content-text expiration-note">{% trans "Note: Your access will expire at check-out time. Please ensure you check out before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %} {% trans "to avoid being locked out." %}</p>
         <h3 class="subsection-title">{% trans "How do I check out?" %}</h3>
         <ul class="content-list">
             <li>🛑 <strong>{% trans "Leave keycard:" %}</strong> {% trans "Inside room, visible." %}</li>
@@ -178,7 +177,7 @@
                 </div>
                 <div class="faq-item">
                     <button class="faq-question" data-answer-id="access-2">
-                        {% trans "What if my front door PIN doesn’t work?" %} <span class="arrow">▼</span>
+                        {% trans "What if my PIN doesn’t work?" %} <span class="arrow">▼</span>
                     </button>
                     <div class="faq-answer" id="access-2">
                         <ul class="content-list">
@@ -190,20 +189,8 @@
                     </div>
                 </div>
                 <div class="faq-item">
-                    <button class="faq-question" data-answer-id="access-3">
-                        {% trans "What if my room door PIN doesn’t work?" %} <span class="arrow">▼</span>
-                    </button>
-                    <div class="faq-answer" id="access-3">
-                        <ul class="content-list">
-                            <li>{% trans "Ensure you’re entering the correct Room PIN." %}</li>
-                            <li>{% trans "Touch the keypad to activate it." %}</li>
-                            <li>{% trans "Contact support via WhatsApp." %}</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="faq-item">
                     <button class="faq-question" data-answer-id="access-4">
-                        {% trans "How do I use the front door keypad?" %} <span class="arrow">▼</span>
+                        {% trans "How do I use the keypad?" %} <span class="arrow">▼</span>
                     </button>
                     <div class="faq-answer" id="access-4">
                         <p>{% trans "Watch this video for assistance:" %}</p>
@@ -355,12 +342,14 @@
 <div id="unlock-help-modal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal('unlock-help-modal')">×</span>
-        <h3 class="modal-title">{% trans "Unlock the Front Door Remotely" %}</h3>
+        <h3 class="modal-title">{% trans "Remote Unlock Assistance" %}</h3>
+        <p class="modal-text">{% trans "If your PIN isn’t working, you can remotely unlock the front door or your room door by pressing the buttons below depending on the door you are in front of." %}</p>
         <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
             {% csrf_token %}
-            <button type="submit" name="unlock_door" class="btn-unlock">🚪 {% trans "Press to Unlock" %}</button>
+            <button type="submit" name="unlock_door" value="front" class="btn-unlock">🚪 {% trans "Unlock Front Door" %}</button>
+            <button type="submit" name="unlock_door" value="room" class="btn-unlock">🔑 {% trans "Unlock Room Door" %}</button>
         </form>
-        <p class="modal-text">{% trans "The front door will unlock; turn the handle to enter. Ensure you are in front of the door." %}</p>
+        <p class="modal-text">{% trans "After unlocking, turn the handle to enter. Ensure you are at the correct door before pressing." %}</p>
     </div>
 </div>
 
