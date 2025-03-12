@@ -34,8 +34,7 @@
                     <tr>
                         <th>{% trans "Full Name" %}</th>
                         <th>{% trans "Room" %}</th>
-                        <th>{% trans "Front Door PIN" %}</th>
-                        <th>{% trans "Room PIN" %}</th>
+                        <th>{% trans "PIN (Front Door & Room)" %}</th> 
                         <th>{% trans "PIN Validity" %}</th>
                         <th>{% trans "Check-In" %}</th>
                         <th>{% trans "Check-Out" %}</th>
@@ -63,13 +62,6 @@
                                 <span class="no-pin">{% trans "N/A" %}</span>
                             {% endif %}
                         </td>
-                        <td class="pin-code">
-                            {% if guest.assigned_room.access_pin %}
-                                {{ guest.assigned_room.access_pin }}
-                            {% else %}
-                                <span class="no-pin">{% trans "N/A" %}</span>
-                            {% endif %}
-                        </td>
                         <td>
                             {% if guest.front_door_pin %}
                                 {{ guest.check_in_date }} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %} - 
@@ -90,7 +82,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8">{% trans "No active guests found." %}</td>
+                        <td colspan="7">{% trans "No active guests found." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -103,7 +95,7 @@
 
     <br id="add-guest-form">
 
-    <!-- Add Guest Form -->
+    <!-- Guest Form -->
     <div class="admin-section">
         <h2>{% trans "Add New Guest" %}</h2>
         <form method="POST">
