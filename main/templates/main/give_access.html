@@ -28,6 +28,7 @@
         padding: 10px;
         text-align: left;
         border-bottom: 1px solid #ddd;
+        color: #000;
     }
     th {
         background-color: #f4f4f4;
@@ -56,6 +57,11 @@
     .unlock-btn.room:hover {
         background-color: #1e87db;
     }
+    .unlock-btn.disabled {
+        background-color: #ccc;
+        color: #666;
+        cursor: not-allowed;
+    }
     .success-message, .error-message {
         padding: 10px;
         margin: 10px 0;
@@ -79,6 +85,35 @@
     }
     .back-link:hover {
         text-decoration: underline;
+    }
+    .manual-section {
+        margin-top: 20px;
+    }
+    .manual-section h2 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    /* Mobile Styling for Manual Section */
+    @media (max-width: 768px) {
+        .give-access-container {
+            padding: 10px;
+        }
+        .manual-section h2 {
+            font-size: 1.2rem;
+        }
+        .manual-section table {
+            border: 0;
+        }
+        .manual-section tr {
+            display: block;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: #fff;
+            width: 30%;
+        }
     }
 </style>
 {% endblock %}
@@ -138,6 +173,67 @@
                 {% endfor %}
             </tbody>
         </table>
+    </div>
+
+    <div class="manual-section">
+        <h2>{% trans "Manual Door Access (Staff/Visitors)" %}</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{% trans "Door" %}</th>
+                        <th>{% trans "Unlock" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in all_rooms %}
+                    <tr>
+                        <td>{{ room.name }}</td>
+                        <td>
+                            {% with lock=room.ttlock %}
+                            {% if lock %}
+                                <form method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="unlock_door" value="true">
+                                    <input type="hidden" name="lock_id" value="{{ lock.lock_id }}">
+                                    <input type="hidden" name="door_type" value="manual_room">
+                                    <button type="submit" class="unlock-btn room">{% trans "Unlock" %}</button>
+                                </form>
+                            {% else %}
+                                <button class="unlock-btn room disabled" disabled>{% trans "No Lock Configured" %}</button>
+                            {% endif %}
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">{% trans "No rooms configured." %}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if front_door_lock %}
+                    <tr>
+                        <td>Front Door</td>
+                        <td>
+                            <form method="post" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="unlock_door" value="true">
+                                <input type="hidden" name="lock_id" value="{{ front_door_lock.lock_id }}">
+                                <input type="hidden" name="door_type" value="manual_front">
+                                <button type="submit" class="unlock-btn front">{% trans "Unlock" %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td>Front Door</td>
+                        <td>
+                            <button class="unlock-btn front disabled" disabled>{% trans "No Lock Configured" %}</button>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
 
