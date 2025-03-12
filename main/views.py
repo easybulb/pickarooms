@@ -1321,3 +1321,79 @@ def ttlock_callback(request):
             return HttpResponse(status=500)
     logger.warning(f"Invalid method for TTLock callback: {request.method}")
     return HttpResponse(status=405)
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def give_access(request):
+    """Allow admin to remotely unlock doors for active guests."""
+    guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
+
+    if request.method == "POST" and "unlock_door" in request.POST:
+        try:
+            guest_id = request.POST.get("guest_id")
+            door_type = request.POST.get("door_type")
+            guest = get_object_or_404(Guest, id=guest_id, is_archived=False)
+
+            front_door_lock = TTLock.objects.get(is_front_door=True)
+            room_lock = guest.assigned_room.ttlock
+            client = TTLockClient()
+            max_retries = 3
+
+            if door_type == "front":
+                for attempt in range(max_retries):
+                    try:
+                        unlock_response = client.unlock_lock(lock_id=str(front_door_lock.lock_id))
+                        if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                            logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                            if attempt == max_retries - 1:
+                                messages.error(request, "Failed to unlock the front door. Please try again or contact support.")
+                            else:
+                                logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                                continue
+                        else:
+                            logger.info(f"Successfully unlocked front door for guest {guest.reservation_number}")
+                            messages.success(request, f"The front door has been unlocked for {guest.full_name}.")
+                            break
+                    except Exception as e:
+                        logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {str(e)}")
+                        if attempt == max_retries - 1:
+                            messages.error(request, "Failed to unlock the front door. Please try again or contact support.")
+                        else:
+                            logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                            continue
+            elif door_type == "room" and room_lock:
+                for attempt in range(max_retries):
+                    try:
+                        unlock_response = client.unlock_lock(lock_id=str(room_lock.lock_id))
+                        if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                            logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {room_response.get('errmsg', 'Unknown error')}")
+                            if attempt == max_retries - 1:
+                                messages.warning(request, f"Failed to unlock the room door for {guest.full_name}. Please try again or contact support.")
+                            else:
+                                logger.info(f"Retrying unlock room door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                                continue
+                        else:
+                            logger.info(f"Successfully unlocked room door for guest {guest.reservation_number}")
+                            messages.success(request, f"The room door ({guest.assigned_room.name}) has been unlocked for {guest.full_name}.")
+                            break
+                    except Exception as e:
+                        logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {str(e)}")
+                        if attempt == max_retries - 1:
+                            messages.warning(request, f"Failed to unlock the room door for {guest.full_name}. Please try again or contact support.")
+                        else:
+                            logger.info(f"Retrying unlock room door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                            continue
+            else:
+                logger.warning(f"Invalid door_type or no room lock assigned for guest {guest.reservation_number}")
+                messages.warning(request, "Invalid unlock request or no room lock assigned. Please contact support.")
+
+        except TTLock.DoesNotExist:
+            logger.error("Front door lock not configured in the database.")
+            messages.error(request, "Front door lock not configured. Please contact support.")
+        except Guest.DoesNotExist:
+            logger.error(f"Guest with ID {guest_id} not found or is archived.")
+            messages.error(request, "Guest not found or is no longer active.")
+
+    return render(request, "main/give_access.html", {
+        "guests": guests,
+    })

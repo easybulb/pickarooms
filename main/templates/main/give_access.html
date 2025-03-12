@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
+<style>
+    .give-access-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .give-access-title {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 20px;
+    }
+    .table-container {
+        overflow-x: auto;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+    }
+    .unlock-btn {
+        padding: 8px 16px;
+        margin: 2px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+    .unlock-btn.front {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .unlock-btn.front:hover {
+        background-color: #45a049;
+    }
+    .unlock-btn.room {
+        background-color: #2196F3;
+        color: white;
+    }
+    .unlock-btn.room:hover {
+        background-color: #1e87db;
+    }
+    .success-message, .error-message {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .success-message {
+        background-color: #dff0d8;
+        color: #3c763d;
+    }
+    .error-message {
+        background-color: #f2dede;
+        color: #a94442;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block title %}{% trans "Give Access" %}{% endblock %}
+
+{% block content %}
+<section class="give-access-container">
+    <a href="{% url 'admin_page' %}" class="back-link">← {% trans "Back to Admin Dashboard" %}</a>
+    <h1 class="give-access-title">{% trans "Give Access" %}</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}" id="message-{{ forloop.counter }}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Full Name" %}</th>
+                    <th>{% trans "Room" %}</th>
+                    <th>{% trans "Unlock Doors" %}</th>
+                    <th>{% trans "Reservation Number" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guest in guests %}
+                <tr>
+                    <td>{{ guest.full_name }}</td>
+                    <td>{{ guest.assigned_room.name }}</td>
+                    <td>
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="unlock_door" value="true">
+                            <input type="hidden" name="guest_id" value="{{ guest.id }}">
+                            <input type="hidden" name="door_type" value="front">
+                            <button type="submit" class="unlock-btn front">{% trans "Unlock Front Door" %}</button>
+                        </form>
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="unlock_door" value="true">
+                            <input type="hidden" name="guest_id" value="{{ guest.id }}">
+                            <input type="hidden" name="door_type" value="room">
+                            <button type="submit" class="unlock-btn room">{% trans "Unlock Room Door" %}</button>
+                        </form>
+                    </td>
+                    <td>{{ guest.reservation_number }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">{% trans "No active guests found." %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Auto-hide messages after 3 seconds
+        setTimeout(() => {
+            document.querySelectorAll("[id^='message-']").forEach(msg => {
+                msg.style.display = "none";
+            });
+        }, 3000);
+    });
+</script>
+{% endblock %}
