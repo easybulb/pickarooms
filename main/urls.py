@@ -30,6 +30,7 @@ urlpatterns = [
     path('admin-page/give-access/', views.give_access, name='give_access'),
     path('admin-page/user-management/', views.user_management, name='user_management'),
     path('room-management/', views.room_management, name='room_management'),
+    path('edit-room/<int:room_id>/', views.edit_room, name='edit_room'),
     path('admin-page/past-guests/', views.past_guests, name='past_guests'),
     path('privacy-policy/', privacy_policy, name='privacy_policy'),
     path('terms-of-use/', terms_of_use, name='terms_of_use'),

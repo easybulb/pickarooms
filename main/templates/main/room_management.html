@@ -4,16 +4,24 @@
 
 {% block extra_css %}
 <style>
+    .nav-link {
+        margin-bottom: 20px;
+    }
+    .nav-link {
+        display: inline-block;
+        margin-right: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .nav-link:hover {
+        text-decoration: underline;
+    }
     .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 0px 20px 50px 20px;
     }
-
-    .mt-4 {
-        margin-top: 2rem;
-    }
-
     h2, h3 {
         color: #333;
     }
@@ -139,79 +147,6 @@
         padding: 6px 12px;
         font-size: 13px;
     }
-
-    /* Modal Styles */
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .modal-content {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 500px;
-        position: relative;
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .modal-header h5 {
-        margin: 0;
-        font-size: 18px;
-    }
-
-    .close-btn {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #333;
-    }
-
-    .modal-body {
-        max-height: 70vh;
-        overflow-y: auto;
-    }
-
-    /* Responsive modal for mobile */
-    @media (max-width: 767px) {
-        .modal-content {
-            width: 95%;
-            max-height: 80vh;
-        }
-    }
-
-    /* Toggle styling */
-    .toggle-group {
-        margin-bottom: 15px;
-    }
-
-    .toggle-group input[type="radio"] {
-        margin-right: 5px;
-    }
-
-    .new-lock-fields {
-        display: none;
-    }
-
-    .new-lock-fields.active {
-        display: block;
-    }
 </style>
 {% endblock %}
 
@@ -219,6 +154,18 @@
 
 {% block content %}
 <div class="container mt-4">
+    <div class="nav-link">
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Admin Dashboard" %}</a>
+        {% if 'main.can_give_access' in perms %}
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
+        {% endif %}
+        {% if 'main.manage_rooms' in perms %}
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Room Management" %}</a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "User Management" %}</a>
+        {% endif %}
+    </div>
     <h2>{% trans "Room Management" %}</h2>
 
     {% if messages %}
@@ -227,7 +174,7 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Populate Locks and Rooms from Inputs -->
+    <!-- Add a New Lock and Room -->
     <div class="form-section">
         <h3>{% trans "Add a New Lock and Room" %}</h3>
         <p>{% trans "Below is a list of existing locks and rooms in the system. To add a new lock and room, enter a unique room name and lock ID below. The lock ID must be unique and obtained from your iPhone app. Click 'Add' to create the new lock and room." %}</p>
@@ -265,7 +212,7 @@
     <!-- Define the confirmation message -->
     {% trans "Are you sure you want to delete this room?" as delete_confirm_msg %}
 
-    <!-- Add Room Form -->
+    <!-- Add New Room Form -->
     <div class="form-section">
         <h3>{% trans "Add New Room" %}</h3>
         <form method="post" action="{% url 'room_management' %}">
@@ -285,22 +232,31 @@
             </div>
             <div class="form-group">
                 <label for="image">{% trans "Cloudinary Image URL" %}</label>
-                <input type="url" name="image" id="image" placeholder="Enter Cloudinary URL">
+                <input type="url" name="image" id="image" placeholder="{% trans 'Enter Cloudinary URL' %}">
             </div>
             <div class="form-group">
-                <label for="new_lock_name">{% trans "New Lock Name" %}</label>
-                <input type="text" name="new_lock_name" id="new_lock_name" required>
+                <label for="ttlock">{% trans "Assign Existing TTLock (Optional)" %}</label>
+                <select name="ttlock" id="ttlock">
+                    <option value="">{% trans "None" %}</option>
+                    {% for lock in ttlocks %}
+                        <option value="{{ lock.id }}">{{ lock.name }} (Lock ID: {{ lock.lock_id }})</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group">
-                <label for="new_lock_id">{% trans "New Lock ID" %}</label>
-                <input type="number" name="new_lock_id" id="new_lock_id" required>
+                <label for="new_lock_name">{% trans "Or Create New Lock (Optional)" %}</label>
+                <input type="text" name="new_lock_name" id="new_lock_name" placeholder="{% trans 'e.g., Room 5 Lock' %}">
+            </div>
+            <div class="form-group">
+                <label for="new_lock_id">{% trans "New Lock ID (Leave blank to use existing lock)" %}</label>
+                <input type="number" name="new_lock_id" id="new_lock_id" placeholder="{% trans 'e.g., 21170000' %}">
             </div>
             <button type="submit" class="primary-btn">{% trans "Add Room" %}</button>
         </form>
     </div>
 
-    <!-- Room List -->
-    <h3>{% trans "Existing Rooms" %}</h3>
+    <!-- Existing Rooms -->
+    <h3 id="existing-rooms">{% trans "Existing Rooms" %}</h3>
     <table class="data-table">
         <thead>
             <tr>
@@ -327,7 +283,7 @@
                 </td>
                 <td>{{ room.ttlock.name|default:"None" }} ({{ room.ttlock.lock_id|default:"N/A" }})</td>
                 <td>
-                    <button class="warning-btn btn-sm edit-room-btn" data-modal-id="editRoomModal{{ room.id }}">{% trans "Edit" %}</button>
+                    <a href="{% url 'edit_room' room_id=room.id %}" class="warning-btn btn-sm">{% trans "Edit" %}</a>
                     <form method="post" action="{% url 'room_management' %}" style="display:inline;">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="delete_room">
@@ -336,110 +292,8 @@
                     </form>
                 </td>
             </tr>
-
-            <!-- Edit Room Modal -->
-            <div id="editRoomModal{{ room.id }}" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5>{% trans "Edit Room" %}</h5>
-                        <button type="button" class="close-btn" data-modal-id="editRoomModal{{ room.id }}" aria-label="Close Modal">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="post" action="{% url 'room_management' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="edit_room">
-                            <input type="hidden" name="room_id" value="{{ room.id }}">
-                            <div class="form-group">
-                                <label for="name_{{ room.id }}">{% trans "Room Name" %}</label>
-                                <input type="text" name="name" id="name_{{ room.id }}" value="{{ room.name }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="video_url_{{ room.id }}">{% trans "Video URL" %}</label>
-                                <input type="url" name="video_url" id="video_url_{{ room.id }}" value="{{ room.video_url }}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="description_{{ room.id }}">{% trans "Description" %}</label>
-                                <textarea name="description" id="description_{{ room.id }}">{{ room.description|default:"" }}</textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="image_{{ room.id }}">{% trans "Cloudinary Image URL" %}</label>
-                                <input type="url" name="image" id="image_{{ room.id }}" value="{{ room.image|default:'' }}" placeholder="Enter Cloudinary URL">
-                            </div>
-                            <div class="toggle-group">
-                                <label><input type="radio" name="lock_option_{{ room.id }}" value="existing" checked> {% trans "Use Existing Lock" %}</label>
-                                <label><input type="radio" name="lock_option_{{ room.id }}" value="new"> {% trans "Create/Edit New Lock" %}</label>
-                            </div>
-                            <div class="form-group">
-                                <label for="ttlock_{{ room.id }}">{% trans "Assign Existing TTLock" %}</label>
-                                <select name="ttlock" id="ttlock_{{ room.id }}">
-                                    <option value="">{% trans "None" %}</option>
-                                    {% for lock in ttlocks %}
-                                        <option value="{{ lock.id }}" {% if room.ttlock and room.ttlock.id == lock.id %}selected{% endif %}>
-                                            {{ lock.name }} (Lock ID: {{ lock.lock_id }})
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="new-lock-fields">
-                                <div class="form-group">
-                                    <label for="new_lock_name_{{ room.id }}">{% trans "New Lock Name" %}</label>
-                                    <input type="text" name="new_lock_name" id="new_lock_name_{{ room.id }}" value="{{ room.ttlock.name|default:'' }}">
-                                </div>
-                                <div class="form-group">
-                                    <label for="new_lock_id_{{ room.id }}">{% trans "New Lock ID" %}</label>
-                                    <input type="number" name="new_lock_id" id="new_lock_id_{{ room.id }}" value="{{ room.ttlock.lock_id|default:'' }}">
-                                </div>
-                            </div>
-                            <button type="submit" class="primary-btn">{% trans "Save Changes" %}</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-    // Attach event listeners for edit buttons
-    document.querySelectorAll('.edit-room-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const modalId = this.getAttribute('data-modal-id');
-            document.getElementById(modalId).style.display = 'flex';
-        });
-    });
-
-    // Attach event listeners for close buttons
-    document.querySelectorAll('.close-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const modalId = this.getAttribute('data-modal-id');
-            document.getElementById(modalId).style.display = 'none';
-        });
-    });
-
-    // Toggle new lock fields based on radio selection
-    document.querySelectorAll('.toggle-group input[type="radio"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const modalId = this.name.replace('lock_option_', '').replace('_' + this.id.split('_').pop(), '');
-            const newLockFields = document.querySelector(`#${modalId} .new-lock-fields`);
-            if (this.value === 'new') {
-                newLockFields.classList.add('active');
-            } else {
-                newLockFields.classList.remove('active');
-            }
-        });
-    });
-
-    // Close modal if clicking outside the modal content
-    window.addEventListener('click', function(event) {
-        const modals = document.getElementsByClassName('modal');
-        for (let i = 0; i < modals.length; i++) {
-            if (event.target === modals[i]) {
-                modals[i].style.display = 'none';
-            }
-        }
-    });
-</script>
 {% endblock %}

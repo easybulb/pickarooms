@@ -1510,6 +1510,15 @@ def user_management(request):
         "groups": groups,
     })
 
+import json
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+import logging
+from .models import Room, TTLock
+
+logger = logging.getLogger('main')
+
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.has_perm('main.manage_rooms'), login_url='/unauthorized/')
 def room_management(request):
@@ -1613,53 +1622,8 @@ def room_management(request):
             video_url = request.POST.get("video_url").strip()
             description = request.POST.get("description").strip() or None
             image_url = request.POST.get("image").strip() or None
-            new_lock_name = request.POST.get("new_lock_name").strip()
-            new_lock_id = request.POST.get("new_lock_id")
-
-            if not name or not video_url or not new_lock_name or not new_lock_id:
-                messages.error(request, "Room name, video URL, new lock name, and new lock ID are required.")
-                return redirect('room_management')
-
-            try:
-                # Validate and create new TTLock
-                if not new_lock_id.isdigit():
-                    messages.error(request, "Lock ID must be a valid number.")
-                    return redirect('room_management')
-                new_lock_id = int(new_lock_id)
-                if TTLock.objects.filter(lock_id=new_lock_id).exists():
-                    messages.error(request, "This lock ID is already in use.")
-                    return redirect('room_management')
-
-                new_ttlock = TTLock.objects.create(
-                    name=new_lock_name,
-                    lock_id=new_lock_id,
-                    is_front_door=False
-                )
-                room = Room.objects.create(
-                    name=name,
-                    video_url=video_url,
-                    description=description,
-                    image=image_url,
-                    ttlock=new_ttlock,
-                )
-                messages.success(request, f"Room '{room.name}' and new lock '{new_lock_name}' added successfully.")
-                logger.info(f"Admin {request.user.username} added room '{room.name}' with new lock '{new_lock_name}' (Lock ID: {new_lock_id})")
-            except ValueError:
-                messages.error(request, "Invalid lock ID format.")
-            except Exception as e:
-                logger.error(f"Failed to add room and lock: {str(e)}")
-                messages.error(request, f"Failed to add room and lock: {str(e)}")
-
-        elif action == "edit_room":
-            room_id = request.POST.get("room_id")
-            room = get_object_or_404(Room, id=room_id)
-            name = request.POST.get("name").strip()
-            video_url = request.POST.get("video_url").strip()
-            description = request.POST.get("description").strip() or None
-            image_url = request.POST.get("image").strip() or None
             ttlock_id = request.POST.get("ttlock")
-            lock_option = request.POST.get("lock_option_" + room_id)
-            new_lock_name = request.POST.get("new_lock_name")
+            new_lock_name = request.POST.get("new_lock_name").strip()
             new_lock_id = request.POST.get("new_lock_id")
 
             if not name or not video_url:
@@ -1667,7 +1631,11 @@ def room_management(request):
                 return redirect('room_management')
 
             try:
-                if lock_option == "new" and new_lock_name and new_lock_id:
+                if ttlock_id:
+                    # Use existing TTLock if selected
+                    ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                elif new_lock_name and new_lock_id:
+                    # Create new TTLock if no existing lock is selected
                     if not new_lock_id.isdigit():
                         messages.error(request, "Lock ID must be a valid number.")
                         return redirect('room_management')
@@ -1676,33 +1644,33 @@ def room_management(request):
                         messages.error(request, "This lock ID is already in use.")
                         return redirect('room_management')
 
-                    # Create or update new TTLock
-                    if room.ttlock and room.ttlock.lock_id == new_lock_id:
-                        room.ttlock.name = new_lock_name
-                        room.ttlock.save()
-                    else:
-                        new_ttlock = TTLock.objects.create(
-                            name=new_lock_name,
-                            lock_id=new_lock_id,
-                            is_front_door=False
-                        )
-                        room.ttlock = new_ttlock
-                elif lock_option == "existing" and ttlock_id:
-                    ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
-                    room.ttlock = ttlock
+                    ttlock = TTLock.objects.create(
+                        name=new_lock_name,
+                        lock_id=new_lock_id,
+                        is_front_door=False
+                    )
+                else:
+                    messages.error(request, "Please either select an existing lock or provide a new lock name and ID.")
+                    return redirect('room_management')
 
-                room.name = name
-                room.video_url = video_url
-                room.description = description
-                room.image = image_url
-                room.save()
-                messages.success(request, f"Room '{room.name}' updated successfully.")
-                logger.info(f"Admin {request.user.username} updated room '{room.name}'")
+                room = Room.objects.create(
+                    name=name,
+                    video_url=video_url,
+                    description=description,
+                    image=image_url,
+                    ttlock=ttlock,
+                )
+                messages.success(request, f"Room '{room.name}' added successfully with lock '{ttlock.name}'.")
+                logger.info(f"Admin {request.user.username} added room '{room.name}' with lock '{ttlock.name}' (Lock ID: {ttlock.lock_id})")
             except TTLock.DoesNotExist:
                 messages.error(request, "Invalid TTLock selected.")
+                return redirect('room_management')
+            except ValueError:
+                messages.error(request, "Invalid lock ID format.")
+                return redirect('room_management')
             except Exception as e:
-                logger.error(f"Failed to update room {room_id}: {str(e)}")
-                messages.error(request, f"Failed to update room: {str(e)}")
+                logger.error(f"Failed to add room and lock: {str(e)}")
+                messages.error(request, f"Failed to add room and lock: {str(e)}")
 
         elif action == "delete_room":
             room_id = request.POST.get("room_id")
@@ -1720,5 +1688,89 @@ def room_management(request):
 
     return render(request, "main/room_management.html", {
         "rooms": rooms,
+        "ttlocks": ttlocks,
+    })
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.manage_rooms'), login_url='/unauthorized/')
+def edit_room(request, room_id):
+    """View to edit an existing room."""
+    room = get_object_or_404(Room, id=room_id)
+    ttlocks = TTLock.objects.all()  # For assigning existing locks
+
+    if request.method == "POST":
+        name = request.POST.get("name").strip()
+        video_url = request.POST.get("video_url").strip()
+        description = request.POST.get("description").strip() or None
+        image_url = request.POST.get("image").strip() or None
+        ttlock_id = request.POST.get("ttlock")
+        new_lock_name = request.POST.get("new_lock_name").strip()
+        new_lock_id = request.POST.get("new_lock_id")
+
+        if not name or not video_url:
+            messages.error(request, "Room name and video URL are required.")
+            return render(request, "main/edit_room.html", {
+                "room": room,
+                "ttlocks": ttlocks,
+            })
+
+        try:
+            if new_lock_name and new_lock_id:
+                if not new_lock_id.isdigit():
+                    messages.error(request, "Lock ID must be a valid number.")
+                    return render(request, "main/edit_room.html", {
+                        "room": room,
+                        "ttlocks": ttlocks,
+                    })
+                new_lock_id = int(new_lock_id)
+                if TTLock.objects.filter(lock_id=new_lock_id).exclude(id=room.ttlock.id if room.ttlock else None).exists():
+                    messages.error(request, "This lock ID is already in use.")
+                    return render(request, "main/edit_room.html", {
+                        "room": room,
+                        "ttlocks": ttlocks,
+                    })
+
+                # Create or update new TTLock
+                if room.ttlock and room.ttlock.lock_id == new_lock_id:
+                    room.ttlock.name = new_lock_name
+                    room.ttlock.save()
+                else:
+                    new_ttlock = TTLock.objects.create(
+                        name=new_lock_name,
+                        lock_id=new_lock_id,
+                        is_front_door=False
+                    )
+                    room.ttlock = new_ttlock
+            elif ttlock_id:
+                ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                room.ttlock = ttlock
+            else:
+                messages.error(request, "Please either select an existing lock or provide a new lock name and ID.")
+                return render(request, "main/edit_room.html", {
+                    "room": room,
+                    "ttlocks": ttlocks,
+                })
+
+            room.name = name
+            room.video_url = video_url
+            room.description = description
+            room.image = image_url
+            room.save()
+            messages.success(request, f"Room '{room.name}' updated successfully.")
+            logger.info(f"Admin {request.user.username} updated room '{room.name}'")
+            return redirect('room_management#existing-rooms')
+        except TTLock.DoesNotExist:
+            messages.error(request, "Invalid TTLock selected.")
+        except Exception as e:
+            logger.error(f"Failed to update room {room_id}: {str(e)}")
+            messages.error(request, f"Failed to update room: {str(e)}")
+
+        return render(request, "main/edit_room.html", {
+            "room": room,
+            "ttlocks": ttlocks,
+        })
+
+    return render(request, "main/edit_room.html", {
+        "room": room,
         "ttlocks": ttlocks,
     })
