@@ -1728,15 +1728,25 @@ def room_management(request):
             room = get_object_or_404(Room, id=room_id)
             room_name = room.name
             try:
+                # Check if the TTLock is only associated with this room before deleting
+                delete_lock = False
+                ttlock_name = None
+                if room.ttlock:
+                    ttlock = room.ttlock
+                    ttlock_name = ttlock.name
+                    if Room.objects.filter(ttlock=ttlock).count() == 1:
+                        delete_lock = True
+                        ttlock.delete()
+                        logger.info(f"Deleted associated TTLock '{ttlock.name}' (Lock ID: {ttlock.lock_id}) for room '{room_name}'")
                 room.delete()
                 AuditLog.objects.create(
                     user=request.user,
                     action="Room Deleted",
                     object_type="Room",
                     object_id=room_id,
-                    details=f"Deleted room '{room_name}'"
+                    details=f"Deleted room '{room_name}'" + (f" and lock '{ttlock_name}'" if delete_lock else "")
                 )
-                messages.success(request, f"Room '{room_name}' deleted successfully.")
+                messages.success(request, f"Room '{room_name}' deleted successfully." + (f" Associated lock '{ttlock_name}' was also deleted." if delete_lock else ""))
                 logger.info(f"Admin {request.user.username} deleted room '{room_name}'")
             except Exception as e:
                 logger.error(f"Failed to delete room {room_id}: {str(e)}")
