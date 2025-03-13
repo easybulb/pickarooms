@@ -174,20 +174,30 @@
                     <td>{{ guest.full_name }}</td>
                     <td>{{ guest.assigned_room.name }}</td>
                     <td>
+                        {% if front_door_lock %}
                         <form method="post" style="display: inline;">
                             {% csrf_token %}
                             <input type="hidden" name="unlock_door" value="true">
                             <input type="hidden" name="guest_id" value="{{ guest.id }}">
+                            <input type="hidden" name="lock_id" value="{{ front_door_lock.lock_id }}">
                             <input type="hidden" name="door_type" value="front">
                             <button type="submit" class="unlock-btn front">{% trans "Unlock Front Door" %}</button>
                         </form>
+                        {% else %}
+                        <button class="unlock-btn front disabled" disabled>{% trans "No Front Door Lock Configured" %}</button>
+                        {% endif %}
+                        {% if guest.assigned_room.ttlock %}
                         <form method="post" style="display: inline;">
                             {% csrf_token %}
                             <input type="hidden" name="unlock_door" value="true">
                             <input type="hidden" name="guest_id" value="{{ guest.id }}">
+                            <input type="hidden" name="lock_id" value="{{ guest.assigned_room.ttlock.lock_id }}">
                             <input type="hidden" name="door_type" value="room">
                             <button type="submit" class="unlock-btn room">{% trans "Unlock Room Door" %}</button>
                         </form>
+                        {% else %}
+                        <button class="unlock-btn room disabled" disabled>{% trans "No Room Lock Configured" %}</button>
+                        {% endif %}
                     </td>
                     <td>{{ guest.reservation_number }}</td>
                 </tr>

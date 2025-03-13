@@ -1395,7 +1395,10 @@ def give_access(request):
                 # Handle guest-specific unlock
                 guest_id = request.POST.get("guest_id")
                 guest = get_object_or_404(Guest, id=guest_id, is_archived=False)
-                lock = TTLock.objects.get(lock_id=lock_id) if door_type == "front" else guest.assigned_room.ttlock
+                if door_type == "front":
+                    lock = front_door_lock  # Use the front door lock directly
+                else:  # door_type == "room"
+                    lock = guest.assigned_room.ttlock
                 if not lock:
                     raise TTLock.DoesNotExist("Lock not found for the specified door.")
             elif door_type in ["manual_front", "manual_room"]:
