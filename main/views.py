@@ -33,6 +33,7 @@ import json
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
+from django.urls import reverse
 
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
@@ -1765,6 +1766,7 @@ def edit_room(request, room_id):
     """View to edit an existing room."""
     room = get_object_or_404(Room, id=room_id)
     ttlocks = TTLock.objects.all()  # For assigning existing locks
+    old_ttlock = room.ttlock  # Store the old TTLock for potential deletion
 
     if request.method == "POST":
         name = request.POST.get("name").strip()
@@ -1808,10 +1810,23 @@ def edit_room(request, room_id):
                         lock_id=new_lock_id,
                         is_front_door=False
                     )
+                    # Update room.ttlock and save to ensure the database reflects the new association
                     room.ttlock = new_ttlock
+                    room.save()
+                    # Now check if the old TTLock is unused and delete it
+                    if old_ttlock and old_ttlock != new_ttlock and Room.objects.filter(ttlock=old_ttlock).count() == 0:
+                        old_ttlock.delete()
+                        logger.info(f"Deleted old TTLock '{old_ttlock.name}' (Lock ID: {old_ttlock.lock_id}) after replacing with new lock")
             elif ttlock_id:
                 ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                # Update room.ttlock and save to ensure the database reflects the new association
                 room.ttlock = ttlock
+                room.save()
+                # Delete the old TTLock if it exists, is different, and is no longer used by other rooms
+                if old_ttlock and old_ttlock != ttlock and Room.objects.filter(ttlock=old_ttlock).count() == 0:
+                    old_ttlock.delete()
+                    logger.info(f"Deleted old TTLock '{old_ttlock.name}' (Lock ID: {old_ttlock.lock_id}) after reassigning to new lock")
+
             else:
                 messages.error(request, "Please either select an existing lock or provide a new lock name and ID.")
                 return render(request, "main/edit_room.html", {
@@ -1819,6 +1834,7 @@ def edit_room(request, room_id):
                     "ttlocks": ttlocks,
                 })
 
+            # Update other room fields
             room.name = name
             room.video_url = video_url
             room.description = description
@@ -1833,7 +1849,8 @@ def edit_room(request, room_id):
             )
             messages.success(request, f"Room '{room.name}' updated successfully.")
             logger.info(f"Admin {request.user.username} updated room '{room.name}'")
-            return redirect('room_management#existing-rooms')
+            # Redirect with fragment manually appended
+            return redirect(reverse('room_management') + '#existing-rooms')
         except TTLock.DoesNotExist:
             messages.error(request, "Invalid TTLock selected.")
         except Exception as e:
