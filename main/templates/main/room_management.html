@@ -48,11 +48,6 @@
         box-sizing: border-box;
     }
 
-    .form-group textarea {
-        height: 200px; /* Increased height for better visibility */
-        resize: vertical;
-    }
-
     /* Desktop styling: Limit input width */
     @media (min-width: 768px) {
         .form-group input,
@@ -232,11 +227,10 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Populate Locks and Rooms from Textarea -->
+    <!-- Populate Locks and Rooms from Inputs -->
     <div class="form-section">
-        <h3>{% trans "Populate Locks and Rooms" %}</h3>
-        <p>{% trans "Below is a list of existing locks and rooms in the system. To add new locks and rooms, paste a JSON array in the textarea below. Each entry should be an object with 'name' and 'lock_id' fields. For example:" %}</p>
-        <pre>{% trans '[{"name": "Room 5", "lock_id": 21170000}, {"name": "Room 6", "lock_id": 21170001}]' %}</pre>
+        <h3>{% trans "Add a New Lock and Room" %}</h3>
+        <p>{% trans "Below is a list of existing locks and rooms in the system. To add a new lock and room, enter a unique room name and lock ID below. The lock ID must be unique and obtained from your iPhone app. Click 'Add' to create the new lock and room." %}</p>
         <p>{% trans "Existing Locks:" %}</p>
         <ul>
             {% for lock in ttlocks %}
@@ -253,15 +247,18 @@
                 <li>{% trans "No rooms currently exist." %}</li>
             {% endfor %}
         </ul>
-        <p>{% trans "To add new locks and rooms, include only new 'lock_id' values that are not listed above. Ensure each 'lock_id' is unique and obtained from your iPhone app. Click 'Populate' to apply the changes." %}</p>
         <form method="post" action="{% url 'room_management' %}">
             {% csrf_token %}
-            <input type="hidden" name="action" value="populate_locks">
+            <input type="hidden" name="action" value="add_from_inputs">
             <div class="form-group">
-                <label for="locks_json">{% trans "Paste JSON Data Here" %}</label>
-                <textarea name="locks_json" id="locks_json" placeholder="{% trans 'Enter JSON data (e.g., [{"name": "Room 5", "lock_id": 21170000}])' %}"></textarea>
+                <label for="new_room_name">{% trans "New Room Name" %}</label>
+                <input type="text" name="new_room_name" id="new_room_name" placeholder="{% trans 'e.g., Room 5' %}" required>
             </div>
-            <button type="submit" class="primary-btn">{% trans "Populate Locks" %}</button>
+            <div class="form-group">
+                <label for="new_lock_id">{% trans "New Lock ID" %}</label>
+                <input type="number" name="new_lock_id" id="new_lock_id" placeholder="{% trans 'e.g., 21170000' %}" required>
+            </div>
+            <button type="submit" class="primary-btn">{% trans "Add" %}</button>
         </form>
     </div>
 

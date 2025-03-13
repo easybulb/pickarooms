@@ -1569,6 +1569,45 @@ def room_management(request):
                 logger.error(f"Failed to populate locks: {str(e)}")
                 messages.error(request, f"Failed to populate locks: {str(e)}")
 
+        elif action == "add_from_inputs":
+            new_room_name = request.POST.get("new_room_name").strip()
+            new_lock_id = request.POST.get("new_lock_id")
+
+            if not new_room_name or not new_lock_id:
+                messages.error(request, "Room name and lock ID are required.")
+                return redirect('room_management')
+
+            try:
+                # Validate and create new TTLock
+                if not new_lock_id.isdigit():
+                    messages.error(request, "Lock ID must be a valid number.")
+                    return redirect('room_management')
+                new_lock_id = int(new_lock_id)
+                if TTLock.objects.filter(lock_id=new_lock_id).exists():
+                    messages.error(request, f"Lock ID {new_lock_id} is already in use.")
+                    return redirect('room_management')
+
+                new_lock_name = new_room_name + " Lock"  # Auto-generate lock name based on room name
+                new_ttlock = TTLock.objects.create(
+                    name=new_lock_name,
+                    lock_id=new_lock_id,
+                    is_front_door=False
+                )
+                room = Room.objects.create(
+                    name=new_room_name,
+                    video_url="",  # Default empty, can be added later via "Add New Room" form
+                    description="",  # Default empty
+                    image="",  # Default empty
+                    ttlock=new_ttlock,
+                )
+                messages.success(request, f"Room '{new_room_name}' and lock '{new_lock_name}' added successfully.")
+                logger.info(f"Admin {request.user.username} added room '{new_room_name}' with lock '{new_lock_name}' (Lock ID: {new_lock_id})")
+            except ValueError:
+                messages.error(request, "Invalid lock ID format.")
+            except Exception as e:
+                logger.error(f"Failed to add room and lock: {str(e)}")
+                messages.error(request, f"Failed to add room and lock: {str(e)}")
+
         elif action == "add_room":
             name = request.POST.get("name").strip()
             video_url = request.POST.get("video_url").strip()
