@@ -21,11 +21,7 @@
     .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 0px 20px 50px 20px;
-    }
-
-    .mt-4 {
-        margin-top: 2rem;
+        padding: 20px;
     }
 
     h2 {
@@ -35,13 +31,13 @@
     }
 
     .data-table-wrapper {
-        overflow-x: auto; /* Enable horizontal scrolling on small screens */
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .data-table {
         width: 100%;
-        min-width: 800px; /* Minimum width to ensure all columns are visible */
+        min-width: 800px;
         border-collapse: collapse;
         margin-top: 20px;
     }
@@ -65,6 +61,27 @@
 
     .data-table tr:hover {
         background-color: #f5f5f5;
+    }
+
+    .filters {
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .filters label {
+        margin-right: 10px;
+        font-weight: bold;
+    }
+
+    .filters input,
+    .filters select {
+        padding: 8px;
+        margin-right: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
     }
 
     .pagination {
@@ -96,7 +113,6 @@
         display: inline-block;
     }
 
-    /* Mobile responsiveness */
     @media (max-width: 768px) {
         .data-table th,
         .data-table td {
@@ -104,12 +120,19 @@
             padding: 8px;
         }
 
-        .mt-4 {
-        margin-top: 0rem;
-        }
-
         .data-table th {
             font-size: 0.95rem;
+        }
+
+        .filters label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .filters input,
+        .filters select {
+            width: 100%;
+            margin-bottom: 10px;
         }
 
         .pagination a,
@@ -123,7 +146,6 @@
         }
     }
 
-    /* Custom scroll buttons */
     .scroll-buttons {
         display: none;
         margin-top: 10px;
@@ -147,6 +169,9 @@
     @media (max-width: 768px) {
         .scroll-buttons {
             display: block;
+        }
+        .container {
+        padding: 0px 20px 40px 20px;
         }
     }
 </style>
@@ -216,6 +241,31 @@
         {% endfor %}
     {% endif %}
 
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get" action="">
+            <label for="search">{% trans "Search" %}:</label>
+            <input type="text" name="search" id="search" value="{{ search_query }}" placeholder="{% trans 'User, Action, Object Type, etc.' %}">
+            <label for="start_date">{% trans "Start Date" %}:</label>
+            <input type="date" name="start_date" id="start_date" value="{{ start_date }}">
+            <label for="end_date">{% trans "End Date" %}:</label>
+            <input type="date" name="end_date" id="end_date" value="{{ end_date }}">
+            <label for="sort">{% trans "Sort By" %}:</label>
+            <select name="sort" id="sort">
+                {% for value, label in sort_options %}
+                    <option value="{{ value }}" {% if sort_by == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <label for="per_page">{% trans "Per Page" %}:</label>
+            <select name="per_page" id="per_page">
+                {% for option in per_page_options %}
+                    <option value="{{ option }}" {% if per_page == option %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="primary-btn" style="padding: 8px 16px;">{% trans "Filter" %}</button>
+        </form>
+    </div>
+
     <div class="data-table-wrapper">
         <table class="data-table">
             <thead>
@@ -250,8 +300,8 @@
     <!-- Pagination -->
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?page=1">« {% trans "First" %}</a>
-            <a href="?page={{ page_obj.previous_page_number }}">‹ {% trans "Previous" %}</a>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}sort={{ sort_by }}&per_page={{ per_page }}&page=1">« {% trans "First" %}</a>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}sort={{ sort_by }}&per_page={{ per_page }}&page={{ page_obj.previous_page_number }}">‹ {% trans "Previous" %}</a>
         {% endif %}
 
         <span class="current">
@@ -259,8 +309,8 @@
         </span>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} ›</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} »</a>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}sort={{ sort_by }}&per_page={{ per_page }}&page={{ page_obj.next_page_number }}">{% trans "Next" %} ›</a>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if start_date %}start_date={{ start_date }}&{% endif %}{% if end_date %}end_date={{ end_date }}&{% endif %}sort={{ sort_by }}&per_page={{ per_page }}&page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} »</a>
         {% endif %}
     </div>
 

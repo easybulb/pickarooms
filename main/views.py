@@ -1870,11 +1870,72 @@ def edit_room(request, room_id):
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def audit_logs(request):
-    """View to display audit logs for administrative actions."""
-    logs = AuditLog.objects.all().order_by('-timestamp')
-    paginator = Paginator(logs, 50)  # Show 50 logs per page
+    """View to display audit logs for administrative actions with filtering, sorting, and pagination."""
+    # Default query set
+    logs = AuditLog.objects.all()
+
+    # Handle search
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        logs = logs.filter(
+            Q(user__username__icontains=search_query) |
+            Q(action__icontains=search_query) |
+            Q(object_type__icontains=search_query) |
+            Q(details__icontains=search_query) |
+            Q(timestamp__icontains=search_query)
+        )
+        logger.info(f"Audit logs filtered by search: {search_query}")
+
+    # Handle date range filter
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    if start_date:
+        logs = logs.filter(timestamp__gte=start_date)
+    if end_date:
+        logs = logs.filter(timestamp__lte=end_date + ' 23:59:59')
+    if start_date or end_date:
+        logger.info(f"Audit logs filtered by date range: {start_date} to {end_date}")
+
+    # Handle sorting
+    sort_by = request.GET.get('sort', '-timestamp')  # Default to descending timestamp
+    if sort_by not in ['timestamp', '-timestamp', 'user', '-user', 'action', '-action', 'object_type', '-object_type', 'object_id', '-object_id']:
+        sort_by = '-timestamp'  # Fallback to default if invalid
+    logs = logs.order_by(sort_by)
+    logger.info(f"Audit logs sorted by: {sort_by}")
+
+    # Handle pagination
+    per_page = request.GET.get('per_page', '50')  # Default to 50
+    try:
+        per_page = int(per_page)
+        if per_page not in [25, 50, 100]:
+            per_page = 50  # Fallback to default if invalid
+    except ValueError:
+        per_page = 50
+    paginator = Paginator(logs, per_page)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'main/audit_logs.html', {
+
+    # Prepare context
+    context = {
         'page_obj': page_obj,
-    })
+        'search_query': search_query,
+        'start_date': start_date or '',
+        'end_date': end_date or '',
+        'sort_by': sort_by,
+        'per_page': per_page,
+        'sort_options': [
+            ('timestamp', 'Timestamp (Newest First)'),
+            ('-timestamp', 'Timestamp (Oldest First)'),
+            ('user', 'User (A-Z)'),
+            ('-user', 'User (Z-A)'),
+            ('action', 'Action (A-Z)'),
+            ('-action', 'Action (Z-A)'),
+            ('object_type', 'Object Type (A-Z)'),
+            ('-object_type', 'Object Type (Z-A)'),
+            ('object_id', 'Object ID (Ascending)'),
+            ('-object_id', 'Object ID (Descending)'),
+        ],
+        'per_page_options': [25, 50, 100],
+    }
+
+    return render(request, 'main/audit_logs.html', context)
