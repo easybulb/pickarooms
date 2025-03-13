@@ -67,6 +67,7 @@ class Guest(models.Model):
         permissions = [
             ("can_give_access", "Can give access to doors"),
             ("view_admin_dashboard", "Can view the admin dashboard and manage guests"),
+            ("manage_rooms", "Can manage rooms"),
         ]
 
 class ReviewCSVUpload(models.Model):

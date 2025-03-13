@@ -27,8 +27,12 @@
 {% block content %}
 <section class="admin-container">
     <div class="nav-link">
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Admin Dashboard" %}</a>
         {% if 'main.can_give_access' in perms %}
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
+        {% endif %}
+        {% if 'main.manage_rooms' in perms %}
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Room Management" %}</a>
         {% endif %}
         {% if user.is_superuser %}
             <a href="{% url 'user_management' %}" class="nav-link">{% trans "User Management" %}</a>

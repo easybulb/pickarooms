@@ -1509,3 +1509,90 @@ def user_management(request):
         "users": users,
         "groups": groups,
     })
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.manage_rooms'), login_url='/unauthorized/')
+def room_management(request):
+    """View to manage rooms (add, edit, delete)."""
+    rooms = Room.objects.all()
+    ttlocks = TTLock.objects.all()  # For assigning locks to rooms
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "add_room":
+            name = request.POST.get("name").strip()
+            video_url = request.POST.get("video_url").strip()
+            description = request.POST.get("description").strip() or None
+            image_url = request.POST.get("image").strip() or None
+            ttlock_id = request.POST.get("ttlock")
+
+            if not name or not video_url:
+                messages.error(request, "Room name and video URL are required.")
+                return redirect('room_management')
+
+            try:
+                ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                room = Room.objects.create(
+                    name=name,
+                    video_url=video_url,
+                    description=description,
+                    image=image_url,  # Cloudinary URL will be processed in save()
+                    ttlock=ttlock,
+                )
+                messages.success(request, f"Room '{room.name}' added successfully.")
+                logger.info(f"Admin {request.user.username} added room '{room.name}'")
+            except IntegrityError:
+                messages.error(request, "A room with this name already exists.")
+            except TTLock.DoesNotExist:
+                messages.error(request, "Invalid TTLock selected.")
+            except Exception as e:
+                logger.error(f"Failed to add room: {str(e)}")
+                messages.error(request, f"Failed to add room: {str(e)}")
+
+        elif action == "edit_room":
+            room_id = request.POST.get("room_id")
+            room = get_object_or_404(Room, id=room_id)
+            name = request.POST.get("name").strip()
+            video_url = request.POST.get("video_url").strip()
+            description = request.POST.get("description").strip() or None
+            image_url = request.POST.get("image").strip() or None
+            ttlock_id = request.POST.get("ttlock")
+
+            if not name or not video_url:
+                messages.error(request, "Room name and video URL are required.")
+                return redirect('room_management')
+
+            try:
+                ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                room.name = name
+                room.video_url = video_url
+                room.description = description
+                room.image = image_url  # Cloudinary URL will be processed in save()
+                room.ttlock = ttlock
+                room.save()
+                messages.success(request, f"Room '{room.name}' updated successfully.")
+                logger.info(f"Admin {request.user.username} updated room '{room.name}'")
+            except TTLock.DoesNotExist:
+                messages.error(request, "Invalid TTLock selected.")
+            except Exception as e:
+                logger.error(f"Failed to update room {room_id}: {str(e)}")
+                messages.error(request, f"Failed to update room: {str(e)}")
+
+        elif action == "delete_room":
+            room_id = request.POST.get("room_id")
+            room = get_object_or_404(Room, id=room_id)
+            room_name = room.name
+            try:
+                room.delete()
+                messages.success(request, f"Room '{room_name}' deleted successfully.")
+                logger.info(f"Admin {request.user.username} deleted room '{room_name}'")
+            except Exception as e:
+                logger.error(f"Failed to delete room {room_id}: {str(e)}")
+                messages.error(request, f"Failed to delete room: {str(e)}")
+
+        return redirect('room_management')
+
+    return render(request, "main/room_management.html", {
+        "rooms": rooms,
+        "ttlocks": ttlocks,
+    })

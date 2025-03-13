@@ -6,6 +6,19 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
 <style>
+    .nav-link {
+        margin-bottom: 20px;
+    }
+    .nav-link {
+        display: inline-block;
+        margin-right: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .nav-link:hover {
+        text-decoration: underline;
+    }
     .user-management-container {
         padding: 20px;
         max-width: 1200px;
@@ -128,7 +141,18 @@
 
 {% block content %}
 <section class="user-management-container">
-    <a href="{% url 'admin_page' %}" class="nav-link">← {% trans "Back to Admin Dashboard" %}</a>
+    <div class="nav-link">
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Admin Dashboard" %}</a>
+        {% if 'main.can_give_access' in perms %}
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
+        {% endif %}
+        {% if 'main.manage_rooms' in perms %}
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Room Management" %}</a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "User Management" %}</a>
+        {% endif %}
+    </div>
     <h1 class="user-management-title">{% trans "User Management" %}</h1>
 
     {% if messages %}
