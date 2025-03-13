@@ -5,7 +5,7 @@
 {% block extra_css %}
 <style>
     .nav-link {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
     .nav-link {
         display: inline-block;
@@ -21,6 +21,9 @@
         max-width: 1200px;
         margin: 0 auto;
         padding: 0px 20px 50px 20px;
+    }
+    .mt-4 {
+        margin-top: 1rem;
     }
     h2, h3 {
         color: #333;
@@ -103,6 +106,9 @@
         .data-table td {
             min-width: 150px;
         }
+        .mt-4 {
+        margin-top: 0rem;
+        }
     }
 
     .primary-btn,
@@ -155,15 +161,16 @@
 {% block content %}
 <div class="container mt-4">
     <div class="nav-link">
-        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Admin Dashboard" %}</a>
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
         {% if 'main.can_give_access' in perms %}
-            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
         {% endif %}
         {% if 'main.manage_rooms' in perms %}
-        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Room Management" %}</a>
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
         {% endif %}
         {% if user.is_superuser %}
-            <a href="{% url 'user_management' %}" class="nav-link">{% trans "User Management" %}</a>
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
+            <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
         {% endif %}
     </div>
     <h2>{% trans "Room Management" %}</h2>

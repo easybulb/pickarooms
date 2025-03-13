@@ -1,3 +1,4 @@
+# main/models.py
 import uuid
 from django.db import models
 from django.utils.timezone import now
@@ -6,6 +7,7 @@ from django.conf import settings
 import pandas as pd
 import json
 import cloudinary.uploader
+from django.contrib.auth.models import User
 
 def default_check_out_date():
     """Returns the next day with time set to 11:00 AM."""
@@ -85,3 +87,18 @@ class ReviewCSVUpload(models.Model):
             )
             self.data = filtered_reviews.to_dict(orient="records")
         super().save(*args, **kwargs)
+
+class AuditLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    action = models.CharField(max_length=255)  # e.g., "Guest Updated", "Room Deleted"
+    object_type = models.CharField(max_length=100)  # e.g., "Guest", "Room"
+    object_id = models.PositiveIntegerField()  # ID of the affected object
+    details = models.TextField(blank=True, null=True)  # Additional details (e.g., old vs. new values)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.action} - {self.object_type} (ID: {self.object_id}) by {self.user.username if self.user else 'Anonymous'} at {self.timestamp}"
+
+    class Meta:
+        verbose_name = "Audit Log"
+        verbose_name_plural = "Audit Logs"

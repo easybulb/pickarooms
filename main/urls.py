@@ -40,4 +40,5 @@ urlpatterns = [
     path('how-to-use/', how_to_use, name='how_to_use'),
     path('awards_reviews/', views.awards_reviews, name='awards_reviews'),
     path('api/callback', ttlock_callback, name='ttlock_callback'),
+    path('audit-logs/', views.audit_logs, name='audit_logs'),
 ]

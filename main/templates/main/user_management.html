@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
 <style>
     .nav-link {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
     .nav-link {
         display: inline-block;
@@ -20,7 +20,7 @@
         text-decoration: underline;
     }
     .user-management-container {
-        padding: 0px 20px 40px 20px;
+        padding: 20px 20px 40px 20px;
         max-width: 1200px;
         margin: 0 auto;
     }
@@ -93,7 +93,7 @@
     }
     .nav-link {
         display: inline-block;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         color: #007bff;
         text-decoration: none;
         font-size: 16px;
@@ -134,6 +134,13 @@
     .add-user-section button:hover {
         background-color: #45a049;
     }
+
+    /* Mobile Styling for Manual Section */
+    @media (max-width: 768px) {
+    .user-management-container {
+        padding: 0px 10px 40px 10px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -142,15 +149,16 @@
 {% block content %}
 <section class="user-management-container">
     <div class="nav-link">
-        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Admin Dashboard" %}</a>
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
         {% if 'main.can_give_access' in perms %}
-            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
         {% endif %}
         {% if 'main.manage_rooms' in perms %}
-        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Room Management" %}</a>
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
         {% endif %}
         {% if user.is_superuser %}
-            <a href="{% url 'user_management' %}" class="nav-link">{% trans "User Management" %}</a>
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
+            <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
         {% endif %}
     </div>
     <h1 class="user-management-title">{% trans "User Management" %}</h1>

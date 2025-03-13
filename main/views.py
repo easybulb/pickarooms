@@ -25,7 +25,7 @@ from langdetect import detect
 import uuid
 import pytz
 import datetime
-from .models import Guest, Room, ReviewCSVUpload, TTLock
+from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog
 from .ttlock_utils import TTLockClient
 import logging
 from django.views.decorators.csrf import csrf_exempt
@@ -851,6 +851,13 @@ def edit_guest(request, guest_id):
                 guest.room_pin_id = room_response["keyboardPwdId"]
                 logger.info(f"Generated new room PIN {new_pin} for guest {guest.reservation_number} (Keyboard Password ID: {room_response['keyboardPwdId']})")
                 guest.save()
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="Guest PIN Regenerated",
+                    object_type="Guest",
+                    object_id=guest.id,
+                    details=f"Regenerated PIN {new_pin} for reservation {guest.reservation_number}"
+                )
                 messages.success(request, f"New PIN (for both front door and room) generated: {new_pin}. The guest can also unlock the doors remotely during check-in or from the room detail page.")
             except Exception as e:
                 logger.error(f"Failed to generate new PIN for guest {guest.reservation_number}: {str(e)}")
@@ -887,7 +894,7 @@ def edit_guest(request, guest_id):
             # Update late_checkout_time if provided
             if late_checkout_time:
                 try:
-                    guest.late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:M').time()
+                    guest.late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
                 except ValueError:
                     messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
                     return redirect('edit_guest', guest_id=guest.id)
@@ -897,6 +904,13 @@ def edit_guest(request, guest_id):
             # Check for room change
             if str(new_room_id) != str(original_room_id):
                 logger.info(f"Room changed for guest {guest.reservation_number} from {original_room_id} to {new_room_id}")
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="Guest Room Changed",
+                    object_type="Guest",
+                    object_id=guest.id,
+                    details=f"Changed room from {original_room_id} to {new_room_id} for reservation {guest.reservation_number}"
+                )
                 front_door_lock = TTLock.objects.filter(is_front_door=True).first()
                 old_room_lock = Room.objects.get(id=original_room_id).ttlock
                 new_room_lock = Room.objects.get(id=new_room_id).ttlock
@@ -979,6 +993,13 @@ def edit_guest(request, guest_id):
                             return redirect('edit_guest', guest_id=guest.id)
                         guest.room_pin_id = room_response["keyboardPwdId"]
                         logger.info(f"Generated new room PIN {new_pin} for guest {guest.reservation_number} after room change (Keyboard Password ID: {room_response['keyboardPwdId']})")
+                        AuditLog.objects.create(
+                            user=request.user,
+                            action="Guest PIN Regenerated (Room Change)",
+                            object_type="Guest",
+                            object_id=guest.id,
+                            details=f"Regenerated PIN {new_pin} due to room change for reservation {guest.reservation_number}"
+                        )
                     except Exception as e:
                         logger.error(f"Failed to generate new PIN for guest {guest.reservation_number} after room change: {str(e)}")
                         messages.error(request, f"Failed to generate new PIN after room change: {str(e)}")
@@ -1072,6 +1093,13 @@ def edit_guest(request, guest_id):
                                 else:
                                     guest.room_pin_id = room_response["keyboardPwdId"]
                                     logger.info(f"Generated new room PIN {new_pin} for guest {guest.reservation_number} after date change (Keyboard Password ID: {room_response['keyboardPwdId']})")
+                                    AuditLog.objects.create(
+                                        user=request.user,
+                                        action="Guest PIN Updated (Date Change)",
+                                        object_type="Guest",
+                                        object_id=guest.id,
+                                        details=f"Updated PIN {new_pin} due to date change for reservation {guest.reservation_number}"
+                                    )
                                     messages.info(request, f"PIN updated due to date change: {new_pin}. The guest can also unlock the doors remotely during check-in or from the room detail page.")
                         except Exception as e:
                             logger.error(f"Failed to update PIN for guest {guest.reservation_number} after date change: {str(e)}")
@@ -1082,6 +1110,13 @@ def edit_guest(request, guest_id):
                             guest.save()
 
             guest.save()
+            AuditLog.objects.create(
+                user=request.user,
+                action="Guest Updated",
+                object_type="Guest",
+                object_id=guest.id,
+                details=f"Updated details for reservation {guest.reservation_number} (Room: {new_room_id}, Check-in: {check_in_date}, Check-out: {check_out_date})"
+            )
             logger.info(f"Updated guest {guest.reservation_number} details")
             messages.success(request, f"Guest {guest.full_name} updated successfully. The guest can unlock the doors using their PIN or remotely during check-in or from the room detail page.")
 
@@ -1099,6 +1134,7 @@ def edit_guest(request, guest_id):
 def delete_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
     guest_name = guest.full_name
+    reservation_number = guest.reservation_number
     front_door_lock = TTLock.objects.filter(is_front_door=True).first()
     room_lock = guest.assigned_room.ttlock
     ttlock_client = TTLockClient()
@@ -1128,7 +1164,14 @@ def delete_guest(request, guest_id):
             messages.warning(request, f"Failed to delete room PIN for {guest_name}: {str(e)}")
 
     guest.delete()
-    logger.info(f"Deleted guest {guest.reservation_number}")
+    AuditLog.objects.create(
+        user=request.user,
+        action="Guest Deleted",
+        object_type="Guest",
+        object_id=guest_id,
+        details=f"Deleted guest {guest_name} with reservation {reservation_number}"
+    )
+    logger.info(f"Deleted guest {reservation_number}")
     messages.success(request, f"Guest {guest_name} deleted successfully.")
     return redirect('admin_page')
 
@@ -1510,15 +1553,6 @@ def user_management(request):
         "groups": groups,
     })
 
-import json
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-import logging
-from .models import Room, TTLock
-
-logger = logging.getLogger('main')
-
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.has_perm('main.manage_rooms'), login_url='/unauthorized/')
 def room_management(request):
@@ -1609,6 +1643,13 @@ def room_management(request):
                     image="",  # Default empty
                     ttlock=new_ttlock,
                 )
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="Room Created",
+                    object_type="Room",
+                    object_id=room.id,
+                    details=f"Created room '{new_room_name}' with lock '{new_lock_name}' (Lock ID: {new_lock_id})"
+                )
                 messages.success(request, f"Room '{new_room_name}' and lock '{new_lock_name}' added successfully.")
                 logger.info(f"Admin {request.user.username} added room '{new_room_name}' with lock '{new_lock_name}' (Lock ID: {new_lock_id})")
             except ValueError:
@@ -1660,6 +1701,13 @@ def room_management(request):
                     image=image_url,
                     ttlock=ttlock,
                 )
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="Room Created",
+                    object_type="Room",
+                    object_id=room.id,
+                    details=f"Created room '{room.name}' with lock '{ttlock.name}' (Lock ID: {ttlock.lock_id})"
+                )
                 messages.success(request, f"Room '{room.name}' added successfully with lock '{ttlock.name}'.")
                 logger.info(f"Admin {request.user.username} added room '{room.name}' with lock '{ttlock.name}' (Lock ID: {ttlock.lock_id})")
             except TTLock.DoesNotExist:
@@ -1678,6 +1726,13 @@ def room_management(request):
             room_name = room.name
             try:
                 room.delete()
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="Room Deleted",
+                    object_type="Room",
+                    object_id=room_id,
+                    details=f"Deleted room '{room_name}'"
+                )
                 messages.success(request, f"Room '{room_name}' deleted successfully.")
                 logger.info(f"Admin {request.user.username} deleted room '{room_name}'")
             except Exception as e:
@@ -1756,6 +1811,13 @@ def edit_room(request, room_id):
             room.description = description
             room.image = image_url
             room.save()
+            AuditLog.objects.create(
+                user=request.user,
+                action="Room Updated",
+                object_type="Room",
+                object_id=room.id,
+                details=f"Updated room '{room.name}' (Video URL: {video_url}, Description: {description}, Image: {image_url}, Lock: {room.ttlock.name if room.ttlock else 'None'})"
+            )
             messages.success(request, f"Room '{room.name}' updated successfully.")
             logger.info(f"Admin {request.user.username} updated room '{room.name}'")
             return redirect('room_management#existing-rooms')
@@ -1773,4 +1835,16 @@ def edit_room(request, room_id):
     return render(request, "main/edit_room.html", {
         "room": room,
         "ttlocks": ttlocks,
+    })
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def audit_logs(request):
+    """View to display audit logs for administrative actions."""
+    logs = AuditLog.objects.all().order_by('-timestamp')
+    paginator = Paginator(logs, 50)  # Show 50 logs per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'main/audit_logs.html', {
+        'page_obj': page_obj,
     })
