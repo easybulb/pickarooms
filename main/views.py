@@ -1519,35 +1519,97 @@ def room_management(request):
 
     if request.method == "POST":
         action = request.POST.get("action")
-        if action == "add_room":
+        if action == "populate_locks":
+            locks_json = request.POST.get("locks_json", "").strip()
+            if not locks_json:
+                messages.error(request, "Please enter JSON data in the textarea.")
+                return redirect('room_management')
+
+            try:
+                # Parse the JSON data
+                ttlock_data = json.loads(locks_json)
+
+                # Validate the JSON structure
+                if not isinstance(ttlock_data, list):
+                    messages.error(request, "JSON data must be an array of lock objects.")
+                    return redirect('room_management')
+
+                for data in ttlock_data:
+                    if not isinstance(data, dict) or 'name' not in data or 'lock_id' not in data:
+                        messages.error(request, "Each lock entry must have 'name' and 'lock_id' fields.")
+                        return redirect('room_management')
+
+                    # Create TTLock entries
+                    lock_id = data["lock_id"]
+                    if not isinstance(lock_id, (int, str)) or not str(lock_id).isdigit():
+                        messages.error(request, "Lock ID must be a valid number.")
+                        return redirect('room_management')
+                    lock_id = int(lock_id)
+                    if TTLock.objects.filter(lock_id=lock_id).exists():
+                        messages.error(request, f"Lock ID {lock_id} is already in use.")
+                        return redirect('room_management')
+
+                    TTLock.objects.get_or_create(lock_id=lock_id, defaults={"name": data["name"]})
+
+                # Associate TTLock with Rooms (only for room-specific locks)
+                room_locks = {item["name"]: item["lock_id"] for item in ttlock_data if item["name"].startswith("Room")}
+                for room_name, lock_id in room_locks.items():
+                    room = Room.objects.get_or_create(name=room_name)[0]  # Create room if it doesn't exist
+                    ttlock = TTLock.objects.get(lock_id=lock_id)
+                    room.ttlock = ttlock
+                    room.save()
+
+                messages.success(request, "Successfully populated TTLock entries and associations from JSON data.")
+                logger.info(f"Admin {request.user.username} populated TTLock entries from JSON textarea")
+            except json.JSONDecodeError:
+                messages.error(request, "Invalid JSON format. Please check your syntax.")
+            except Room.DoesNotExist:
+                messages.error(request, "One or more rooms in the JSON data do not exist.")
+            except Exception as e:
+                logger.error(f"Failed to populate locks: {str(e)}")
+                messages.error(request, f"Failed to populate locks: {str(e)}")
+
+        elif action == "add_room":
             name = request.POST.get("name").strip()
             video_url = request.POST.get("video_url").strip()
             description = request.POST.get("description").strip() or None
             image_url = request.POST.get("image").strip() or None
-            ttlock_id = request.POST.get("ttlock")
+            new_lock_name = request.POST.get("new_lock_name").strip()
+            new_lock_id = request.POST.get("new_lock_id")
 
-            if not name or not video_url:
-                messages.error(request, "Room name and video URL are required.")
+            if not name or not video_url or not new_lock_name or not new_lock_id:
+                messages.error(request, "Room name, video URL, new lock name, and new lock ID are required.")
                 return redirect('room_management')
 
             try:
-                ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                # Validate and create new TTLock
+                if not new_lock_id.isdigit():
+                    messages.error(request, "Lock ID must be a valid number.")
+                    return redirect('room_management')
+                new_lock_id = int(new_lock_id)
+                if TTLock.objects.filter(lock_id=new_lock_id).exists():
+                    messages.error(request, "This lock ID is already in use.")
+                    return redirect('room_management')
+
+                new_ttlock = TTLock.objects.create(
+                    name=new_lock_name,
+                    lock_id=new_lock_id,
+                    is_front_door=False
+                )
                 room = Room.objects.create(
                     name=name,
                     video_url=video_url,
                     description=description,
-                    image=image_url,  # Cloudinary URL will be processed in save()
-                    ttlock=ttlock,
+                    image=image_url,
+                    ttlock=new_ttlock,
                 )
-                messages.success(request, f"Room '{room.name}' added successfully.")
-                logger.info(f"Admin {request.user.username} added room '{room.name}'")
-            except IntegrityError:
-                messages.error(request, "A room with this name already exists.")
-            except TTLock.DoesNotExist:
-                messages.error(request, "Invalid TTLock selected.")
+                messages.success(request, f"Room '{room.name}' and new lock '{new_lock_name}' added successfully.")
+                logger.info(f"Admin {request.user.username} added room '{room.name}' with new lock '{new_lock_name}' (Lock ID: {new_lock_id})")
+            except ValueError:
+                messages.error(request, "Invalid lock ID format.")
             except Exception as e:
-                logger.error(f"Failed to add room: {str(e)}")
-                messages.error(request, f"Failed to add room: {str(e)}")
+                logger.error(f"Failed to add room and lock: {str(e)}")
+                messages.error(request, f"Failed to add room and lock: {str(e)}")
 
         elif action == "edit_room":
             room_id = request.POST.get("room_id")
@@ -1557,18 +1619,43 @@ def room_management(request):
             description = request.POST.get("description").strip() or None
             image_url = request.POST.get("image").strip() or None
             ttlock_id = request.POST.get("ttlock")
+            lock_option = request.POST.get("lock_option_" + room_id)
+            new_lock_name = request.POST.get("new_lock_name")
+            new_lock_id = request.POST.get("new_lock_id")
 
             if not name or not video_url:
                 messages.error(request, "Room name and video URL are required.")
                 return redirect('room_management')
 
             try:
-                ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                if lock_option == "new" and new_lock_name and new_lock_id:
+                    if not new_lock_id.isdigit():
+                        messages.error(request, "Lock ID must be a valid number.")
+                        return redirect('room_management')
+                    new_lock_id = int(new_lock_id)
+                    if TTLock.objects.filter(lock_id=new_lock_id).exists():
+                        messages.error(request, "This lock ID is already in use.")
+                        return redirect('room_management')
+
+                    # Create or update new TTLock
+                    if room.ttlock and room.ttlock.lock_id == new_lock_id:
+                        room.ttlock.name = new_lock_name
+                        room.ttlock.save()
+                    else:
+                        new_ttlock = TTLock.objects.create(
+                            name=new_lock_name,
+                            lock_id=new_lock_id,
+                            is_front_door=False
+                        )
+                        room.ttlock = new_ttlock
+                elif lock_option == "existing" and ttlock_id:
+                    ttlock = TTLock.objects.get(id=ttlock_id) if ttlock_id else None
+                    room.ttlock = ttlock
+
                 room.name = name
                 room.video_url = video_url
                 room.description = description
-                room.image = image_url  # Cloudinary URL will be processed in save()
-                room.ttlock = ttlock
+                room.image = image_url
                 room.save()
                 messages.success(request, f"Room '{room.name}' updated successfully.")
                 logger.info(f"Admin {request.user.username} updated room '{room.name}'")

@@ -4,23 +4,10 @@
 
 {% block extra_css %}
 <style>
-    .nav-link {
-        margin-bottom: 20px;
-    }
-    .nav-link {
-        display: inline-block;
-        margin-right: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-    }
-    .nav-link:hover {
-        text-decoration: underline;
-    }
     .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 0px 20px 40px 20px;
+        padding: 20px;
     }
 
     .mt-4 {
@@ -62,7 +49,7 @@
     }
 
     .form-group textarea {
-        height: 100px;
+        height: 200px; /* Increased height for better visibility */
         resize: vertical;
     }
 
@@ -70,11 +57,11 @@
     @media (min-width: 768px) {
         .form-group input,
         .form-group select {
-            width: 50%; /* Half width on desktop */
-            max-width: 400px; /* Prevent it from getting too narrow */
+            width: 50%;
+            max-width: 400px;
         }
         .form-group textarea {
-            width: 50%; /* Half width for textarea on desktop */
+            width: 50%;
             max-width: 400px;
         }
     }
@@ -111,7 +98,7 @@
         }
         .data-table th,
         .data-table td {
-            min-width: 150px; /* Ensure columns are readable */
+            min-width: 150px;
         }
     }
 
@@ -209,9 +196,26 @@
     /* Responsive modal for mobile */
     @media (max-width: 767px) {
         .modal-content {
-            width: 95%; /* Slightly wider on mobile for usability */
-            max-height: 80vh; /* Adjust height for smaller screens */
+            width: 95%;
+            max-height: 80vh;
         }
+    }
+
+    /* Toggle styling */
+    .toggle-group {
+        margin-bottom: 15px;
+    }
+
+    .toggle-group input[type="radio"] {
+        margin-right: 5px;
+    }
+
+    .new-lock-fields {
+        display: none;
+    }
+
+    .new-lock-fields.active {
+        display: block;
     }
 </style>
 {% endblock %}
@@ -220,19 +224,6 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="nav-link">
-        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Admin Dashboard" %}</a>
-        {% if 'main.can_give_access' in perms %}
-            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Give Access" %}</a>
-        {% endif %}
-        {% if 'main.manage_rooms' in perms %}
-        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Room Management" %}</a>
-        {% endif %}
-        {% if user.is_superuser %}
-            <a href="{% url 'user_management' %}" class="nav-link">{% trans "User Management" %}</a>
-        {% endif %}
-    </div>
-    
     <h2>{% trans "Room Management" %}</h2>
 
     {% if messages %}
@@ -240,6 +231,39 @@
             <div class="alert alert-{{ message.tags }}">{{ message }}</div>
         {% endfor %}
     {% endif %}
+
+    <!-- Populate Locks and Rooms from Textarea -->
+    <div class="form-section">
+        <h3>{% trans "Populate Locks and Rooms" %}</h3>
+        <p>{% trans "Below is a list of existing locks and rooms in the system. To add new locks and rooms, paste a JSON array in the textarea below. Each entry should be an object with 'name' and 'lock_id' fields. For example:" %}</p>
+        <pre>{% trans '[{"name": "Room 5", "lock_id": 21170000}, {"name": "Room 6", "lock_id": 21170001}]' %}</pre>
+        <p>{% trans "Existing Locks:" %}</p>
+        <ul>
+            {% for lock in ttlocks %}
+                <li>{{ lock.name }} (Lock ID: {{ lock.lock_id }})</li>
+            {% empty %}
+                <li>{% trans "No locks currently exist." %}</li>
+            {% endfor %}
+        </ul>
+        <p>{% trans "Existing Rooms:" %}</p>
+        <ul>
+            {% for room in rooms %}
+                <li>{{ room.name }} (Lock: {{ room.ttlock.name|default:"None" }} - ID: {{ room.ttlock.lock_id|default:"N/A" }})</li>
+            {% empty %}
+                <li>{% trans "No rooms currently exist." %}</li>
+            {% endfor %}
+        </ul>
+        <p>{% trans "To add new locks and rooms, include only new 'lock_id' values that are not listed above. Ensure each 'lock_id' is unique and obtained from your iPhone app. Click 'Populate' to apply the changes." %}</p>
+        <form method="post" action="{% url 'room_management' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="populate_locks">
+            <div class="form-group">
+                <label for="locks_json">{% trans "Paste JSON Data Here" %}</label>
+                <textarea name="locks_json" id="locks_json" placeholder="{% trans 'Enter JSON data (e.g., [{"name": "Room 5", "lock_id": 21170000}])' %}"></textarea>
+            </div>
+            <button type="submit" class="primary-btn">{% trans "Populate Locks" %}</button>
+        </form>
+    </div>
 
     <!-- Define the confirmation message -->
     {% trans "Are you sure you want to delete this room?" as delete_confirm_msg %}
@@ -267,13 +291,12 @@
                 <input type="url" name="image" id="image" placeholder="Enter Cloudinary URL">
             </div>
             <div class="form-group">
-                <label for="ttlock">{% trans "Assign TTLock" %}</label>
-                <select name="ttlock" id="ttlock">
-                    <option value="">{% trans "None" %}</option>
-                    {% for lock in ttlocks %}
-                        <option value="{{ lock.id }}">{{ lock.name }} (Lock ID: {{ lock.lock_id }})</option>
-                    {% endfor %}
-                </select>
+                <label for="new_lock_name">{% trans "New Lock Name" %}</label>
+                <input type="text" name="new_lock_name" id="new_lock_name" required>
+            </div>
+            <div class="form-group">
+                <label for="new_lock_id">{% trans "New Lock ID" %}</label>
+                <input type="number" name="new_lock_id" id="new_lock_id" required>
             </div>
             <button type="submit" class="primary-btn">{% trans "Add Room" %}</button>
         </form>
@@ -345,8 +368,12 @@
                                 <label for="image_{{ room.id }}">{% trans "Cloudinary Image URL" %}</label>
                                 <input type="url" name="image" id="image_{{ room.id }}" value="{{ room.image|default:'' }}" placeholder="Enter Cloudinary URL">
                             </div>
+                            <div class="toggle-group">
+                                <label><input type="radio" name="lock_option_{{ room.id }}" value="existing" checked> {% trans "Use Existing Lock" %}</label>
+                                <label><input type="radio" name="lock_option_{{ room.id }}" value="new"> {% trans "Create/Edit New Lock" %}</label>
+                            </div>
                             <div class="form-group">
-                                <label for="ttlock_{{ room.id }}">{% trans "Assign TTLock" %}</label>
+                                <label for="ttlock_{{ room.id }}">{% trans "Assign Existing TTLock" %}</label>
                                 <select name="ttlock" id="ttlock_{{ room.id }}">
                                     <option value="">{% trans "None" %}</option>
                                     {% for lock in ttlocks %}
@@ -355,6 +382,16 @@
                                         </option>
                                     {% endfor %}
                                 </select>
+                            </div>
+                            <div class="new-lock-fields">
+                                <div class="form-group">
+                                    <label for="new_lock_name_{{ room.id }}">{% trans "New Lock Name" %}</label>
+                                    <input type="text" name="new_lock_name" id="new_lock_name_{{ room.id }}" value="{{ room.ttlock.name|default:'' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_lock_id_{{ room.id }}">{% trans "New Lock ID" %}</label>
+                                    <input type="number" name="new_lock_id" id="new_lock_id_{{ room.id }}" value="{{ room.ttlock.lock_id|default:'' }}">
+                                </div>
                             </div>
                             <button type="submit" class="primary-btn">{% trans "Save Changes" %}</button>
                         </form>
@@ -365,13 +402,15 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
 
+{% block extra_scripts %}
 <script>
     // Attach event listeners for edit buttons
     document.querySelectorAll('.edit-room-btn').forEach(button => {
         button.addEventListener('click', function() {
             const modalId = this.getAttribute('data-modal-id');
-            document.getElementId(modalId).style.display = 'flex';
+            document.getElementById(modalId).style.display = 'flex';
         });
     });
 
@@ -380,6 +419,19 @@
         button.addEventListener('click', function() {
             const modalId = this.getAttribute('data-modal-id');
             document.getElementById(modalId).style.display = 'none';
+        });
+    });
+
+    // Toggle new lock fields based on radio selection
+    document.querySelectorAll('.toggle-group input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const modalId = this.name.replace('lock_option_', '').replace('_' + this.id.split('_').pop(), '');
+            const newLockFields = document.querySelector(`#${modalId} .new-lock-fields`);
+            if (this.value === 'new') {
+                newLockFields.classList.add('active');
+            } else {
+                newLockFields.classList.remove('active');
+            }
         });
     });
 
