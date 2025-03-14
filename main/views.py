@@ -98,7 +98,7 @@ def explore_manchester(request):
         'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY
     })
 
-@ratelimit(key='ip', rate='10/m', method='POST', block=True)
+@ratelimit(key='ip', rate='7/m', method='POST', block=True)
 def checkin(request):
     if request.method == "POST":
         reservation_number = request.POST.get('reservation_number', '').strip()
@@ -302,14 +302,14 @@ def room_detail(request, room_token):
     now_uk_time = timezone.now().astimezone(uk_timezone)
 
     # Use early check-in time if set, otherwise default to 2:00 PM
-    check_in_time = guest.early_checkin_time if guest.early_checkin_time else time(14, 0)
+    check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
     check_in_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_in_date, check_in_time),
         timezone.get_current_timezone(),
     ).astimezone(uk_timezone)
 
     # Use late check-out time if set, otherwise default to 11:00 AM
-    check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
+    check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
     check_out_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_out_date, check_out_time),
         timezone.get_current_timezone(),
@@ -332,8 +332,13 @@ def room_detail(request, room_token):
             "front_door_pin": guest.front_door_pin,
         }, content_type="text/html", status=200)
 
-    # Handle unlock request if submitted
+    # Handle unlock request if submitted, with rate limiting
     if request.method == "POST" and "unlock_door" in request.POST:
+        # Check rate limit (6 per minute per IP)
+        if getattr(request, 'limited', False):  # Set by ratelimit if exceeded
+            logger.warning(f"Rate limit exceeded for IP {request.META.get('REMOTE_ADDR')} on unlock attempt for guest {guest.reservation_number}")
+            return JsonResponse({"error": "Too many attempts, please wait a moment."}, status=429)
+
         try:
             front_door_lock = TTLock.objects.get(is_front_door=True)
             room_lock = guest.assigned_room.ttlock
@@ -359,7 +364,7 @@ def room_detail(request, room_token):
                     except Exception as e:
                         logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {str(e)}")
                         if attempt == max_retries - 1:
-                            return JsonResponse({"error": "Failed to unlock the front door. Please try again or contact report."}, status=400)
+                            return JsonResponse({"error": "Failed to unlock the front door. Please try again or contact support."}, status=400)
                         else:
                             logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
                             continue
@@ -404,6 +409,9 @@ def room_detail(request, room_token):
             "front_door_pin": guest.front_door_pin,
         },
     )
+
+# Apply rate limit to the entire view, but we'll check 'limited' only for POST
+room_detail = ratelimit(key='ip', rate='6/m', method='POST', block=True)(room_detail)
 
 @ratelimit(key='ip', rate='3/m', method='POST', block=True)
 def report_pin_issue(request):
@@ -1385,6 +1393,12 @@ def give_access(request):
     front_door_lock = TTLock.objects.filter(is_front_door=True).first()  # Get the front door lock
 
     if request.method == "POST" and "unlock_door" in request.POST:
+        # Check rate limit (6 per minute per user)
+        if getattr(request, 'limited', False):  # Set by ratelimit if exceeded
+            logger.warning(f"Rate limit exceeded for user {request.user.username} on unlock attempt")
+            messages.error(request, "Too many attempts, please wait a moment.")
+            return redirect('give_access')
+
         try:
             lock_id = request.POST.get("lock_id")
             door_type = request.POST.get("door_type")
@@ -1459,6 +1473,9 @@ def give_access(request):
         "all_rooms": all_rooms,
         "front_door_lock": front_door_lock,
     })
+
+# Apply rate limit to the entire view, but we'll check 'limited' only for POST
+give_access = ratelimit(key='user', rate='6/m', method='POST', block=True)(give_access)
 
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')

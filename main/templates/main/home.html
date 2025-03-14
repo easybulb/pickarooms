@@ -12,12 +12,12 @@
     <div class="hero-content">
         <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
         <p>{% trans "Enter your Booking.com confirmation number to retrieve your check-in details." %}</p>
-
+        <p style="color: red; display: none;" class="error-message"></p> <!-- Placeholder for JS errors -->
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
             <input type="text" name="reservation_number"
-                placeholder="{% trans 'Enter your Booking.com confirmation number' %}"
-                value="{{ reservation_number|default:'' }}">
+                   placeholder="{% trans 'Enter your Booking.com confirmation number' %}"
+                   value="{{ reservation_number|default:'' }}">
             <button type="submit">{% trans "Check In" %}</button>
         </form>
 
@@ -30,10 +30,9 @@
         <!-- How to Use Modal -->
         <div id="how-to-use-modal" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="close" data-modal="how-to-use-modal">&times;</span>
+                <span class="close" data-modal="how-to-use-modal">×</span>
                 <h2>{% trans "How to Use" %}</h2>
-                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter the confirmation number you received during
-                    your reservation on Booking.com." %}</p>
+                <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter the confirmation number you received during your reservation on Booking.com." %}</p>
                 <p><strong>{% trans "Step 2:" %}</strong> {% trans "Retrieve your PIN." %}</p>
                 <p><strong>{% trans "Step 3:" %}</strong> {% trans "Follow the check-in instructions." %}</p>
                 <p><strong>{% trans "Step 4:" %}</strong> {% trans "Enjoy your stay!" %}</p>
@@ -43,17 +42,16 @@
         <!-- Contact Us Modal -->
         <div id="contact-modal" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="close" data-modal="contact-modal">&times;</span>
+                <span class="close" data-modal="contact-modal">×</span>
                 <h2>{% trans "Contact Us" %}</h2>
                 <p><strong>{% trans "Phone:" %}</strong> +44 (0) 7539029629</p>
                 <p><strong>{% trans "Whatsapp:" %}</strong> +44 (0) 7539029629</p>
                 <p><strong>{% trans "Email:" %}</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
             </div>
         </div>
-
     </div>
     <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739380781/grey-hero-pickarooms_i5lums.png"
-        alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
+         alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
 </section>
 
 <!-- FAQ Section -->
@@ -61,51 +59,43 @@
     <h2>{% trans "Have Questions? Answers Below." %}</h2>
     <div class="faq-container">
         <div class="faq-item">
-            <button class="faq-question">{% trans "Where can I find my Booking.com confirmation number?" %} <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Where can I find my Booking.com confirmation number?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Your Booking.com confirmation number can be found in your email amd phone confirmation. You
-                    can also locate it by logging into your Booking.com account online. If using a browser, it appears
-                    at the top-right (see first image). If using the Booking.com app, it is displayed under your
-                    completed booking details (see second image)." %}</p>
+                <p>{% trans "Your Booking.com confirmation number can be found in your email amd phone confirmation. You can also locate it by logging into your Booking.com account online. If using a browser, it appears at the top-right (see first image). If using the Booking.com app, it is displayed under your completed booking details (see second image)." %}</p>
 
                 <!-- Image Container -->
                 <div class="faq-images">
                     <div class="faq-image">
                         <h3>{% trans "Using Browser" %}</h3>
                         <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking.browser_pmzfnq.png"
-                            alt="{% trans 'Booking.com confirmation number on browser' %}">
+                             alt="{% trans 'Booking.com confirmation number on browser' %}">
                     </div>
                     <div class="faq-image">
                         <h3>{% trans "On Booking.com App" %}</h3>
                         <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking-app_xbqadd.png"
-                            alt="{% trans 'Booking.com confirmation number on app' %}">
+                             alt="{% trans 'Booking.com confirmation number on app' %}">
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "What is the property address?" %} <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What is the property address?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                {% blocktrans %}The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP,
-                    United Kingdom</strong>.{% endblocktrans %}
+                {% blocktrans %}The property is located at <strong>8 Rylance Street, Beswick, Manchester, M11 3NP, United Kingdom</strong>.{% endblocktrans %}
 
                 <!-- Google Maps Embed -->
                 <div class="faq-map-container">
                     <iframe width="600" height="350" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps/embed/v1/place?q=8+Rylance+Street,+Beswick,+Manchester,+M11+3NP,+United+Kingdom&key={{ GOOGLE_MAPS_API_KEY }}">
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed/v1/place?q=8+Rylance+Street,+Beswick,+Manchester,+M11+3NP,+United+Kingdom&key={{ GOOGLE_MAPS_API_KEY }}">
                     </iframe>
                 </div>
             </div>
         </div>
 
-
         <div class="faq-item">
-            <button class="faq-question">{% trans "What are the check-in and check-out times?" %} <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What are the check-in and check-out times?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>
                     {% trans "Check-in:" %} <strong>{% trans "From 2:00 PM" %}</strong> <br>
@@ -115,26 +105,21 @@
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "How do I get my room access PIN?" %} <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How do I get my room access PIN?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Your room access PIN can be found on this site after checkin with your Booking.com
-                    confirmation number." %}</p>
+                <p>{% trans "Your room access PIN can be found on this site after checkin with your Booking.com confirmation number." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "Is there parking available at the property?" %} <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "Is there parking available at the property?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Yes, free parking is available on the property. Additional paid parking options are
-                    nearby." %}</p>
+                <p>{% trans "Yes, free parking is available on the property. Additional paid parking options are nearby." %}</p>
             </div>
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "How can I contact support if I need help?" %} <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "How can I contact support if I need help?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
                 <p>{% trans "For assistance, contact us via:" %} <br>
                     <strong>{% trans "Phone:" %}</strong> +44 (0) 7539029629 <br>
@@ -144,11 +129,9 @@
         </div>
 
         <div class="faq-item">
-            <button class="faq-question">{% trans "What is your cancellation policy?" %} <span
-                    class="arrow">▼</span></button>
+            <button class="faq-question">{% trans "What is your cancellation policy?" %} <span class="arrow">▼</span></button>
             <div class="faq-answer">
-                <p>{% trans "Cancellations depend on the policy selected during booking. Check your Booking.com
-                    reservation for details." %}</p>
+                <p>{% trans "Cancellations depend on the policy selected during booking. Check your Booking.com reservation for details." %}</p>
             </div>
         </div>
     </div>
@@ -162,47 +145,46 @@
             <!-- Placeholder Images (Replace with Cloudinary Links) -->
             <div class="slide fade">
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739643397/room-4-luxury_kgqed7.png"
-                    alt="Modern Bedroom">
+                     alt="Modern Bedroom">
                 <div class="caption">Spacious Room</div>
             </div>
             <div class="slide fade">
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739643395/room-1-luxury_h9ss2p.png"
-                    alt="Cozy Bedroom">
+                     alt="Cozy Bedroom">
                 <div class="caption">Cozy Bedrooms</div>
             </div>
             <div class="slide fade">
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739643391/kitchen-1_ueqv3f.png"
-                    alt="Modern Kitchen">
+                     alt="Modern Kitchen">
                 <div class="caption">Communal Modern Kitchen</div>
             </div>
             <div class="slide fade">
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739643373/shower-room4_obybny.png"
-                    alt="Clean & Comfortable Bathroom">
+                     alt="Clean & Comfortable Bathroom">
                 <div class="caption">Clean & Comfortable Bathrooms</div>
             </div>
             <div class="slide fade">
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739643405/towels_afrtxi.png"
-                    alt="Clean Towels">
+                     alt="Clean Towels">
                 <div class="caption">Clean Towels</div>
             </div>
             <div class="slide fade">
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739643363/rooms-beautiful_jrdots.png"
-                    alt="Comfortable Rooms">
+                     alt="Comfortable Rooms">
                 <div class="caption">Comfortable Rooms</div>
             </div>
             <div class="slide fade">
                 <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739643367/free-parking_mktf6t.png"
-                    alt="Free Parking">
+                     alt="Free Parking">
                 <div class="caption">Free Parking</div>
             </div>
         </div>
 
         <!-- Navigation Arrows -->
-        <button class="prev" onclick="changeSlide(-1)">&#10094;</button>
-        <button class="next" onclick="changeSlide(1)">&#10095;</button>
+        <button class="prev" onclick="changeSlide(-1)">❮</button>
+        <button class="next" onclick="changeSlide(1)">❯</button>
     </div>
 </section>
-
 
 <!-- Guest Reviews & Awards Section -->
 <section class="reviews-awards">
@@ -211,7 +193,7 @@
     <!-- Awards Display -->
     <div class="awards-container">
         <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739094366/Digital-Gallery-Award-TRA-2025_saszeh.png"
-            alt="{% trans 'Booking.com Traveller Award 2025' %}">
+             alt="{% trans 'Booking.com Traveller Award 2025' %}">
     </div>
 
     <!-- Latest Guest Reviews -->
@@ -230,6 +212,68 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Rate Limiting Variables
+        const maxAttempts = 6; // Matches checkin.html
+        const timeWindow = 60 * 1000; // 60 seconds in milliseconds
+        let attempts = JSON.parse(localStorage.getItem('checkinAttempts')) || [];
+
+        // Form Elements
+        const checkinForm = document.querySelector('.checkin-form');
+        const submitButton = checkinForm.querySelector('button[type="submit"]');
+        const inputField = checkinForm.querySelector('input[name="reservation_number"]');
+        const errorMessage = document.querySelector('.error-message');
+
+        // Function to update attempts in localStorage
+        function updateAttempts() {
+            localStorage.setItem('checkinAttempts', JSON.stringify(attempts));
+        }
+
+        // Check rate limit on page load
+        const now = Date.now();
+        attempts = attempts.filter(time => now - time < timeWindow);
+        if (attempts.length >= maxAttempts) {
+            inputField.disabled = true;
+            submitButton.disabled = true;
+            errorMessage.textContent = "{% trans 'Too many attempts, please wait for 1 minute and try again.' %}";
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                attempts = [];
+                updateAttempts();
+                inputField.disabled = false;
+                submitButton.disabled = false;
+                errorMessage.textContent = "";
+                errorMessage.style.display = 'none';
+            }, timeWindow - (now - attempts[0])); // Time until reset
+        }
+        updateAttempts();
+
+        // Form Submission with Rate Limiting
+        checkinForm.addEventListener('submit', function(event) {
+            const now = Date.now();
+            attempts = attempts.filter(time => now - time < timeWindow);
+            
+            if (attempts.length >= maxAttempts) {
+                event.preventDefault(); // Stop form submission
+                inputField.disabled = true;
+                submitButton.disabled = true;
+                errorMessage.textContent = "{% trans 'Too many attempts, please wait a moment.' %}";
+                errorMessage.style.display = 'block';
+
+                // Reset after remaining time
+                setTimeout(() => {
+                    attempts = [];
+                    updateAttempts();
+                    inputField.disabled = false;
+                    submitButton.disabled = false;
+                    errorMessage.textContent = "";
+                    errorMessage.style.display = 'none';
+                }, timeWindow - (now - attempts[0]));
+            } else {
+                attempts.push(now);
+                updateAttempts();
+            }
+        });
+
         // Modal Functionality
         const modals = document.querySelectorAll(".modal");
         const openHowToUseBtn = document.getElementById("open-how-to-use-modal");
@@ -284,7 +328,6 @@
         menuToggle.addEventListener("click", function (event) {
             event.stopPropagation(); // Prevents document.body click from firing
         });
-
 
         // FAQ Functionality with Enhancements
         const faqItems = document.querySelectorAll(".faq-item");
@@ -356,7 +399,7 @@
 
         // FAQ Filter (Your existing function, unchanged but with slight tweak for compatibility)
         window.filterFAQs = function () {
-            const input = document.getElementById("faq-search").value.toLowerCase();
+            const input = document.getElementById("faq-search") ? document.getElementById("faq-search").value.toLowerCase() : "";
             const items = document.querySelectorAll(".faq-item");
             let visibleCount = 0;
 
@@ -438,8 +481,5 @@
         });
     });
 </script>
-
-
-
 
 {% endblock %}

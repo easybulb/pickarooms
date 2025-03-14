@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% load i18n %}  <!-- ✅ Ensure this is loaded for translations -->
+{% load i18n %}
 
 {% block title %}{% trans "Check-In" %}{% endblock %}
 
@@ -10,16 +10,17 @@
     <div class="hero-content">
         <h1>{% trans "Check-In" %}</h1>
         {% if error %}
-        <p style="color: red;">{{ error }}</p>
+        <p style="color: red;" class="error-message">{{ error }}</p>
+        {% else %}
+        <p style="color: red; display: none;" class="error-message"></p> <!-- Placeholder for JS errors -->
         {% endif %}
         <form method="post" class="checkin-form">
             {% csrf_token %}
             <input type="text" name="reservation_number" class="checkin-input" 
-       placeholder="Enter your confirmation number"
-       value="{{ reservation_number|default:'' }}" required>
+                   placeholder="Enter your confirmation number"
+                   value="{{ reservation_number|default:'' }}" required>
             <button type="submit">Check In</button>
         </form>
-             
 
         <!-- Links for Popups -->
         <p class="how-to-use-link">
@@ -30,7 +31,7 @@
         <!-- How to Use Modal -->
         <div id="how-to-use-modal" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="close" data-modal="how-to-use-modal">&times;</span>
+                <span class="close" data-modal="how-to-use-modal">×</span>
                 <h2>{% trans "How to Use" %}</h2>
                 <p><strong>{% trans "Step 1:" %}</strong> {% trans "Enter the confirmation number you received during your reservation on Booking.com." %}</p>
                 <p><strong>{% trans "Step 2:" %}</strong> {% trans "Retrieve your PIN." %}</p>
@@ -42,17 +43,16 @@
         <!-- Contact Us Modal -->
         <div id="contact-modal" class="modal" style="display: none;">
             <div class="modal-content">
-                <span class="close" data-modal="contact-modal">&times;</span>
+                <span class="close" data-modal="contact-modal">×</span>
                 <h2>{% trans "Contact Us" %}</h2>
                 <p><strong>{% trans "Phone:" %}</strong> +44 (0) 7539029629</p>
                 <p><strong>{% trans "Whatsapp:" %}</strong> +44 (0) 7539029629</p>
                 <p><strong>{% trans "Email:" %}</strong> <a href="mailto:easybulb@gmail.com">easybulb@gmail.com</a></p>
             </div>
         </div>
-
     </div>
     <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739380781/grey-hero-pickarooms_i5lums.png"
-        alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
+         alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
 </section>
 
 <!-- FAQ Section -->
@@ -69,12 +69,12 @@
                     <div class="faq-image">
                         <h3>{% trans "Using Browser" %}</h3>
                         <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking.browser_pmzfnq.png"
-                            alt="{% trans 'Booking.com confirmation number on browser' %}">
+                             alt="{% trans 'Booking.com confirmation number on browser' %}">
                     </div>
                     <div class="faq-image">
                         <h3>{% trans "On Booking.com App" %}</h3>
                         <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739476501/booking-app_xbqadd.png"
-                            alt="{% trans 'Booking.com confirmation number on app' %}">
+                             alt="{% trans 'Booking.com confirmation number on app' %}">
                     </div>
                 </div>
             </div>
@@ -88,13 +88,12 @@
                 <!-- Google Maps Embed -->
                 <div class="faq-map-container">
                     <iframe width="600" height="350" frameborder="0" style="border:0;" allowfullscreen="" loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps/embed/v1/place?q=8+Rylance+Street,+Beswick,+Manchester,+M11+3NP,+United+Kingdom&key={{ GOOGLE_MAPS_API_KEY }}">
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed/v1/place?q=8+Rylance+Street,+Beswick,+Manchester,+M11+3NP,+United+Kingdom&key={{ GOOGLE_MAPS_API_KEY }}">
                     </iframe>
                 </div>
             </div>
         </div>        
-
 
         <div class="faq-item">
             <button class="faq-question">{% trans "What are the check-in and check-out times?" %} <span class="arrow">▼</span></button>
@@ -138,9 +137,71 @@
     </div>
 </section>
 
-<!-- Add JavaScript for Modals & Smooth Scrolling -->
+<!-- Add JavaScript for Modals, Smooth Scrolling, and Rate Limiting -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Rate Limiting Variables
+        const maxAttempts = 6;
+        const timeWindow = 60 * 1000; // 60 seconds in milliseconds
+        let attempts = JSON.parse(localStorage.getItem('checkinAttempts')) || [];
+
+        // Form Elements
+        const checkinForm = document.querySelector('.checkin-form');
+        const submitButton = checkinForm.querySelector('button[type="submit"]');
+        const inputField = checkinForm.querySelector('.checkin-input');
+        const errorMessage = document.querySelector('.error-message');
+
+        // Function to update attempts in localStorage
+        function updateAttempts() {
+            localStorage.setItem('checkinAttempts', JSON.stringify(attempts));
+        }
+
+        // Check rate limit on page load
+        const now = Date.now();
+        attempts = attempts.filter(time => now - time < timeWindow);
+        if (attempts.length >= maxAttempts) {
+            inputField.disabled = true;
+            submitButton.disabled = true;
+            errorMessage.textContent = "{% trans 'Too many attempts, please wait for 40 seconds and try again.' %}";
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                attempts = [];
+                updateAttempts();
+                inputField.disabled = false;
+                submitButton.disabled = false;
+                errorMessage.textContent = "";
+                errorMessage.style.display = 'none';
+            }, timeWindow - (now - attempts[0])); // Time until reset
+        }
+        updateAttempts();
+
+        // Form Submission with Rate Limiting
+        checkinForm.addEventListener('submit', function(event) {
+            const now = Date.now();
+            attempts = attempts.filter(time => now - time < timeWindow);
+            
+            if (attempts.length >= maxAttempts) {
+                event.preventDefault(); // Stop form submission
+                inputField.disabled = true;
+                submitButton.disabled = true;
+                errorMessage.textContent = "{% trans 'Too many attempts, please wait a moment.' %}";
+                errorMessage.style.display = 'block';
+
+                // Reset after remaining time
+                setTimeout(() => {
+                    attempts = [];
+                    updateAttempts();
+                    inputField.disabled = false;
+                    submitButton.disabled = false;
+                    errorMessage.textContent = "";
+                    errorMessage.style.display = 'none';
+                }, timeWindow - (now - attempts[0]));
+            } else {
+                attempts.push(now);
+                updateAttempts();
+            }
+        });
+
         // ✅ Modal Functionality
         const modals = document.querySelectorAll(".modal");
         const openHowToUseBtn = document.getElementById("open-how-to-use-modal");
@@ -216,9 +277,7 @@
                 }
             });
         });
-
     });
 </script>
-
 
 {% endblock %}
