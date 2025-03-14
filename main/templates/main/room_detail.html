@@ -4,6 +4,46 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
+<style>
+    /* Existing styles from room_detail.css assumed to be loaded */
+    /* Add loading overlay styles */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-text {
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .loading-dots::after {
+        content: '...';
+        animation: dots 1.5s infinite;
+    }
+    @keyframes dots {
+        0% { content: '.'; }
+        33% { content: '..'; }
+        66% { content: '...'; }
+        100% { content: '.'; }
+    }
+    /* Tweak modal button styling */
+    #unlock-help-modal .btn-unlock {
+        margin: 5px; /* Add spacing between buttons */
+        display: inline-block; /* Ensure buttons don't stack unnecessarily */
+    }
+</style>
 {% endblock %}
 
 {% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
@@ -344,7 +384,7 @@
         <span class="close" onclick="closeModal('unlock-help-modal')">×</span>
         <h3 class="modal-title">{% trans "Remote Unlock Assistance" %}</h3>
         <p class="modal-text">{% trans "If your PIN isn’t working, you can remotely unlock the front door or your room door by pressing the buttons below depending on the door you are in front of." %}</p>
-        <form method="post" id="unlock-form" action="{% url 'room_detail' room_token=guest.secure_token %}">
+        <form method="post" id="unlock-form" action="{% url 'room_detail' room_token=guest.secure_token %}" class="unlock-form">
             {% csrf_token %}
             <input type="hidden" name="unlock_door" value="true">
             <input type="hidden" name="door_type" id="door-type-input">
@@ -362,12 +402,16 @@
     <a href="https://wa.me/447539029629" target="_blank" class="chat-link">{% trans "Open WhatsApp" %}</a>
 </div>
 
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-text">{% trans "Please Wait" %}<span class="loading-dots"></span></div>
+</div>
+
 <!-- JavaScript -->
 <script>
     // Global functions
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
-        // Fetch fresh modal content to ensure a new CSRF token
         fetch(window.location.href + '?modal=' + modalId)
             .then(response => response.text())
             .then(html => {
@@ -407,6 +451,17 @@
         const formData = new FormData(form);
         formData.append('door_type', doorType);
 
+        // Show loading overlay
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.style.display = 'flex';
+
+        // Disable buttons to prevent multiple clicks
+        const buttons = form.querySelectorAll('.btn-unlock');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.cursor = 'not-allowed';
+        });
+
         fetch(form.action, {
             method: 'POST',
             body: formData,
@@ -416,6 +471,13 @@
         })
         .then(response => response.json())
         .then(data => {
+            // Hide loading overlay after response
+            loadingOverlay.style.display = 'none';
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+            });
+
             if (data.success) {
                 alert(data.success);
                 closeModal('unlock-help-modal');
@@ -423,7 +485,16 @@
                 alert(data.error);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            // Hide loading overlay on error
+            loadingOverlay.style.display = 'none';
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.cursor = 'pointer';
+            });
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
     }
 
     window.watchEntryVideo = function () {
