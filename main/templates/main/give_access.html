@@ -128,6 +128,38 @@
             width: 30%;
         }
     }
+    /* New Loading Overlay Styles */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-text {
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .loading-dots::after {
+        content: '...';
+        animation: dots 1.5s infinite;
+    }
+    @keyframes dots {
+        0% { content: '.'; }
+        33% { content: '..'; }
+        66% { content: '...'; }
+        100% { content: '.'; }
+    }
 </style>
 {% endblock %}
 
@@ -175,7 +207,7 @@
                     <td>{{ guest.assigned_room.name }}</td>
                     <td>
                         {% if front_door_lock %}
-                        <form method="post" style="display: inline;">
+                        <form method="post" style="display: inline;" class="unlock-form">
                             {% csrf_token %}
                             <input type="hidden" name="unlock_door" value="true">
                             <input type="hidden" name="guest_id" value="{{ guest.id }}">
@@ -187,7 +219,7 @@
                         <button class="unlock-btn front disabled" disabled>{% trans "No Front Door Lock Configured" %}</button>
                         {% endif %}
                         {% if guest.assigned_room.ttlock %}
-                        <form method="post" style="display: inline;">
+                        <form method="post" style="display: inline;" class="unlock-form">
                             {% csrf_token %}
                             <input type="hidden" name="unlock_door" value="true">
                             <input type="hidden" name="guest_id" value="{{ guest.id }}">
@@ -227,7 +259,7 @@
                         <td>
                             {% with lock=room.ttlock %}
                             {% if lock %}
-                                <form method="post" style="display: inline;">
+                                <form method="post" style="display: inline;" class="unlock-form">
                                     {% csrf_token %}
                                     <input type="hidden" name="unlock_door" value="true">
                                     <input type="hidden" name="lock_id" value="{{ lock.lock_id }}">
@@ -249,7 +281,7 @@
                     <tr>
                         <td>Front Door</td>
                         <td>
-                            <form method="post" style="display: inline;">
+                            <form method="post" style="display: inline;" class="unlock-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="unlock_door" value="true">
                                 <input type="hidden" name="lock_id" value="{{ front_door_lock.lock_id }}">
@@ -270,6 +302,11 @@
             </table>
         </div>
     </div>
+
+    <!-- New Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-text">{% trans "Please Wait" %}<span class="loading-dots"></span></div>
+    </div>
 </section>
 
 <script>
@@ -280,6 +317,20 @@
                 msg.style.display = "none";
             });
         }, 3000);
+
+        // Show loading overlay on form submit
+        const unlockForms = document.querySelectorAll(".unlock-form");
+        unlockForms.forEach(form => {
+            form.addEventListener("submit", function (event) {
+                const loadingOverlay = document.getElementById("loadingOverlay");
+                loadingOverlay.style.display = "flex";
+                // Disable all unlock buttons to prevent multiple submissions
+                document.querySelectorAll(".unlock-btn").forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.cursor = "not-allowed";
+                });
+            });
+        });
     });
 </script>
 {% endblock %}
