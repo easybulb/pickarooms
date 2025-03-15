@@ -4,6 +4,34 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
+<style>
+    /* ID Upload styles */
+    .id-instructions {
+        color: #475569;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    .id-form {
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #d8b4fe;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    .id-uploads {
+        margin-top: 15px;
+    }
+    .id-uploads img {
+        max-width: 200px;
+        border-radius: 8px;
+        margin: 5px;
+    }
+    .messages .success { color: green; }
+    .messages .error { color: red; }
+</style>
 {% endblock %}
 
 {% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
@@ -19,9 +47,10 @@
     <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">{% trans "Kitchen" %}</button>
     <button class="tab-btn" data-section="nearby" onclick="showSection('nearby')">{% trans "Nearby" %}</button>
     <button class="tab-btn" data-section="faq" onclick="showSection('faq')">{% trans "FAQs" %}</button>
+    <button class="tab-btn" data-section="upload-id" onclick="showSection('upload-id')">{% trans "Upload ID" %}</button>
 </div>
 
-<!-- Access Section (formerly Location, now just Welcome and WiFi) -->
+<!-- Access Section -->
 <section id="location" class="section-content active">
     <div class="welcome-section">
         <h1 class="welcome-header">
@@ -53,8 +82,10 @@
     <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
     <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
     <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
-    <!-- Direction Section -->
+</section>
 
+<!-- Direction Section -->
+<section id="direction" class="section-content">
     <h2 class="section-title">📍 {% trans "Location" %}</h2>
     <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
     <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
@@ -166,15 +197,6 @@
 <section id="faq" class="section-content">
     <h2 class="section-title">❓ {% trans "Frequently Asked Questions" %}</h2>
     <input type="text" id="faq-search" placeholder="{% trans 'Search FAQs...' %}" onkeyup="filterFAQs()">
-    {% if show_pin %}
-    <form method="post" enctype="multipart/form-data" action="{% url 'room_detail' room_token=guest.secure_token %}" class="welcome-info">
-        {% csrf_token %}
-        <input type="hidden" name="upload_id" value="true">
-        <p><strong>{% trans "Upload Passport/ID (Optional):" %}</strong></p>
-        <input type="file" name="id_image" accept="image/*" style="margin: 5px 0;">
-        <button type="submit" class="btn-unlock">{% trans "Upload" %}</button>
-    </form>
-    {% endif %}
     <div class="faq-container">
         <!-- Access Category -->
         <div class="faq-category" data-category="access">
@@ -333,21 +355,37 @@
     </div>
 </section>
 
-<!-- Direction Section -->
-<section id="direction" class="section-content">
-    <h2 class="section-title">📍 {% trans "Location" %}</h2>
-    <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
-    <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
-    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Street View of Property' %}" class="street-image">
-    <h3 class="subsection-title">{% trans "How do I get to the property?" %}</h3>
-    <p class="content-text"><strong>{% trans "From Manchester Airport:" %}</strong></p>
-    <ul class="content-list">
-        <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "25 minutes from Manchester Airport." %}</li>
-        <li>🚆 <strong>{% trans "Train:" %}</strong> {% trans "To Piccadilly Station, then a £5 taxi ride." %}</li>
-        <li>🚌 <strong>{% trans "Bus:" %}</strong> {% trans "219 bus from Piccadilly stops nearby." %}</li>
-    </ul>
-    <p class="content-text"><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
-    <p class="content-text"><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street via Ashton Old Road (A635) or M60 Exit 24." %}</p>
+<!-- Upload ID Section -->
+<section id="upload-id" class="section-content">
+    <h2 class="section-title">🪪 {% trans "Upload ID" %}</h2>
+    <form method="post" enctype="multipart/form-data" action="{% url 'room_detail' room_token=guest.secure_token %}" class="id-form">
+        {% csrf_token %}
+        <input type="hidden" name="upload_id" value="true">
+        <input type="file" name="id_image" accept="image/*" capture="environment" style="margin: 10px 0;" required>
+        <button type="submit" class="btn-unlock">{% trans "Upload ID" %}</button>
+    </form>
+    <div class="id-instructions">
+        <p><strong>{% trans "Why We Ask:" %}</strong> {% trans "This optional ID upload helps verify your booking and enhances security for all guests, similar to Booking.com’s check-in practices. It ensures we know who’s staying in case of emergencies or incidents." %}</p>
+        <p><strong>{% trans "Where It’s Stored:" %}</strong> {% trans "Your ID is securely uploaded to Cloudinary, a trusted cloud platform, in a private folder accessible only to our authorized staff via a protected admin system." %}</p>
+        <p><strong>{% trans "Booking.com Context:" %}</strong> {% trans "Booking.com often requires ID at check-in for safety and verification—uploading here streamlines that process for your stay." %}</p>
+        <p><strong>{% trans "How to Upload:" %}</strong> {% trans "Take a clear photo of your passport or driver’s license using your camera above. For your privacy, cover sensitive details like your ID number with a finger or tape, leaving your name, photo, and expiry date visible." %}</p>
+        <p><strong>{% trans "Safety Guaranteed:" %}</strong> {% trans "Your data is encrypted during upload (HTTPS) and stored privately—never shared publicly. Only Pickarooms staff can access it if needed. Limit: 3 uploads per guest." %}</p>
+    </div>
+    {% if id_uploads %}
+    <div class="id-uploads">
+        <h3>{% trans "Your Uploaded IDs:" %}</h3>
+        {% for upload in id_uploads %}
+        <img src="{{ upload.id_image.url }}" alt="{% trans 'Uploaded ID' %}">
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <p class="{% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
 </section>
 
 <!-- Unlock Help Modal -->
@@ -381,7 +419,6 @@
 
 <!-- JavaScript -->
 <script>
-    // Global functions
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         fetch(window.location.href + '?modal=' + modalId)

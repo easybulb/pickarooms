@@ -10,21 +10,19 @@ import cloudinary.uploader
 from django.contrib.auth.models import User
 
 def default_check_out_date():
-    """Returns the next day with time set to 11:00 AM."""
     return date.today() + timedelta(days=1)
 
 class TTLock(models.Model):
-    """Stores TTLock-specific data for locks."""
-    lock_id = models.IntegerField(unique=True)  # TTLock lock ID
-    name = models.CharField(max_length=100)  # Friendly name (e.g., "Front Door", "Room 1")
-    is_front_door = models.BooleanField(default=False)  # Mark as front door lock
+    lock_id = models.IntegerField(unique=True)
+    name = models.CharField(max_length=100)
+    is_front_door = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} (Lock ID: {self.lock_id})"
 
 class Room(models.Model):
     name = models.CharField(max_length=100)
-    ttlock = models.ForeignKey(TTLock, on_delete=models.SET_NULL, null=True, blank=True)  # Link to TTLock for this room
+    ttlock = models.ForeignKey(TTLock, on_delete=models.SET_NULL, null=True, blank=True)
     video_url = models.URLField()
     description = models.TextField(blank=True, null=True)
     image = models.URLField(blank=True, null=True)
@@ -47,12 +45,13 @@ class Guest(models.Model):
     assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
     is_archived = models.BooleanField(default=False)
     is_returning = models.BooleanField(default=False)
-    secure_token = models.CharField(max_length=36, unique=True, blank=True)  # Adjusted to UUID length
-    front_door_pin = models.CharField(max_length=10, blank=True, null=True)  # Temporary PIN for front door
-    front_door_pin_id = models.CharField(max_length=50, blank=True, null=True)  # TTLock keyboard password ID for front door
-    room_pin_id = models.CharField(max_length=50, blank=True, null=True)  # TTLock keyboard password ID for room lock
-    early_checkin_time = models.TimeField(null=True, blank=True)  # Custom early check-in time
-    late_checkout_time = models.TimeField(null=True, blank=True)  # Custom late check-out time
+    secure_token = models.CharField(max_length=36, unique=True, blank=True)
+    front_door_pin = models.CharField(max_length=10, blank=True, null=True)
+    front_door_pin_id = models.CharField(max_length=50, blank=True, null=True)
+    room_pin_id = models.CharField(max_length=50, blank=True, null=True)
+    early_checkin_time = models.TimeField(null=True, blank=True)
+    late_checkout_time = models.TimeField(null=True, blank=True)
+    # Remove id_image from Guest, replaced by GuestIDUpload
 
     def save(self, *args, **kwargs):
         if not self.secure_token:
@@ -72,6 +71,14 @@ class Guest(models.Model):
             ("manage_rooms", "Can manage rooms"),
         ]
 
+class GuestIDUpload(models.Model):
+    guest = models.ForeignKey(Guest, on_delete=models.CASCADE, related_name='id_uploads')
+    id_image = models.ImageField(upload_to='guest_ids/%Y/%m/%d/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"ID for {self.guest.reservation_number} uploaded on {self.uploaded_at}"
+
 class ReviewCSVUpload(models.Model):
     file = models.FileField(upload_to="uploads/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -90,10 +97,10 @@ class ReviewCSVUpload(models.Model):
 
 class AuditLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    action = models.CharField(max_length=255)  # e.g., "Guest Updated", "Room Deleted"
-    object_type = models.CharField(max_length=100)  # e.g., "Guest", "Room"
-    object_id = models.PositiveIntegerField()  # ID of the affected object
-    details = models.TextField(blank=True, null=True)  # Additional details (e.g., old vs. new values)
+    action = models.CharField(max_length=255)
+    object_type = models.CharField(max_length=100)
+    object_id = models.PositiveIntegerField()
+    details = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -25,7 +25,7 @@ from langdetect import detect
 import uuid
 import pytz
 import datetime
-from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog
+from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload
 from .ttlock_utils import TTLockClient
 import logging
 from django.views.decorators.csrf import csrf_exempt
@@ -293,7 +293,6 @@ def room_detail(request, room_token):
     reservation_number = request.session.get("reservation_number", None)
     guest = Guest.objects.filter(secure_token=room_token).first()
 
-    # Redirect to unauthorized if guest doesn't exist or reservation_number doesn't match
     if not guest or not reservation_number or guest.reservation_number != reservation_number:
         return redirect("unauthorized")
 
@@ -301,14 +300,12 @@ def room_detail(request, room_token):
     uk_timezone = pytz.timezone("Europe/London")
     now_uk_time = timezone.now().astimezone(uk_timezone)
 
-    # Use early check-in time if set, otherwise default to 2:00 PM
     check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
     check_in_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_in_date, check_in_time),
         timezone.get_current_timezone(),
     ).astimezone(uk_timezone)
 
-    # Use late check-out time if set, otherwise default to 11:00 AM
     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
     check_out_datetime = timezone.make_aware(
         datetime.datetime.combine(guest.check_out_date, check_out_time),
@@ -321,7 +318,6 @@ def room_detail(request, room_token):
 
     enforce_2pm_rule = now_uk_time < check_in_datetime
 
-    # Handle modal refresh request
     if request.method == "GET" and request.GET.get('modal'):
         return render(request, "main/room_detail.html", {
             "room": room,
@@ -330,72 +326,91 @@ def room_detail(request, room_token):
             "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
             "show_pin": not enforce_2pm_rule,
             "front_door_pin": guest.front_door_pin,
+            "id_uploads": guest.id_uploads.all(),  # Pass all uploads
         }, content_type="text/html", status=200)
 
-    # Handle unlock request if submitted, with rate limiting
-    if request.method == "POST" and "unlock_door" in request.POST:
-        # Check rate limit (6 per minute per IP)
-        if getattr(request, 'limited', False):  # Set by ratelimit if exceeded
-            logger.warning(f"Rate limit exceeded for IP {request.META.get('REMOTE_ADDR')} on unlock attempt for guest {guest.reservation_number}")
-            return JsonResponse({"error": "Too many attempts, please wait a moment."}, status=429)
+    if request.method == "POST":
+        if "upload_id" in request.POST and request.FILES.get('id_image'):
+            id_image = request.FILES['id_image']
+            upload_count = guest.id_uploads.count()
 
-        try:
-            front_door_lock = TTLock.objects.get(is_front_door=True)
-            room_lock = guest.assigned_room.ttlock
-            client = TTLockClient()
-            max_retries = 3
-            door_type = request.POST.get("door_type")  # New field to determine which door to unlock
+            if upload_count >= 3:
+                messages.error(request, "You’ve reached the maximum of 3 ID uploads.")
+                return redirect('room_detail', room_token=room_token)
 
-            # Unlock the specified door
-            if door_type == "front":
-                for attempt in range(max_retries):
-                    try:
-                        unlock_response = client.unlock_lock(lock_id=str(front_door_lock.lock_id))
-                        if "errcode" in unlock_response and unlock_response["errcode"] != 0:
-                            logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+            if id_image.size > 5 * 1024 * 1024:
+                messages.error(request, "ID image must be under 5MB.")
+                return redirect('room_detail', room_token=room_token)
+            if not id_image.content_type.startswith('image/'):
+                messages.error(request, "Please upload a valid image file (e.g., JPG, PNG).")
+                return redirect('room_detail', room_token=room_token)
+
+            # Save as a new GuestIDUpload instance, keeping old uploads
+            GuestIDUpload.objects.create(guest=guest, id_image=id_image)
+            messages.success(request, "ID uploaded successfully!")
+            return redirect('room_detail', room_token=room_token)
+
+        if "unlock_door" in request.POST:
+            if getattr(request, 'limited', False):
+                logger.warning(f"Rate limit exceeded for IP {request.META.get('REMOTE_ADDR')} on unlock attempt for guest {guest.reservation_number}")
+                return JsonResponse({"error": "Too many attempts, please wait a moment."}, status=429)
+
+            try:
+                front_door_lock = TTLock.objects.get(is_front_door=True)
+                room_lock = guest.assigned_room.ttlock
+                client = TTLockClient()
+                max_retries = 3
+                door_type = request.POST.get("door_type")
+
+                if door_type == "front":
+                    for attempt in range(max_retries):
+                        try:
+                            unlock_response = client.unlock_lock(lock_id=str(front_door_lock.lock_id))
+                            if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                                logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                                if attempt == max_retries - 1:
+                                    return JsonResponse({"error": "Failed to unlock the front door. Please try again or contact support."}, status=400)
+                                else:
+                                    logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                                    continue
+                            else:
+                                logger.info(f"Successfully unlocked front door for guest {guest.reservation_number}")
+                                return JsonResponse({"success": "The front door has been unlocked for you."})
+                        except Exception as e:
+                            logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {str(e)}")
                             if attempt == max_retries - 1:
                                 return JsonResponse({"error": "Failed to unlock the front door. Please try again or contact support."}, status=400)
                             else:
                                 logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
                                 continue
-                        else:
-                            logger.info(f"Successfully unlocked front door for guest {guest.reservation_number}")
-                            return JsonResponse({"success": "The front door has been unlocked for you."})
-                    except Exception as e:
-                        logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {str(e)}")
-                        if attempt == max_retries - 1:
-                            return JsonResponse({"error": "Failed to unlock the front door. Please try again or contact support."}, status=400)
-                        else:
-                            logger.info(f"Retrying unlock front door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
-                            continue
-            elif door_type == "room" and room_lock:
-                for attempt in range(max_retries):
-                    try:
-                        unlock_response = client.unlock_lock(lock_id=str(room_lock.lock_id))
-                        if "errcode" in unlock_response and unlock_response["errcode"] != 0:
-                            logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                elif door_type == "room" and room_lock:
+                    for attempt in range(max_retries):
+                        try:
+                            unlock_response = client.unlock_lock(lock_id=str(room_lock.lock_id))
+                            if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                                logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                                if attempt == max_retries - 1:
+                                    return JsonResponse({"error": "Failed to unlock the room door. Please try again or contact support."}, status=400)
+                                else:
+                                    logger.info(f"Retrying unlock room door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
+                                    continue
+                            else:
+                                logger.info(f"Successfully unlocked room door for guest {guest.reservation_number}")
+                                return JsonResponse({"success": "The room door has been unlocked for you."})
+                        except Exception as e:
+                            logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {str(e)}")
                             if attempt == max_retries - 1:
                                 return JsonResponse({"error": "Failed to unlock the room door. Please try again or contact support."}, status=400)
                             else:
                                 logger.info(f"Retrying unlock room door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
                                 continue
-                        else:
-                            logger.info(f"Successfully unlocked room door for guest {guest.reservation_number}")
-                            return JsonResponse({"success": "The room door has been unlocked for you."})
-                    except Exception as e:
-                        logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {str(e)}")
-                        if attempt == max_retries - 1:
-                            return JsonResponse({"error": "Failed to unlock the room door. Please try again or contact support."}, status=400)
-                        else:
-                            logger.info(f"Retrying unlock room door for guest {guest.reservation_number} (attempt {attempt + 1}/{max_retries})")
-                            continue
-            else:
-                logger.warning(f"Invalid door_type or no room lock assigned for guest {guest.reservation_number}")
-                return JsonResponse({"error": "Invalid unlock request or no room lock assigned. Please contact support."}, status=400)
+                else:
+                    logger.warning(f"Invalid door_type or no room lock assigned for guest {guest.reservation_number}")
+                    return JsonResponse({"error": "Invalid unlock request or no room lock assigned. Please contact support."}, status=400)
 
-        except TTLock.DoesNotExist:
-            logger.error("Front door lock not configured in the database.")
-            return JsonResponse({"error": "Front door lock not configured. Please contact support."}, status=400)
+            except TTLock.DoesNotExist:
+                logger.error("Front door lock not configured in the database.")
+                return JsonResponse({"error": "Front door lock not configured. Please contact support."}, status=400)
 
     return render(
         request,
@@ -407,10 +422,10 @@ def room_detail(request, room_token):
             "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
             "show_pin": not enforce_2pm_rule,
             "front_door_pin": guest.front_door_pin,
+            "id_uploads": guest.id_uploads.all(),  # Pass all uploads
         },
     )
 
-# Apply rate limit to the entire view, but we'll check 'limited' only for POST
 room_detail = ratelimit(key='ip', rate='6/m', method='POST', block=True)(room_detail)
 
 @ratelimit(key='ip', rate='3/m', method='POST', block=True)
