@@ -34,6 +34,11 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.urls import reverse
+import os
+import cloudinary
+import cloudinary.uploader
+from django.core.files.storage import default_storage
+from cloudinary.uploader import upload as cloudinary_upload
 
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
@@ -326,14 +331,19 @@ def room_detail(request, room_token):
             "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
             "show_pin": not enforce_2pm_rule,
             "front_door_pin": guest.front_door_pin,
-            "id_uploads": guest.id_uploads.all(),  # Pass all uploads
+            "id_uploads": guest.id_uploads.all(),
         }, content_type="text/html", status=200)
 
     if request.method == "POST":
         if "upload_id" in request.POST and request.FILES.get('id_image'):
             id_image = request.FILES['id_image']
-            upload_count = guest.id_uploads.count()
+            logger.debug(f"Received file: {id_image.name}, size: {id_image.size} bytes, content_type: {id_image.content_type}")
+            if not id_image or id_image.size == 0:
+                logger.error(f"Empty file received for guest {guest.reservation_number}")
+                messages.error(request, "No file was uploaded or the file is empty. Please try again.")
+                return redirect('room_detail', room_token=room_token)
 
+            upload_count = guest.id_uploads.count()
             if upload_count >= 3:
                 messages.error(request, "You’ve reached the maximum of 3 ID uploads.")
                 return redirect('room_detail', room_token=room_token)
@@ -345,9 +355,47 @@ def room_detail(request, room_token):
                 messages.error(request, "Please upload a valid image file (e.g., JPG, PNG).")
                 return redirect('room_detail', room_token=room_token)
 
-            # Save as a new GuestIDUpload instance, keeping old uploads
-            GuestIDUpload.objects.create(guest=guest, id_image=id_image)
-            messages.success(request, "ID uploaded successfully!")
+            try:
+                # Initialize Cloudinary with environment variables
+                cloudinary.config(
+                    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+                    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+                    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+                )
+                logger.debug(f"Cloudinary config initialized: {cloudinary.config().cloud_name}")
+                logger.debug(f"Default storage backend: {default_storage.__class__.__name__}")
+
+                # Debug file content before upload
+                logger.debug(f"File content sample before upload: {id_image.read(100)}")
+                id_image.seek(0)  # Reset the file pointer after reading
+
+                # Manual upload to Cloudinary
+                upload_response = cloudinary_upload(
+                    id_image,
+                    folder=f"guest_ids/{now_uk_time.year}/{now_uk_time.month}/{now_uk_time.day}/",
+                    resource_type="image"
+                )
+                logger.info(f"Manual upload response: {upload_response}")
+
+                # Save the Cloudinary URL to the model
+                if 'url' in upload_response:
+                    guest_upload = GuestIDUpload(
+                        guest=guest,
+                        id_image=upload_response['url']  # Store the Cloudinary URL directly
+                    )
+                    guest_upload.save()
+                    logger.info(f"Successfully saved ID for guest {guest.reservation_number}: {guest_upload.id_image}")
+                    messages.success(request, "ID uploaded successfully!")
+                else:
+                    logger.error(f"Cloudinary upload failed for guest {guest.reservation_number}: {upload_response.get('error', 'Unknown error')}")
+                    messages.error(request, "Failed to upload ID to Cloudinary. Please try again.")
+                    return redirect('room_detail', room_token=room_token)
+
+            except Exception as e:
+                logger.error(f"Error uploading ID for guest {guest.reservation_number}: {str(e)}")
+                messages.error(request, f"An error occurred while uploading your ID: {str(e)}. Please try again.")
+                return redirect('room_detail', room_token=room_token)
+
             return redirect('room_detail', room_token=room_token)
 
         if "unlock_door" in request.POST:
@@ -422,7 +470,7 @@ def room_detail(request, room_token):
             "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
             "show_pin": not enforce_2pm_rule,
             "front_door_pin": guest.front_door_pin,
-            "id_uploads": guest.id_uploads.all(),  # Pass all uploads
+            "id_uploads": guest.id_uploads.all(),
         },
     )
 

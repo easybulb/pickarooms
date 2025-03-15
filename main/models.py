@@ -73,7 +73,7 @@ class Guest(models.Model):
 
 class GuestIDUpload(models.Model):
     guest = models.ForeignKey(Guest, on_delete=models.CASCADE, related_name='id_uploads')
-    id_image = models.ImageField(upload_to='guest_ids/%Y/%m/%d/')
+    id_image = models.CharField(max_length=500)  # Store the Cloudinary URL as a string
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

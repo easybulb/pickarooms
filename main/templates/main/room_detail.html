@@ -375,7 +375,7 @@
     <div class="id-uploads">
         <h3>{% trans "Your Uploaded IDs:" %}</h3>
         {% for upload in id_uploads %}
-        <img src="{{ upload.id_image.url }}" alt="{% trans 'Uploaded ID' %}">
+        <img src="{{ upload.id_image }}" alt="{% trans 'Uploaded ID' %}">
         {% endfor %}
     </div>
     {% endif %}
@@ -649,7 +649,7 @@
 
         window.filterFAQs = function() {
             const input = document.getElementById('faq-search').value.toLowerCase();
-            const categories = document.querySelectorAll('.faq-category');
+            const categories = document.queryselectorAll('.faq-category');
 
             categories.forEach(category => {
                 const categoryItems = category.querySelector('.faq-items');

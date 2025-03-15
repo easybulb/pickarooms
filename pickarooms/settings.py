@@ -14,6 +14,7 @@ import os
 import dj_database_url
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
+from django.core.files.storage import default_storage
 
 # Import env.py if it exists
 if os.path.isfile("env.py"):
@@ -96,13 +97,13 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
             'formatter': 'verbose',
         },
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
@@ -110,7 +111,7 @@ LOGGING = {
     'loggers': {
         'main': {
             'handlers': ['file', 'console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
     },
@@ -261,9 +262,19 @@ CLOUDINARY_STORAGE = {
 # Set Default Media Storage to Cloudinary
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# Media files (uploaded images)
+# Media files - Remove local fallback entirely to force Cloudinary
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = None  # No local storage, rely on Cloudinary
+
+# Debug Cloudinary config and storage backend
+import cloudinary
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+)
+print(f"Cloudinary config initialized: {cloudinary.config().cloud_name}")
+print(f"Default storage backend after settings: {default_storage.__class__.__name__}")
 
 CACHES = {
     'default': {
