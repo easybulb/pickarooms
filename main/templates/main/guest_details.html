@@ -6,6 +6,22 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
 <style>
+    /* Navigation styles */
+    .nav-link {
+        margin-bottom: 10px;
+        padding: 0 5px;
+    }
+    .nav-link {
+        display: inline-block;
+        margin-right: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .nav-link:hover {
+        text-decoration: underline;
+    }
+
     /* Base styles */
     .guest-details {
         padding: 20px;
@@ -61,63 +77,78 @@
     }
     .modal-content {
         background: #fff;
-        padding: 20px;
+        padding: 10px; /* Reduced padding for mobile */
         border-radius: 8px;
         text-align: center;
-        max-width: 90%;
-        max-height: 90%;
+        max-width: 95%; /* Slightly wider on mobile */
+        max-height: 90vh; /* Ensure it fits within viewport */
         overflow: auto;
+        position: relative; /* Ensure close button positioning works */
     }
     .modal-content img {
         max-width: 100%;
         max-height: 80vh;
         border-radius: 8px;
+        display: block; /* Ensure image is block-level for centering */
+        margin: 0 auto; /* Center the image */
     }
     .close {
         position: absolute;
-        top: 10px;
-        right: 20px;
-        font-size: 24px;
+        top: 5px; /* Adjusted for mobile */
+        right: 10px; /* Adjusted for mobile */
+        font-size: 20px; /* Reduced for mobile */
         color: #333;
         cursor: pointer;
+        padding: 5px; /* Add padding for touch target */
     }
-    .reservation-table {
+    .data-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
-        overflow-x: auto; /* Horizontal scroll for tables on mobile */
     }
-    .reservation-table th, .reservation-table td {
-        border: 1px solid #ddd;
-        padding: 8px;
+    .data-table th,
+    .data-table td {
+        padding: 12px;
         text-align: left;
-        font-size: 14px; /* Base font size */
+        border-bottom: 1px solid #ddd;
+        white-space: nowrap; /* Prevent text wrapping */
     }
-    .reservation-table th {
-        background-color: #f2f2f2;
+    .data-table th {
+        background: #f1f1f1;
+        font-weight: bold;
+        color: #333;
     }
-
-    /* Navigation styles */
-    .nav-link {
-        margin-bottom: 10px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .nav-link a {
-        display: inline-block;
-        margin-right: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-        padding: 5px 10px;
-    }
-    .nav-link a:hover {
-        text-decoration: underline;
+    .data-table tr:hover {
+        background: #f5f5f5;
     }
 
-    /* Mobile-specific styles (max-width: 768px) */
-    @media (max-width: 768px) {
+    /* Enhanced table scrolling for mobile */
+    .data-table-wrapper {
+        position: relative;
+        overflow-x: auto; /* Enable horizontal scrolling */
+    }
+    .data-table-wrapper::-webkit-scrollbar {
+        height: 8px; /* Customize scrollbar height */
+    }
+    .data-table-wrapper::-webkit-scrollbar-thumb {
+        background-color: #007bff; /* Scrollbar color */
+        border-radius: 4px;
+    }
+    .data-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1; /* Track color */
+    }
+
+    /* Responsive table for mobile */
+    @media (max-width: 767px) {
+        .data-table-wrapper {
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        .data-table th,
+        .data-table td {
+            min-width: 150px; /* Ensure columns are wide enough */
+            font-size: 12px;
+            padding: 6px;
+        }
         .admin-container {
             padding: 10px;
         }
@@ -137,13 +168,9 @@
             margin: 5px 0;
         }
         .nav-link {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .nav-link a {
             margin-right: 0;
             font-size: 14px;
-            padding: 5px 0;
+            padding: 5px 5px;
         }
         .id-upload-container img {
             max-width: 100px; /* Smaller images on mobile */
@@ -153,26 +180,18 @@
             padding: 3px 6px;
         }
         .modal-content {
-            max-width: 95%;
-            padding: 10px;
+            max-width: 90%; /* Adjusted for better fit */
+            padding: 5px; /* Further reduced for mobile */
+            max-height: 80vh; /* Reduced to fit better */
         }
         .modal-content img {
             max-height: 70vh;
         }
-        .reservation-table th, .reservation-table td {
-            font-size: 12px;
-            padding: 6px;
-        }
-        .reservation-table {
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        .reservation-table tr {
-            display: table-row;
-        }
-        .reservation-table th, .reservation-table td {
-            display: table-cell;
+        .close {
+            top: 2px; /* Further adjusted for mobile */
+            right: 5px; /* Further adjusted for mobile */
+            font-size: 18px; /* Further reduced for mobile */
+            padding: 2px; /* Smaller touch target */
         }
     }
 
@@ -194,10 +213,22 @@
             font-size: 8px;
             padding: 2px 4px;
         }
+        .modal-content {
+            max-width: 85%; /* Even tighter fit */
+            padding: 2px;
+            max-height: 70vh; /* Further reduced */
+            left: -5%;
+        }
         .modal-content img {
             max-height: 60vh;
         }
-        .reservation-table th, .reservation-table td {
+        .close {
+            top: 0;
+            right: 8px;
+            font-size: 25px;
+            padding: 0;
+        }
+        .data-table th, .data-table td {
             font-size: 10px;
             padding: 4px;
         }
@@ -244,7 +275,7 @@
             {% for upload in id_uploads %}
             <div class="id-upload-container" onclick="openModal('modal-{{ forloop.counter }}')">
                 <img src="{{ upload.id_image }}" alt="{% trans 'Uploaded ID' %}">
-                <button class="download-btn" onclick="downloadImage('{{ upload.id_image }}', '{{ upload.filename }}')">⬇</button>
+                <button class="download-btn" onclick="downloadImage('{{ upload.id_image }}', '{{ upload.filename }}', event)">⬇</button>
             </div>
             <div id="modal-{{ forloop.counter }}" class="modal">
                 <div class="modal-content">
@@ -261,28 +292,30 @@
 
     <div class="guest-details">
         <h2>{% trans "All Reservations" %}</h2>
-        <table class="reservation-table">
-            <thead>
-                <tr>
-                    <th>{% trans "Reservation Number" %}</th>
-                    <th>{% trans "Check-In" %}</th>
-                    <th>{% trans "Check-Out" %}</th>
-                    <th>{% trans "Room" %}</th>
-                    <th>{% trans "Archived" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for reservation in all_reservations %}
-                <tr>
-                    <td>{{ reservation.reservation_number }}</td>
-                    <td>{{ reservation.check_in_date }} ({% if reservation.early_checkin_time %}{{ reservation.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %})</td>
-                    <td>{{ reservation.check_out_date }} ({% if reservation.late_checkout_time %}{{ reservation.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %})</td>
-                    <td>{{ reservation.assigned_room.name }}</td>
-                    <td>{{ reservation.is_archived|yesno:"Yes,No" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Reservation Number" %}</th>
+                        <th>{% trans "Check-In" %}</th>
+                        <th>{% trans "Check-Out" %}</th>
+                        <th>{% trans "Room" %}</th>
+                        <th>{% trans "Archived" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in all_reservations %}
+                    <tr>
+                        <td>{{ reservation.reservation_number }}</td>
+                        <td>{{ reservation.check_in_date }} ({% if reservation.early_checkin_time %}{{ reservation.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %})</td>
+                        <td>{{ reservation.check_out_date }} ({% if reservation.late_checkout_time %}{{ reservation.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %})</td>
+                        <td>{{ reservation.assigned_room.name }}</td>
+                        <td>{{ reservation.is_archived|yesno:"Yes,No" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
 
@@ -300,14 +333,36 @@
         modal.style.display = 'none';
     }
 
-    // Download image
-    function downloadImage(url, filename) {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename; // Use a default filename since custom filter isn't working
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    // Download image using Fetch API to handle cross-origin
+    async function downloadImage(url, filename, event) {
+        event.stopPropagation(); // Prevent the parent onclick (modal opening) from firing
+
+        try {
+            // Fetch the image as a blob
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const blob = await response.blob();
+
+            // Create a temporary URL for the blob
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename || 'downloaded-image.png'; // Use provided filename
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+            // Fallback: Open the image in a new tab if download fails
+            window.open(url, '_blank');
+        }
     }
 
     // Ensure modals close when clicking outside
