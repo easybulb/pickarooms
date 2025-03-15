@@ -41,4 +41,5 @@ urlpatterns = [
     path('awards_reviews/', views.awards_reviews, name='awards_reviews'),
     path('api/callback', ttlock_callback, name='ttlock_callback'),
     path('audit-logs/', views.audit_logs, name='audit_logs'),
+    path('admin-page/guest-details/<int:guest_id>/', views.guest_details, name='guest_details'),
 ]

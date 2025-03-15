@@ -1,0 +1,329 @@
+<!-- main/templates/main/guest_details.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
+<style>
+    /* Base styles */
+    .guest-details {
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .id-uploads {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .id-upload-container {
+        position: relative;
+        cursor: pointer;
+    }
+    .id-upload-container img {
+        max-width: 200px;
+        border-radius: 8px;
+        transition: transform 0.2s;
+    }
+    .id-upload-container:hover img {
+        transform: scale(1.05);
+    }
+    .download-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        display: none; /* Hidden by default, shown on hover */
+    }
+    .id-upload-container:hover .download-btn {
+        display: block;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        max-width: 90%;
+        max-height: 90%;
+        overflow: auto;
+    }
+    .modal-content img {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 8px;
+    }
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 24px;
+        color: #333;
+        cursor: pointer;
+    }
+    .reservation-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        overflow-x: auto; /* Horizontal scroll for tables on mobile */
+    }
+    .reservation-table th, .reservation-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        font-size: 14px; /* Base font size */
+    }
+    .reservation-table th {
+        background-color: #f2f2f2;
+    }
+
+    /* Navigation styles */
+    .nav-link {
+        margin-bottom: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .nav-link a {
+        display: inline-block;
+        margin-right: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+        padding: 5px 10px;
+    }
+    .nav-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Mobile-specific styles (max-width: 768px) */
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 10px;
+        }
+        .admin-title {
+            font-size: 24px;
+            text-align: center;
+        }
+        .guest-details {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .guest-details h2 {
+            font-size: 20px;
+        }
+        .guest-details p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .nav-link {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .nav-link a {
+            margin-right: 0;
+            font-size: 14px;
+            padding: 5px 0;
+        }
+        .id-upload-container img {
+            max-width: 100px; /* Smaller images on mobile */
+        }
+        .download-btn {
+            font-size: 10px;
+            padding: 3px 6px;
+        }
+        .modal-content {
+            max-width: 95%;
+            padding: 10px;
+        }
+        .modal-content img {
+            max-height: 70vh;
+        }
+        .reservation-table th, .reservation-table td {
+            font-size: 12px;
+            padding: 6px;
+        }
+        .reservation-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .reservation-table tr {
+            display: table-row;
+        }
+        .reservation-table th, .reservation-table td {
+            display: table-cell;
+        }
+    }
+
+    /* Extra small screens (max-width: 480px) */
+    @media (max-width: 480px) {
+        .admin-title {
+            font-size: 20px;
+        }
+        .guest-details h2 {
+            font-size: 18px;
+        }
+        .guest-details p {
+            font-size: 12px;
+        }
+        .id-upload-container img {
+            max-width: 80px;
+        }
+        .download-btn {
+            font-size: 8px;
+            padding: 2px 4px;
+        }
+        .modal-content img {
+            max-height: 60vh;
+        }
+        .reservation-table th, .reservation-table td {
+            font-size: 10px;
+            padding: 4px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block title %}{% trans "Guest Details" %} - {{ guest.full_name }}{% endblock %}
+
+{% block content %}
+<section class="admin-container">
+    <div class="nav-link">
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
+        {% if 'main.can_give_access' in perms %}
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
+        {% endif %}
+        {% if 'main.manage_rooms' in perms %}
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
+            <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
+        {% endif %}
+    </div>
+    <h1 class="admin-title">{% trans "Guest Details" %} - {{ guest.full_name }}</h1>
+
+    <div class="guest-details">
+        <h2>{% trans "Guest Information" %}</h2>
+        <p><strong>{% trans "Full Name:" %}</strong> {{ guest.full_name }}</p>
+        <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
+        <p><strong>{% trans "Phone Number:" %}</strong> {{ guest.phone_number|default:"Not provided" }}</p>
+        <p><strong>{% trans "Check-In:" %}</strong> {{ guest.check_in_date }} ({% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %})</p>
+        <p><strong>{% trans "Check-Out:" %}</strong> {{ guest.check_out_date }} ({% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %})</p>
+        <p><strong>{% trans "Room:" %}</strong> {{ guest.assigned_room.name }}</p>
+        <p><strong>{% trans "PIN (Front Door & Room):" %}</strong> {{ guest.front_door_pin|default:"N/A" }}</p>
+        <p><strong>{% trans "Archived:" %}</strong> {{ guest.is_archived|yesno:"Yes,No" }}</p>
+    </div>
+
+    <!-- main/templates/main/guest_details.html (relevant section) -->
+    {% if id_uploads %}
+    <div class="guest-details">
+        <h2>{% trans "Uploaded IDs" %}</h2>
+        <div class="id-uploads">
+            {% for upload in id_uploads %}
+            <div class="id-upload-container" onclick="openModal('modal-{{ forloop.counter }}')">
+                <img src="{{ upload.id_image }}" alt="{% trans 'Uploaded ID' %}">
+                <button class="download-btn" onclick="downloadImage('{{ upload.id_image }}', '{{ upload.filename }}')">⬇</button>
+            </div>
+            <div id="modal-{{ forloop.counter }}" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal('modal-{{ forloop.counter }}')">×</span>
+                    <img src="{{ upload.id_image }}" alt="{% trans 'Enlarged Uploaded ID' %}">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <p class="guest-details">{% trans "No IDs uploaded for this guest." %}</p>
+    {% endif %}
+
+    <div class="guest-details">
+        <h2>{% trans "All Reservations" %}</h2>
+        <table class="reservation-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Reservation Number" %}</th>
+                    <th>{% trans "Check-In" %}</th>
+                    <th>{% trans "Check-Out" %}</th>
+                    <th>{% trans "Room" %}</th>
+                    <th>{% trans "Archived" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reservation in all_reservations %}
+                <tr>
+                    <td>{{ reservation.reservation_number }}</td>
+                    <td>{{ reservation.check_in_date }} ({% if reservation.early_checkin_time %}{{ reservation.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %})</td>
+                    <td>{{ reservation.check_out_date }} ({% if reservation.late_checkout_time %}{{ reservation.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %})</td>
+                    <td>{{ reservation.assigned_room.name }}</td>
+                    <td>{{ reservation.is_archived|yesno:"Yes,No" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- JavaScript -->
+<script>
+    // Open modal for enlarged image
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'flex';
+    }
+
+    // Close modal
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+    }
+
+    // Download image
+    function downloadImage(url, filename) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename; // Use a default filename since custom filter isn't working
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Ensure modals close when clicking outside
+    document.addEventListener('click', function(event) {
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (!modal.querySelector('.modal-content').contains(event.target) && event.target.tagName !== 'IMG') {
+                modal.style.display = 'none';
+            }
+        });
+    });
+
+    // Prevent modal from closing when clicking inside modal content
+    document.querySelectorAll('.modal-content').forEach(content => {
+        content.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    });
+</script>
+{% endblock %}

@@ -2019,3 +2019,28 @@ def audit_logs(request):
     }
 
     return render(request, 'main/audit_logs.html', context)
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def guest_details(request, guest_id):
+    """Display detailed information for a guest, including uploaded IDs, restricted to superusers."""
+    guest = get_object_or_404(Guest, id=guest_id)
+    id_uploads = guest.id_uploads.all()  # Fetch all uploaded IDs for this guest
+
+    # Fetch all reservations (past and present) for this guest
+    all_reservations = Guest.objects.filter(full_name__iexact=guest.full_name).order_by('-check_in_date')
+
+    # Extract filenames for downloads
+    id_uploads_with_filenames = [
+        {
+            'id_image': upload.id_image,
+            'filename': os.path.basename(upload.id_image) if upload.id_image else 'downloaded-image.png'
+        } for upload in id_uploads
+    ]
+
+    context = {
+        'guest': guest,
+        'id_uploads': id_uploads_with_filenames,  # Pass dictionary with filename
+        'all_reservations': all_reservations,
+    }
+    return render(request, 'main/guest_details.html', context)

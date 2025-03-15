@@ -73,7 +73,11 @@
                     {% for guest in guests %}
                     <tr>
                         <td>
-                            {{ guest.full_name }} 
+                            {% if user.is_superuser %}
+                                <a href="{% url 'guest_details' guest.id %}">{{ guest.full_name }}</a>
+                            {% else %}
+                                {{ guest.full_name }}
+                            {% endif %}
                             {% if guest.is_returning %}
                                 <span class="returning-guest" title="Returning Guest"> (R) </span>
                             {% endif %}
@@ -81,7 +85,7 @@
                             <small>#: {{ guest.reservation_number }}</small>
                             <br>
                             <small>{% trans "Tel:" %} {{ guest.phone_number|default:"Not provided" }}</small>
-                        </td>                        
+                        </td>                     
                         <td>{{ guest.assigned_room.name }}</td>
                         <td class="pin-code">
                             {% if guest.front_door_pin %}
