@@ -356,7 +356,6 @@ body {
     color: #475569;
     margin: 6px 0;
     padding: 6px 10px;
-    background: #f8fafc;
     border-radius: 6px;
     line-height: 1.6;
 }
@@ -386,7 +385,6 @@ body {
     color: #475569;
     margin: 6px 0;
     padding: 6px 10px;
-    background: #f8fafc;
     border-radius: 6px;
     display: block;
     line-height: 1.5;
@@ -796,7 +794,7 @@ body {
     gap: 8px;
     margin-top: 15px;
     padding-top: 10px;
-    border-top: 2px solid #ede9fe;
+    /* border-top: 2px solid #ede9fe; */
 }
 
 .quick-access button {
@@ -957,6 +955,7 @@ body {
         border-radius: 8px;
         margin: 5px 0;
         border: 1px solid #d8b4fe;
+        margin-top: 15px;
     }
     .welcome-rules {
         text-align: center;
@@ -965,6 +964,10 @@ body {
         border: 2px solid #fde68a;
         font-weight: 500;
         margin-top: 10px;
+    }
+
+    .welcome-info {
+        padding: 2px 15px;
     }
 
 /* Animations */
@@ -1089,6 +1092,10 @@ body {
         margin: 10px auto;
     }
 
+    #direction {
+        margin-top: -15px;
+    }
+
     .room-info {
         padding: 8px 0;
     }
@@ -1134,13 +1141,14 @@ body {
     }
 
     .street-image {
+        border-radius: 0;
         max-width: 100%;
         margin: 8px 0;
     }
 
     .quick-access {
         gap: 6px;
-        margin-top: 10px;
+        margin-top: -5px;
         padding-top: 8px;
     }
 

@@ -13,6 +13,7 @@
 <!-- Sticky Tab Navigation -->
 <div class="section-nav">
     <button class="tab-btn active" data-section="location" onclick="showSection('location')">{% trans "Access" %}</button>
+    <button class="tab-btn" data-section="direction" onclick="showSection('direction')">{% trans "Location" %}</button>
     <button class="tab-btn" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
     <button class="tab-btn" data-section="parking" onclick="showSection('parking')">{% trans "Parking" %}</button>
     <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">{% trans "Kitchen" %}</button>
@@ -20,7 +21,7 @@
     <button class="tab-btn" data-section="faq" onclick="showSection('faq')">{% trans "FAQs" %}</button>
 </div>
 
-<!-- Location Section -->
+<!-- Access Section (formerly Location, now just Welcome and WiFi) -->
 <section id="location" class="section-content active">
     <div class="welcome-section">
         <h1 class="welcome-header">
@@ -49,6 +50,11 @@
             <p>{% trans "No visitors allowed. Noise, parties, or disturbances are prohibited and may result in eviction." %}</p>
         </div>
     </div>
+    <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
+    <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
+    <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
+    <!-- Direction Section -->
+
     <h2 class="section-title">📍 {% trans "Location" %}</h2>
     <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
     <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
@@ -62,10 +68,6 @@
     </ul>
     <p class="content-text"><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
     <p class="content-text"><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street via Ashton Old Road (A635) or M60 Exit 24." %}</p>
-    
-    <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
-    <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
-    <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
 </section>
 
 <!-- How To Use PIN Section -->
@@ -331,6 +333,23 @@
     </div>
 </section>
 
+<!-- Direction Section -->
+<section id="direction" class="section-content">
+    <h2 class="section-title">📍 {% trans "Location" %}</h2>
+    <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
+    <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
+    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Street View of Property' %}" class="street-image">
+    <h3 class="subsection-title">{% trans "How do I get to the property?" %}</h3>
+    <p class="content-text"><strong>{% trans "From Manchester Airport:" %}</strong></p>
+    <ul class="content-list">
+        <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "25 minutes from Manchester Airport." %}</li>
+        <li>🚆 <strong>{% trans "Train:" %}</strong> {% trans "To Piccadilly Station, then a £5 taxi ride." %}</li>
+        <li>🚌 <strong>{% trans "Bus:" %}</strong> {% trans "219 bus from Piccadilly stops nearby." %}</li>
+    </ul>
+    <p class="content-text"><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
+    <p class="content-text"><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street via Ashton Old Road (A635) or M60 Exit 24." %}</p>
+</section>
+
 <!-- Unlock Help Modal -->
 <div id="unlock-help-modal" class="modal">
     <div class="modal-content">
@@ -374,7 +393,6 @@
                 modal.querySelector('.modal-content').innerHTML = newModalContent;
                 modal.style.display = 'flex';
 
-                // Reattach event listeners after content update
                 const buttons = modal.querySelectorAll('.btn-unlock');
                 buttons.forEach(button => {
                     button.onclick = function() {
