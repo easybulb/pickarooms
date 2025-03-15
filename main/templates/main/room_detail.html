@@ -361,14 +361,14 @@
     <form method="post" enctype="multipart/form-data" action="{% url 'room_detail' room_token=guest.secure_token %}" class="id-form">
         {% csrf_token %}
         <input type="hidden" name="upload_id" value="true">
-        <input type="file" name="id_image" accept="image/*" capture="environment" style="margin: 10px 0;" required>
+        <input type="file" name="id_image" accept="image/*" style="margin: 10px 0;" required>
         <button type="submit" class="btn-unlock">{% trans "Upload ID" %}</button>
     </form>
     <div class="id-instructions">
         <p><strong>{% trans "Why We Ask:" %}</strong> {% trans "This optional ID upload helps verify your booking and enhances security for all guests, similar to Booking.com’s check-in practices. It ensures we know who’s staying in case of emergencies or incidents." %}</p>
         <p><strong>{% trans "Where It’s Stored:" %}</strong> {% trans "Your ID is securely uploaded to Cloudinary, a trusted cloud platform, in a private folder accessible only to our authorized staff via a protected admin system." %}</p>
         <p><strong>{% trans "Booking.com Context:" %}</strong> {% trans "Booking.com often requires ID at check-in for safety and verification—uploading here streamlines that process for your stay." %}</p>
-        <p><strong>{% trans "How to Upload:" %}</strong> {% trans "Take a clear photo of your passport or driver’s license using your camera above. For your privacy, cover sensitive details like your ID number with a finger or tape, leaving your name, photo, and expiry date visible." %}</p>
+        <p><strong>{% trans "How to Upload:" %}</strong> {% trans "Take a clear photo of your passport or driver’s license using your camera above, or select an existing image from your device. For your privacy, cover sensitive details like your ID number with a finger or tape, leaving your name, photo, and expiry date visible." %}</p>
         <p><strong>{% trans "Safety Guaranteed:" %}</strong> {% trans "Your data is encrypted during upload (HTTPS) and stored privately—never shared publicly. Only Pickarooms staff can access it if needed. Limit: 3 uploads per guest." %}</p>
     </div>
     {% if id_uploads %}
