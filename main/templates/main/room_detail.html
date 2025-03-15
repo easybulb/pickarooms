@@ -4,46 +4,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/room_detail.css' %}">
-<style>
-    /* Existing styles from room_detail.css assumed to be loaded */
-    /* Add loading overlay styles */
-    .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-    .loading-text {
-        color: white;
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 20px;
-        border-radius: 8px;
-    }
-    .loading-dots::after {
-        content: '...';
-        animation: dots 1.5s infinite;
-    }
-    @keyframes dots {
-        0% { content: '.'; }
-        33% { content: '..'; }
-        66% { content: '...'; }
-        100% { content: '.'; }
-    }
-    /* Tweak modal button styling */
-    #unlock-help-modal .btn-unlock {
-        margin: 5px; /* Add spacing between buttons */
-        display: inline-block; /* Ensure buttons don't stack unnecessarily */
-    }
-</style>
 {% endblock %}
 
 {% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
@@ -54,9 +14,9 @@
 <div class="section-nav">
     <button class="tab-btn active" data-section="location" onclick="showSection('location')">{% trans "Access" %}</button>
     <button class="tab-btn" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
-    <button class="tab-btn" data-section="checkin" onclick="showSection('checkin')">{% trans "Check-In" %}</button>
-    <button class="tab-btn" data-section="checkout" onclick="showSection('checkout')">{% trans "Check-Out" %}</button>
-    <button class="tab-btn" data-section="wifi" onclick="showSection('wifi')">{% trans "WiFi" %}</button>
+    <button class="tab-btn" data-section="parking" onclick="showSection('parking')">{% trans "Parking" %}</button>
+    <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">{% trans "Kitchen" %}</button>
+    <button class="tab-btn" data-section="nearby" onclick="showSection('nearby')">{% trans "Nearby" %}</button>
     <button class="tab-btn" data-section="faq" onclick="showSection('faq')">{% trans "FAQs" %}</button>
 </div>
 
@@ -70,14 +30,24 @@
         </h1>
         <p class="welcome-greeting">{% trans "Welcome," %} {{ guest.full_name }}!</p>
         {% if not show_pin %}
-            <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time.  Your access details will be available then." %}</p>
+        <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time. Your access details will be available then." %}</p>
         {% else %}
             <p class="pin-entry"><strong>{% trans "PIN (Front Door & Room):" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
+            <p class="welcome-info welcome-rules">{% trans "Protect your PIN—it secures your belongings. Do not share it." %}</p>
             <div class="quick-access">
                 <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button>
                 <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
             </div>
         {% endif %}
+        <div class="welcome-info">
+            <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester M11 3NP</p>
+            <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
+            <p><strong>{% trans "Check-In:" %}</strong> {{ guest.check_in_date }} ({% trans "From" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %})</p>
+            <p><strong>{% trans "Check-Out:" %}</strong> {{ guest.check_out_date }} ({% trans "Before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %})</p>
+        </div>
+        <div class="welcome-info welcome-rules">
+            <p>{% trans "No visitors allowed. Noise, parties, or disturbances are prohibited and may result in eviction." %}</p>
+        </div>
     </div>
     <h2 class="section-title">📍 {% trans "Location" %}</h2>
     <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
@@ -96,14 +66,9 @@
     <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
     <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
     <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
-    
-    <div class="quick-access">
-        <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button>
-        <button onclick="showSection('faq')">📜 {% trans "FAQs & Help" %}</button>
-    </div>
 </section>
 
-<!-- Access Section -->
+<!-- How To Use PIN Section -->
 <section id="access" class="section-content">
     <div class="video-container">
         <div class="video-overlay"></div>
@@ -141,7 +106,7 @@
                     <span class="step-text">{% trans "to unlock the room door." %}</span>
                 </div>
             </li>
-            <li>{% if show_pin %}{% trans "If the PIN doesn’t work, use the remote unlock option in the modal below." %}{% endif %}</li>
+            <li>{% if show_pin %}{% trans "If the PIN doesn’t work, use the remote unlock option in the modal below. Protect your PIN—it secures your belongings." %}{% endif %}</li>
             <li>{% trans "Watch the instructional video in the FAQs section for keypad usage." %}</li>
             <li>{% trans "Once inside, remove your shoes and head upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
         </ol>
@@ -157,49 +122,57 @@
     {% endif %}
 </section>
 
-<!-- Check-In Section -->
-<section id="checkin" class="section-content">
-    <h2 class="section-title">📥 {% trans "Check-In" %}</h2>
-    {% if guest %}
-        <p class="content-text"><strong>{% trans "Date:" %}</strong> {{ guest.check_in_date }} ({% trans "From" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %})</p>
-        <p class="content-text"><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
-    {% else %}
-        <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
-    {% endif %}
+<!-- Parking Section -->
+<section id="parking" class="section-content">
+    <h2 class="section-title">🚗 {% trans "Parking" %}</h2>
+    <p class="content-text">{% trans "Free parking is available on-site:" %}</p>
+    <ul class="content-list">
+        <li>✅ {% trans "Tarmac fits two cars—park on the left if you’re the first to arrive." %}</li>
+        <li>✅ {% trans "Additional paid parking options are nearby if needed." %}</li>
+    </ul>
 </section>
 
-<!-- Check-Out Section -->
-<section id="checkout" class="section-content">
-    <h2 class="section-title">📤 {% trans "Check-Out" %}</h2>
-    {% if guest %}
-        <p class="content-text"><strong>{% trans "Date:" %}</strong> {{ guest.check_out_date }} ({% trans "Before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %})</p>
-        <p class="expiration"><strong>{% trans "Access Expires:" %}</strong> {{ expiration_message }}</p>
-        <p class="content-text expiration-note">{% trans "Note: Your access will expire at check-out time. Please ensure you check out before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %} {% trans "to avoid being locked out." %}</p>
-        <h3 class="subsection-title">{% trans "How do I check out?" %}</h3>
-        <ul class="content-list">
-            <li>🛑 <strong>{% trans "Leave keycard:" %}</strong> {% trans "Inside room, visible." %}</li>
-            <li>🛏️ {% trans "Leave towels in bathroom." %}</li>
-            <li>🔌 <strong>{% trans "Switch off:" %}</strong> {% trans "All appliances and lights." %}</li>
-            <li>🚪 <strong>{% trans "Close door:" %}</strong> {% trans "Securely." %}</li>
-            <li>📅 {% trans "Housekeeping enters after 11 AM." %}</li>
-        </ul>
-    {% else %}
-        <p class="no-guest">❌ {% trans "No guest assigned to this room. Contact admin for assistance." %}</p>
-    {% endif %}
+<!-- Kitchen Section -->
+<section id="kitchen" class="section-content">
+    <h2 class="section-title">🍳 {% trans "Kitchen" %}</h2>
+    <p class="content-text">{% trans "The shared kitchen is downstairs with full access:" %}</p>
+    <ul class="content-list">
+        <li>🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with instructions nearby." %}</li>
+        <li>🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}</li>
+        <li>💧 <strong>{% trans "Drinking Water:" %}</strong> {% trans "Tap water is clean and drinkable, supplied by United Utilities UK." %}</li>
+    </ul>
 </section>
 
-<!-- WiFi Section -->
-<section id="wifi" class="section-content">
-    <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
-    <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
-    <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
-    <p class="content-text">{% trans "Powered by Fibre One with an Eero 6+ Gateway for a secure, isolated guest network." %}</p>
+<!-- Nearby Section -->
+<section id="nearby" class="section-content">
+    <h2 class="section-title">🍽️ {% trans "Nearby" %}</h2>
+    <h3 class="subsection-title">{% trans "Ordering Food" %}</h3>
+    <p class="content-text">{% trans "Download UberEats or Deliveroo for fast food delivery to the property. Keep an eye out for the delivery person to avoid continuous knocking." %}</p>
+    <h3 class="subsection-title">{% trans "Restaurants" %}</h3>
+    <ul class="content-list">
+        <li><strong>{% trans "The Grove Bakery:" %}</strong> 135 Katherine St, Ashton-under-Lyne OL6 7AW (2 miles)</li>
+        <li><strong>{% trans "Anatolian Grill:" %}</strong> 88 Market St, Droylsden, Manchester M43 6DE (1 mile)</li>
+    </ul>
+    <h3 class="subsection-title">{% trans "Supermarkets" %}</h3>
+    <ul class="content-list">
+        <li><strong>{% trans "Asda Ashton:" %}</strong> Cavendish St, Ashton-under-Lyne OL6 7PF (2 miles)</li>
+        <li><strong>{% trans "Tesco Extra:" %}</strong> Trinity St, Stalybridge SK15 2BJ (3 miles)</li>
+    </ul>
 </section>
 
 <!-- FAQ Section -->
 <section id="faq" class="section-content">
     <h2 class="section-title">❓ {% trans "Frequently Asked Questions" %}</h2>
     <input type="text" id="faq-search" placeholder="{% trans 'Search FAQs...' %}" onkeyup="filterFAQs()">
+    {% if show_pin %}
+    <form method="post" enctype="multipart/form-data" action="{% url 'room_detail' room_token=guest.secure_token %}" class="welcome-info">
+        {% csrf_token %}
+        <input type="hidden" name="upload_id" value="true">
+        <p><strong>{% trans "Upload Passport/ID (Optional):" %}</strong></p>
+        <input type="file" name="id_image" accept="image/*" style="margin: 5px 0;">
+        <button type="submit" class="btn-unlock">{% trans "Upload" %}</button>
+    </form>
+    {% endif %}
     <div class="faq-container">
         <!-- Access Category -->
         <div class="faq-category" data-category="access">
@@ -276,18 +249,9 @@
                         <ul class="content-list">
                             <li>❗ {% trans "No smoking inside." %}</li>
                             <li>🔑 {% trans "Lost keys incur a fee." %}</li>
-                            <li>🎉 {% trans "No loud noise or parties allowed." %}</li>
+                            <li>🚫 {% trans "No visitors allowed in rooms or property." %}</li>
+                            <li>🎉 {% trans "No loud noise, parties, or disturbances—may result in eviction." %}</li>
                         </ul>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" data-answer-id="amenities-3">
-                        {% trans "Where is the shared kitchen?" %} <span class="arrow">▼</span>
-                    </button>
-                    <div class="faq-answer" id="amenities-3">
-                        <p class="content-text">🍕 {% trans "Downstairs with full access." %}</p>
-                        <p class="content-text">🍕 <strong>{% trans "Microwave & Oven:" %}</strong> {% trans "In the kitchen with instructions nearby." %}</p>
-                        <p class="content-text">🍽 <strong>{% trans "Plates & Cutlery:" %}</strong> {% trans "In cabinets—wash after use." %}</p>
                     </div>
                 </div>
                 <div class="faq-item">
@@ -359,17 +323,6 @@
                             <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "Uber, Bolt, or StreetCars (+44 161 223 1066)." %}</li>
                             <li>🚇 <strong>{% trans "Metro:" %}</strong> {% trans "219 bus from Ashton-Old-Road to city centre." %}</li>
                             <li><a href="https://tfgm.com/" target="_blank">{% trans "Bee Network" %}</a> {% trans "for bus routes." %}</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <button class="faq-question" data-answer-id="travel-2">
-                        {% trans "Where can I park?" %} <span class="arrow">▼</span>
-                    </button>
-                    <div class="faq-answer" id="travel-2">
-                        <ul class="content-list">
-                            <li>✅ <strong>{% trans "Free parking:" %}</strong> {% trans "On-site." %}</li>
-                            <li>✅ {% trans "Tarmac fits two cars—park left if first." %}</li>
                         </ul>
                     </div>
                 </div>
@@ -451,11 +404,9 @@
         const formData = new FormData(form);
         formData.append('door_type', doorType);
 
-        // Show loading overlay
         const loadingOverlay = document.getElementById('loadingOverlay');
         loadingOverlay.style.display = 'flex';
 
-        // Disable buttons to prevent multiple clicks
         const buttons = form.querySelectorAll('.btn-unlock');
         buttons.forEach(btn => {
             btn.disabled = true;
@@ -471,7 +422,6 @@
         })
         .then(response => response.json())
         .then(data => {
-            // Hide loading overlay after response
             loadingOverlay.style.display = 'none';
             buttons.forEach(btn => {
                 btn.disabled = false;
@@ -486,7 +436,6 @@
             }
         })
         .catch(error => {
-            // Hide loading overlay on error
             loadingOverlay.style.display = 'none';
             buttons.forEach(btn => {
                 btn.disabled = false;
@@ -525,18 +474,15 @@
     };
 
     document.addEventListener("DOMContentLoaded", function () {
-        // Close modal on page load unless reopened
         document.querySelectorAll('.modal').forEach(modal => {
             modal.style.display = 'none';
         });
 
-        // PIN Confirmation
         const pinSuccess = document.getElementById("pin-success");
         const pinHelp = document.getElementById("pin-help");
         if (pinSuccess) pinSuccess.addEventListener("click", () => alert("🎉 {% trans 'Proceed to your room upstairs!' %}"));
         if (pinHelp) pinHelp.addEventListener("click", () => openModal("unlock-help-modal"));
 
-        // Instruction Video Playback
         const playButton = document.getElementById("playInstructionVideo");
         playButton.addEventListener("click", function () {
             const instructionImage = document.getElementById("instructionImage");
@@ -557,11 +503,9 @@
             }
         });
 
-        // FAQ Functionality (Adapted from home.html)
         const faqItems = document.querySelectorAll(".faq-item");
         const faqQuestions = document.querySelectorAll(".faq-question");
 
-        // Initialize FAQs to collapsed state
         function initializeFAQs() {
             faqItems.forEach(item => {
                 const answer = item.querySelector(".faq-answer");
@@ -572,7 +516,6 @@
             });
         }
 
-        // Toggle Individual FAQ with Animation and Accessibility
         faqQuestions.forEach(question => {
             question.addEventListener("click", function (event) {
                 event.preventDefault();
@@ -581,7 +524,6 @@
                 const arrow = question.querySelector(".arrow");
                 const isExpanded = answer.classList.contains("show");
 
-                // Close all other answers
                 faqItems.forEach(faq => {
                     const otherAnswer = faq.querySelector(".faq-answer");
                     const otherArrow = faq.querySelector(".arrow");
@@ -593,7 +535,6 @@
                     }
                 });
 
-                // Ensure the parent category is expanded
                 const category = question.closest('.faq-category');
                 const categoryItems = category.querySelector('.faq-items');
                 const categoryArrow = category.querySelector('.category-arrow');
@@ -603,18 +544,15 @@
                     categoryArrow.textContent = '▲';
                 }
 
-                // Toggle the current answer
                 answer.style.display = isExpanded ? "none" : "block";
                 answer.classList.toggle("show", !isExpanded);
                 arrow.textContent = isExpanded ? "▼" : "▲";
                 question.setAttribute("aria-expanded", !isExpanded);
 
-                // Update ARIA for accessibility
                 question.setAttribute("aria-controls", answer.id);
                 if (!answer.id) answer.id = question.getAttribute("aria-controls");
             });
 
-            // Keyboard Accessibility
             question.addEventListener("keydown", function (event) {
                 if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();
@@ -623,7 +561,6 @@
             });
         });
 
-        // Initialize FAQ IDs for accessibility
         faqQuestions.forEach((question, index) => {
             if (!question.getAttribute("aria-controls")) {
                 const answer = question.nextElementSibling;
@@ -634,19 +571,16 @@
             question.setAttribute("aria-expanded", "false");
         });
 
-        // Toggle Category
         window.toggleCategory = function(categoryId) {
             const category = document.querySelector(`.faq-category[data-category="${categoryId}"]`);
             const categoryItems = category.querySelector('.faq-items');
             const categoryArrow = category.querySelector('.category-arrow');
             const isExpanded = category.classList.contains('expanded');
 
-            // Toggle category visibility
             category.classList.toggle('expanded');
             categoryItems.style.display = isExpanded ? 'none' : 'block';
             categoryArrow.textContent = isExpanded ? '▼' : '▲';
 
-            // Collapse all answers within the category when closing
             if (isExpanded) {
                 const answers = categoryItems.querySelectorAll('.faq-answer');
                 const arrows = categoryItems.querySelectorAll('.faq-question .arrow');
@@ -658,7 +592,6 @@
             }
         };
 
-        // FAQ Search Filter
         window.filterFAQs = function() {
             const input = document.getElementById('faq-search').value.toLowerCase();
             const categories = document.querySelectorAll('.faq-category');
@@ -693,7 +626,6 @@
                             answerElement.classList.remove("highlight");
                         }
 
-                        // Collapse the answer and reset the arrow
                         const answerElement = item.querySelector('.faq-answer');
                         const arrow = item.querySelector('.arrow');
                         answerElement.style.display = 'none';
@@ -702,7 +634,6 @@
                     }
                 });
 
-                // Expand category if there are visible items
                 if (hasVisibleItems || input === "") {
                     category.classList.add('expanded');
                     categoryItems.style.display = 'block';
@@ -715,7 +646,6 @@
             });
         };
 
-        // Initialize FAQ Categories (expanded by default for better UX)
         document.querySelectorAll('.faq-category').forEach(category => {
             const categoryItems = category.querySelector('.faq-items');
             const categoryArrow = category.querySelector('.category-arrow');
@@ -724,10 +654,8 @@
             categoryArrow.textContent = '▲';
         });
 
-        // Initialize FAQs on load
         initializeFAQs();
 
-        // Modal Video Playback
         document.querySelectorAll('.video-item .play-button').forEach(button => {
             button.addEventListener('click', function () {
                 const videoId = this.getAttribute('data-video');
@@ -743,12 +671,10 @@
             });
         });
 
-        // Chat Toggle
         window.toggleChat = function () {
             document.getElementById('chatBox').classList.toggle('show');
         };
 
-        // Initialize Active Section
         showSection('location');
     });
 </script>

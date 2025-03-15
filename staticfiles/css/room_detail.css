@@ -792,7 +792,7 @@ body {
 /* Quick Access */
 .quick-access {
     display: flex;
-    justify-content: flex-start;
+    justify-content:center;
     gap: 8px;
     margin-top: 15px;
     padding-top: 10px;
@@ -911,6 +911,62 @@ body {
     box-shadow: 0 3px 12px rgba(37, 211, 102, 0.3);
 }
 
+    /* Existing styles from room_detail.css assumed to be loaded */
+    /* Add loading overlay styles */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-text {
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .loading-dots::after {
+        content: '...';
+        animation: dots 1.5s infinite;
+    }
+    @keyframes dots {
+        0% { content: '.'; }
+        33% { content: '..'; }
+        66% { content: '...'; }
+        100% { content: '.'; }
+    }
+    /* Tweak modal button styling */
+    #unlock-help-modal .btn-unlock {
+        margin: 5px;
+        display: inline-block;
+    }
+    /* Welcome info boxes */
+    .welcome-info {
+        text-align: left;
+        background: #f8fafc;
+        padding: 2px 22px;
+        border-radius: 8px;
+        margin: 5px 0;
+        border: 1px solid #d8b4fe;
+    }
+    .welcome-rules {
+        text-align: center;
+        color: #d97706;
+        background: #fefce8;
+        border: 2px solid #fde68a;
+        font-weight: 500;
+        margin-top: 10px;
+    }
+
 /* Animations */
 @keyframes fadeIn {
     from { opacity: 0; }
@@ -932,8 +988,9 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     .welcome-section {
-        padding: 8px 40px;
-        margin: 8px auto;
+        padding: 0px 10px;
+        margin: 0px auto;
+        margin-top: -10px;
     }
 
     .welcome-header {
@@ -941,14 +998,19 @@ body {
         margin: 0 0 3px;
     }
 
+    .welcome-header span {
+        margin-top: 10px;
+    }
+
     .room-name {
         font-size: 1.4rem;
     }
 
     .no-smoking-icon {
-        width: 22px;
-        height: 22px;
+        width: 33px;
+        height: 33px;
         margin-left: 4px;
+        margin-top: 10px;
     }
 
     .welcome-greeting {
@@ -970,7 +1032,7 @@ body {
     }
 
     .pin-code {
-        font-size: 1rem;
+        font-size: 1.3rem;
         padding: 1px 6px;
         margin-bottom: 1px;
     }
@@ -983,6 +1045,9 @@ body {
         padding: 6px 10px; /* Increased padding for better tap target */
         font-size: 1rem; /* Increased from 0.8rem to 16px */
     }
+    .welcome-info p {
+        margin: 5px 0; /* Sets top and bottom margin to 5px, horizontal to 0 */
+    }
 
     .section-nav {
         margin-top: -20px;
@@ -994,7 +1059,7 @@ body {
 
     .tab-btn {
         font-size: 1rem; /* Increased from 0.85rem to 16px */
-        padding: 8px 12px; /* Increased padding for better tap target */
+        padding: 5px 12px; /* Increased padding for better tap target */
     }
 
     .video-container {
