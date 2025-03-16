@@ -2178,3 +2178,105 @@ def event_finder(request):
         'page_range': page_range,
     }
     return render(request, 'main/event_finder.html', context)
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def price_suggester(request):
+    """Suggest room prices based on popular events near M11 3NP."""
+    # Base room price
+    base_price = 50  # £50 as per your requirement
+
+    # Manually collected average hotel price near M11 3NP (e.g., from ibis Budget, Dakota Manchester)
+    average_hotel_price = 80  # Example value; adjust as needed
+
+    # Default date range (from today to end of year)
+    today = date.today().strftime('%Y-%m-%d')
+    start_date = today
+    end_date = '2025-12-31'
+
+    # Get pagination parameter
+    page = request.GET.get('page', 1)
+
+    # Build the API query for events in Manchester (broader search than postalCode)
+    params = {
+        'apikey': settings.TICKETMASTER_CONSUMER_KEY,
+        'city': 'Manchester',  # Use city instead of postalCode for broader search
+        'countryCode': 'GB',  # Restrict to UK
+        'size': 10,  # 10 events per page (reduced for pagination)
+        'page': int(page) - 1,  # Ticketmaster API uses 0-based paging
+        'sort': 'date,asc',  # Sort by date ascending
+        'startDateTime': f"{start_date}T00:00:00Z",
+        'endDateTime': f"{end_date}T23:59:59Z",
+    }
+
+    # Log the API request for debugging
+    request_url = 'https://app.ticketmaster.com/discovery/v2/events.json' + '?' + '&'.join(f"{k}={v}" for k, v in params.items())
+    logger.info(f"Ticketmaster API request URL: {request_url}")
+
+    # Call the Ticketmaster API
+    try:
+        response = requests.get('https://app.ticketmaster.com/discovery/v2/events.json', params=params)
+        response.raise_for_status()  # Raise an error for bad status codes
+        data = response.json()
+        logger.info(f"Ticketmaster API response: {json.dumps(data, indent=2)}")  # Log the full response
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Ticketmaster API error: {str(e)}")
+        data = {'_embedded': {'events': []}}
+
+    # Log raw events before filtering
+    raw_events = data.get('_embedded', {}).get('events', [])
+    logger.info(f"Raw events before filtering: {json.dumps(raw_events, indent=2)}")
+
+    # Extract popular events and suggest prices
+    suggestions = []
+    major_venues = ['Co-op Live', 'AO Arena', 'Etihad Stadium', 'Old Trafford']
+    for event in raw_events:
+        # Check ticket price (if available)
+        price_info = event.get('priceRanges', [{}])[0]
+        min_price = price_info.get('min', 0)
+        max_price = price_info.get('max', 0)
+        ticket_price = max(min_price, max_price) if min_price or max_price else 0
+
+        # Check if sold out
+        is_sold_out = event.get('dates', {}).get('status', {}).get('code') == 'soldout'
+
+        # Check if at a major venue
+        venue_name = event.get('_embedded', {}).get('venues', [{}])[0].get('name', '') if event.get('_embedded', {}).get('venues') else 'Unknown Venue'
+        is_major_venue = any(major_venue in venue_name for major_venue in major_venues)
+
+        # Consider an event popular if sold out, price > £40, or at a major venue
+        is_popular = is_sold_out or ticket_price > 40 or is_major_venue
+
+        if is_popular:
+            # Suggest price increase (2x or 3x based on popularity level)
+            suggested_price = 150 if is_sold_out or is_major_venue else 100  # £150 for sold out/major venues, £100 otherwise
+            event_details = {
+                'name': event.get('name'),
+                'date': event.get('dates', {}).get('start', {}).get('localDate'),
+                'venue': venue_name,
+                'ticket_price': f"£{ticket_price}" if ticket_price else "N/A",
+                'suggested_price': f"£{suggested_price}",
+                'image': event.get('images', [{}])[0].get('url') if event.get('images') else None,  # Extract event image
+            }
+            suggestions.append(event_details)
+
+    total_pages = data.get('page', {}).get('totalPages', 1)
+    total_elements = data.get('page', {}).get('totalElements', 0)
+
+    # Limit page range to 5 pages around the current page
+    page_range = []
+    start_page = max(1, int(page) - 2)
+    end_page = min(total_pages, int(page) + 2)
+    for i in range(start_page, end_page + 1):
+        page_range.append(i)
+
+    context = {
+        'suggestions': suggestions,
+        'base_price': f"£{base_price}",
+        'average_hotel_price': f"£{average_hotel_price}",
+        'current_page': int(page),
+        'total_pages': total_pages,
+        'total_elements': total_elements,
+        'page_range': page_range,
+    }
+    return render(request, 'main/price_suggester.html', context)

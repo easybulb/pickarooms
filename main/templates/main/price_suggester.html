@@ -1,0 +1,209 @@
+<!-- main/templates/main/price_suggester.html -->
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}{% trans "Price Suggester" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .nav-link {
+        margin-bottom: 10px;
+    }
+    .nav-link {
+        display: inline-block;
+        margin-right: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .nav-link:hover {
+        text-decoration: underline;
+    }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .suggestion-list {
+        margin-top: 20px;
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+    .suggestion-item {
+        padding: 15px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .suggestion-item h3 {
+        margin: 0 0 5px;
+        font-size: 18px;
+        color: #333;
+    }
+    .suggestion-item p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #666;
+    }
+    .suggestion-item img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .info-box {
+        padding: 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-top: 20px;
+    }
+    .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    .pagination a {
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #007bff;
+    }
+    .pagination a:hover {
+        background: #f1f1f1;
+    }
+    .pagination .current {
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #007bff;
+        color: white;
+    }
+
+    /* Mobile-specific styles */
+    @media (max-width: 767px) {
+        .container {
+            padding: 10px;
+            margin-top: -15px;
+        }
+        .suggestion-list {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .suggestion-item {
+            padding: 10px;
+        }
+        .suggestion-item h3 {
+            font-size: 16px;
+        }
+        .suggestion-item p {
+            font-size: 16px;
+        }
+        .suggestion-item img {
+            max-width: 80%;
+            margin: 5px auto;
+            display: block;
+        }
+        .info-box {
+            padding: 8px;
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container h1 {
+            font-size: 1.5rem;
+            margin-top: -5px;
+        }
+        .suggestion-item h3 {
+            font-size: 18px;
+        }
+        .suggestion-item p {
+            font-size: 16px;
+        }
+        .suggestion-item img {
+            max-width: 100%;
+        }
+        .pagination a,
+        .pagination .current {
+            padding: 3px 6px;
+            font-size: 16px;
+        }
+        .info-box {
+            padding: 6px;
+            font-size: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="nav-link">
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
+        {% if 'main.can_give_access' in perms %}
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
+        {% endif %}
+        {% if 'main.manage_rooms' in perms %}
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
+            <a href="{% url 'price_suggester' %}" class="nav-link">{% trans "Price Suggester" %}</a>
+            <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
+        {% endif %}
+    </div>
+    <h1>{% trans "Price Suggester" %}</h1>
+    <p>{% trans "Suggestions for room price adjustments based on popular events near M11 3NP." %}</p>
+
+    <div class="info-box">
+        <p>{% trans "Base Room Price: " %}{{ base_price }}</p>
+        <p>{% trans "Average Hotel Price Near M11 3NP: " %}{{ average_hotel_price }}</p>
+    </div>
+
+    <!-- Suggestion List -->
+    <div class="suggestion-list">
+        {% if suggestions %}
+            {% for suggestion in suggestions %}
+                <div class="suggestion-item">
+                    <h3>{{ suggestion.name }}</h3>
+                    <p>{% trans "Date: " %}{{ suggestion.date }}</p>
+                    <p>{% trans "Venue: " %}{{ suggestion.venue }}</p>
+                    <p>{% trans "Ticket Price: " %}{{ suggestion.ticket_price }}</p>
+                    <p>{% trans "Suggested Room Price: " %}<strong>{{ suggestion.suggested_price }}</strong></p>
+                    {% if suggestion.image %}
+                        <img src="{{ suggestion.image }}" alt="{% trans 'Event Image' %}">
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>{% trans "No popular events found to suggest price changes." %}</p>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if current_page > 1 %}
+                <a href="?page={{ current_page|add:'-1' }}">{% trans "Previous" %}</a>
+            {% endif %}
+
+            {% for page_num in page_range %}
+                {% if page_num == current_page %}
+                    <span class="current">{{ page_num }}</span>
+                {% else %}
+                    <a href="?page={{ page_num }}">{{ page_num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if current_page < total_pages %}
+                <a href="?page={{ current_page|add:'1' }}">{% trans "Next" %}</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
