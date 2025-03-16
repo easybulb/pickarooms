@@ -85,6 +85,14 @@ TTLOCK_BASE_URL = os.environ.get("TTLOCK_BASE_URL", "https://euapi.sciener.com/v
 TTLOCK_OAUTH_BASE_URL = os.environ.get("TTLOCK_OAUTH_BASE_URL", "https://euapi.sciener.com")  # For OAuth endpoints
 TTLOCK_CALLBACK_URL = os.environ.get("TTLOCK_CALLBACK_URL", "https://pickarooms-3203aa136ccc.herokuapp.com/api/callback")
 
+# Ticketmaster API Configuration
+TICKETMASTER_CONSUMER_KEY = os.environ.get("TICKETMASTER_CONSUMER_KEY")
+TICKETMASTER_CONSUMER_SECRET = os.environ.get("TICKETMASTER_CONSUMER_SECRET")
+
+# Validate Ticketmaster credentials
+if not TICKETMASTER_CONSUMER_KEY or not TICKETMASTER_CONSUMER_SECRET:
+    raise ValueError("🚨 Ticketmaster API credentials (consumer_key or consumer_secret) are missing in env.py!")
+
 
 LOGGING = {
     'version': 1,

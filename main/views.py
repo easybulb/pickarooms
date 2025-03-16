@@ -2064,3 +2064,117 @@ def guest_details(request, guest_id):
         'all_reservations': all_reservations,
     }
     return render(request, 'main/guest_details.html', context)
+
+def event_finder(request):
+    """Display a page for guests to find events using the Ticketmaster API."""
+    # Define today at the top to avoid UnboundLocalError
+    today = date.today().strftime('%Y-%m-%d')
+
+    # Get parameters
+    city = request.GET.get('city', 'Manchester')  # Default to Manchester
+    keyword = request.GET.get('keyword', '')  # Search by event place, band, or musician
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
+    page = request.GET.get('page', 1)
+
+    # Set default date range if no dates are provided (from today to end of year)
+    if not start_date and not end_date:
+        start_date = today
+        end_date = '2025-12-31'  # Search up to end of 2025 to ensure events are found
+
+    # Build the API query
+    params = {
+        'apikey': settings.TICKETMASTER_CONSUMER_KEY,
+        'city': city,
+        'countryCode': 'GB',  # Restrict to UK
+        'size': 10,  # 10 events per page
+        'page': int(page) - 1,  # Ticketmaster API uses 0-based paging
+        'sort': 'date,asc',  # Sort by date ascending
+    }
+
+    # Add date filters
+    if start_date:
+        params['startDateTime'] = f"{start_date}T00:00:00Z"  # Start of day
+    if end_date:
+        params['endDateTime'] = f"{end_date}T23:59:59Z"  # End of day
+
+    # Add keyword search for event place, band, or musician
+    if keyword:
+        params['keyword'] = keyword
+
+    # On initial load (no search parameters), prioritize popular events
+    major_venues = ['Co-op Live', 'AO Arena', 'Etihad Stadium', 'Old Trafford']
+    if not keyword and not start_date == today and not end_date == '2025-12-31':
+        params['keyword'] = ','.join(major_venues)  # Search for major venues by default
+
+    # Log the API request for debugging
+    request_url = 'https://app.ticketmaster.com/discovery/v2/events.json' + '?' + '&'.join(f"{k}={v}" for k, v in params.items())
+    logger.info(f"Ticketmaster API request URL: {request_url}")
+
+    # Call the Ticketmaster API
+    try:
+        response = requests.get('https://app.ticketmaster.com/discovery/v2/events.json', params=params)
+        response.raise_for_status()  # Raise an error for bad status codes
+        data = response.json()
+        logger.info(f"Ticketmaster API response: {json.dumps(data, indent=2)}")  # Log the full response
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Ticketmaster API error: {str(e)}")
+        data = {'_embedded': {'events': []}, 'page': {'totalElements': 0, 'totalPages': 1}}
+
+    # Extract events and preprocess to filter popular events
+    events = []
+    for event in data.get('_embedded', {}).get('events', []):
+        # Check ticket price (if available)
+        price_info = event.get('priceRanges', [{}])[0]
+        min_price = price_info.get('min', 0)
+        max_price = price_info.get('max', 0)
+        ticket_price = max(min_price, max_price) if min_price or max_price else 0
+
+        # Check if sold out (status code or availability)
+        is_sold_out = event.get('dates', {}).get('status', {}).get('code') == 'soldout'
+
+        # Check if at a major venue
+        venue_name = event.get('_embedded', {}).get('venues', [{}])[0].get('name', '') if event.get('_embedded', {}).get('venues') else 'Unknown Venue'
+        is_major_venue = any(major_venue in venue_name for major_venue in major_venues)
+
+        # Consider an event popular if sold out, price > £40, or at a major venue
+        is_popular = is_sold_out or ticket_price > 40 or is_major_venue
+
+        # On initial load, only include popular events
+        if not keyword and start_date == today and end_date == '2025-12-31' and not is_popular:
+            continue
+
+        event_data = {
+            'name': event.get('name'),
+            'date': event.get('dates', {}).get('start', {}).get('localDate'),
+            'time': event.get('dates', {}).get('start', {}).get('localTime'),
+            'venue': venue_name,
+            'url': event.get('url'),
+            'image': event.get('images', [{}])[0].get('url') if event.get('images') else None,  # Extract event image
+            'is_sold_out': is_sold_out,
+            'ticket_price': f"£{ticket_price}" if ticket_price else "N/A",
+        }
+        events.append(event_data)
+
+    total_pages = data.get('page', {}).get('totalPages', 1)
+    total_elements = data.get('page', {}).get('totalElements', 0)
+
+    # Limit page range to 5 pages around the current page
+    page_range = []
+    start_page = max(1, int(page) - 2)
+    end_page = min(total_pages, int(page) + 2)
+    for i in range(start_page, end_page + 1):
+        page_range.append(i)
+
+    context = {
+        'events': events,
+        'city': city,
+        'keyword': keyword,
+        'start_date': start_date,
+        'end_date': end_date,
+        'current_page': int(page),
+        'total_pages': total_pages,
+        'total_elements': total_elements,
+        'page_range': page_range,
+    }
+    return render(request, 'main/event_finder.html', context)

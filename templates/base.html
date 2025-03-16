@@ -77,6 +77,7 @@
                 <li><a href="/about/" class="{% if request.path == '/about/' %}active{% endif %}">{% trans "About" %}</a></li>
                 <li><a href="/checkin/" class="{% if request.path == '/checkin/' %}active{% endif %}">{% trans "Check-In" %}</a></li>
                 <li><a href="/explore-manchester/" class="{% if request.path == '/explore-manchester/' %}active{% endif %}">{% trans "Explore Manchester" %}</a></li>
+                <li><a href="{% url 'event_finder' %}" class="{% if request.path == '/event-finder/' %}active{% endif %}">{% trans "Event Finder" %}</a></li>
                 <li><a href="{% url 'awards_reviews' %}" class="{% if request.path == '/awards_reviews/' %}active{% endif %}">{% trans "Awards & Reviews" %}</a></li>
                 <li><a href="/contact/" class="{% if request.path == '/contact/' %}active{% endif %}">{% trans "Contact Us" %}</a></li>
         
