@@ -38,6 +38,7 @@
     .id-upload-container {
         position: relative;
         cursor: pointer;
+        text-align: center; /* Center the Download text */
     }
     .id-upload-container img {
         max-width: 200px;
@@ -47,21 +48,15 @@
     .id-upload-container:hover img {
         transform: scale(1.05);
     }
-    .download-btn {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        display: none; /* Hidden by default, shown on hover */
-    }
-    .id-upload-container:hover .download-btn {
+    .download-link {
         display: block;
+        margin-top: 5px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .download-link:hover {
+        text-decoration: underline;
     }
     .modal {
         display: none;
@@ -84,6 +79,10 @@
         max-height: 90vh; /* Ensure it fits within viewport */
         overflow: auto;
         position: relative; /* Ensure close button positioning works */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     .modal-content img {
         max-width: 100%;
@@ -91,6 +90,16 @@
         border-radius: 8px;
         display: block; /* Ensure image is block-level for centering */
         margin: 0 auto; /* Center the image */
+    }
+    .modal-download-link {
+        display: block;
+        margin-top: 5px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .modal-download-link:hover {
+        text-decoration: underline;
     }
     .close {
         position: absolute;
@@ -169,15 +178,15 @@
         }
         .nav-link {
             margin-right: 0;
-            font-size: 14px;
+            font-size: 16px;
             padding: 5px 5px;
         }
         .id-upload-container img {
             max-width: 100px; /* Smaller images on mobile */
         }
-        .download-btn {
-            font-size: 10px;
-            padding: 3px 6px;
+        .download-link {
+            font-size: 12px;
+            margin-top: 3px;
         }
         .modal-content {
             max-width: 90%; /* Adjusted for better fit */
@@ -186,6 +195,10 @@
         }
         .modal-content img {
             max-height: 70vh;
+        }
+        .modal-download-link {
+            font-size: 12px;
+            margin-top: 3px;
         }
         .close {
             top: 2px; /* Further adjusted for mobile */
@@ -204,14 +217,14 @@
             font-size: 18px;
         }
         .guest-details p {
-            font-size: 12px;
+            font-size: 16px;
         }
         .id-upload-container img {
             max-width: 80px;
         }
-        .download-btn {
-            font-size: 8px;
-            padding: 2px 4px;
+        .download-link {
+            font-size: 10px;
+            margin-top: 2px;
         }
         .modal-content {
             max-width: 85%; /* Even tighter fit */
@@ -221,6 +234,10 @@
         }
         .modal-content img {
             max-height: 60vh;
+        }
+        .modal-download-link {
+            font-size: 10px;
+            margin-top: 2px;
         }
         .close {
             top: 0;
@@ -273,14 +290,15 @@
         <h2>{% trans "Uploaded IDs" %}</h2>
         <div class="id-uploads">
             {% for upload in id_uploads %}
-            <div class="id-upload-container" onclick="openModal('modal-{{ forloop.counter }}')">
-                <img src="{{ upload.id_image }}" alt="{% trans 'Uploaded ID' %}">
-                <button class="download-btn" onclick="downloadImage('{{ upload.id_image }}', '{{ upload.filename }}', event)">⬇</button>
+            <div class="id-upload-container">
+                <img src="{{ upload.id_image }}" alt="{% trans 'Uploaded ID' %}" onclick="openModal('modal-{{ forloop.counter }}')">
+                <a href="#" class="download-link" onclick="downloadImage('{{ upload.id_image }}', '{{ upload.filename }}', event)">Download</a>
             </div>
             <div id="modal-{{ forloop.counter }}" class="modal">
                 <div class="modal-content">
                     <span class="close" onclick="closeModal('modal-{{ forloop.counter }}')">×</span>
                     <img src="{{ upload.id_image }}" alt="{% trans 'Enlarged Uploaded ID' %}">
+                    <a href="#" class="modal-download-link" onclick="downloadImage('{{ upload.id_image }}', '{{ upload.filename }}', event)">Download</a>
                 </div>
             </div>
             {% endfor %}
@@ -308,7 +326,7 @@
                     <tr>
                         <td>{{ reservation.reservation_number }}</td>
                         <td>{{ reservation.check_in_date }} ({% if reservation.early_checkin_time %}{{ reservation.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %})</td>
-                        <td>{{ reservation.check_out_date }} ({% if reservation.late_checkout_time %}{{ reservation.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %})</td>
+                        <td>{{ reservation.check_out_date }} ({% if reservation.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %})</td>
                         <td>{{ reservation.assigned_room.name }}</td>
                         <td>{{ reservation.is_archived|yesno:"Yes,No" }}</td>
                     </tr>

@@ -35,8 +35,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 import os
+import time as time_module
 import cloudinary
 import cloudinary.uploader
+import cloudinary.api
+from cloudinary.utils import cloudinary_url
 from django.core.files.storage import default_storage
 from cloudinary.uploader import upload as cloudinary_upload
 
@@ -2030,17 +2033,34 @@ def guest_details(request, guest_id):
     # Fetch all reservations (past and present) for this guest
     all_reservations = Guest.objects.filter(full_name__iexact=guest.full_name).order_by('-check_in_date')
 
-    # Extract filenames for downloads
-    id_uploads_with_filenames = [
-        {
-            'id_image': upload.id_image,
-            'filename': os.path.basename(upload.id_image) if upload.id_image else 'downloaded-image.png'
-        } for upload in id_uploads
-    ]
+    # Generate signed URLs for each ID image
+    id_uploads_with_filenames = []
+    for upload in id_uploads:
+        if upload.id_image:
+            # Extract the public ID from the URL (e.g., "guest_ids/2025/3/15/ibvkul4hkv3ew4lvruzd")
+            public_id_parts = upload.id_image.split('/image/upload/')[1].split('.')[0]  # Adjust based on URL structure
+            public_id = public_id_parts  # The part after /image/upload/ up to the extension
+            # Generate a signed URL with an expiration time (e.g., 1 hour = 3600 seconds)
+            signed_url, _ = cloudinary_url(
+                public_id,
+                sign_url=True,
+                resource_type="image",
+                expires_at=int(time_module.time() + 3600),  # Use time_module.time()
+                secure=True
+            )
+            id_uploads_with_filenames.append({
+                'id_image': signed_url,  # Use the signed URL
+                'filename': os.path.basename(upload.id_image) if upload.id_image else 'downloaded-image.png'
+            })
+        else:
+            id_uploads_with_filenames.append({
+                'id_image': '',
+                'filename': 'downloaded-image.png'
+            })
 
     context = {
         'guest': guest,
-        'id_uploads': id_uploads_with_filenames,  # Pass dictionary with filename
+        'id_uploads': id_uploads_with_filenames,  # Pass dictionary with signed URLs and filename
         'all_reservations': all_reservations,
     }
     return render(request, 'main/guest_details.html', context)
