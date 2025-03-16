@@ -252,11 +252,6 @@
         {% endif %}
     </form>
 
-    <div class="info-box">
-        <p>{% trans "Base Room Price: " %}{{ base_price }}</p>
-        <p>{% trans "Average Hotel Price Near M11 3NP: " %}{{ average_hotel_price }}</p>
-    </div>
-
     <!-- Suggestion List -->
     <div class="suggestion-list">
         {% if suggestions %}
@@ -273,7 +268,11 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p>{% trans "No popular events found to suggest price changes." %}</p>
+            {% if show_sold_out %}
+                <p>{% trans "No sold-out events found for the given criteria." %}</p>
+            {% else %}
+                <p>{% trans "No popular events found to suggest price changes." %}</p>
+            {% endif %}
         {% endif %}
     </div>
 
