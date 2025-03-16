@@ -24,6 +24,55 @@
         margin: 0 auto;
         padding: 20px;
     }
+    .search-form {
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+    }
+    .search-form label {
+        font-weight: bold;
+        color: #333;
+        margin-right: 5px;
+    }
+    .search-form input[type="text"],
+    .search-form input[type="date"],
+    .search-form input[type="submit"] {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    .search-form button {
+        padding: 8px 16px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .search-form button:hover {
+        background: #0056b3;
+    }
+    .filter-form {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .filter-form button {
+        padding: 8px 16px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .filter-form button:hover {
+        background: #218838;
+    }
     .suggestion-list {
         margin-top: 20px;
         display: grid;
@@ -90,6 +139,29 @@
             padding: 10px;
             margin-top: -15px;
         }
+        .search-form {
+            flex-direction: column;
+            gap: 5px;
+        }
+        .search-form label {
+            font-size: 16px;
+        }
+        .search-form input[type="text"],
+        .search-form input[type="date"],
+        .search-form input[type="submit"] {
+            width: 95%;
+            font-size: 16px;
+            padding: 6px;
+        }
+        .search-form button {
+            width: 100%;
+            font-size: 16px;
+            padding: 6px 12px;
+        }
+        .filter-form button {
+            font-size: 16px;
+            padding: 6px 12px;
+        }
         .suggestion-list {
             grid-template-columns: 1fr;
             gap: 1rem;
@@ -149,7 +221,7 @@
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
         {% endif %}
         {% if 'main.manage_rooms' in perms %}
-        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
+            <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
         {% endif %}
         {% if user.is_superuser %}
             <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
@@ -158,7 +230,27 @@
         {% endif %}
     </div>
     <h1>{% trans "Price Suggester" %}</h1>
-    <p>{% trans "Suggestions for room price adjustments based on popular events near M11 3NP." %}</p>
+    <p>{% trans "Suggestions for room price adjustments based on popular events in Manchester." %}</p>
+
+    <!-- Search Form -->
+    <form method="get" class="search-form">
+        <label for="keyword">{% trans "Event Location" %}:</label>
+        <input type="text" name="keyword" value="{{ keyword }}" placeholder="{% trans 'e.g., Co-op Live, AO Arena' %}">
+        <label for="start_date">{% trans "Start Date" %}:</label>
+        <input type="date" name="start_date" value="{{ start_date }}">
+        <label for="end_date">{% trans "End Date" %}:</label>
+        <input type="date" name="end_date" value="{{ end_date }}">
+        <button type="submit">{% trans "Search" %}</button>
+    </form>
+
+    <!-- Filter Form for Sold-Out Events -->
+    <form method="get" class="filter-form">
+        {% if show_sold_out %}
+            <button type="submit" name="show_sold_out" value="">{% trans "Show All Popular Events" %}</button>
+        {% else %}
+            <button type="submit" name="show_sold_out" value="1">{% trans "Show Sold-Out Events" %}</button>
+        {% endif %}
+    </form>
 
     <div class="info-box">
         <p>{% trans "Base Room Price: " %}{{ base_price }}</p>
@@ -189,19 +281,19 @@
     {% if total_pages > 1 %}
         <div class="pagination">
             {% if current_page > 1 %}
-                <a href="?page={{ current_page|add:'-1' }}">{% trans "Previous" %}</a>
+                <a href="?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'-1' }}">{% trans "Previous" %}</a>
             {% endif %}
 
             {% for page_num in page_range %}
                 {% if page_num == current_page %}
                     <span class="current">{{ page_num }}</span>
                 {% else %}
-                    <a href="?page={{ page_num }}">{{ page_num }}</a>
+                    <a href="?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ page_num }}">{{ page_num }}</a>
                 {% endif %}
             {% endfor %}
 
             {% if current_page < total_pages %}
-                <a href="?page={{ current_page|add:'1' }}">{% trans "Next" %}</a>
+                <a href="?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'1' }}">{% trans "Next" %}</a>
             {% endif %}
         </div>
     {% endif %}

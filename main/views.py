@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.utils.timezone import now, localtime
 from django.utils import timezone
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from django.core.mail import send_mail
 from django.http import Http404, JsonResponse
 from django.db import IntegrityError
@@ -2189,25 +2189,29 @@ def price_suggester(request):
     # Manually collected average hotel price near M11 3NP (e.g., from ibis Budget, Dakota Manchester)
     average_hotel_price = 80  # Example value; adjust as needed
 
-    # Default date range (from today to end of year)
-    today = date.today().strftime('%Y-%m-%d')
-    start_date = today
-    end_date = '2025-12-31'
-
-    # Get pagination parameter
+    # Default date range (from today to 365 days from now)
+    today = date.today()
+    start_date = request.GET.get('start_date', today.strftime('%Y-%m-%d'))
+    end_date = request.GET.get('end_date', (today + timedelta(days=365)).strftime('%Y-%m-%d'))
+    keyword = request.GET.get('keyword', '')  # Search by event location (e.g., Co-op Live, AO Arena)
+    show_sold_out = request.GET.get('show_sold_out', '')  # Filter for sold-out events
     page = request.GET.get('page', 1)
 
-    # Build the API query for events in Manchester (broader search than postalCode)
+    # Build the API query for events in Manchester
     params = {
         'apikey': settings.TICKETMASTER_CONSUMER_KEY,
-        'city': 'Manchester',  # Use city instead of postalCode for broader search
+        'city': 'Manchester',  # Focus on Manchester
         'countryCode': 'GB',  # Restrict to UK
-        'size': 10,  # 10 events per page (reduced for pagination)
+        'size': 10,  # 10 events per page
         'page': int(page) - 1,  # Ticketmaster API uses 0-based paging
         'sort': 'date,asc',  # Sort by date ascending
         'startDateTime': f"{start_date}T00:00:00Z",
         'endDateTime': f"{end_date}T23:59:59Z",
     }
+
+    # Add keyword search for event location
+    if keyword:
+        params['keyword'] = keyword
 
     # Log the API request for debugging
     request_url = 'https://app.ticketmaster.com/discovery/v2/events.json' + '?' + '&'.join(f"{k}={v}" for k, v in params.items())
@@ -2247,18 +2251,25 @@ def price_suggester(request):
         # Consider an event popular if sold out, price > £40, or at a major venue
         is_popular = is_sold_out or ticket_price > 40 or is_major_venue
 
-        if is_popular:
-            # Suggest price increase (2x or 3x based on popularity level)
-            suggested_price = 150 if is_sold_out or is_major_venue else 100  # £150 for sold out/major venues, £100 otherwise
-            event_details = {
-                'name': event.get('name'),
-                'date': event.get('dates', {}).get('start', {}).get('localDate'),
-                'venue': venue_name,
-                'ticket_price': f"£{ticket_price}" if ticket_price else "N/A",
-                'suggested_price': f"£{suggested_price}",
-                'image': event.get('images', [{}])[0].get('url') if event.get('images') else None,  # Extract event image
-            }
-            suggestions.append(event_details)
+        # If show_sold_out is selected, only include sold-out events
+        if show_sold_out and not is_sold_out:
+            continue
+
+        # Otherwise, filter by popularity
+        if not show_sold_out and not is_popular:
+            continue
+
+        # Suggest price increase (2x or 3x based on popularity level)
+        suggested_price = 150 if is_sold_out or is_major_venue else 100  # £150 for sold out/major venues, £100 otherwise
+        event_details = {
+            'name': event.get('name'),
+            'date': event.get('dates', {}).get('start', {}).get('localDate'),
+            'venue': venue_name,
+            'ticket_price': f"£{ticket_price}" if ticket_price else "N/A",
+            'suggested_price': f"£{suggested_price}",
+            'image': event.get('images', [{}])[0].get('url') if event.get('images') else None,  # Extract event image
+        }
+        suggestions.append(event_details)
 
     total_pages = data.get('page', {}).get('totalPages', 1)
     total_elements = data.get('page', {}).get('totalElements', 0)
@@ -2274,6 +2285,10 @@ def price_suggester(request):
         'suggestions': suggestions,
         'base_price': f"£{base_price}",
         'average_hotel_price': f"£{average_hotel_price}",
+        'start_date': start_date,
+        'end_date': end_date,
+        'keyword': keyword,
+        'show_sold_out': show_sold_out,
         'current_page': int(page),
         'total_pages': total_pages,
         'total_elements': total_elements,
