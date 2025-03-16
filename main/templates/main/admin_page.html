@@ -36,6 +36,7 @@
         {% endif %}
         {% if user.is_superuser %}
             <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
+            <a href="{% url 'price_suggester' %}" class="nav-link">{% trans "Price Suggester" %}</a>
             <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
         {% endif %}
     </div>
