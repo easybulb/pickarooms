@@ -44,6 +44,7 @@ from cloudinary.utils import cloudinary_url
 from django.core.files.storage import default_storage
 from cloudinary.uploader import upload as cloudinary_upload
 
+# Set up logging for TTLock interactions
 logger = logging.getLogger('main')
 
 def home(request):
