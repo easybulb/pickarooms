@@ -53,7 +53,6 @@
         {% else %}
             <p class="pin-entry"><strong>{% trans "PIN (Front Door & Room):" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
             <div class="quick-access">
-                <!-- <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button> -->
                 <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
             </div>
         {% endif %}
