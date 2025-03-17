@@ -26,11 +26,8 @@
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>{% trans "Full Name" %}</th>
-                    <th>{% trans "Phone Number" %}</th>
-                    <th>{% trans "PIN (Front Door & Room)" %}</th> <!-- Updated header -->
-                    <th>{% trans "Check-In Date" %}</th>
-                    <th>{% trans "Check-Out Date" %}</th>
+                    <th>{% trans "Guest Details" %}</th>
+                    <th>{% trans "Stay Dates" %}</th>
                     <th>{% trans "Assigned Room" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>
@@ -45,29 +42,27 @@
                         {% endif %}
                         <br>
                         <small>{% trans "Res #:" %} {{ guest.reservation_number }}</small>
-                    </td>                    
-                    <td>{{ guest.phone_number|default:"Not provided" }}</td>
-                    <td>
-                        {% if guest.front_door_pin %}
-                            {{ guest.front_door_pin }} <span class="expired-pin">({% trans "Expired" %})</span>
-                        {% else %}
-                            <span class="no-pin">{% trans "N/A" %}</span>
-                        {% endif %}
+                        <br>
+                        <small>{% trans "Tel:" %} {{ guest.phone_number|default:"Not provided" }}</small>
+                        <br>
+                        <small>{% trans "Email:" %} {{ guest.email|default:"Not provided" }}</small>
                     </td>
-                    <td>{{ guest.check_in_date }}</td>
-                    <td>{{ guest.check_out_date }}</td>
+                    <td>
+                        {{ guest.check_in_date }}<br>{{ guest.check_out_date }} <!-- Stack dates vertically -->
+                    </td>
                     <td>{{ guest.assigned_room.name }}</td>
                     <td>
                         <button class="reassign-btn" 
                             data-name="{{ guest.full_name }}"
-                            data-phone="{{ guest.phone_number }}">
+                            data-phone="{{ guest.phone_number|default:'' }}"
+                            data-email="{{ guest.email|default:'' }}">
                             {% trans "Reassign" %}
                         </button>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7">{% trans "No past guests found." %}</td> <!-- Updated colspan -->
+                    <td colspan="4">{% trans "No past guests found." %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -100,14 +95,15 @@
             button.addEventListener("click", function () {
                 const name = this.getAttribute("data-name");
                 const phone = this.getAttribute("data-phone");
+                const email = this.getAttribute("data-email");
 
                 localStorage.setItem("reassign_name", name);
                 localStorage.setItem("reassign_phone", phone);
+                localStorage.setItem("reassign_email", email);
 
                 window.location.href = "{% url 'admin_page' %}#add-guest-form";
             });
         });
     });
 </script>
-
 {% endblock %}

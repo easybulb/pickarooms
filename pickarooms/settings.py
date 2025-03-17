@@ -93,6 +93,15 @@ TICKETMASTER_CONSUMER_SECRET = os.environ.get("TICKETMASTER_CONSUMER_SECRET")
 if not TICKETMASTER_CONSUMER_KEY or not TICKETMASTER_CONSUMER_SECRET:
     raise ValueError("🚨 Ticketmaster API credentials (consumer_key or consumer_secret) are missing in env.py!")
 
+# Twilio Configuration for SMS
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+
+# Validate Twilio credentials
+if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
+    raise ValueError("🚨 Twilio API credentials (account_sid, auth_token, or phone_number) are missing in env.py!")
+
 
 LOGGING = {
     'version': 1,

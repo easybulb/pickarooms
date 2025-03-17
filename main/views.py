@@ -25,6 +25,7 @@ from langdetect import detect
 import uuid
 import pytz
 import datetime
+import re
 from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload
 from .ttlock_utils import TTLockClient
 import logging
@@ -605,7 +606,7 @@ def admin_page(request):
         # Determine the check-out datetime based on late_checkout_time or default to 11:00 AM
         check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
         check_out_datetime = timezone.make_aware(
-            datetime.datetime.combine(guest.check_out_date, check_out_time),  # Fixed: Use datetime.datetime.combine
+            datetime.datetime.combine(guest.check_out_date, check_out_time),
             datetime.timezone.utc
         ).astimezone(uk_timezone)
 
@@ -666,6 +667,7 @@ def admin_page(request):
     if request.method == 'POST':
         reservation_number = request.POST.get('reservation_number', '').strip()
         phone_number = request.POST.get('phone_number', '').strip() or None
+        email = request.POST.get('email', '').strip() or None  # New email field from form
         full_name = request.POST.get('full_name', 'Guest').strip()
         room_id = request.POST.get('room')
 
@@ -677,6 +679,16 @@ def admin_page(request):
         if not reservation_number:
             messages.error(request, "Reservation number is required.")
             return redirect('admin_page')
+
+        # Normalize and validate phone number
+        if phone_number:
+            if not re.match(r'^\+?\d{9,15}$', phone_number):  # Allow 9-15 digits with optional +
+                messages.error(request, "Phone number must be in international format (e.g., +12025550123) or a valid local number (e.g., 07123456789 for UK).")
+                return redirect('admin_page')
+            # Only normalize UK numbers starting with 0 to +44, leave other international numbers intact
+            if phone_number.startswith('0') and len(phone_number) == 11 and phone_number[1] in '7':  # UK mobile numbers
+                phone_number = '+44' + phone_number[1:]
+            # Do not modify numbers with existing country codes
 
         try:
             room = Room.objects.get(id=room_id)
@@ -763,8 +775,9 @@ def admin_page(request):
                 # Create the guest with the generated PIN
                 guest = Guest.objects.create(
                     full_name=full_name,
-                    reservation_number=reservation_number,
                     phone_number=phone_number,
+                    email=email,
+                    reservation_number=reservation_number,
                     check_in_date=check_in_date,
                     check_out_date=check_out_date,
                     assigned_room=room,
@@ -772,7 +785,7 @@ def admin_page(request):
                     front_door_pin=pin,
                     front_door_pin_id=keyboard_pwd_id_front,
                     room_pin_id=keyboard_pwd_id_room,
-                    late_checkout_time=check_out_time if check_out_time != time(11, 0) else None,  # Only save if different from default
+                    late_checkout_time=check_out_time if check_out_time != time(11, 0) else None,
                 )
                 messages.success(request, f"Guest {guest.full_name} added successfully! PIN (for both front door and room): {pin}. They can also unlock the doors remotely during check-in or from the room detail page.")
             except Exception as e:
@@ -830,6 +843,8 @@ def unauthorized(request):
 def edit_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
     original_room_id = guest.assigned_room.id  # Store original room ID for comparison
+    original_phone_number = guest.phone_number  # Store original phone number
+    original_email = guest.email  # Store original email
 
     if request.method == 'POST':
         if 'regenerate_pin' in request.POST:
@@ -949,7 +964,8 @@ def edit_guest(request, guest_id):
 
             guest.full_name = request.POST.get('full_name')
             guest.reservation_number = new_reservation_number
-            guest.phone_number = request.POST.get('phone_number')
+            guest.phone_number = request.POST.get('phone_number') or None
+            guest.email = request.POST.get('email') or None  # Update email field
             check_in_date = date.fromisoformat(request.POST.get('check_in_date'))
             check_out_date = date.fromisoformat(request.POST.get('check_out_date'))
             new_room_id = request.POST.get('room')
@@ -1080,11 +1096,6 @@ def edit_guest(request, guest_id):
                         messages.error(request, f"Failed to generate new PIN after room change: {str(e)}")
                         return redirect('edit_guest', guest_id=guest.id)
 
-            # Update dates and room
-            guest.check_in_date = check_in_date
-            guest.check_out_date = check_out_date
-            guest.assigned_room_id = new_room_id
-
             # Handle date changes (similar to previous logic)
             if (guest.check_in_date != check_in_date or guest.check_out_date != check_out_date):
                 if guest.front_door_pin_id or guest.room_pin_id:
@@ -1184,6 +1195,14 @@ def edit_guest(request, guest_id):
                             guest.room_pin_id = None
                             guest.save()
 
+            # Trigger welcome message if phone number or email is newly added
+            if (not original_phone_number and guest.phone_number) or (not original_email and guest.email):
+                if guest.phone_number and guest.email:
+                    guest.send_welcome_message()
+
+            guest.check_in_date = check_in_date
+            guest.check_out_date = check_out_date
+            guest.assigned_room_id = new_room_id
             guest.save()
             AuditLog.objects.create(
                 user=request.user,
