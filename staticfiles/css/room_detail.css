@@ -873,6 +873,7 @@ body {
     display: none;
     width: 220px;
     border: 1px solid #d8b4fe;
+    z-index: 1000;
 }
 
 .chat-box.show {
