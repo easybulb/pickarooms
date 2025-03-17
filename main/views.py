@@ -24,6 +24,7 @@ from django.utils.safestring import mark_safe
 from langdetect import detect
 import uuid
 import pytz
+import datetime
 import re
 from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload, PopularEvent
 from .ttlock_utils import TTLockClient
@@ -43,7 +44,6 @@ from cloudinary.utils import cloudinary_url
 from django.core.files.storage import default_storage
 from cloudinary.uploader import upload as cloudinary_upload
 
-# Set up logging for TTLock interactions
 logger = logging.getLogger('main')
 
 def home(request):
@@ -2291,7 +2291,7 @@ def price_suggester(request):
 
         # Check if this event is new and notify if it is
         event_id = event_details['event_id']
-        event_date = datetime.strptime(event_details['date'], '%Y-%m-%d').date() if event_details['date'] else None
+        event_date = datetime.datetime.strptime(event_details['date'], '%Y-%m-%d').date() if event_details['date'] else None
         if event_date:
             try:
                 # Check if the event already exists in the database
