@@ -841,7 +841,7 @@ body {
     position: fixed;
     bottom: 15px;
     right: 15px;
-    background: #25D366;
+    background: #2f9856;
     color: white;
     padding: 10px 16px;
     border-radius: 50px;
@@ -853,6 +853,7 @@ body {
     display: flex;
     align-items: center;
     gap: 4px;
+    z-index: 1000;
 }
 
 #chat-button:hover {
@@ -889,7 +890,7 @@ body {
 
 .chat-link {
     display: inline-block;
-    background: #25D366;
+    background: #2f9856;
     color: white;
     padding: 6px 12px;
     border-radius: 10px;
@@ -1333,7 +1334,7 @@ body {
     }
 
     .close {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
         top: 6px;
         right: 10px;
     }
