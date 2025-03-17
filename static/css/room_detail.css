@@ -769,7 +769,6 @@ body {
     color: #475569;
     margin: 8px 0;
     padding: 6px 10px;
-    background: #f8fafc;
     border-radius: 6px;
 }
 
@@ -798,7 +797,7 @@ body {
 }
 
 .quick-access button {
-    background: linear-gradient(135deg, #34d399, #10b981);
+    background: linear-gradient(135deg, #289c71, #086144);
     color: white;
     padding: 8px 14px;
     border: none;
@@ -820,7 +819,7 @@ body {
 }
 
 .quick-access button:first-child {
-    background: linear-gradient(135deg, #facc15, #eab308);
+    background: linear-gradient(135deg, #c5a113, #c19308);
 }
 
 .quick-access button:first-child:hover {
@@ -1147,7 +1146,6 @@ body {
         border: 2px solid #fde68a;
         font-weight: 500;
         margin-top: 10px;
-        margin-bottom: 40px;
     }
 
     .section-nav {
@@ -1166,7 +1164,6 @@ body {
 
     .video-container {
         height: 250px;
-        margin-top: -25px;
     }
 
     .play-button {
