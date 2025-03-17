@@ -268,7 +268,7 @@ body {
     gap: 6px;
     padding: 8px;
     background: #d8b4fe;
-    border-bottom: 2px solid #7921d6 ; /* #fff7e6 */
+    border-bottom: 2px solid #7921d6; /* #fff7e6 */
     position: sticky;
     top: 0;
     z-index: 10;
@@ -790,7 +790,7 @@ body {
 /* Quick Access */
 .quick-access {
     display: flex;
-    justify-content:center;
+    justify-content: center;
     gap: 8px;
     margin-top: 15px;
     padding-top: 10px;
@@ -896,7 +896,7 @@ body {
     border-radius: 10px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 1rem; /* Explicitly set to 16px */
+    font-size: 1rem; /* Increased from 0.9rem to 16px */
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -909,66 +909,72 @@ body {
     box-shadow: 0 3px 12px rgba(37, 211, 102, 0.3);
 }
 
-    /* Existing styles from room_detail.css assumed to be loaded */
-    /* Add loading overlay styles */
-    .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-    .loading-text {
-        color: white;
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 20px;
-        border-radius: 8px;
-    }
-    .loading-dots::after {
-        content: '...';
-        animation: dots 1.5s infinite;
-    }
-    @keyframes dots {
-        0% { content: '.'; }
-        33% { content: '..'; }
-        66% { content: '...'; }
-        100% { content: '.'; }
-    }
-    /* Tweak modal button styling */
-    #unlock-help-modal .btn-unlock {
-        margin: 5px;
-        display: inline-block;
-    }
-    /* Welcome info boxes */
-    .welcome-info {
-        text-align: left;
-        background: #f8fafc;
-        padding: 2px 22px;
-        border-radius: 8px;
-        margin: 5px 0;
-        border: 1px solid #d8b4fe;
-        margin-top: 15px;
-    }
-    .welcome-rules {
-        text-align: center;
-        color: #d97706;
-        background: #fefce8;
-        border: 2px solid #fde68a;
-        font-weight: 500;
-        margin-top: 10px;
-    }
+/* Existing styles from room_detail.css assumed to be loaded */
+/* Add loading overlay styles */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
 
-    .welcome-info {
-        padding: 2px 15px;
-    }
+.loading-text {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.loading-dots::after {
+    content: '...';
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+    100% { content: '.'; }
+}
+
+/* Tweak modal button styling */
+#unlock-help-modal .btn-unlock {
+    margin: 5px;
+    display: inline-block;
+}
+
+/* Welcome info boxes */
+.welcome-info {
+    text-align: left;
+    background: #f8fafc;
+    padding: 2px 22px;
+    border-radius: 8px;
+    margin: 5px 0;
+    border: 1px solid #d8b4fe;
+    margin-top: 15px;
+}
+
+.welcome-rules {
+    text-align: center;
+    color: #d97706;
+    background: #fefce8;
+    border: 2px solid #fde68a;
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.welcome-info {
+    padding: 2px 15px;
+}
 
 /* Animations */
 @keyframes fadeIn {
@@ -990,6 +996,78 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    /* Left-align Access Section content on mobile */
+    .access-section {
+        text-align: left !important;
+    }
+
+    .access-section .welcome-section {
+        text-align: left !important;
+        padding: 0px 20px;
+        margin: 0px auto;
+    }
+
+    .access-section .welcome-header {
+        font-size: 1.3rem;
+        margin: 0 0 3px;
+        justify-content: flex-start;
+    }
+
+    .access-section .welcome-header span {
+        margin-top: 10px;
+    }
+
+    .access-section .room-name {
+        font-size: 1.4rem;
+    }
+
+    .access-section .no-smoking-icon {
+        width: 33px;
+        height: 33px;
+        margin-left: 4px;
+        margin-top: 10px;
+    }
+
+    .access-section .welcome-greeting {
+        font-size: 1rem;
+        margin: 0 0 3px;
+        color: #475569; /* Darker color for better contrast */
+    }
+
+    .access-section .pin-wait {
+        font-size: 1rem;
+        padding: 4px 8px;
+        margin: 3px 0;
+        display: inline-block;
+    }
+
+    .access-section .pin-entry {
+        font-size: 1rem; /* Increased from 0.85rem to 16px */
+        margin: 1px 0;
+        gap: 4px;
+        justify-content: flex-start;
+    }
+
+    .access-section .pin-code {
+        font-size: 1.3rem;
+        padding: 1px 6px;
+        margin-bottom: 1px;
+    }
+
+    .access-section .quick-access {
+        gap: 6px;
+        margin-top: -5px;
+        padding-top: 8px;
+        justify-content: flex-start;
+    }
+
+    .access-section .quick-access button {
+        padding: 6px 10px; /* Increased padding for better tap target */
+        font-size: 1rem; /* Increased from 0.85rem to 16px */
+        font-weight: 400;
+    }
+
+    /* Other mobile styles (unchanged) */
     .welcome-section {
         padding: 0px 10px;
         margin: 0px auto;
@@ -1048,8 +1126,28 @@ body {
         padding: 6px 10px; /* Increased padding for better tap target */
         font-size: 1rem; /* Increased from 0.8rem to 16px */
     }
+
+    .welcome-info {
+        margin: 5px 0;
+        padding: 2px 0px;
+        border-radius: 0px;
+        border: 0px;
+        margin-bottom: 30px;
+    }
+
     .welcome-info p {
-        margin: 5px 0; /* Sets top and bottom margin to 5px, horizontal to 0 */
+        margin: 1px 0;
+        font-size: 14px;
+    }
+
+    .welcome-rules {
+        text-align: center;
+        color: #d97706;
+        background: #fefce8;
+        border: 2px solid #fde68a;
+        font-weight: 500;
+        margin-top: 10px;
+        margin-bottom: 40px;
     }
 
     .section-nav {
@@ -1058,6 +1156,7 @@ body {
         padding: 8px;
         flex-wrap: wrap;
         justify-content: center;
+        margin-bottom: -10px;
     }
 
     .tab-btn {
@@ -1150,6 +1249,7 @@ body {
         gap: 6px;
         margin-top: -5px;
         padding-top: 8px;
+        justify-content: flex-start;
     }
 
     .quick-access button {
