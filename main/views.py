@@ -2298,7 +2298,7 @@ def price_suggester(request):
                 # Check if the event already exists in the database
                 existing_event = PopularEvent.objects.filter(event_id=event_id).first()
                 if not existing_event:
-                    # New event, save it and send email
+                    # New event, save it to the database
                     popular_event = PopularEvent(
                         event_id=event_id,
                         name=event_details['name'],
@@ -2306,9 +2306,15 @@ def price_suggester(request):
                         venue=event_details['venue'],
                         ticket_price=event_details['ticket_price'],
                         suggested_price=event_details['suggested_price'],
+                        email_sent=False,  # Ensure email_sent is False initially
                     )
                     popular_event.save()
+                    logger.info(f"Saved new popular event: {event_details['name']} (ID: {event_id})")
+                else:
+                    popular_event = existing_event
 
+                # Send email only if the event hasn't had an email sent yet
+                if not popular_event.email_sent:
                     # Send email notification
                     subject = "New Popular Event Added - Price Suggester"
                     email_message = (
@@ -2331,6 +2337,10 @@ def price_suggester(request):
                             fail_silently=False,
                         )
                         logger.info(f"Sent email notification for new popular event: {event_details['name']}")
+                        # Update email_sent flag
+                        popular_event.email_sent = True
+                        popular_event.save()
+                        logger.info(f"Updated email_sent flag for event {event_id}")
                     except Exception as e:
                         logger.error(f"Failed to send email notification for new popular event: {str(e)}")
 
