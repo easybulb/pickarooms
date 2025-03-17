@@ -104,9 +104,9 @@ class Guest(models.Model):
         except Exception as e:
             logger.error(f"Failed to send welcome email to {self.email}: {str(e)}")
 
-        # Send SMS via Twilio with detailed logging
+        # Send SMS via Twilio with redacted logging
         try:
-            logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID={settings.TWILIO_ACCOUNT_SID}, From={settings.TWILIO_PHONE_NUMBER}")
+            logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
             client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
             message = client.messages.create(
                 body=sms_message,
@@ -149,9 +149,9 @@ class Guest(models.Model):
         except Exception as e:
             logger.error(f"Failed to send cancellation email to {self.email}: {str(e)}")
 
-        # Send SMS via Twilio with detailed logging
+        # Send SMS via Twilio with redacted logging
         try:
-            logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID={settings.TWILIO_ACCOUNT_SID}, From={settings.TWILIO_PHONE_NUMBER}")
+            logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
             client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
             message = client.messages.create(
                 body=sms_message,
