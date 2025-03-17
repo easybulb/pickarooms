@@ -819,11 +819,11 @@ body {
 }
 
 .quick-access button:first-child {
-    background: linear-gradient(135deg, #c5a113, #c19308);
+    background: linear-gradient(135deg, #10b981, #059669);
 }
 
 .quick-access button:first-child:hover {
-    background: linear-gradient(135deg, #eab308, #ca8a04);
+    background: linear-gradient(135deg, #10b981, #059669);
 }
 
 /* Street Image */
@@ -951,6 +951,7 @@ body {
 #unlock-help-modal .btn-unlock {
     margin: 5px;
     display: inline-block;
+    background: linear-gradient(135deg, #10b981, #059669);
 }
 
 /* Welcome info boxes */
