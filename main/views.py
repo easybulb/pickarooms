@@ -24,9 +24,8 @@ from django.utils.safestring import mark_safe
 from langdetect import detect
 import uuid
 import pytz
-import datetime
 import re
-from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload
+from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload, PopularEvent
 from .ttlock_utils import TTLockClient
 import logging
 from django.views.decorators.csrf import csrf_exempt
@@ -2241,7 +2240,7 @@ def price_suggester(request):
         response = requests.get('https://app.ticketmaster.com/discovery/v2/events.json', params=params)
         response.raise_for_status()  # Raise an error for bad status codes
         data = response.json()
-        logger.info(f"Ticketmaster API response: {json.dumps(data, indent=2)}")  # Log the full response
+        logger.info(f"Ticketmaster API response: {json.dumps(data, indent=2)}")
     except requests.exceptions.RequestException as e:
         logger.error(f"Ticketmaster API error: {str(e)}")
         data = {'_embedded': {'events': []}}
@@ -2281,13 +2280,64 @@ def price_suggester(request):
         # Suggest price increase (2x or 3x based on popularity level)
         suggested_price = 150 if is_sold_out or is_major_venue else 100  # £150 for sold out/major venues, £100 otherwise
         event_details = {
+            'event_id': event.get('id'),  # Ticketmaster event ID
             'name': event.get('name'),
             'date': event.get('dates', {}).get('start', {}).get('localDate'),
             'venue': venue_name,
             'ticket_price': f"£{ticket_price}" if ticket_price else "N/A",
             'suggested_price': f"£{suggested_price}",
-            'image': event.get('images', [{}])[0].get('url') if event.get('images') else None,  # Extract event image
+            'image': event.get('images', [{}])[0].get('url') if event.get('images') else None,
         }
+
+        # Check if this event is new and notify if it is
+        event_id = event_details['event_id']
+        event_date = datetime.strptime(event_details['date'], '%Y-%m-%d').date() if event_details['date'] else None
+        if event_date:
+            try:
+                # Check if the event already exists in the database
+                existing_event = PopularEvent.objects.filter(event_id=event_id).first()
+                if not existing_event:
+                    # New event, save it and send email
+                    popular_event = PopularEvent(
+                        event_id=event_id,
+                        name=event_details['name'],
+                        date=event_date,
+                        venue=event_details['venue'],
+                        ticket_price=event_details['ticket_price'],
+                        suggested_price=event_details['suggested_price'],
+                    )
+                    popular_event.save()
+
+                    # Send email notification
+                    subject = "New Popular Event Added - Price Suggester"
+                    email_message = (
+                        f"Dear Admin,\n\n"
+                        f"A new popular event has been detected in Manchester:\n\n"
+                        f"Event: {event_details['name']}\n"
+                        f"Date: {event_details['date']}\n"
+                        f"Venue: {event_details['venue']}\n"
+                        f"Ticket Price: {event_details['ticket_price']}\n"
+                        f"Suggested Room Price: {event_details['suggested_price']}\n\n"
+                        f"Please review the Price Suggester page for more details.\n\n"
+                        f"Best regards,\nThe Pickarooms Team"
+                    )
+                    try:
+                        send_mail(
+                            subject,
+                            email_message,
+                            settings.DEFAULT_FROM_EMAIL,
+                            [settings.DEFAULT_FROM_EMAIL],
+                            fail_silently=False,
+                        )
+                        logger.info(f"Sent email notification for new popular event: {event_details['name']}")
+                    except Exception as e:
+                        logger.error(f"Failed to send email notification for new popular event: {str(e)}")
+
+            except IntegrityError:
+                # If there's a duplicate (name, date, venue), skip it
+                logger.warning(f"Duplicate event found: {event_details['name']} on {event_details['date']} at {event_details['venue']}")
+                continue
+
         suggestions.append(event_details)
 
     total_pages = data.get('page', {}).get('totalPages', 1)

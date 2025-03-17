@@ -213,3 +213,19 @@ class AuditLog(models.Model):
     class Meta:
         verbose_name = "Audit Log"
         verbose_name_plural = "Audit Logs"
+
+class PopularEvent(models.Model):
+    event_id = models.CharField(max_length=100, unique=True)  # Ticketmaster event ID
+    name = models.CharField(max_length=255)
+    date = models.DateField()
+    venue = models.CharField(max_length=255)
+    ticket_price = models.CharField(max_length=50)
+    suggested_price = models.CharField(max_length=50)
+    email_sent = models.BooleanField(default=False)  # Track if email has been sent
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('name', 'date', 'venue')  # Ensure uniqueness across name, date, and venue
+
+    def __str__(self):
+        return f"{self.name} at {self.venue} on {self.date}"
