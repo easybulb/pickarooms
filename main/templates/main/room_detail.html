@@ -32,26 +32,15 @@
     .messages .success { color: green; }
     .messages .error { color: red; }
 </style>
+</style>
 {% endblock %}
 
 {% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
 
 {% block content %}
 
-<!-- Sticky Tab Navigation -->
-<div class="section-nav">
-    <button class="tab-btn active" data-section="location" onclick="showSection('location')">{% trans "Access" %}</button>
-    <button class="tab-btn" data-section="direction" onclick="showSection('direction')">{% trans "Location" %}</button>
-    <button class="tab-btn" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
-    <button class="tab-btn" data-section="parking" onclick="showSection('parking')">{% trans "Parking" %}</button>
-    <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">{% trans "Kitchen" %}</button>
-    <button class="tab-btn" data-section="nearby" onclick="showSection('nearby')">{% trans "Nearby" %}</button>
-    <button class="tab-btn" data-section="faq" onclick="showSection('faq')">{% trans "FAQs" %}</button>
-    <button class="tab-btn" data-section="upload-id" onclick="showSection('upload-id')">{% trans "Upload ID" %}</button>
-</div>
-
-<!-- Access Section -->
-<section id="location" class="section-content active">
+<!-- Always Visible Access Section -->
+<div class="access-section">
     <div class="welcome-section">
         <h1 class="welcome-header">
             <span class="room-name">{{ room.name }}</span>
@@ -63,46 +52,34 @@
         <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time. Your access details will be available then." %}</p>
         {% else %}
             <p class="pin-entry"><strong>{% trans "PIN (Front Door & Room):" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
-            <p class="welcome-info welcome-rules">{% trans "Protect your PIN—it secures your belongings. Do not share it." %}</p>
             <div class="quick-access">
                 <button onclick="watchEntryVideo()">🎥 {% trans "Watch Entry Video" %}</button>
                 <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
             </div>
         {% endif %}
         <div class="welcome-info">
-            <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester M11 3NP</p>
+            <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Manchester M11 3NP</p>
             <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
             <p><strong>{% trans "Check-In:" %}</strong> {{ guest.check_in_date }} ({% trans "From" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %})</p>
             <p><strong>{% trans "Check-Out:" %}</strong> {{ guest.check_out_date }} ({% trans "Before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %})</p>
         </div>
-        <div class="welcome-info welcome-rules">
-            <p>{% trans "No visitors allowed. Noise, parties, or disturbances are prohibited and may result in eviction." %}</p>
-        </div>
     </div>
-    <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
-    <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
-    <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
-</section>
+</div>
 
-<!-- Direction Section -->
-<section id="direction" class="section-content">
-    <h2 class="section-title">📍 {% trans "Location" %}</h2>
-    <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
-    <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
-    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Street View of Property' %}" class="street-image">
-    <h3 class="subsection-title">{% trans "How do I get to the property?" %}</h3>
-    <p class="content-text"><strong>{% trans "From Manchester Airport:" %}</strong></p>
-    <ul class="content-list">
-        <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "25 minutes from Manchester Airport." %}</li>
-        <li>🚆 <strong>{% trans "Train:" %}</strong> {% trans "To Piccadilly Station, then a £5 taxi ride." %}</li>
-        <li>🚌 <strong>{% trans "Bus:" %}</strong> {% trans "219 bus from Piccadilly stops nearby." %}</li>
-    </ul>
-    <p class="content-text"><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
-    <p class="content-text"><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street via Ashton Old Road (A635) or M60 Exit 24." %}</p>
-</section>
+<!-- Sticky Tab Navigation (Moved Below Access Section) -->
+<div class="section-nav">
+    <button class="tab-btn active" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
+    <button class="tab-btn" data-section="direction" onclick="showSection('direction')">{% trans "Location" %}</button>
+    <button class="tab-btn" data-section="parking" onclick="showSection('parking')">{% trans "Parking" %}</button>
+    <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">{% trans "Kitchen" %}</button>
+    <button class="tab-btn" data-section="nearby" onclick="showSection('nearby')">{% trans "Nearby" %}</button>
+    <button class="tab-btn" data-section="faq" onclick="showSection('faq')">{% trans "FAQs" %}</button>
+    <button class="tab-btn" data-section="upload-id" onclick="showSection('upload-id')">{% trans "Upload ID" %}</button>
+</div>
 
 <!-- How To Use PIN Section -->
-<section id="access" class="section-content">
+<section id="access" class="section-content active">
+    <p class="welcome-rules">{% trans "Protect your PIN—it secures your belongings. Do not share it." %}</p>
     <div class="video-container">
         <div class="video-overlay"></div>
         <div class="video-content">
@@ -144,15 +121,28 @@
             <li>{% trans "Once inside, remove your shoes and head upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
         </ol>
     </div>
-    {% if show_pin %}
-    <div class="unlock-container">
-        <p class="content-text">{% trans "If the PIN fails, unlock remotely:" %}</p>
-        <form method="post" action="{% url 'room_detail' room_token=guest.secure_token %}">
-            {% csrf_token %}
-            <button type="submit" name="unlock_door" class="btn-unlock">🚪 {% trans "Unlock Front Door" %}</button>
-        </form>
-    </div>
-    {% endif %}
+    <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
+    <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
+    <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
+    <div class="welcome-rules">
+        <p>{% trans "No visitors allowed. Noise, parties, or disturbances are prohibited and may result in eviction." %}</p>
+</section>
+
+<!-- Direction Section -->
+<section id="direction" class="section-content">
+    <h2 class="section-title">📍 {% trans "Location" %}</h2>
+    <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
+    <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
+    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739857805/property-image_jvfznl.png" alt="{% trans 'Street View of Property' %}" class="street-image">
+    <h3 class="subsection-title">{% trans "How do I get to the property?" %}</h3>
+    <p class="content-text"><strong>{% trans "From Manchester Airport:" %}</strong></p>
+    <ul class="content-list">
+        <li>🚕 <strong>{% trans "Taxi:" %}</strong> {% trans "25 minutes from Manchester Airport." %}</li>
+        <li>🚆 <strong>{% trans "Train:" %}</strong> {% trans "To Piccadilly Station, then a £5 taxi ride." %}</li>
+        <li>🚌 <strong>{% trans "Bus:" %}</strong> {% trans "219 bus from Piccadilly stops nearby." %}</li>
+    </ul>
+    <p class="content-text"><strong>{% trans "From Manchester:" %}</strong> {% trans "Take the 219 bus from the city centre." %}</p>
+    <p class="content-text"><strong>{% trans "Driving:" %}</strong> {% trans "Use Google Maps to 8 Rylance Street via Ashton Old Road (A635) or M60 Exit 24." %}</p>
 </section>
 
 <!-- Parking Section -->
@@ -649,7 +639,7 @@
 
         window.filterFAQs = function() {
             const input = document.getElementById('faq-search').value.toLowerCase();
-            const categories = document.queryselectorAll('.faq-category');
+            const categories = document.querySelectorAll('.faq-category');
 
             categories.forEach(category => {
                 const categoryItems = category.querySelector('.faq-items');
@@ -730,7 +720,7 @@
             document.getElementById('chatBox').classList.toggle('show');
         };
 
-        showSection('location');
+        showSection('access');
     });
 </script>
 
