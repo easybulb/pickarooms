@@ -69,13 +69,13 @@ class Guest(models.Model):
             self.send_welcome_message()
 
     def delete(self, *args, **kwargs):
-        if self.phone_number and self.email:  # Only send if both phone and email are provided (for consistency with welcome)
+        if self.phone_number or self.email:  # Send message if either phone_number or email is provided
             self.send_cancellation_message()
         super().delete(*args, **kwargs)
 
     def send_welcome_message(self):
         """Send a welcome email and/or SMS to the guest when added, based on available contact info."""
-        checkin_url = "https://www.pickarooms.com"
+        checkin_url = "https://www.pickarooms.com"  # Adjust URL as needed
         subject = "Welcome to Pickarooms!"
         email_message = (
             f"Dear {self.full_name},\n\n"
