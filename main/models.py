@@ -75,7 +75,8 @@ class Guest(models.Model):
 
     def send_welcome_message(self):
         """Send a welcome email and/or SMS to the guest when added, based on available contact info."""
-        checkin_url = "https://www.pickarooms.com"  # Adjust URL as needed
+        checkin_url = "https://www.pickarooms.com"
+        property_address = "8 Rylance Street M11 3NP, UK"
         subject = "Welcome to Pickarooms!"
         email_message = (
             f"Dear {self.full_name},\n\n"
@@ -84,11 +85,13 @@ class Guest(models.Model):
             f"Assigned Room: {self.assigned_room.name}\n\n"
             f"Please visit {checkin_url} to complete your check-in and obtain your unique PIN for the doors. "
             f"The webapp provides all the details you need for a seamless stay, including your check-in guide and room information.\n\n"
+            f"Property address is {property_address}"
             f"Best regards,\nThe Pickarooms Team"
         )
         sms_message = (
             f"Welcome to Pickarooms! Check-in on {self.check_in_date} for {self.assigned_room.name}. "
             f"Visit {checkin_url} to get your PIN and enjoy a breeze with all stay details!"
+            f"Property address is {property_address}"
         )
 
         # Send email if email is provided
@@ -163,6 +166,47 @@ class Guest(models.Model):
                 logger.info(f"Cancellation SMS sent to {self.phone_number} for guest {self.full_name}, SID: {message.sid}")
             except TwilioRestException as e:
                 logger.error(f"Failed to send cancellation SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
+
+    def send_post_stay_message(self):
+        """Send a post-stay email and/or SMS to the guest after their reservation elapses, based on available contact info."""
+        subject = "Thank You for Staying at Pickarooms!"
+        email_message = (
+            f"Dear {self.full_name},\n\n"
+            f"Thank you for staying with us at Pickarooms! We hope you enjoyed your time at {self.assigned_room.name}.\n\n"
+            f"We’d love to welcome you back for your next visit. When Booking.com prompts you, please leave us a review to share your experience—it means the world to us!\n\n"
+            f"Best regards,\nThe Pickarooms Team"
+        )
+        sms_message = (
+            f"Thank you for staying at Pickarooms! We’d love you back. Please leave a review on Booking.com when prompted!"
+        )
+
+        # Send email if email is provided
+        if self.email:
+            try:
+                send_mail(
+                    subject,
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [self.email],
+                    fail_silently=False,
+                )
+                logger.info(f"Post-stay email sent to {self.email} for guest {self.full_name}")
+            except Exception as e:
+                logger.error(f"Failed to send post-stay email to {self.email}: {str(e)}")
+
+        # Send SMS if phone number is provided
+        if self.phone_number:
+            try:
+                logger.info(f"Attempting to send post-stay SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
+                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+                message = client.messages.create(
+                    body=sms_message,
+                    from_=settings.TWILIO_PHONE_NUMBER,
+                    to=self.phone_number
+                )
+                logger.info(f"Post-stay SMS sent to {self.phone_number} for guest {self.full_name}, SID: {message.sid}")
+            except TwilioRestException as e:
+                logger.error(f"Failed to send post-stay SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
 
     def has_access(self):
         return now().date() <= self.check_out_date and not self.is_archived
