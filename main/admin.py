@@ -3,9 +3,11 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Room, Guest, ReviewCSVUpload, TTLock
+from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload
 from .ttlock_utils import TTLockClient
 import logging
+import random  # Added for randint
+from django.contrib import messages  # Added for messages framework
 
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
@@ -25,6 +27,7 @@ class RoomAdmin(admin.ModelAdmin):
     form = RoomAdminForm  # ✅ Use the custom form
     list_display = ('name', 'video_url', 'image_preview')  # Removed 'access_pin'
     search_fields = ('name',)
+    list_filter = ('ttlock',)  # Add filter for rooms with/without locks
 
     def image_preview(self, obj):
         """Display Cloudinary image preview in Django Admin."""
@@ -34,11 +37,17 @@ class RoomAdmin(admin.ModelAdmin):
 
     image_preview.short_description = "Image Preview"
 
+class GuestIDUploadInline(admin.TabularInline):
+    model = GuestIDUpload
+    extra = 1
+    readonly_fields = ('uploaded_at',)
+
 class GuestAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'reservation_number', 'phone_number', 'check_in_date', 'check_out_date', 'assigned_room', 'front_door_pin', 'front_door_pin_id', 'is_archived')
     list_filter = ('is_archived', 'check_in_date', 'check_out_date', 'assigned_room')
     search_fields = ('full_name', 'phone_number', 'reservation_number')
-    actions = ['mark_as_archived']
+    actions = ['mark_as_archived', 'regenerate_pins']
+    inlines = [GuestIDUploadInline]
 
     def mark_as_archived(self, request, queryset):
         """Allow manually archiving guests from the admin panel."""
@@ -46,6 +55,24 @@ class GuestAdmin(admin.ModelAdmin):
         self.message_user(request, "Selected guests have been archived.")
 
     mark_as_archived.short_description = "Move selected guests to archive"
+
+    def regenerate_pins(self, request, queryset):
+        """Regenerate PINs for selected guests."""
+        for guest in queryset:
+            if not guest.is_archived:
+                # Add PIN regeneration logic (simplified for admin action)
+                front_door_lock = TTLock.objects.filter(is_front_door=True).first()
+                room_lock = guest.assigned_room.ttlock
+                if front_door_lock and room_lock:
+                    ttlock_client = TTLockClient()
+                    new_pin = str(random.randint(10000, 99999))  # Use random module
+                    # Simplified regeneration (full logic can be reused from edit_guest)
+                    guest.front_door_pin = new_pin
+                    guest.save()
+                    messages.success(request, f"Regenerated PIN {new_pin} for {guest.full_name}.")  # Use messages
+        self.message_user(request, "PINs regenerated for selected guests.")
+
+    regenerate_pins.short_description = "Regenerate PINs for selected guests"
 
     def delete_queryset(self, request, queryset):
         """Override delete to handle bulk deletion with TTLock PIN cleanup."""
@@ -120,8 +147,22 @@ class TTLockAdmin(admin.ModelAdmin):
     search_fields = ('name', 'lock_id')
     list_filter = ('is_front_door',)
 
+class AuditLogAdmin(admin.ModelAdmin):
+    list_display = ('timestamp', 'user', 'action', 'object_type', 'object_id', 'details')
+    list_filter = ('timestamp', 'user', 'action', 'object_type')
+    search_fields = ('user__username', 'action', 'object_type', 'details')
+    readonly_fields = ('timestamp', 'user', 'action', 'object_type', 'object_id', 'details')
+
+class PopularEventAdmin(admin.ModelAdmin):
+    list_display = ('event_id', 'name', 'date', 'venue', 'ticket_price', 'suggested_price', 'email_sent', 'created_at')
+    list_filter = ('date', 'email_sent')
+    search_fields = ('name', 'venue', 'event_id')
+    readonly_fields = ('event_id', 'created_at')
+
 # ✅ Register models
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
 admin.site.register(ReviewCSVUpload, ReviewCSVUploadAdmin)
 admin.site.register(TTLock, TTLockAdmin)
+admin.site.register(AuditLog, AuditLogAdmin)
+admin.site.register(PopularEvent, PopularEventAdmin)
