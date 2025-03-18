@@ -646,6 +646,14 @@ def admin_page(request):
             try:
                 guest.save()
                 logger.info(f"Successfully archived guest {guest.reservation_number}")
+                # Log the archiving action
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="archive_guest",
+                    object_type="Guest",
+                    object_id=guest.id,
+                    details=f"Archived guest {guest.full_name} (Reservation: {guest.reservation_number})"
+                )
                 # Send post-stay message if the guest has contact info
                 if guest.phone_number or guest.email:
                     guest.send_post_stay_message()
@@ -789,6 +797,14 @@ def admin_page(request):
                     front_door_pin_id=keyboard_pwd_id_front,
                     room_pin_id=keyboard_pwd_id_room,
                     late_checkout_time=check_out_time if check_out_time != time(11, 0) else None,
+                )
+                # Log the guest creation action
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="create_guest",
+                    object_type="Guest",
+                    object_id=guest.id,
+                    details=f"Created guest {guest.full_name} (Reservation: {reservation_number}) with PIN {pin}"
                 )
                 messages.success(request, f"Guest {guest.full_name} added successfully! PIN (for both front door and room): {pin}. They can also unlock the doors remotely during check-in or from the room detail page.")
             except Exception as e:
@@ -2059,6 +2075,14 @@ def guest_details(request, guest_id):
     if request.method == 'POST' and 'block_review' in request.POST:
         guest.dont_send_review_message = True
         guest.save()
+        # Create audit log entry for blocking review message
+        AuditLog.objects.create(
+            user=request.user,
+            action="block_review_message",
+            object_type="Guest",
+            object_id=guest.id,
+            details=f"Blocked review message for guest {guest.full_name} (Reservation: {guest.reservation_number})"
+        )
         messages.success(request, f"Review message blocked for guest {guest.full_name}.")
         logger.info(f"Review message blocked for guest {guest.full_name} (ID: {guest.id}) by user {request.user.username}")
         return redirect('guest_details', guest_id=guest.id)
