@@ -65,102 +65,104 @@ class Guest(models.Model):
             self.secure_token = str(uuid.uuid4())
         is_new = self._state.adding  # True if the guest is being created
         super().save(*args, **kwargs)  # Save the guest first
-        if is_new and self.phone_number and self.email:  # Only send if both phone and email are provided
+        if is_new and (self.phone_number or self.email):  # Send message if either phone_number or email is provided
             self.send_welcome_message()
 
     def delete(self, *args, **kwargs):
-        if self.phone_number and self.email:  # Only send if both phone and email are provided
+        if self.phone_number and self.email:  # Only send if both phone and email are provided (for consistency with welcome)
             self.send_cancellation_message()
         super().delete(*args, **kwargs)
 
     def send_welcome_message(self):
-        """Send a welcome email and SMS to the guest when added."""
-        checkin_url = "https://www.pickarooms.com/checkin/"  # Adjust URL as needed
+        """Send a welcome email and/or SMS to the guest when added, based on available contact info."""
+        checkin_url = "https://www.pickarooms.com"
         subject = "Welcome to Pickarooms!"
         email_message = (
             f"Dear {self.full_name},\n\n"
-            f"Welcome to Pickarooms! Your check-in details:\n"
-            f"Reservation Number: {self.reservation_number}\n"
+            f"Welcome to Pickarooms! We’re excited to have you.\n\n"
             f"Check-In Date: {self.check_in_date}\n"
             f"Assigned Room: {self.assigned_room.name}\n\n"
-            f"Please visit {checkin_url} to complete your check-in.\n\n"
+            f"Please visit {checkin_url} to complete your check-in and obtain your unique PIN for the doors. "
+            f"The webapp provides all the details you need for a seamless stay, including your check-in guide and room information.\n\n"
             f"Best regards,\nThe Pickarooms Team"
         )
         sms_message = (
-            f"Welcome to Pickarooms! Check-in: Reservation #{self.reservation_number}, "
-            f"Date: {self.check_in_date}, Room: {self.assigned_room.name}. Visit {checkin_url}"
+            f"Welcome to Pickarooms! Check-in on {self.check_in_date} for {self.assigned_room.name}. "
+            f"Visit {checkin_url} to get your PIN and enjoy a breeze with all stay details!"
         )
 
-        # Send email
-        try:
-            send_mail(
-                subject,
-                email_message,
-                settings.DEFAULT_FROM_EMAIL,
-                [self.email],
-                fail_silently=False,
-            )
-            logger.info(f"Welcome email sent to {self.email} for guest {self.full_name}")
-        except Exception as e:
-            logger.error(f"Failed to send welcome email to {self.email}: {str(e)}")
+        # Send email if email is provided
+        if self.email:
+            try:
+                send_mail(
+                    subject,
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [self.email],
+                    fail_silently=False,
+                )
+                logger.info(f"Welcome email sent to {self.email} for guest {self.full_name}")
+            except Exception as e:
+                logger.error(f"Failed to send welcome email to {self.email}: {str(e)}")
 
-        # Send SMS via Twilio with redacted logging
-        try:
-            logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
-            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-            message = client.messages.create(
-                body=sms_message,
-                from_=settings.TWILIO_PHONE_NUMBER,
-                to=self.phone_number
-            )
-            logger.info(f"Welcome SMS sent to {self.phone_number} for guest {self.full_name}, SID: {message.sid}")
-        except TwilioRestException as e:
-            logger.error(f"Failed to send welcome SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
+        # Send SMS if phone number is provided
+        if self.phone_number:
+            try:
+                logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
+                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+                message = client.messages.create(
+                    body=sms_message,
+                    from_=settings.TWILIO_PHONE_NUMBER,
+                    to=self.phone_number
+                )
+                logger.info(f"Welcome SMS sent to {self.phone_number} for guest {self.full_name}, SID: {message.sid}")
+            except TwilioRestException as e:
+                logger.error(f"Failed to send welcome SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
 
     def send_cancellation_message(self):
-        """Send a cancellation email and SMS to the guest when deleted."""
+        """Send a cancellation email and/or SMS to the guest when deleted, based on available contact info."""
         admin_email = "easybulb@gmail.com"  # Adjust as needed
         subject = "Pickarooms Reservation Cancelled"
         email_message = (
             f"Dear {self.full_name},\n\n"
             f"Your reservation at Pickarooms has been cancelled.\n"
-            f"Reservation Number: {self.reservation_number}\n"
             f"Check-In Date: {self.check_in_date}\n"
             f"Assigned Room: {self.assigned_room.name}\n\n"
             f"If this was a mistake, please contact us at {admin_email}.\n\n"
             f"Best regards,\nThe Pickarooms Team"
         )
         sms_message = (
-            f"Pickarooms: Your reservation (#{self.reservation_number}) "
-            f"on {self.check_in_date} for {self.assigned_room.name} has been cancelled. "
+            f"Pickarooms: Your reservation on {self.check_in_date} for {self.assigned_room.name} has been cancelled. "
             f"Contact us if needed."
         )
 
-        # Send email
-        try:
-            send_mail(
-                subject,
-                email_message,
-                settings.DEFAULT_FROM_EMAIL,
-                [self.email],
-                fail_silently=False,
-            )
-            logger.info(f"Cancellation email sent to {self.email} for guest {self.full_name}")
-        except Exception as e:
-            logger.error(f"Failed to send cancellation email to {self.email}: {str(e)}")
+        # Send email if email is provided
+        if self.email:
+            try:
+                send_mail(
+                    subject,
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [self.email],
+                    fail_silently=False,
+                )
+                logger.info(f"Cancellation email sent to {self.email} for guest {self.full_name}")
+            except Exception as e:
+                logger.error(f"Failed to send cancellation email to {self.email}: {str(e)}")
 
-        # Send SMS via Twilio with redacted logging
-        try:
-            logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
-            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-            message = client.messages.create(
-                body=sms_message,
-                from_=settings.TWILIO_PHONE_NUMBER,
-                to=self.phone_number
-            )
-            logger.info(f"Cancellation SMS sent to {self.phone_number} for guest {self.full_name}, SID: {message.sid}")
-        except TwilioRestException as e:
-            logger.error(f"Failed to send cancellation SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
+        # Send SMS if phone number is provided
+        if self.phone_number:
+            try:
+                logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
+                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+                message = client.messages.create(
+                    body=sms_message,
+                    from_=settings.TWILIO_PHONE_NUMBER,
+                    to=self.phone_number
+                )
+                logger.info(f"Cancellation SMS sent to {self.phone_number} for guest {self.full_name}, SID: {message.sid}")
+            except TwilioRestException as e:
+                logger.error(f"Failed to send cancellation SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
 
     def has_access(self):
         return now().date() <= self.check_out_date and not self.is_archived
