@@ -194,7 +194,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'pickarooms.middleware.restrict_staff_to_custom_admin',
+    'main.middleware.PopularEventMonitorMiddleware',
 ]
+
+MAJOR_VENUES = ['Co-op Live', 'AO Arena', 'Etihad Stadium', 'Old Trafford', 'Manchester Academy', 'O2 Apollo Manchester', 'O2 Ritz Manchester']
 
 ROOT_URLCONF = 'pickarooms.urls'
 
