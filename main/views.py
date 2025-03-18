@@ -639,7 +639,7 @@ def admin_page(request):
                     logger.error(f"Failed to delete room PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete room PIN for {guest.full_name}: {str(e)}")
 
-            # Update guest status
+            # Update guest status and send post-stay message
             guest.front_door_pin = None
             guest.front_door_pin_id = None
             guest.room_pin_id = None
@@ -647,6 +647,10 @@ def admin_page(request):
             try:
                 guest.save()
                 logger.info(f"Successfully archived guest {guest.reservation_number}")
+                # Send post-stay message if the guest has contact info
+                if guest.phone_number or guest.email:
+                    guest.send_post_stay_message()
+                    logger.info(f"Post-stay message sent for archived guest {guest.full_name}")
                 messages.success(request, f"Guest {guest.full_name} has been archived.")
             except Exception as e:
                 logger.error(f"Failed to save archived guest {guest.reservation_number}: {str(e)}")
