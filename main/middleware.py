@@ -6,7 +6,7 @@ from django.utils.timezone import now
 from datetime import timedelta, date, datetime
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from .models import PopularEvent
 
 logger = logging.getLogger('main')
@@ -17,8 +17,8 @@ class PopularEventMonitorMiddleware:
         self.last_check_time = None
 
     def __call__(self, request):
-        # Only check for admins under /admin-page/ and not too frequently
-        if request.user.is_authenticated and request.user.is_superuser and '/admin-page/' in request.path:
+        # Only check for admins under /price-suggester/ and not too frequently
+        if request.user.is_authenticated and request.user.is_superuser and request.path == '/price-suggester/':
             current_time = now()
             # Check every 15 minutes
             if self.last_check_time is None or (current_time - self.last_check_time).total_seconds() >= 900:  # 900 seconds = 15 minutes
@@ -81,48 +81,60 @@ class PopularEventMonitorMiddleware:
                     if is_popular:
                         event_date = datetime.strptime(event.get('dates', {}).get('start', {}).get('localDate'), '%Y-%m-%d').date() if event.get('dates', {}).get('start', {}).get('localDate') else None
                         if event_date:
-                            new_event = PopularEvent(
-                                event_id=event_id,
-                                name=event.get('name'),
-                                date=event_date,
-                                venue=venue_name,
-                                ticket_price=f"£{ticket_price}" if ticket_price else "N/A",
-                                suggested_price=f"£150" if is_sold_out or is_major_venue else f"£100",
-                                email_sent=False,
-                            )
-                            try:
-                                new_event.save()
-                                logger.info(f"Saved new popular event: {new_event.name} (ID: {new_event.event_id})")
-                                if not new_event.email_sent:
-                                    subject = "New Popular Event Added - Price Suggester"
-                                    email_message = (
-                                        f"Dear Admin,\n\n"
-                                        f"A new popular event has been detected in Manchester:\n\n"
-                                        f"Event: {new_event.name}\n"
-                                        f"Date: {new_event.date}\n"
-                                        f"Venue: {new_event.venue}\n"
-                                        f"Ticket Price: {new_event.ticket_price}\n"
-                                        f"Suggested Room Price: {new_event.suggested_price}\n\n"
-                                        f"Please review the Price Suggester page for more details.\n\n"
-                                        f"Best regards,\nThe Pickarooms Team"
-                                    )
-                                    try:
-                                        send_mail(
-                                            subject,
-                                            email_message,
-                                            settings.DEFAULT_FROM_EMAIL,
-                                            [settings.DEFAULT_FROM_EMAIL],
-                                            fail_silently=False,
-                                        )
-                                        logger.info(f"Sent email notification for new popular event: {new_event.name}")
-                                        new_event.email_sent = True
+                            # Check if event already exists by event_id
+                            existing_event = PopularEvent.objects.filter(event_id=event_id).first()
+                            if existing_event:
+                                # Update email_sent if not already sent
+                                if not existing_event.email_sent:
+                                    with transaction.atomic():
+                                        existing_event.email_sent = True
+                                        existing_event.save()
+                                        logger.info(f"Updated existing event {existing_event.name} (ID: {existing_event.event_id}) with email_sent=True")
+                            else:
+                                # Create new event
+                                new_event = PopularEvent(
+                                    event_id=event_id,
+                                    name=event.get('name'),
+                                    date=event_date,
+                                    venue=venue_name,
+                                    ticket_price=f"£{ticket_price}" if ticket_price else "N/A",
+                                    suggested_price=f"£150" if is_sold_out or is_major_venue else f"£100",
+                                    email_sent=False,
+                                )
+                                try:
+                                    with transaction.atomic():
                                         new_event.save()
-                                        logger.info(f"Updated email_sent flag for event {new_event.event_id}")
-                                    except Exception as e:
-                                        logger.error(f"Failed to send email notification for new popular event: {str(e)}")
-                            except IntegrityError:
-                                logger.warning(f"Duplicate event found during save: {new_event.name} on {new_event.date} at {new_event.venue}")
-                                continue
+                                        logger.info(f"Saved new popular event: {new_event.name} (ID: {new_event.event_id})")
+                                        if not new_event.email_sent:
+                                            subject = "New Popular Event Added - Price Suggester"
+                                            email_message = (
+                                                f"Dear Admin,\n\n"
+                                                f"A new popular event has been detected in Manchester:\n\n"
+                                                f"Event: {new_event.name}\n"
+                                                f"Date: {new_event.date}\n"
+                                                f"Venue: {new_event.venue}\n"
+                                                f"Ticket Price: {new_event.ticket_price}\n"
+                                                f"Suggested Room Price: {new_event.suggested_price}\n\n"
+                                                f"Please review the Price Suggester page for more details.\n\n"
+                                                f"Best regards,\nThe Pickarooms Team"
+                                            )
+                                            try:
+                                                send_mail(
+                                                    subject,
+                                                    email_message,
+                                                    settings.DEFAULT_FROM_EMAIL,
+                                                    [settings.DEFAULT_FROM_EMAIL],
+                                                    fail_silently=False,
+                                                )
+                                                logger.info(f"Sent email notification for new popular event: {new_event.name}")
+                                                new_event.email_sent = True
+                                                new_event.save()
+                                                logger.info(f"Updated email_sent flag for event {new_event.event_id}")
+                                            except Exception as e:
+                                                logger.error(f"Failed to send email notification for new popular event: {str(e)}")
+                                except IntegrityError:
+                                    logger.warning(f"Duplicate event found during save: {new_event.name} on {new_event.date} at {new_event.venue}")
+                                    continue
 
             # Delete events older than 30 days to free space
             cutoff_date = now() - timedelta(days=30)
