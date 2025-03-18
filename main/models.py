@@ -58,7 +58,7 @@ class Guest(models.Model):
     room_pin_id = models.CharField(max_length=50, blank=True, null=True)
     early_checkin_time = models.TimeField(null=True, blank=True)
     late_checkout_time = models.TimeField(null=True, blank=True)
-    # Remove id_image from Guest, replaced by GuestIDUpload
+    dont_send_review_message = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.secure_token:
@@ -85,12 +85,12 @@ class Guest(models.Model):
             f"Assigned Room: {self.assigned_room.name}\n\n"
             f"Please visit {checkin_url} to complete your check-in and obtain your unique PIN for the doors. "
             f"The webapp provides all the details you need for a seamless stay, including your check-in guide and room information.\n\n"
-            f"Property address is {property_address}"
+            f"Property address is {property_address}\n\n"
             f"Best regards,\nThe Pickarooms Team"
         )
         sms_message = (
             f"Welcome to Pickarooms! Check-in on {self.check_in_date} for {self.assigned_room.name}. "
-            f"Visit {checkin_url} to get your PIN and enjoy a breeze with all stay details!"
+            f"Visit {checkin_url} to get your PIN and enjoy a breeze with all stay details! "
             f"Property address is {property_address}"
         )
 
@@ -169,6 +169,10 @@ class Guest(models.Model):
 
     def send_post_stay_message(self):
         """Send a post-stay email and/or SMS to the guest after their reservation elapses, based on available contact info."""
+        if self.dont_send_review_message:  # Skip if guest is blocked from receiving review messages
+            logger.info(f"Skipped post-stay message for guest {self.full_name} (ID: {self.id}) as review message is blocked")
+            return
+
         subject = "Thank You for Staying at Pickarooms!"
         email_message = (
             f"Dear {self.full_name},\n\n"

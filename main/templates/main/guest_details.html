@@ -130,6 +130,21 @@
     .data-table tr:hover {
         background: #f5f5f5;
     }
+    .block-review-form {
+        margin-top: 10px;
+    }
+    .block-review-btn {
+        background-color: #dc3545;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .block-review-btn:hover {
+        background-color: #c82333;
+    }
 
     /* Enhanced table scrolling for mobile */
     .data-table-wrapper {
@@ -268,9 +283,18 @@
         {% if user.is_superuser %}
             <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
             <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
+            <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
         {% endif %}
     </div>
     <h1 class="admin-title">{% trans "Guest Details" %} - {{ guest.full_name }}</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}" id="message-{{ forloop.counter }}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    {% endif %}
 
     <div class="guest-details">
         <h2>{% trans "Guest Information" %}</h2>
@@ -282,9 +306,15 @@
         <p><strong>{% trans "Room:" %}</strong> {{ guest.assigned_room.name }}</p>
         <p><strong>{% trans "PIN (Front Door & Room):" %}</strong> {{ guest.front_door_pin|default:"N/A" }}</p>
         <p><strong>{% trans "Archived:" %}</strong> {{ guest.is_archived|yesno:"Yes,No" }}</p>
+        <p><strong>{% trans "Review Message Blocked:" %}</strong> {{ guest.dont_send_review_message|yesno:"Yes,No" }}</p>
+        {% if not guest.is_archived and not guest.dont_send_review_message %}
+            <form method="POST" class="block-review-form">
+                {% csrf_token %}
+                <button type="submit" name="block_review" class="block-review-btn">{% trans "Block Review Message" %}</button>
+            </form>
+        {% endif %}
     </div>
 
-    <!-- main/templates/main/guest_details.html (relevant section) -->
     {% if id_uploads %}
     <div class="guest-details">
         <h2>{% trans "Uploaded IDs" %}</h2>

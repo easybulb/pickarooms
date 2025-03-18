@@ -42,6 +42,7 @@ urlpatterns = [
     path('api/callback', ttlock_callback, name='ttlock_callback'),
     path('audit-logs/', views.audit_logs, name='audit_logs'),
     path('admin-page/guest-details/<int:guest_id>/', views.guest_details, name='guest_details'),
+    path('block-review-messages/', views.block_review_messages, name='block_review_messages'),
     path('event-finder/', views.event_finder, name='event_finder'),
     path('price-suggester/', views.price_suggester, name='price_suggester'),
 ]

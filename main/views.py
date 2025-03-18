@@ -2056,6 +2056,14 @@ def guest_details(request, guest_id):
     # Fetch all reservations (past and present) for this guest
     all_reservations = Guest.objects.filter(full_name__iexact=guest.full_name).order_by('-check_in_date')
 
+    # Handle POST request to block review message
+    if request.method == 'POST' and 'block_review' in request.POST:
+        guest.dont_send_review_message = True
+        guest.save()
+        messages.success(request, f"Review message blocked for guest {guest.full_name}.")
+        logger.info(f"Review message blocked for guest {guest.full_name} (ID: {guest.id}) by user {request.user.username}")
+        return redirect('guest_details', guest_id=guest.id)
+
     # Generate signed URLs for each ID image
     id_uploads_with_filenames = []
     for upload in id_uploads:
@@ -2379,3 +2387,32 @@ def price_suggester(request):
         'page_range': page_range,
     }
     return render(request, 'main/price_suggester.html', context)
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
+def block_review_messages(request):
+    """Allow superusers to block review messages for current guests."""
+    search_query = request.GET.get('search', '')
+    guests = Guest.objects.filter(is_archived=False)
+
+    if search_query:
+        guests = guests.filter(
+            Q(full_name__icontains=search_query) |
+            Q(reservation_number__icontains=search_query) |
+            Q(check_in_date__icontains=search_query)
+        )
+
+    if request.method == 'POST':
+        guest_ids = request.POST.getlist('guest_ids')  # List of selected guest IDs
+        if guest_ids:
+            # Update the selected guests to block review messages
+            Guest.objects.filter(id__in=guest_ids).update(dont_send_review_message=True)
+            messages.success(request, f"Blocked review messages for {len(guest_ids)} guest(s).")
+            logger.info(f"Superuser {request.user.username} blocked review messages for guests with IDs: {guest_ids}")
+        return redirect('block_review_messages')
+
+    context = {
+        'guests': guests,
+        'search_query': search_query,
+    }
+    return render(request, 'main/block_review_message.html', context)
