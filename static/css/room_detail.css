@@ -404,8 +404,6 @@ body {
 .step-container {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
     width: 100%;
 }
 
@@ -425,6 +423,12 @@ body {
     margin: 0 4px;
     vertical-align: middle;
     text-align: center;
+}
+
+.pin-hidden {
+    font-size: 16px;
+    color: #1e40af;
+    font-weight: 500;
 }
 
 /* Style for the hidden message */
