@@ -32,7 +32,6 @@
     .messages .success { color: green; }
     .messages .error { color: red; }
 </style>
-</style>
 {% endblock %}
 
 {% block title %}{{ room.name }} - {% trans "Room Details" %}{% endblock %}
@@ -57,18 +56,21 @@
             </div>
         {% endif %}
         <div class="welcome-info">
-            <p><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Manchester M11 3NP</p>
             <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
             <p><strong>{% trans "Check-In:" %}</strong> {{ guest.check_in_date }} ({% trans "From" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %})</p>
             <p><strong>{% trans "Check-Out:" %}</strong> {{ guest.check_out_date }} ({% trans "Before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %})</p>
+            <p>
+                <strong>{% trans "Wifi Details:" %}</strong> Guest_2.4G 
+                <strong>{% trans "Password:" %}</strong> welcome1
+            </p>
         </div>
     </div>
 </div>
 
 <!-- Sticky Tab Navigation (Moved Below Access Section) -->
 <div class="section-nav">
-    <button class="tab-btn active" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
-    <button class="tab-btn" data-section="direction" onclick="showSection('direction')">{% trans "Location" %}</button>
+    <button class="tab-btn active" data-section="direction" onclick="showSection('direction')">{% trans "Location" %}</button>
+    <button class="tab-btn" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
     <button class="tab-btn" data-section="parking" onclick="showSection('parking')">{% trans "Parking" %}</button>
     <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">{% trans "Kitchen" %}</button>
     <button class="tab-btn" data-section="nearby" onclick="showSection('nearby')">{% trans "Nearby" %}</button>
@@ -77,7 +79,7 @@
 </div>
 
 <!-- How To Use PIN Section -->
-<section id="access" class="section-content active">
+<section id="access" class="section-content">
     <div class="video-container">
         <div class="video-overlay"></div>
         <div class="video-content">
@@ -96,39 +98,53 @@
     <div class="room-info">
         <h2 class="section-title">🔑 {% trans "How To Use PIN" %}</h2>
         <p class="content-text">{% trans "To enter the property and access your room, follow these steps:" %}</p>
-        <ol class="content-list">
-            <li class="pin-step">
-                <div class="step-container">
-                    <span class="step-text">{% trans "Enter the PIN:" %}</span>
-                    <span class="pin-display">
-                        {% if show_pin %}{{ front_door_pin|default:"Contact support" }}#{% else %}<span class="hidden-till-checkin">{% trans "Hidden till check-in" %}</span>{% endif %}
-                    </span>
-                    <span class="step-text">{% trans "on the keypad to unlock the front door." %}</span>
-                </div>
+        <ol>
+            <li>
+              <strong>{% trans "Enter the PIN:" %}</strong>
+              <span class="pin-code">
+                {% if show_pin %}
+                  {{ front_door_pin|default:"Contact support" }}#
+                {% else %}
+                  <span class="pin-hidden">{% trans "Hidden till check-in" %}</span>
+                {% endif %}
+              </span>
+              {% trans "on the keypad to unlock the front door." %}
             </li>
-            <li class="pin-step">
-                <div class="step-container">
-                    <span class="step-text">{% trans "Proceed upstairs to your room and use the same PIN:" %}</span>
-                    <span class="pin-display">
-                        {% if show_pin %}{{ front_door_pin|default:"Contact support" }}#{% else %}<span class="hidden-till-checkin">{% trans "Hidden till check-in" %}</span>{% endif %}
-                    </span>
-                    <span class="step-text">{% trans "to unlock the room door." %}</span>
-                </div>
+        
+            <li>
+              {% trans "Proceed upstairs to your room and use the same PIN:" %}
+              <span class="pin-code">
+                {% if show_pin %}
+                  {{ front_door_pin|default:"Contact support" }}#
+                {% else %}
+                  <span class="pin-hidden">{% trans "Hidden till check-in" %}</span>
+                {% endif %}
+              </span>
+              {% trans "to unlock the room door." %}
             </li>
-            <li>{% if show_pin %}{% trans "If the PIN doesn’t work, use the remote unlock option in the modal below. Protect your PIN—it secures your belongings." %}{% endif %}</li>
+        
+            <li>
+              {% if show_pin %}
+                {% trans "If the PIN doesn’t work, use the remote unlock option in the modal below. Protect your PIN—it secures your belongings." %}
+              {% endif %}
+            </li>
+        
             <li>{% trans "Watch the instructional video in the FAQs section for keypad usage." %}</li>
-            <li>{% trans "Once inside, remove your shoes and head upstairs to find" %} <strong>{{ room.name }}</strong>.</li>
-        </ol>
+        
+            <li>
+              {% trans "Once inside, remove your shoes and head upstairs to find" %}
+              <strong>{{ room.name }}</strong>.
+            </li>
+          </ol>
     </div>
-    <h2 class="section-title">📶 {% trans "WiFi" %}</h2>
-    <p class="content-text"><strong>{% trans "WiFi Name:" %}</strong> {% trans "Guest_2.4G" %}</p>
-    <p class="content-text"><strong>{% trans "Password:" %}</strong> {% trans "welcome1" %}</p>
+    
     <div class="welcome-rules">
         <p>{% trans "No visitors allowed. Noise, parties, or disturbances are prohibited and may result in eviction." %}</p>
+    </div>
 </section>
 
 <!-- Direction Section -->
-<section id="direction" class="section-content">
+<section id="direction" class="section-content active">
     <h2 class="section-title">📍 {% trans "Location" %}</h2>
     <p class="content-text"><strong>{% trans "Address:" %}</strong> 8 Rylance Street, Beswick, Manchester, M11 3NP</p>
     <p class="content-text"><a href="https://maps.google.com?q=8+Rylance+Street,+M11+3NP" target="_blank">📍 {% trans "Open in Google Maps" %}</a></p>
@@ -719,7 +735,8 @@
             document.getElementById('chatBox').classList.toggle('show');
         };
 
-        showSection('access');
+        // Set the initial active tab to "direction" (Location)
+        showSection('direction');
     });
 </script>
 
