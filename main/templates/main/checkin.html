@@ -137,7 +137,17 @@
     </div>
 </section>
 
-<!-- Add JavaScript for Modals, Smooth Scrolling, and Rate Limiting -->
+<!-- Add CSS for FAQ -->
+<style>
+    .faq-answer {
+        display: none; /* Ensure answers are hidden by default */
+    }
+    .faq-answer.show {
+        display: block; /* Show when toggled */
+    }
+</style>
+
+<!-- Add JavaScript for Modals, Smooth Scrolling, Rate Limiting, and FAQ -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Rate Limiting Variables
@@ -239,28 +249,73 @@
             });
         });
 
-        // ✅ FAQ Toggle Functionality
+        // ✅ FAQ Toggle Functionality (Adapted from home.html)
         const faqItems = document.querySelectorAll(".faq-item");
+        const faqQuestions = document.querySelectorAll(".faq-question");
 
-        faqItems.forEach(item => {
-            const question = item.querySelector(".faq-question");
-            const answer = item.querySelector(".faq-answer");
-            const arrow = item.querySelector(".arrow");
+        // Initialize FAQs to collapsed state
+        function initializeFAQs() {
+            faqItems.forEach(item => {
+                const answer = item.querySelector(".faq-answer");
+                const arrow = item.querySelector(".arrow");
+                answer.style.display = "none"; // Ensure all answers start hidden
+                answer.classList.remove("show"); // Remove show class if present
+                arrow.textContent = "▼"; // Reset arrows
+            });
+        }
 
-            question.addEventListener("click", function () {
-                const isActive = answer.style.display === "block";
+        // Toggle Individual FAQ with Animation and Accessibility
+        faqQuestions.forEach(question => {
+            question.addEventListener("click", function (event) {
+                event.preventDefault(); // Prevent default button behavior
+                const item = question.closest(".faq-item");
+                const answer = item.querySelector(".faq-answer");
+                const arrow = question.querySelector(".arrow");
+                const isExpanded = answer.style.display === "block";
 
                 // Close all other answers
                 faqItems.forEach(faq => {
-                    faq.querySelector(".faq-answer").style.display = "none";
-                    faq.querySelector(".arrow").textContent = "▼";
+                    const otherAnswer = faq.querySelector(".faq-answer");
+                    const otherArrow = faq.querySelector(".arrow");
+                    otherAnswer.style.display = "none";
+                    otherAnswer.classList.remove("show");
+                    otherArrow.textContent = "▼";
+                    faq.querySelector(".faq-question").setAttribute("aria-expanded", "false");
                 });
 
-                // Toggle clicked item
-                answer.style.display = isActive ? "none" : "block";
-                arrow.textContent = isActive ? "▼" : "▲";
+                // Toggle the clicked answer
+                answer.style.display = isExpanded ? "none" : "block";
+                answer.classList.toggle("show", !isExpanded); // For CSS transitions
+                arrow.textContent = isExpanded ? "▼" : "▲";
+                question.setAttribute("aria-expanded", !isExpanded);
+
+                // Update ARIA for accessibility
+                question.setAttribute("aria-controls", answer.id || `faq-answer-${item.dataset.index || Math.random().toString(36).substr(2, 9)}`);
+                if (!answer.id) answer.id = question.getAttribute("aria-controls");
+            });
+
+            // Keyboard Accessibility
+            question.addEventListener("keydown", function (event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    question.click();
+                }
             });
         });
+
+        // Initialize FAQ IDs for accessibility (if not already present)
+        faqQuestions.forEach((question, index) => {
+            if (!question.getAttribute("aria-controls")) {
+                const answer = question.nextElementSibling;
+                const id = `faq-answer-${index}`;
+                question.setAttribute("aria-controls", id);
+                if (!answer.id) answer.id = id;
+            }
+            question.setAttribute("aria-expanded", "false");
+        });
+
+        // Initialize FAQs on load
+        initializeFAQs();
 
         // ✅ Smooth Scrolling for FAQ Anchor Link
         document.querySelectorAll('.faq-link').forEach(link => {
