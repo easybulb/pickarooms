@@ -7,6 +7,11 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/manage_checkin_checkout.css' %}">
+<style>
+    .btn-save {
+        display: block;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -43,7 +48,6 @@
                 <span class="no-pin">{% trans "Not set" %}</span>
             {% endif %}
         </p>
-        <p>{% trans "Note: Changing check-in/check-out times may update the PIN validity period if a PIN is set." %}</p>
     </div>
 
     <!-- Check-In/Check-Out Form -->
@@ -58,9 +62,61 @@
         <input type="time" id="late_checkout_time" name="late_checkout_time" value="{{ guest.late_checkout_time|time:'H:i'|default_if_none:'' }}" placeholder="HH:MM">
         <p>{% trans "Leave blank to use default (11:00 AM)." %}</p>
 
-        <button type="submit" class="btn-save">{% trans "Save Changes" %}</button>
+        <p id="time-change-message" class="note" style="display: none; color: red;">
+            {% trans "Check-in or check-out time has been changed. Please regenerate the PIN before saving changes." %}
+        </p>
+
+        <button type="submit" id="save-changes-btn" class="btn-save">{% trans "Save Changes" %}</button>
     </form>
 
+    {% if guest.front_door_pin %}
+    <form method="POST" class="regenerate-pin-form">
+        {% csrf_token %}
+        <input type="hidden" name="regenerate_pin" value="true">
+        <button type="submit" class="btn-regenerate">{% trans "Regenerate PIN (Front Door & Room)" %}</button>
+    </form>
+    {% endif %}
+    
     <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
 </div>
+
+<!-- JavaScript for Hiding Save Button on Time Changes -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Logic to hide the Save Changes button on time changes
+        const originalEarlyCheckinTime = "{{ guest.early_checkin_time|time:'H:i'|default:'' }}";
+        const originalLateCheckoutTime = "{{ guest.late_checkout_time|time:'H:i'|default:'' }}";
+        const earlyCheckinTimeInput = document.getElementById('early_checkin_time');
+        const lateCheckoutTimeInput = document.getElementById('late_checkout_time');
+        const saveButton = document.getElementById('save-changes-btn');
+        const timeChangeMessage = document.getElementById('time-change-message');
+
+        function checkTimeChange() {
+            const currentEarlyCheckinTime = earlyCheckinTimeInput.value || '';
+            const currentLateCheckoutTime = lateCheckoutTimeInput.value || '';
+
+            const timeChanged = (
+                currentEarlyCheckinTime !== originalEarlyCheckinTime ||
+                currentLateCheckoutTime !== originalLateCheckoutTime
+            );
+
+            if (timeChanged) {
+                // Time has changed: hide the Save Changes button and show the message
+                saveButton.style.display = 'none';
+                timeChangeMessage.style.display = 'block';
+            } else {
+                // No changes: show the Save Changes button and hide the message
+                saveButton.style.display = 'block';
+                timeChangeMessage.style.display = 'none';
+            }
+        }
+
+        // Add event listeners for changes
+        earlyCheckinTimeInput.addEventListener('change', checkTimeChange);
+        lateCheckoutTimeInput.addEventListener('change', checkTimeChange);
+
+        // Initial check on page load
+        checkTimeChange();
+    });
+</script>
 {% endblock %}

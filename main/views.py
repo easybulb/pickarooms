@@ -1251,122 +1251,169 @@ def past_guests(request):
 @user_passes_test(lambda user: user.has_perm('main.change_guest'), login_url='/unauthorized/')
 def manage_checkin_checkout(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
+    # Store original values for comparison
+    original_early_checkin_time = guest.early_checkin_time
+    original_late_checkout_time = guest.late_checkout_time
 
     if request.method == 'POST':
-        early_checkin_time = request.POST.get('early_checkin_time')
-        late_checkout_time = request.POST.get('late_checkout_time')
-
-        # Convert time strings (e.g., "12:00") to time objects
-        if early_checkin_time:
-            try:
-                early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
-                guest.early_checkin_time = early_checkin_time
-            except ValueError:
-                messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
-                return redirect('manage_checkin_checkout', guest_id=guest.id)
-
-        if late_checkout_time:
-            try:
-                late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
-                guest.late_checkout_time = late_checkout_time
-            except ValueError:
-                messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
-                return redirect('manage_checkin_checkout', guest_id=guest.id)
-
-        # Clear the times if the fields are empty (to revert to default)
-        if not early_checkin_time:
-            guest.early_checkin_time = None
-        if not late_checkout_time:
-            guest.late_checkout_time = None
-
-        # Update PIN validity period if check-out time changes
-        if late_checkout_time and (guest.front_door_pin_id or guest.room_pin_id):
+        if 'regenerate_pin' in request.POST:
             front_door_lock = TTLock.objects.filter(is_front_door=True).first()
             room_lock = guest.assigned_room.ttlock
-            if front_door_lock and room_lock:
-                ttlock_client = TTLockClient()
+            if not front_door_lock:
+                logger.error("Front door lock not configured in the database.")
+                messages.error(request, "Front door lock not configured.")
+                return redirect('manage_checkin_checkout', guest_id=guest.id)
+            if not room_lock:
+                logger.error(f"No TTLock assigned to room {guest.assigned_room.name}")
+                messages.error(request, f"No lock assigned to room {guest.assigned_room.name}.")
+                return redirect('manage_checkin_checkout', guest_id=guest.id)
+
+            ttlock_client = TTLockClient()
+            # Delete existing front door PIN
+            if guest.front_door_pin_id:
                 try:
-                    # Delete the old front door PIN
-                    if guest.front_door_pin_id:
+                    ttlock_client.delete_pin(
+                        lock_id=front_door_lock.lock_id,
+                        keyboard_pwd_id=guest.front_door_pin_id,
+                    )
+                except Exception as e:
+                    messages.warning(request, f"Failed to delete old front door PIN: {str(e)}")
+
+            # Delete existing room PIN
+            if guest.room_pin_id:
+                try:
+                    ttlock_client.delete_pin(
+                        lock_id=room_lock.lock_id,
+                        keyboard_pwd_id=guest.room_pin_id,
+                    )
+                except Exception as e:
+                    messages.warning(request, f"Failed to delete old room PIN: {str(e)}")
+
+            new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
+            uk_timezone = pytz.timezone("Europe/London")
+            now_uk_time = timezone.now().astimezone(uk_timezone)
+            start_time = int(now_uk_time.timestamp() * 1000)
+            # Set endDate to one day after check-out
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            end_date = timezone.make_aware(
+                datetime.datetime.combine(guest.check_out_date, check_out_time),
+                datetime.timezone.utc
+            ).astimezone(uk_timezone) + datetime.timedelta(days=1)
+            end_time = int(end_date.timestamp() * 1000)
+
+            try:
+                # Generate new PIN for front door
+                front_door_response = ttlock_client.generate_temporary_pin(
+                    lock_id=front_door_lock.lock_id,
+                    pin=new_pin,
+                    start_time=start_time,
+                    end_time=end_time,
+                    name=f"Front Door - {guest.assigned_room.name} - {guest.full_name} - {new_pin}",
+                )
+                if "keyboardPwdId" not in front_door_response:
+                    logger.error(f"Failed to generate new front door PIN for guest {guest.reservation_number}: {front_door_response.get('errmsg', 'Unknown error')}")
+                    messages.error(request, f"Failed to generate new front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
+                    return redirect('manage_checkin_checkout', guest_id=guest.id)
+                guest.front_door_pin = new_pin
+                guest.front_door_pin_id = front_door_response["keyboardPwdId"]
+
+                # Generate the same PIN for the room lock
+                room_response = ttlock_client.generate_temporary_pin(
+                    lock_id=room_lock.lock_id,
+                    pin=new_pin,
+                    start_time=start_time,
+                    end_time=end_time,
+                    name=f"Room - {guest.assigned_room.name} - {guest.full_name} - {new_pin}",
+                )
+                if "keyboardPwdId" not in room_response:
+                    logger.error(f"Failed to generate new room PIN for guest {guest.reservation_number}: {room_response.get('errmsg', 'Unknown error')}")
+                    # Roll back the front door PIN
+                    try:
                         ttlock_client.delete_pin(
                             lock_id=front_door_lock.lock_id,
                             keyboard_pwd_id=guest.front_door_pin_id,
                         )
-                        logger.info(f"Deleted old front door PIN for guest {guest.reservation_number} due to check-out time change (Keyboard Password ID: {guest.front_door_pin_id})")
-                    
-                    # Delete the old room PIN
-                    if guest.room_pin_id:
-                        ttlock_client.delete_pin(
-                            lock_id=room_lock.lock_id,
-                            keyboard_pwd_id=guest.room_pin_id,
-                        )
-                        logger.info(f"Deleted old room PIN for guest {guest.reservation_number} due to check-out time change (Keyboard Password ID: {guest.room_pin_id})")
-
-                    # Generate a new PIN with updated validity
-                    new_pin = guest.front_door_pin  # Reuse the existing PIN
-                    uk_timezone = pytz.timezone("Europe/London")
-                    now_uk_time = timezone.now().astimezone(uk_timezone)
-                    start_time = int(now_uk_time.timestamp() * 1000)
-                    # Set endDate to one day after check-out
-                    end_date = timezone.make_aware(
-                        datetime.datetime.combine(guest.check_out_date, late_checkout_time),
-                        datetime.timezone.utc,
-                    ).astimezone(uk_timezone) + datetime.timedelta(days=1)
-                    end_time = int(end_date.timestamp() * 1000)
-
-                    # Generate new PIN for front door
-                    front_door_response = ttlock_client.generate_temporary_pin(
-                        lock_id=front_door_lock.lock_id,
-                        pin=new_pin,
-                        start_time=start_time,
-                        end_time=end_time,
-                        name=f"Front Door - {guest.assigned_room.name} - {guest.full_name} - {new_pin}",
-                    )
-                    if "keyboardPwdId" not in front_door_response:
-                        logger.error(f"Failed to update front door PIN for guest {guest.reservation_number} after check-out time change: {front_door_response.get('errmsg', 'Unknown error')}")
-                        messages.warning(request, f"Failed to update front door PIN after check-out time change: {front_door_response.get('errmsg', 'Unknown error')}")
-                        guest.front_door_pin = None
-                        guest.front_door_pin_id = None
-                        guest.room_pin_id = None
-                    else:
-                        guest.front_door_pin_id = front_door_response["keyboardPwdId"]
-                        logger.info(f"Updated front door PIN {new_pin} for guest {guest.reservation_number} after check-out time change (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
-
-                        # Generate the same PIN for the room lock
-                        room_response = ttlock_client.generate_temporary_pin(
-                            lock_id=room_lock.lock_id,
-                            pin=new_pin,
-                            start_time=start_time,
-                            end_time=end_time,
-                            name=f"Room - {guest.assigned_room.name} - {guest.full_name} - {new_pin}",
-                        )
-                        if "keyboardPwdId" not in room_response:
-                            logger.error(f"Failed to update room PIN for guest {guest.reservation_number} after check-out time change: {room_response.get('errmsg', 'Unknown error')}")
-                            # Roll back the front door PIN
-                            try:
-                                ttlock_client.delete_pin(
-                                    lock_id=front_door_lock.lock_id,
-                                    keyboard_pwd_id=guest.front_door_pin_id,
-                                )
-                                logger.info(f"Rolled back updated front door PIN for guest {guest.reservation_number} after check-out time change")
-                            except Exception as e:
-                                logger.error(f"Failed to roll back updated front door PIN for guest {guest.reservation_number}: {str(e)}")
-                            guest.front_door_pin = None
-                            guest.front_door_pin_id = None
-                            guest.room_pin_id = None
-                            messages.warning(request, f"Failed to update room PIN after check-out time change: {room_response.get('errmsg', 'Unknown error')}")
-                        else:
-                            guest.room_pin_id = room_response["keyboardPwdId"]
-                            logger.info(f"Updated room PIN {new_pin} for guest {guest.reservation_number} after check-out time change (Keyboard Password ID: {room_response['keyboardPwdId']})")
-                except Exception as e:
-                    logger.error(f"Failed to update PIN for guest {guest.reservation_number} after check-out time change: {str(e)}")
-                    messages.warning(request, f"Failed to update PIN after check-out time change: {str(e)}")
+                    except Exception as e:
+                        logger.error(f"Failed to roll back new front door PIN for guest {guest.reservation_number}: {str(e)}")
                     guest.front_door_pin = None
                     guest.front_door_pin_id = None
                     guest.room_pin_id = None
+                    guest.save()
+                    messages.error(request, f"Failed to generate new room PIN: {room_response.get('errmsg', 'Unknown error')}")
+                    return redirect('manage_checkin_checkout', guest_id=guest.id)
+                guest.room_pin_id = room_response["keyboardPwdId"]
+                guest.save()
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="Guest PIN Regenerated (Check-In/Check-Out Update)",
+                    object_type="Guest",
+                    object_id=guest.id,
+                    details=f"Regenerated PIN {new_pin} for reservation {guest.reservation_number} due to check-in/check-out time update"
+                )
+                # Send update message after PIN regeneration
+                if guest.phone_number or guest.email:
+                    guest.send_update_message()
+                messages.success(request, f"New PIN (for both front door and room) generated: {new_pin}. The guest can also unlock the doors remotely during check-in or from the room detail page.")
+            except Exception as e:
+                logger.error(f"Failed to generate new PIN for guest {guest.reservation_number}: {str(e)}")
+                messages.error(request, f"Failed to generate new PIN: {str(e)}")
+                return redirect('manage_checkin_checkout', guest_id=guest.id)
 
-        guest.save()
-        messages.success(request, f"Check-in/check-out times updated for {guest.full_name}.")
+        else:
+            # Update guest details
+            early_checkin_time = request.POST.get('early_checkin_time')
+            late_checkout_time = request.POST.get('late_checkout_time')
+
+            # Convert time strings (e.g., "12:00") to time objects
+            if early_checkin_time:
+                try:
+                    early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+                    guest.early_checkin_time = early_checkin_time
+                except ValueError:
+                    messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
+                    return redirect('manage_checkin_checkout', guest_id=guest.id)
+            else:
+                guest.early_checkin_time = None  # Revert to default if empty
+
+            if late_checkout_time:
+                try:
+                    late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
+                    guest.late_checkout_time = late_checkout_time
+                except ValueError:
+                    messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
+                    return redirect('manage_checkin_checkout', guest_id=guest.id)
+            else:
+                guest.late_checkout_time = None  # Revert to default if empty
+
+            # Check for changes and build the changed_fields list
+            changed_fields = []
+            if original_early_checkin_time != guest.early_checkin_time:
+                changed_fields.append(f"Early Check-In Time (from '{original_early_checkin_time or 'Default (2:00 PM)'}' to '{guest.early_checkin_time or 'Default (2:00 PM)'}')")
+            if original_late_checkout_time != guest.late_checkout_time:
+                changed_fields.append(f"Late Check-Out Time (from '{original_late_checkout_time or 'Default (11:00 AM)'}' to '{guest.late_checkout_time or 'Default (11:00 AM)'}')")
+
+            # Save the guest with updated fields
+            guest.save()
+
+            # Send update message if there are changes and the guest has contact info
+            if changed_fields and (guest.phone_number or guest.email):
+                guest.send_update_message()
+
+            # Construct the success message with changed fields
+            if changed_fields:
+                changes_message = "Changes made: " + ", ".join(changed_fields) + "."
+            else:
+                changes_message = "No changes were made to the check-in/check-out times."
+            messages.success(request, f"Check-in/check-out times updated for {guest.full_name}. {changes_message}")
+
+            AuditLog.objects.create(
+                user=request.user,
+                action="Guest Check-In/Check-Out Updated",
+                object_type="Guest",
+                object_id=guest.id,
+                details=f"Updated check-in/check-out times for reservation {guest.reservation_number}: {', '.join(changed_fields)}"
+            )
+
         return redirect('admin_page')
 
     return render(request, 'main/manage_checkin_checkout.html', {

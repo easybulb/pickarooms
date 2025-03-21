@@ -97,6 +97,21 @@ p {
     background-color: #162033;
 }
 
+.btn-regenerate {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #19a43e;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 200px;
+    align-self: center;
+    transition: background 0.3s ease-in-out;
+    margin-bottom: 30px;
+}
+
 /* Back Link Styles */
 .back-link {
     display: inline-block;
@@ -154,6 +169,13 @@ p {
     }
 
     .btn-save {
+        width: 150px;
+        font-size: 14px;
+        padding: 8px 15px;
+        align-self: center;
+    }
+
+    .btn-regenerate {
         width: 150px;
         font-size: 14px;
         padding: 8px 15px;
