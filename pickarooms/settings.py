@@ -124,13 +124,13 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': 'debug.log',
             'formatter': 'verbose',
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'ERROR',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
@@ -138,8 +138,13 @@ LOGGING = {
     'loggers': {
         'main': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
-            'propagate': True,
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        '': {  # Root logger
+            'handlers': ['file', 'console'],
+            'level': 'ERROR',
+            'propagate': False,
         },
     },
 }
