@@ -2255,15 +2255,10 @@ def price_suggester(request):
     if keyword:
         display_params['keyword'] = keyword
 
-    # Log the display API request
-    display_url = 'https://app.ticketmaster.com/discovery/v2/events.json' + '?' + '&'.join(f"{k}={v}" for k, v in display_params.items())
-    logger.info(f"Ticketmaster API display request URL: {display_url}")
-
     try:
         display_response = requests.get('https://app.ticketmaster.com/discovery/v2/events.json', params=display_params)
         display_response.raise_for_status()
         display_data = display_response.json()
-        logger.info(f"Ticketmaster API display response: {json.dumps(display_data, indent=2)}")
     except requests.exceptions.RequestException as e:
         logger.error(f"Ticketmaster API display error: {str(e)}")
         display_data = {'_embedded': {'events': []}}
