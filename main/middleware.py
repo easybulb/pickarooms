@@ -47,8 +47,9 @@ class PopularEventMonitorMiddleware:
                 'endDateTime': f"{end_date}T23:59:59Z",
             }
 
+            # Log the API request, redacting the API key
             detection_url = 'https://app.ticketmaster.com/discovery/v2/events.json?' + '&'.join(
-                f"{k}={v}" for k, v in params.items()
+                f"{k}={'[REDACTED]' if k == 'apikey' else v}" for k, v in params.items()
             )
             logger.info(f"Ticketmaster API detection request URL (page {page}): {detection_url}")
 
@@ -56,7 +57,6 @@ class PopularEventMonitorMiddleware:
                 detection_response = requests.get('https://app.ticketmaster.com/discovery/v2/events.json', params=params)
                 detection_response.raise_for_status()
                 detection_data = detection_response.json()
-                logger.info(f"Ticketmaster API detection response (page {page}): {json.dumps(detection_data, indent=2)}")
             except requests.exceptions.RequestException as e:
                 logger.error(f"Ticketmaster API detection error on page {page}: {str(e)}")
                 break
@@ -89,7 +89,6 @@ class PopularEventMonitorMiddleware:
                                     with transaction.atomic():
                                         existing_event.email_sent = True
                                         existing_event.save()
-                                        logger.info(f"Updated existing event {existing_event.name} (ID: {existing_event.event_id}) with email_sent=True")
                             else:
                                 # Create new event
                                 new_event = PopularEvent(
@@ -129,7 +128,6 @@ class PopularEventMonitorMiddleware:
                                                 logger.info(f"Sent email notification for new popular event: {new_event.name}")
                                                 new_event.email_sent = True
                                                 new_event.save()
-                                                logger.info(f"Updated email_sent flag for event {new_event.event_id}")
                                             except Exception as e:
                                                 logger.error(f"Failed to send email notification for new popular event: {str(e)}")
                                 except IntegrityError:
