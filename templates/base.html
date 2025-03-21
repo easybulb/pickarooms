@@ -176,16 +176,30 @@
                 }
             }
     
-            // Fetch visitor location and show cookie banner for UK/EU
-            fetch("https://ipapi.co/json/")
+            // Fetch visitor location using ipgeolocation.io
+            const apiKey = "{{ IPGEOLOCATION_API_KEY }}";  // Use Django template variable
+            if (!apiKey || apiKey.trim() === "") {
+                console.error("IPGeolocation API key is missing!");
+                showCookieBanner();  // Fallback: show banner if API key is missing
+                return;
+            }
+    
+            fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${apiKey}`)
                 .then(response => response.json())
                 .then(data => {
                     const euCountries = ["GB", "FR", "DE", "ES", "IT", "NL", "BE", "SE", "DK", "FI", "IE", "PT", "AT", "PL", "GR"];
-                    if (euCountries.includes(data.country_code)) {
+                    if (euCountries.includes(data.country_code2)) {
+                        console.log("User is in EU/UK, showing cookie banner...");
                         showCookieBanner();
+                    } else {
+                        console.log("User is not in EU/UK, skipping cookie banner...");
                     }
                 })
-                .catch(error => console.error("Error fetching location:", error));
+                .catch(error => {
+                    console.error("Error fetching location:", error);
+                    // Fallback: show the banner if the API fails
+                    showCookieBanner();
+                });
         });
     </script>
     
