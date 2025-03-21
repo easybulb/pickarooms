@@ -32,6 +32,7 @@
 
             <!-- ✅ Google reCAPTCHA v2 Checkbox -->
             <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_PUBLIC_KEY }}"></div>
+            <p id="recaptcha-error" style="color: red; display: none;">{% trans "Please complete the reCAPTCHA to proceed." %}</p>
 
             <button type="submit" id="submit-button">{% trans "Send Message" %}</button>
         </form>
@@ -70,10 +71,22 @@
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("contact-form");
         const submitButton = document.getElementById("submit-button");
+        const recaptchaError = document.getElementById("recaptcha-error");
 
-        form.addEventListener("submit", function () {
-            submitButton.disabled = true; // Disable the button on form submission
-            submitButton.textContent = "{% trans 'Sending...' %}"; // Optional: Update button text
+        form.addEventListener("submit", function (event) {
+            // Check if reCAPTCHA is completed
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                // Prevent form submission if reCAPTCHA is not completed
+                event.preventDefault();
+                recaptchaError.style.display = "block"; // Show error message
+                return;
+            }
+
+            // If reCAPTCHA is completed, proceed with form submission
+            recaptchaError.style.display = "none"; // Hide error message
+            submitButton.disabled = true; // Disable the button to prevent multiple submissions
+            submitButton.textContent = "{% trans 'Sending...' %}"; // Update button text
         });
     });
 </script>

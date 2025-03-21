@@ -534,16 +534,13 @@ def contact(request):
         email = request.POST.get('email')
         message = request.POST.get('message')
         recaptcha_response = request.POST.get('g-recaptcha-response')
-        logger.debug(f"reCAPTCHA response from form: {recaptcha_response}")
 
         recaptcha_secret = settings.RECAPTCHA_PRIVATE_KEY
         recaptcha_url = "https://www.google.com/recaptcha/api/siteverify"
         recaptcha_data = {'secret': recaptcha_secret, 'response': recaptcha_response}
         recaptcha_verify = requests.post(recaptcha_url, data=recaptcha_data).json()
-        logger.debug(f"reCAPTCHA verification response: {recaptcha_verify}")
 
         if not recaptcha_verify.get('success'):
-            logger.warning(f"reCAPTCHA verification failed: {recaptcha_verify.get('error-codes', 'Unknown error')}")
             return render(request, 'main/contact.html', {
                 'error': "reCAPTCHA verification failed. Please try again.",
                 "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
@@ -568,14 +565,12 @@ def contact(request):
             logger.error(f"Failed to send contact email from {email}: {str(e)}")
             return HttpResponse(f"Error: {str(e)}", status=500)
 
-        logger.info(f"Sent contact email from {email}")
         return render(request, 'main/contact.html', {
             'success': True,
             "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
             "RECAPTCHA_PUBLIC_KEY": settings.RECAPTCHA_PUBLIC_KEY,
         })
 
-    logger.debug(f"Rendering contact page with RECAPTCHA_PUBLIC_KEY: {settings.RECAPTCHA_PUBLIC_KEY}")  # Add this line
     return render(request, 'main/contact.html', {
         "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         "RECAPTCHA_PUBLIC_KEY": settings.RECAPTCHA_PUBLIC_KEY,
