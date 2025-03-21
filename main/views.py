@@ -1991,7 +1991,6 @@ def audit_logs(request):
             Q(details__icontains=search_query) |
             Q(timestamp__icontains=search_query)
         )
-        logger.info(f"Audit logs filtered by search: {search_query}")
 
     # Handle date range filter
     start_date = request.GET.get('start_date')
@@ -2000,15 +1999,12 @@ def audit_logs(request):
         logs = logs.filter(timestamp__gte=start_date)
     if end_date:
         logs = logs.filter(timestamp__lte=end_date + ' 23:59:59')
-    if start_date or end_date:
-        logger.info(f"Audit logs filtered by date range: {start_date} to {end_date}")
 
     # Handle sorting
     sort_by = request.GET.get('sort', '-timestamp')  # Default to descending timestamp
     if sort_by not in ['timestamp', '-timestamp', 'user', '-user', 'action', '-action', 'object_type', '-object_type', 'object_id', '-object_id']:
         sort_by = '-timestamp'  # Fallback to default if invalid
     logs = logs.order_by(sort_by)
-    logger.info(f"Audit logs sorted by: {sort_by}")
 
     # Handle pagination
     per_page = request.GET.get('per_page', '50')  # Default to 50
