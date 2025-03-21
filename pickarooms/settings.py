@@ -107,6 +107,11 @@ if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
 if not ADMIN_PHONE_NUMBER:
     raise ValueError("🚨 Admin phone number (ADMIN_PHONE_NUMBER) is missing in env.py!")
 
+IPGEOLOCATION_API_KEY = os.environ.get("IPGEOLOCATION_API_KEY")
+
+if not IPGEOLOCATION_API_KEY:
+    raise ValueError("🚨 IPGeolocation API key (IPGEOLOCATION_API_KEY) is missing in env.py!")
+
 
 LOGGING = {
     'version': 1,
