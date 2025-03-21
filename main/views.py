@@ -379,7 +379,6 @@ def room_detail(request, room_token):
                     folder=f"guest_ids/{now_uk_time.year}/{now_uk_time.month}/{now_uk_time.day}/",
                     resource_type="image"
                 )
-                logger.info(f"Manual upload response: {upload_response}")
 
                 # Save the Cloudinary URL to the model
                 if 'url' in upload_response:
