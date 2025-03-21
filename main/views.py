@@ -876,9 +876,7 @@ def edit_guest(request, guest_id):
                         lock_id=front_door_lock.lock_id,
                         keyboard_pwd_id=guest.front_door_pin_id,
                     )
-                    logger.info(f"Deleted old front door PIN for guest {guest.reservation_number} (Keyboard Password ID: {guest.front_door_pin_id})")
                 except Exception as e:
-                    logger.warning(f"Failed to delete old front door PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete old front door PIN: {str(e)}")
 
             # Delete existing room PIN
@@ -888,9 +886,7 @@ def edit_guest(request, guest_id):
                         lock_id=room_lock.lock_id,
                         keyboard_pwd_id=guest.room_pin_id,
                     )
-                    logger.info(f"Deleted old room PIN for guest {guest.reservation_number} (Keyboard Password ID: {guest.room_pin_id})")
                 except Exception as e:
-                    logger.warning(f"Failed to delete old room PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete old room PIN: {str(e)}")
 
             new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
@@ -901,7 +897,7 @@ def edit_guest(request, guest_id):
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             end_date = timezone.make_aware(
                 datetime.datetime.combine(guest.check_out_date, check_out_time),
-                datetime.timezone.utc,
+                datetime.timezone.utc
             ).astimezone(uk_timezone) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
@@ -920,7 +916,6 @@ def edit_guest(request, guest_id):
                     return redirect('edit_guest', guest_id=guest.id)
                 guest.front_door_pin = new_pin
                 guest.front_door_pin_id = front_door_response["keyboardPwdId"]
-                logger.info(f"Generated new front door PIN {new_pin} for guest {guest.reservation_number} (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
 
                 # Generate the same PIN for the room lock
                 room_response = ttlock_client.generate_temporary_pin(
@@ -938,7 +933,6 @@ def edit_guest(request, guest_id):
                             lock_id=front_door_lock.lock_id,
                             keyboard_pwd_id=guest.front_door_pin_id,
                         )
-                        logger.info(f"Rolled back new front door PIN for guest {guest.reservation_number}")
                     except Exception as e:
                         logger.error(f"Failed to roll back new front door PIN for guest {guest.reservation_number}: {str(e)}")
                     guest.front_door_pin = None
@@ -948,7 +942,6 @@ def edit_guest(request, guest_id):
                     messages.error(request, f"Failed to generate new room PIN: {room_response.get('errmsg', 'Unknown error')}")
                     return redirect('edit_guest', guest_id=guest.id)
                 guest.room_pin_id = room_response["keyboardPwdId"]
-                logger.info(f"Generated new room PIN {new_pin} for guest {guest.reservation_number} (Keyboard Password ID: {room_response['keyboardPwdId']})")
                 guest.save()
                 AuditLog.objects.create(
                     user=request.user,
@@ -1003,7 +996,6 @@ def edit_guest(request, guest_id):
 
             # Check for room change
             if str(new_room_id) != str(original_room_id):
-                logger.info(f"Room changed for guest {guest.reservation_number} from {original_room_id} to {new_room_id}")
                 AuditLog.objects.create(
                     user=request.user,
                     action="Guest Room Changed",
@@ -1023,9 +1015,7 @@ def edit_guest(request, guest_id):
                             lock_id=old_room_lock.lock_id,
                             keyboard_pwd_id=guest.room_pin_id,
                         )
-                        logger.info(f"Deleted old room PIN for guest {guest.reservation_number} from room {original_room_id} (Keyboard Password ID: {guest.room_pin_id})")
                     except Exception as e:
-                        logger.warning(f"Failed to delete old room PIN for guest {guest.reservation_number}: {str(e)}")
                         messages.warning(request, f"Failed to delete old room PIN: {str(e)}")
 
                 # Regenerate PIN for new room and front door
@@ -1037,7 +1027,6 @@ def edit_guest(request, guest_id):
                                 lock_id=front_door_lock.lock_id,
                                 keyboard_pwd_id=guest.front_door_pin_id,
                             )
-                            logger.info(f"Deleted old front door PIN for guest {guest.reservation_number} due to room change (Keyboard Password ID: {guest.front_door_pin_id})")
 
                         new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
                         uk_timezone = pytz.timezone("Europe/London")
@@ -1064,7 +1053,6 @@ def edit_guest(request, guest_id):
                             return redirect('edit_guest', guest_id=guest.id)
                         guest.front_door_pin = new_pin
                         guest.front_door_pin_id = front_door_response["keyboardPwdId"]
-                        logger.info(f"Generated new front door PIN {new_pin} for guest {guest.reservation_number} after room change (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
 
                         # Generate the same PIN for the new room lock
                         room_response = ttlock_client.generate_temporary_pin(
@@ -1082,7 +1070,6 @@ def edit_guest(request, guest_id):
                                     lock_id=front_door_lock.lock_id,
                                     keyboard_pwd_id=guest.front_door_pin_id,
                                 )
-                                logger.info(f"Rolled back new front door PIN for guest {guest.reservation_number} after room change")
                             except Exception as e:
                                 logger.error(f"Failed to roll back new front door PIN for guest {guest.reservation_number}: {str(e)}")
                             guest.front_door_pin = None
@@ -1092,7 +1079,6 @@ def edit_guest(request, guest_id):
                             messages.error(request, f"Failed to generate new room PIN: {room_response.get('errmsg', 'Unknown error')}")
                             return redirect('edit_guest', guest_id=guest.id)
                         guest.room_pin_id = room_response["keyboardPwdId"]
-                        logger.info(f"Generated new room PIN {new_pin} for guest {guest.reservation_number} after room change (Keyboard Password ID: {room_response['keyboardPwdId']})")
                         AuditLog.objects.create(
                             user=request.user,
                             action="Guest PIN Regenerated (Room Change)",
@@ -1119,7 +1105,6 @@ def edit_guest(request, guest_id):
                                     lock_id=front_door_lock.lock_id,
                                     keyboard_pwd_id=guest.front_door_pin_id,
                                 )
-                                logger.info(f"Deleted old front door PIN for guest {guest.reservation_number} due to date change (Keyboard Password ID: {guest.front_door_pin_id})")
                             
                             # Delete the old room PIN
                             if guest.room_pin_id:
@@ -1127,7 +1112,6 @@ def edit_guest(request, guest_id):
                                     lock_id=room_lock.lock_id,
                                     keyboard_pwd_id=guest.room_pin_id,
                                 )
-                                logger.info(f"Deleted old room PIN for guest {guest.reservation_number} due to date change (Keyboard Password ID: {guest.room_pin_id})")
 
                             # Generate a new PIN with updated validity
                             new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
@@ -1159,7 +1143,6 @@ def edit_guest(request, guest_id):
                             else:
                                 guest.front_door_pin = new_pin
                                 guest.front_door_pin_id = front_door_response["keyboardPwdId"]
-                                logger.info(f"Generated new front door PIN {new_pin} for guest {guest.reservation_number} after date change (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
 
                                 # Generate the same PIN for the room lock
                                 room_response = ttlock_client.generate_temporary_pin(
@@ -1177,7 +1160,6 @@ def edit_guest(request, guest_id):
                                             lock_id=front_door_lock.lock_id,
                                             keyboard_pwd_id=guest.front_door_pin_id,
                                         )
-                                        logger.info(f"Rolled back new front door PIN for guest {guest.reservation_number} after date change")
                                     except Exception as e:
                                         logger.error(f"Failed to roll back new front door PIN for guest {guest.reservation_number}: {str(e)}")
                                     guest.front_door_pin = None
@@ -1187,7 +1169,6 @@ def edit_guest(request, guest_id):
                                     messages.warning(request, f"Failed to update room PIN after date change: {room_response.get('errmsg', 'Unknown error')}")
                                 else:
                                     guest.room_pin_id = room_response["keyboardPwdId"]
-                                    logger.info(f"Generated new room PIN {new_pin} for guest {guest.reservation_number} after date change (Keyboard Password ID: {room_response['keyboardPwdId']})")
                                     AuditLog.objects.create(
                                         user=request.user,
                                         action="Guest PIN Updated (Date Change)",
@@ -1220,7 +1201,6 @@ def edit_guest(request, guest_id):
                 object_id=guest.id,
                 details=f"Updated details for reservation {guest.reservation_number} (Room: {new_room_id}, Check-in: {check_in_date}, Check-out: {check_out_date})"
             )
-            logger.info(f"Updated guest {guest.reservation_number} details")
             messages.success(request, f"Guest {guest.full_name} updated successfully. The guest can unlock the doors using their PIN or remotely during check-in or from the room detail page.")
 
         return redirect('admin_page')

@@ -7,6 +7,12 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/edit_guest.css' %}">
+<style>
+    /* Ensure the Save Changes button has a consistent display style when visible */
+    .btn-save {
+        display: block; /* Default display style for the button */
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -29,7 +35,7 @@
         <input type="text" id="phone_number" name="phone_number" value="{{ guest.phone_number|default_if_none:'' }}">
 
         <label for="email">{% trans "Email (Optional):" %}</label>
-        <input type="email" id="email" name="email" value="{{ guest.email|default_if_none:'' }}"> <!-- New email field -->
+        <input type="email" id="email" name="email" value="{{ guest.email|default_if_none:'' }}">
 
         <label for="check_in_date">{% trans "Check-In Date:" %}</label>
         <input type="date" id="check_in_date" name="check_in_date" value="{{ guest.check_in_date|date:'Y-m-d' }}" required>
@@ -53,6 +59,9 @@
                 </option>
             {% endfor %}
         </select>
+        <p id="room-change-message" class="note" style="display: none; color: red;">
+            {% trans "Room has been changed. Please regenerate the PIN before saving changes." %}
+        </p>
 
         <label>{% trans "PIN (Front Door & Room):" %}</label>
         <p>
@@ -73,7 +82,7 @@
             {% endif %}
         </p>
 
-        <button type="submit" class="btn-save">{% trans "Save Changes" %}</button>
+        <button type="submit" id="save-changes-btn" class="btn-save">{% trans "Save Changes" %}</button>
     </form>
 
     {% if guest.front_door_pin %}
@@ -87,9 +96,10 @@
     <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
 </div>
 
-<!-- JavaScript for Updating Available Rooms Dynamically -->
+<!-- JavaScript for Updating Available Rooms Dynamically and Hiding Save Button on Room Change -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Existing logic to update available rooms dynamically
         function updateRooms() {
             const checkInDate = document.getElementById('check_in_date').value;
             const checkOutDate = document.getElementById('check_out_date').value;
@@ -110,13 +120,41 @@
                             }
                             roomSelect.appendChild(option);
                         });
+                        // Trigger the room change check after updating the dropdown
+                        checkRoomChange();
                     })
                     .catch(error => console.error('Error fetching available rooms:', error));
             }
         }
 
+        // Updated logic to hide the Save Changes button on room change
+        const originalRoomId = "{{ guest.assigned_room.id }}";
+        const roomSelect = document.getElementById('room');
+        const saveButton = document.getElementById('save-changes-btn');
+        const roomChangeMessage = document.getElementById('room-change-message');
+
+        function checkRoomChange() {
+            const selectedRoomId = roomSelect.value;
+            if (selectedRoomId !== originalRoomId) {
+                // Room has changed: hide the Save Changes button and show the message
+                saveButton.style.display = 'none';
+                roomChangeMessage.style.display = 'block';
+            } else {
+                // Room is the same: show the Save Changes button and hide the message
+                saveButton.style.display = 'block';
+                roomChangeMessage.style.display = 'none';
+            }
+        }
+
+        // Add event listener for room selection changes
+        roomSelect.addEventListener('change', checkRoomChange);
+
+        // Existing event listeners for date changes
         document.getElementById('check_in_date').addEventListener('change', updateRooms);
         document.getElementById('check_out_date').addEventListener('change', updateRooms);
+
+        // Initial check on page load
+        checkRoomChange();
     });
 </script>
 {% endblock %}
