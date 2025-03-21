@@ -1713,7 +1713,6 @@ def room_management(request):
                     room.save()
 
                 messages.success(request, "Successfully populated TTLock entries and associations from JSON data.")
-                logger.info(f"Admin {request.user.username} populated TTLock entries from JSON textarea")
             except json.JSONDecodeError:
                 messages.error(request, "Invalid JSON format. Please check your syntax.")
             except Room.DoesNotExist:
@@ -1761,7 +1760,6 @@ def room_management(request):
                     details=f"Created room '{new_room_name}' with lock '{new_lock_name}' (Lock ID: {new_lock_id})"
                 )
                 messages.success(request, f"Room '{new_room_name}' and lock '{new_lock_name}' added successfully.")
-                logger.info(f"Admin {request.user.username} added room '{new_room_name}' with lock '{new_lock_name}' (Lock ID: {new_lock_id})")
             except ValueError:
                 messages.error(request, "Invalid lock ID format.")
             except Exception as e:
@@ -1819,7 +1817,6 @@ def room_management(request):
                     details=f"Created room '{room.name}' with lock '{ttlock.name}' (Lock ID: {ttlock.lock_id})"
                 )
                 messages.success(request, f"Room '{room.name}' added successfully with lock '{ttlock.name}'.")
-                logger.info(f"Admin {request.user.username} added room '{room.name}' with lock '{ttlock.name}' (Lock ID: {ttlock.lock_id})")
             except TTLock.DoesNotExist:
                 messages.error(request, "Invalid TTLock selected.")
                 return redirect('room_management')
@@ -1844,7 +1841,6 @@ def room_management(request):
                     if Room.objects.filter(ttlock=ttlock).count() == 1:
                         delete_lock = True
                         ttlock.delete()
-                        logger.info(f"Deleted associated TTLock '{ttlock.name}' (Lock ID: {ttlock.lock_id}) for room '{room_name}'")
                 room.delete()
                 AuditLog.objects.create(
                     user=request.user,
@@ -1854,7 +1850,6 @@ def room_management(request):
                     details=f"Deleted room '{room_name}'" + (f" and lock '{ttlock_name}'" if delete_lock else "")
                 )
                 messages.success(request, f"Room '{room_name}' deleted successfully." + (f" Associated lock '{ttlock_name}' was also deleted." if delete_lock else ""))
-                logger.info(f"Admin {request.user.username} deleted room '{room_name}'")
             except Exception as e:
                 logger.error(f"Failed to delete room {room_id}: {str(e)}")
                 messages.error(request, f"Failed to delete room: {str(e)}")
