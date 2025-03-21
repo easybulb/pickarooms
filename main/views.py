@@ -42,6 +42,7 @@ import cloudinary.api
 from cloudinary.utils import cloudinary_url
 from django.core.files.storage import default_storage
 from cloudinary.uploader import upload as cloudinary_upload
+from twilio.rest import Client
 
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
@@ -2362,3 +2363,33 @@ def block_review_messages(request):
         'search_query': search_query,
     }
     return render(request, 'main/block_review_message.html', context)
+
+@csrf_exempt
+def sms_reply_handler(request):
+    if request.method == 'POST':
+        from_number = request.POST.get('From', 'Unknown')
+        message_body = request.POST.get('Body', 'No message')
+        logger.info(f"Received SMS reply from {from_number}: {message_body}")
+
+        admin_phone_number = settings.ADMIN_PHONE_NUMBER
+        guest = Guest.objects.filter(phone_number=from_number).first()
+        guest_info = f" ({guest.full_name}, #{guest.reservation_number})" if guest else ""
+
+        forwarded_message = (
+            f"Guest Reply from {from_number}{guest_info}: {message_body}\n"
+            f"[Forwarded to you on {admin_phone_number}]"
+        )
+
+        try:
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            message = client.messages.create(
+                body=forwarded_message,
+                from_=settings.TWILIO_PHONE_NUMBER,
+                to=admin_phone_number
+            )
+            logger.info(f"Forwarded SMS reply to {admin_phone_number}, SID: {message.sid}")
+        except Exception as e:
+            logger.error(f"Failed to forward SMS reply to {admin_phone_number}: {str(e)}")
+
+        return HttpResponse('<Response></Response>', content_type='text/xml')
+    return HttpResponse(status=405)

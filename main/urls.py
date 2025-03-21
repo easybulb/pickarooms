@@ -39,6 +39,7 @@ urlpatterns = [
     path('sitemap/', sitemap, name='sitemap'),
     path('how-to-use/', how_to_use, name='how_to_use'),
     path('awards_reviews/', views.awards_reviews, name='awards_reviews'),
+    path('sms-reply/', views.sms_reply_handler, name='sms_reply_handler'),
     path('api/callback', ttlock_callback, name='ttlock_callback'),
     path('audit-logs/', views.audit_logs, name='audit_logs'),
     path('admin-page/guest-details/<int:guest_id>/', views.guest_details, name='guest_details'),

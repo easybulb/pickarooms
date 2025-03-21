@@ -98,9 +98,14 @@ TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
 
-# Validate Twilio credentials
+# Admin Phone Number for SMS forwarding
+ADMIN_PHONE_NUMBER = os.environ.get("ADMIN_PHONE_NUMBER")
+
+# Validate Twilio credentials and admin phone number
 if not TWILIO_ACCOUNT_SID or not TWILIO_AUTH_TOKEN or not TWILIO_PHONE_NUMBER:
     raise ValueError("🚨 Twilio API credentials (account_sid, auth_token, or phone_number) are missing in env.py!")
+if not ADMIN_PHONE_NUMBER:
+    raise ValueError("🚨 Admin phone number (ADMIN_PHONE_NUMBER) is missing in env.py!")
 
 
 LOGGING = {
