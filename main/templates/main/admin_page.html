@@ -88,7 +88,7 @@
                             <br>
                             <small>{% trans "Tel:" %} {{ guest.phone_number|default:"Not provided" }}</small>
                             <br>
-                            <small>{% trans "Email:" %} {{ guest.email|default:"Not provided" }}</small> <!-- Display email if available -->
+                            <small>{% trans "Email:" %} {{ guest.email|default:"Not provided" }}</small>
                         </td>                     
                         <td>{{ guest.assigned_room.name }}</td>
                         <td class="pin-code">
@@ -147,10 +147,15 @@
             <input type="text" id="phone_number" name="phone_number">
 
             <label for="email">{% trans "Email (Optional):" %}</label>
-            <input type="email" id="email" name="email"> <!-- New email field -->
+            <input type="email" id="email" name="email">
 
             <label for="check_in_date">{% trans "Check-In Date:" %}</label>
             <input type="date" id="check_in_date" name="check_in_date" required>
+
+            <!-- Early Check-In Time -->
+            <label for="early_checkin_time">{% trans "Early Check-In Time (e.g., 12:00):" %}</label>
+            <input type="time" id="early_checkin_time" name="early_checkin_time" placeholder="HH:MM">
+            <p class="note">{% trans "Leave blank to use default (2:00 PM)." %}</p>
 
             <!-- Stay Duration -->
             <label for="stay_duration">{% trans "Stay Duration:" %}</label>
@@ -162,6 +167,11 @@
         
             <label for="check_out_date">{% trans "Check-Out Date:" %}</label>
             <input type="date" id="check_out_date" name="check_out_date" placeholder="dd/mm/yyyy">
+
+            <!-- Late Check-Out Time -->
+            <label for="late_checkout_time">{% trans "Late Check-Out Time (e.g., 14:00):" %}</label>
+            <input type="time" id="late_checkout_time" name="late_checkout_time" placeholder="HH:MM">
+            <p class="note">{% trans "Leave blank to use default (11:00 AM)." %}</p>
 
             <label for="select-room">{% trans "Assign Room:" %}</label>
             <select id="select-room" name="room" required>
@@ -262,20 +272,20 @@
     document.addEventListener("DOMContentLoaded", function () {
         const nameField = document.getElementById("full_name");
         const phoneField = document.getElementById("phone_number");
-        const emailField = document.getElementById("email");  // Add email field to localStorage logic
+        const emailField = document.getElementById("email");
 
         const storedName = localStorage.getItem("reassign_name");
         const storedPhone = localStorage.getItem("reassign_phone");
-        const storedEmail = localStorage.getItem("reassign_email");  // Add stored email
+        const storedEmail = localStorage.getItem("reassign_email");
 
         if (storedName && storedPhone && storedEmail) {
             nameField.value = storedName;
             phoneField.value = storedPhone;
-            emailField.value = storedEmail;  // Set email value
+            emailField.value = storedEmail;
 
             localStorage.removeItem("reassign_name");
             localStorage.removeItem("reassign_phone");
-            localStorage.removeItem("reassign_email");  // Remove stored email
+            localStorage.removeItem("reassign_email");
         }
     });
 </script>

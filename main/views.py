@@ -671,9 +671,11 @@ def admin_page(request):
     if request.method == 'POST':
         reservation_number = request.POST.get('reservation_number', '').strip()
         phone_number = request.POST.get('phone_number', '').strip() or None
-        email = request.POST.get('email', '').strip() or None  # New email field from form
+        email = request.POST.get('email', '').strip() or None
         full_name = request.POST.get('full_name', 'Guest').strip()
         room_id = request.POST.get('room')
+        early_checkin_time = request.POST.get('early_checkin_time')
+        late_checkout_time = request.POST.get('late_checkout_time')
 
         # Validate reservation_number length
         if len(reservation_number) > 15:
@@ -686,13 +688,11 @@ def admin_page(request):
 
         # Normalize and validate phone number
         if phone_number:
-            if not re.match(r'^\+?\d{9,15}$', phone_number):  # Allow 9-15 digits with optional +
+            if not re.match(r'^\+?\d{9,15}$', phone_number):
                 messages.error(request, "Phone number must be in international format (e.g., +12025550123) or a valid local number (e.g., 07123456789 for UK).")
                 return redirect('admin_page')
-            # Only normalize UK numbers starting with 0 to +44, leave other international numbers intact
-            if phone_number.startswith('0') and len(phone_number) == 11 and phone_number[1] in '7':  # UK mobile numbers
+            if phone_number.startswith('0') and len(phone_number) == 11 and phone_number[1] in '7':
                 phone_number = '+44' + phone_number[1:]
-            # Do not modify numbers with existing country codes
 
         try:
             room = Room.objects.get(id=room_id)
@@ -720,17 +720,36 @@ def admin_page(request):
             pin = str(random.randint(10000, 99999))  # 5-digit PIN
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
-            start_time = int(now_uk_time.timestamp() * 1000)
-            # Set endDate to one day after check-out, considering late_checkout_time if provided
-            check_out_time = time(11, 0)  # Default if not set
-            if request.POST.get('late_checkout_time'):
+
+            # Set start time based on early_checkin_time (default to 2:00 PM if not set)
+            if early_checkin_time:
                 try:
-                    check_out_time = datetime.datetime.strptime(request.POST.get('late_checkout_time'), '%H:%M').time()
+                    early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+                    start_datetime = timezone.make_aware(
+                        datetime.datetime.combine(check_in_date, early_checkin_time),
+                        datetime.timezone.utc
+                    ).astimezone(uk_timezone)
+                except ValueError:
+                    messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
+                    return redirect('admin_page')
+            else:
+                start_datetime = timezone.make_aware(
+                    datetime.datetime.combine(check_in_date, time(14, 0)),
+                    datetime.timezone.utc
+                ).astimezone(uk_timezone)
+            start_time = int(start_datetime.timestamp() * 1000)
+
+            # Set end time based on late_checkout_time (default to 11:00 AM if not set)
+            if late_checkout_time:
+                try:
+                    late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
                 except ValueError:
                     messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
                     return redirect('admin_page')
+            else:
+                late_checkout_time = time(11, 0)
             end_date = timezone.make_aware(
-                datetime.datetime.combine(check_out_date, check_out_time),
+                datetime.datetime.combine(check_out_date, late_checkout_time),
                 datetime.timezone.utc
             ).astimezone(uk_timezone) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
@@ -786,7 +805,8 @@ def admin_page(request):
                     front_door_pin=pin,
                     front_door_pin_id=keyboard_pwd_id_front,
                     room_pin_id=keyboard_pwd_id_room,
-                    late_checkout_time=check_out_time if check_out_time != time(11, 0) else None,
+                    early_checkin_time=early_checkin_time if early_checkin_time else None,
+                    late_checkout_time=late_checkout_time if late_checkout_time != time(11, 0) else None,
                 )
                 # Log the guest creation action
                 AuditLog.objects.create(
