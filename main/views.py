@@ -2142,8 +2142,10 @@ def event_finder(request):
     if not keyword and not start_date == today and not end_date == '2025-12-31':
         params['keyword'] = ','.join(major_venues)  # Search for major venues by default
 
-    # Log the API request for debugging
-    request_url = 'https://app.ticketmaster.com/discovery/v2/events.json' + '?' + '&'.join(f"{k}={v}" for k, v in params.items())
+    # Log the API request for debugging, redacting the API key
+    request_url = 'https://app.ticketmaster.com/discovery/v2/events.json' + '?' + '&'.join(
+        f"{k}={'[REDACTED]' if k == 'apikey' else v}" for k, v in params.items()
+    )
     logger.info(f"Ticketmaster API request URL: {request_url}")
 
     # Call the Ticketmaster API
@@ -2151,7 +2153,6 @@ def event_finder(request):
         response = requests.get('https://app.ticketmaster.com/discovery/v2/events.json', params=params)
         response.raise_for_status()  # Raise an error for bad status codes
         data = response.json()
-        logger.info(f"Ticketmaster API response: {json.dumps(data, indent=2)}")  # Log the full response
     except requests.exceptions.RequestException as e:
         logger.error(f"Ticketmaster API error: {str(e)}")
         data = {'_embedded': {'events': []}, 'page': {'totalElements': 0, 'totalPages': 1}}
