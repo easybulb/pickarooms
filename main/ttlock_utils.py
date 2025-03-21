@@ -1,4 +1,3 @@
-# main/ttlock_utils.py
 import requests
 import os
 import json
@@ -24,8 +23,6 @@ class TTLockClient:
             self.access_token = os.environ.get("SCIENER_ACCESS_TOKEN")
             self.refresh_token = os.environ.get("SCIENER_REFRESH_TOKEN")
             self._save_tokens()  # Save initial tokens to file
-        
-        logger.info(f"Initialized TTLockClient with base_url: {self.base_url}, oauth_base_url: {self.oauth_base_url}")
 
     def _load_tokens(self):
         """Load tokens from the token file."""
@@ -35,9 +32,8 @@ class TTLockClient:
                     tokens = json.load(f)
                     self.access_token = tokens.get("access_token")
                     self.refresh_token = tokens.get("refresh_token")
-                    logger.info("Loaded tokens from file")
             else:
-                logger.info("Token file does not exist, using env.py tokens")
+                pass  # No logging needed
         except Exception as e:
             logger.error(f"Failed to load tokens from file: {str(e)}")
 
@@ -50,7 +46,6 @@ class TTLockClient:
             }
             with open(self.token_file, 'w') as f:
                 json.dump(tokens, f)
-            logger.info("Saved tokens to file")
         except Exception as e:
             logger.error(f"Failed to save tokens to file: {str(e)}")
 
@@ -76,30 +71,23 @@ class TTLockClient:
             for key, value in data.items():
                 params[key] = str(value)
 
-        logger.info(f"Making {method} request to {url} with headers: {headers}, params: {params}")
         response = requests.request(method, url, headers=headers, params=params if method == "GET" else None, data=params if method == "POST" else None)
-        logger.info(f"Request URL: {response.request.url}")
-        logger.info(f"Request Headers: {response.request.headers}")
         response.raise_for_status()
         result = response.json()
-        logger.info(f"Received response: {result}")
 
         # Check for TTLock-specific errors
         if "errcode" in result and result["errcode"] != 0:
             error_msg = result.get("errmsg", "Unknown error")
             logger.error(f"TTLock API error: {error_msg} (errcode: {result['errcode']})")
             if result["errcode"] == 10003:  # Token expired
-                logger.info("Access token expired, refreshing token")
                 self.refresh_access_token()
                 # Update headers and params with new token
                 headers["Authorization"] = f"Bearer {self.access_token}"
                 params["accessToken"] = self.access_token
                 # Retry the request
-                logger.info(f"Retrying {method} request to {url} with new token")
                 response = requests.request(method, url, headers=headers, params=params if method == "GET" else None, data=params if method == "POST" else None)
                 response.raise_for_status()
                 result = response.json()
-                logger.info(f"Received response after retry: {result}")
                 if "errcode" in result and result["errcode"] != 0:
                     error_msg = result.get("errmsg", "Unknown error")
                     logger.error(f"TTLock API error after retry: {error_msg} (errcode: {result['errcode']})")
@@ -119,13 +107,11 @@ class TTLockClient:
             "grant_type": "refresh_token",
         }
         result = self._make_request("POST", endpoint, data=data, use_oauth_url=True)
-        logger.info(f"Refresh token response: {result}")
 
         # Update tokens in the instance
         self.access_token = result.get("access_token")
         self.refresh_token = result.get("refresh_token")
         self._save_tokens()  # Persist the new tokens
-        logger.info("Successfully refreshed TTLock access token")
         return self.access_token
 
     def list_locks(self):
@@ -170,7 +156,6 @@ class TTLockClient:
         }
         if name:
             data["keyboardPwdName"] = name  # Use keyboardPwdName instead of name
-        logger.debug(f"Generating permanent PIN with parameters: {data}")
         return self._make_request("POST", "/keyboardPwd/add", data)
 
     def delete_pin(self, lock_id, keyboard_pwd_id):
