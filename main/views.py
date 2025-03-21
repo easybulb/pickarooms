@@ -2066,7 +2066,6 @@ def guest_details(request, guest_id):
             details=f"Blocked review message for guest {guest.full_name} (Reservation: {guest.reservation_number})"
         )
         messages.success(request, f"Review message blocked for guest {guest.full_name}.")
-        logger.info(f"Review message blocked for guest {guest.full_name} (ID: {guest.id}) by user {request.user.username}")
         return redirect('guest_details', guest_id=guest.id)
 
     # Generate signed URLs for each ID image
