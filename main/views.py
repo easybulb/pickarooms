@@ -609,10 +609,7 @@ def admin_page(request):
             datetime.timezone.utc
         ).astimezone(uk_timezone)
 
-        logger.info(f"Checking archive for guest {guest.reservation_number}: Current time {now_time}, Check-out time {check_out_datetime}")
-
         if now_time > check_out_datetime:
-            logger.info(f"Archiving guest {guest.reservation_number} as check-out time {check_out_datetime} has passed")
             # Delete front door PIN
             if guest.front_door_pin_id and front_door_lock:
                 try:
@@ -620,7 +617,6 @@ def admin_page(request):
                         lock_id=front_door_lock.lock_id,
                         keyboard_pwd_id=guest.front_door_pin_id,
                     )
-                    logger.info(f"Deleted front door PIN for guest {guest.reservation_number} (Keyboard Password ID: {guest.front_door_pin_id})")
                 except Exception as e:
                     logger.error(f"Failed to delete front door PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete front door PIN for {guest.full_name}: {str(e)}")
@@ -633,7 +629,6 @@ def admin_page(request):
                         lock_id=room_lock.lock_id,
                         keyboard_pwd_id=guest.room_pin_id,
                     )
-                    logger.info(f"Deleted room PIN for guest {guest.reservation_number} (Keyboard Password ID: {guest.room_pin_id})")
                 except Exception as e:
                     logger.error(f"Failed to delete room PIN for guest {guest.reservation_number}: {str(e)}")
                     messages.warning(request, f"Failed to delete room PIN for {guest.full_name}: {str(e)}")
@@ -645,7 +640,6 @@ def admin_page(request):
             guest.is_archived = True
             try:
                 guest.save()
-                logger.info(f"Successfully archived guest {guest.reservation_number}")
                 # Log the archiving action
                 AuditLog.objects.create(
                     user=request.user,
@@ -657,7 +651,6 @@ def admin_page(request):
                 # Send post-stay message if the guest has contact info
                 if guest.phone_number or guest.email:
                     guest.send_post_stay_message()
-                    logger.info(f"Post-stay message sent for archived guest {guest.full_name}")
                 messages.success(request, f"Guest {guest.full_name} has been archived.")
             except Exception as e:
                 logger.error(f"Failed to save archived guest {guest.reservation_number}: {str(e)}")
@@ -757,7 +750,6 @@ def admin_page(request):
                     messages.error(request, f"Failed to generate front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
                     return redirect('admin_page')
                 keyboard_pwd_id_front = front_door_response["keyboardPwdId"]
-                logger.info(f"Generated front door PIN {pin} for guest {reservation_number} (Keyboard Password ID: {keyboard_pwd_id_front})")
 
                 # Generate the same PIN for the room lock
                 room_response = ttlock_client.generate_temporary_pin(
@@ -775,13 +767,11 @@ def admin_page(request):
                             lock_id=front_door_lock.lock_id,
                             keyboard_pwd_id=keyboard_pwd_id_front,
                         )
-                        logger.info(f"Rolled back front door PIN for guest {reservation_number}")
                     except Exception as e:
                         logger.error(f"Failed to roll back front door PIN for guest {reservation_number}: {str(e)}")
                     messages.error(request, f"Failed to generate room PIN: {room_response.get('errmsg', 'Unknown error')}")
                     return redirect('admin_page')
                 keyboard_pwd_id_room = room_response["keyboardPwdId"]
-                logger.info(f"Generated room PIN {pin} for guest {reservation_number} (Keyboard Password ID: {keyboard_pwd_id_room})")
 
                 # Create the guest with the generated PIN
                 guest = Guest.objects.create(
