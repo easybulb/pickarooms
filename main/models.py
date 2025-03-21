@@ -167,6 +167,58 @@ class Guest(models.Model):
             except TwilioRestException as e:
                 logger.error(f"Failed to send cancellation SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
 
+    def send_update_message(self):
+        """Send an update email and/or SMS to the guest when their details are edited, based on available contact info."""
+        checkin_url = "https://www.pickarooms.com"
+        property_address = "8 Rylance Street M11 3NP, UK"
+        subject = "Pickarooms Reservation Updated"
+        early_checkin_display = f"{self.early_checkin_time.strftime('%I:%M %p')}" if self.early_checkin_time else "2:00 PM"
+        late_checkout_display = f"{self.late_checkout_time.strftime('%I:%M %p')}" if self.late_checkout_time else "11:00 AM"
+        email_message = (
+            f"Dear {self.full_name},\n\n"
+            f"Your reservation at Pickarooms has been updated and a new access PIN generated. Here are your updated details:\n\n"
+            f"Check-In Date: {self.check_in_date} at {early_checkin_display}\n"
+            f"Check-Out Date: {self.check_out_date} at {late_checkout_display}\n"
+            f"Assigned Room: {self.assigned_room.name}\n\n"
+            f"Please visit {checkin_url} to complete your check-in and access your room details, including your PIN. "
+            f"The webapp provides all the information you need for a seamless stay.\n\n"
+            f"Property address is {property_address}\n\n"
+            f"Best regards,\nThe Pickarooms Team"
+        )
+        sms_message = (
+            f"Pickarooms: Your reservation has been updated and a new access PIN genereated for you. Check-in on {self.check_in_date} at {early_checkin_display}, "
+            f"Check-out on {self.check_out_date} at {late_checkout_display}, Room: {self.assigned_room.name}. "
+            f"Visit {checkin_url} for details and your PIN."
+        )
+
+        # Send email if email is provided
+        if self.email:
+            try:
+                send_mail(
+                    subject,
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [self.email],
+                    fail_silently=False,
+                )
+                logger.info(f"Update email sent to {self.email} for guest {self.full_name}")
+            except Exception as e:
+                logger.error(f"Failed to send update email to {self.email}: {str(e)}")
+
+        # Send SMS if phone number is provided
+        if self.phone_number:
+            try:
+                logger.info(f"Attempting to send update SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
+                client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+                message = client.messages.create(
+                    body=sms_message,
+                    from_=settings.TWILIO_PHONE_NUMBER,
+                    to=self.phone_number
+                )
+                logger.info(f"Update SMS sent to {self.phone_number} for guest {self.full_name}, SID: {message.sid}")
+            except TwilioRestException as e:
+                logger.error(f"Failed to send update SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
+
     def send_post_stay_message(self):
         """Send a post-stay email and/or SMS to the guest after their reservation elapses, based on available contact info."""
         if self.dont_send_review_message:  # Skip if guest is blocked from receiving review messages

@@ -62,6 +62,9 @@
         <p id="room-change-message" class="note" style="display: none; color: red;">
             {% trans "Room has been changed. Please regenerate the PIN before saving changes." %}
         </p>
+        <p id="date-time-change-message" class="note" style="display: none; color: red;">
+            {% trans "Check-in or check-out date/time has been changed. Please regenerate the PIN before saving changes." %}
+        </p>
 
         <label>{% trans "PIN (Front Door & Room):" %}</label>
         <p>
@@ -96,7 +99,7 @@
     <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
 </div>
 
-<!-- JavaScript for Updating Available Rooms Dynamically and Hiding Save Button on Room Change -->
+<!-- JavaScript for Updating Available Rooms Dynamically and Hiding Save Button on Room/Date/Time Changes -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Existing logic to update available rooms dynamically
@@ -122,16 +125,18 @@
                         });
                         // Trigger the room change check after updating the dropdown
                         checkRoomChange();
+                        checkDateTimeChange();
                     })
                     .catch(error => console.error('Error fetching available rooms:', error));
             }
         }
 
-        // Updated logic to hide the Save Changes button on room change
+        // Logic to hide the Save Changes button on room change
         const originalRoomId = "{{ guest.assigned_room.id }}";
         const roomSelect = document.getElementById('room');
         const saveButton = document.getElementById('save-changes-btn');
         const roomChangeMessage = document.getElementById('room-change-message');
+        const dateTimeChangeMessage = document.getElementById('date-time-change-message');
 
         function checkRoomChange() {
             const selectedRoomId = roomSelect.value;
@@ -140,21 +145,71 @@
                 saveButton.style.display = 'none';
                 roomChangeMessage.style.display = 'block';
             } else {
-                // Room is the same: show the Save Changes button and hide the message
-                saveButton.style.display = 'block';
-                roomChangeMessage.style.display = 'none';
+                // Room is the same: check if date/time changes require the button to remain hidden
+                checkDateTimeChange();
             }
         }
 
-        // Add event listener for room selection changes
-        roomSelect.addEventListener('change', checkRoomChange);
+        // Logic to hide the Save Changes button on date/time changes
+        const originalCheckInDate = "{{ guest.check_in_date|date:'Y-m-d' }}";
+        const originalCheckOutDate = "{{ guest.check_out_date|date:'Y-m-d' }}";
+        const originalEarlyCheckinTime = "{{ guest.early_checkin_time|time:'H:i'|default:'' }}";
+        const originalLateCheckoutTime = "{{ guest.late_checkout_time|time:'H:i'|default:'' }}";
+        const checkInDateInput = document.getElementById('check_in_date');
+        const checkOutDateInput = document.getElementById('check_out_date');
+        const earlyCheckinTimeInput = document.getElementById('early_checkin_time');
+        const lateCheckoutTimeInput = document.getElementById('late_checkout_time');
 
-        // Existing event listeners for date changes
-        document.getElementById('check_in_date').addEventListener('change', updateRooms);
-        document.getElementById('check_out_date').addEventListener('change', updateRooms);
+        function checkDateTimeChange() {
+            const currentCheckInDate = checkInDateInput.value;
+            const currentCheckOutDate = checkOutDateInput.value;
+            const currentEarlyCheckinTime = earlyCheckinTimeInput.value || '';
+            const currentLateCheckoutTime = lateCheckoutTimeInput.value || '';
+
+            const selectedRoomId = roomSelect.value;
+            const roomChanged = selectedRoomId !== originalRoomId;
+
+            const dateTimeChanged = (
+                currentCheckInDate !== originalCheckInDate ||
+                currentCheckOutDate !== originalCheckOutDate ||
+                currentEarlyCheckinTime !== originalEarlyCheckinTime ||
+                currentLateCheckoutTime !== originalLateCheckoutTime
+            );
+
+            if (dateTimeChanged || roomChanged) {
+                // Date/time or room has changed: hide the Save Changes button and show the appropriate message
+                saveButton.style.display = 'none';
+                if (roomChanged) {
+                    roomChangeMessage.style.display = 'block';
+                    dateTimeChangeMessage.style.display = 'none';
+                } else {
+                    roomChangeMessage.style.display = 'none';
+                    dateTimeChangeMessage.style.display = 'block';
+                }
+            } else {
+                // No changes: show the Save Changes button and hide both messages
+                saveButton.style.display = 'block';
+                roomChangeMessage.style.display = 'none';
+                dateTimeChangeMessage.style.display = 'none';
+            }
+        }
+
+        // Add event listeners for changes
+        roomSelect.addEventListener('change', checkRoomChange);
+        checkInDateInput.addEventListener('change', () => {
+            updateRooms();
+            checkDateTimeChange();
+        });
+        checkOutDateInput.addEventListener('change', () => {
+            updateRooms();
+            checkDateTimeChange();
+        });
+        earlyCheckinTimeInput.addEventListener('change', checkDateTimeChange);
+        lateCheckoutTimeInput.addEventListener('change', checkDateTimeChange);
 
         // Initial check on page load
         checkRoomChange();
+        checkDateTimeChange();
     });
 </script>
 {% endblock %}
