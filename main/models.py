@@ -111,7 +111,6 @@ class Guest(models.Model):
         # Send SMS if phone number is provided
         if self.phone_number:
             try:
-                logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
                     body=sms_message,
@@ -156,7 +155,6 @@ class Guest(models.Model):
         # Send SMS if phone number is provided
         if self.phone_number:
             try:
-                logger.info(f"Attempting to send SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
                     body=sms_message,
@@ -208,7 +206,6 @@ class Guest(models.Model):
         # Send SMS if phone number is provided
         if self.phone_number:
             try:
-                logger.info(f"Attempting to send update SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
                     body=sms_message,
@@ -253,7 +250,6 @@ class Guest(models.Model):
         # Send SMS if phone number is provided
         if self.phone_number:
             try:
-                logger.info(f"Attempting to send post-stay SMS to {self.phone_number} with Twilio credentials: SID=[REDACTED], From=[REDACTED]")
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
                     body=sms_message,
