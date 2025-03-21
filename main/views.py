@@ -1489,7 +1489,6 @@ def give_access(request):
     if request.method == "POST" and "unlock_door" in request.POST:
         # Check rate limit (6 per minute per user)
         if getattr(request, 'limited', False):  # Set by ratelimit if exceeded
-            logger.warning(f"Rate limit exceeded for user {request.user.username} on unlock attempt")
             messages.error(request, "Too many attempts, please wait a moment.")
             return redirect('give_access')
 
@@ -1514,7 +1513,6 @@ def give_access(request):
                 # Handle manual unlock
                 lock = get_object_or_404(TTLock, lock_id=lock_id)
             else:
-                logger.warning(f"Invalid door_type: {door_type}")
                 messages.warning(request, "Invalid unlock request. Please try again.")
                 return redirect('give_access')
 
@@ -1530,10 +1528,8 @@ def give_access(request):
                             else:
                                 messages.error(request, f"Failed to unlock {door_type.replace('manual_', '')} door. Please try again or contact support.")
                         else:
-                            logger.info(f"Retrying unlock {door_type} (Lock ID: {lock.lock_id}) (attempt {attempt + 1}/{max_retries})")
                             continue
                     else:
-                        logger.info(f"Successfully unlocked {door_type} (Lock ID: {lock.lock_id})")
                         if door_type in ["front", "room"]:
                             messages.success(request, f"The {door_type} door has been unlocked for {guest.full_name}.")
                         else:
@@ -1547,7 +1543,6 @@ def give_access(request):
                         else:
                             messages.error(request, f"Failed to unlock {door_type.replace('manual_', '')} door. Please try again or contact support.")
                     else:
-                        logger.info(f"Retrying unlock {door_type} (Lock ID: {lock.lock_id}) (attempt {attempt + 1}/{max_retries})")
                         continue
 
         except TTLock.DoesNotExist:
