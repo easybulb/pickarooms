@@ -1,1 +1,2 @@
 ERROR 2025-10-19 18:16:24,935 views Ticketmaster API error: 401 Client Error: Unauthorized for url: https://app.ticketmaster.com/discovery/v2/events.json?apikey=your_ticketmaster_consumer_key_here&city=Manchester&countryCode=GB&size=10&page=0&sort=date%2Casc&startDateTime=2025-10-19T00%3A00%3A00Z&endDateTime=2025-12-31T23%3A59%3A59Z
+ERROR 2025-10-20 11:44:27,214 ttlock_utils TTLock API error: invalid grant (errcode: 10004)
