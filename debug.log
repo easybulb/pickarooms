@@ -2,3 +2,5 @@ ERROR 2025-10-19 18:16:24,935 views Ticketmaster API error: 401 Client Error: Un
 ERROR 2025-10-20 11:44:27,214 ttlock_utils TTLock API error: invalid grant (errcode: 10004)
 ERROR 2025-10-20 12:38:49,588 ttlock_utils TTLock API error: invalid grant (errcode: 10004)
 ERROR 2025-10-20 12:38:49,841 ttlock_utils TTLock API error: invalid grant (errcode: 10004)
+ERROR 2025-10-20 13:07:44,366 ttlock_service Authentication failed: 'TTLock' object has no attribute 'login'
+ERROR 2025-10-20 13:09:24,235 ttlock_service Authentication failed: TTLock.get_token() missing 3 required positional arguments: 'username', 'password', and 'redirect_uri'

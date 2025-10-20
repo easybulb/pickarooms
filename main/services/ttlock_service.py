@@ -7,7 +7,7 @@ import logging
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
-from ttlockio import TTLock as TTLockClient
+from ttlockwrapper import TTLock as TTLockIOClient
 from main.models import TTLockToken
 
 logger = logging.getLogger('main')
@@ -29,18 +29,22 @@ class TTLockService:
         try:
             logger.info(f"Authenticating with TTLock API for user: {username}")
             
-            # Initialize ttlockio client
-            client = TTLockClient(self.client_id, self.client_secret)
-            
-            # Authenticate
-            response = client.login(username, password)
+            # Authenticate using get_token static method
+            redirect_uri = settings.TTLOCK_CALLBACK_URL
+            response = TTLockIOClient.get_token(
+                self.client_id,
+                self.client_secret,
+                username,
+                password,
+                redirect_uri
+            )
             
             if not response or 'access_token' not in response:
                 raise ValueError("Authentication failed: No access token in response")
             
             # Extract token data
             access_token = response['access_token']
-            refresh_token = response.get('refresh_token', '')
+            refresh_token = response.get('refresh_token', access_token)  # Some APIs return same token
             
             # Calculate expiry (TTLock tokens typically expire in 7776000 seconds = 90 days)
             expires_in_seconds = response.get('expires_in', 7776000)  # Default 90 days
@@ -81,7 +85,7 @@ class TTLockService:
             logger.info("Refreshing TTLock access token...")
             
             # Initialize client
-            client = TTLockClient(self.client_id, self.client_secret)
+            client = TTLockIOClient(self.client_id, self.client_secret)
             
             # Refresh token
             response = client.refresh_token(token.refresh_token)
@@ -135,10 +139,10 @@ class TTLockService:
 
     def get_client_with_token(self):
         """
-        Get a TTLockClient instance with a valid token
+        Get a TTLockIOClient instance with a valid token
         Useful for making API calls directly
         """
         token = self.get_valid_token()
-        client = TTLockClient(self.client_id, self.client_secret)
+        client = TTLockIOClient(self.client_id, self.client_secret)
         client.access_token = token
         return client
