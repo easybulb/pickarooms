@@ -58,12 +58,6 @@ class Room(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.URLField(blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        if self.image and not self.image.startswith("http"):
-            uploaded_image = cloudinary.uploader.upload(self.image, folder="room_images")
-            self.image = uploaded_image['secure_url']
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.name
 

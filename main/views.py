@@ -120,10 +120,9 @@ def checkin(request):
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-            check_out_datetime = timezone.make_aware(
-                datetime.datetime.combine(guest.check_out_date, check_out_time),
-                datetime.timezone.utc,
-            ).astimezone(uk_timezone)
+            check_out_datetime = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_out_date, check_out_time)
+            )
 
             if now_uk_time > check_out_datetime:
                 # Guest has checked out but hasn't been archived yet
@@ -154,10 +153,9 @@ def checkin(request):
                     now_uk_time = timezone.now().astimezone(uk_timezone)
                     start_time = int(now_uk_time.timestamp() * 1000)
                     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-                    end_date = timezone.make_aware(
-                        datetime.datetime.combine(guest.check_out_date, check_out_time),
-                        datetime.timezone.utc,
-                    ).astimezone(uk_timezone) + datetime.timedelta(days=1)
+                    end_date = uk_timezone.localize(
+                        datetime.datetime.combine(guest.check_out_date, check_out_time)
+                    ) + datetime.timedelta(days=1)
                     end_time = int(end_date.timestamp() * 1000)
                     pin = str(random.randint(10000, 99999))  # 5-digit PIN
 
@@ -260,10 +258,9 @@ def checkin(request):
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-            check_out_datetime = timezone.make_aware(
-                datetime.datetime.combine(guest.check_out_date, check_out_time),
-                datetime.timezone.utc,
-            ).astimezone(uk_timezone)
+            check_out_datetime = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_out_date, check_out_time)
+            )
 
             if now_uk_time > check_out_datetime:
                 # Guest has checked out; ensure they are archived for consistency
@@ -310,16 +307,14 @@ def room_detail(request, room_token):
     now_uk_time = timezone.now().astimezone(uk_timezone)
 
     check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
-    check_in_datetime = timezone.make_aware(
-        datetime.datetime.combine(guest.check_in_date, check_in_time),
-        timezone.get_current_timezone(),
-    ).astimezone(uk_timezone)
+    check_in_datetime = uk_timezone.localize(
+        datetime.datetime.combine(guest.check_in_date, check_in_time)
+    )
 
     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-    check_out_datetime = timezone.make_aware(
-        datetime.datetime.combine(guest.check_out_date, check_out_time),
-        timezone.get_current_timezone(),
-    ).astimezone(uk_timezone)
+    check_out_datetime = uk_timezone.localize(
+        datetime.datetime.combine(guest.check_out_date, check_out_time)
+    )
 
     if now_uk_time > check_out_datetime:
         request.session.pop("reservation_number", None)
@@ -360,20 +355,7 @@ def room_detail(request, room_token):
                 return redirect('room_detail', room_token=room_token)
 
             try:
-                # Initialize Cloudinary with environment variables
-                cloudinary.config(
-                    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-                    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-                    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
-                )
-                logger.debug(f"Cloudinary config initialized: {cloudinary.config().cloud_name}")
-                logger.debug(f"Default storage backend: {default_storage.__class__.__name__}")
-
-                # Debug file content before upload
-                logger.debug(f"File content sample before upload: {id_image.read(100)}")
-                id_image.seek(0)  # Reset the file pointer after reading
-
-                # Manual upload to Cloudinary
+                # Upload to Cloudinary (already configured in settings.py)
                 upload_response = cloudinary_upload(
                     id_image,
                     folder=f"guest_ids/{now_uk_time.year}/{now_uk_time.month}/{now_uk_time.day}/",
@@ -603,10 +585,9 @@ def admin_page(request):
     for guest in guests_to_archive:
         # Determine the check-out datetime based on late_checkout_time or default to 11:00 AM
         check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
-        check_out_datetime = timezone.make_aware(
-            datetime.datetime.combine(guest.check_out_date, check_out_time),
-            datetime.timezone.utc
-        ).astimezone(uk_timezone)
+        check_out_datetime = uk_timezone.localize(
+            datetime.datetime.combine(guest.check_out_date, check_out_time)
+        )
 
         if now_time > check_out_datetime:
             # Delete front door PIN
@@ -724,18 +705,16 @@ def admin_page(request):
             if early_checkin_time:
                 try:
                     early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
-                    start_datetime = timezone.make_aware(
-                        datetime.datetime.combine(check_in_date, early_checkin_time),
-                        datetime.timezone.utc
-                    ).astimezone(uk_timezone)
+                    start_datetime = uk_timezone.localize(
+                        datetime.datetime.combine(check_in_date, early_checkin_time)
+                    )
                 except ValueError:
                     messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
                     return redirect('admin_page')
             else:
-                start_datetime = timezone.make_aware(
-                    datetime.datetime.combine(check_in_date, time(14, 0)),
-                    datetime.timezone.utc
-                ).astimezone(uk_timezone)
+                start_datetime = uk_timezone.localize(
+                    datetime.datetime.combine(check_in_date, time(14, 0))
+                )
             start_time = int(start_datetime.timestamp() * 1000)
 
             # Set end time based on late_checkout_time (default to 11:00 AM if not set)
@@ -747,10 +726,9 @@ def admin_page(request):
                     return redirect('admin_page')
             else:
                 late_checkout_time = time(11, 0)
-            end_date = timezone.make_aware(
-                datetime.datetime.combine(check_out_date, late_checkout_time),
-                datetime.timezone.utc
-            ).astimezone(uk_timezone) + datetime.timedelta(days=1)
+            end_date = uk_timezone.localize(
+                datetime.datetime.combine(check_out_date, late_checkout_time)
+            ) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             ttlock_client = TTLockClient()
@@ -921,10 +899,9 @@ def edit_guest(request, guest_id):
             start_time = int(now_uk_time.timestamp() * 1000)
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-            end_date = timezone.make_aware(
-                datetime.datetime.combine(guest.check_out_date, check_out_time),
-                datetime.timezone.utc
-            ).astimezone(uk_timezone) + datetime.timedelta(days=1)
+            end_date = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_out_date, check_out_time)
+            ) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             try:
@@ -1076,10 +1053,9 @@ def edit_guest(request, guest_id):
                         now_uk_time = timezone.now().astimezone(uk_timezone)
                         start_time = int(now_uk_time.timestamp() * 1000)
                         check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-                        end_date = timezone.make_aware(
-                            datetime.datetime.combine(check_out_date, check_out_time),
-                            datetime.timezone.utc,
-                        ).astimezone(uk_timezone) + datetime.timedelta(days=1)
+                        end_date = uk_timezone.localize(
+                            datetime.datetime.combine(check_out_date, check_out_time)
+                        ) + datetime.timedelta(days=1)
                         end_time = int(end_date.timestamp() * 1000)
 
                         # Generate new PIN for front door
@@ -1314,10 +1290,9 @@ def manage_checkin_checkout(request, guest_id):
             start_time = int(now_uk_time.timestamp() * 1000)
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-            end_date = timezone.make_aware(
-                datetime.datetime.combine(guest.check_out_date, check_out_time),
-                datetime.timezone.utc
-            ).astimezone(uk_timezone) + datetime.timedelta(days=1)
+            end_date = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_out_date, check_out_time)
+            ) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             try:

@@ -14,7 +14,6 @@ import os
 import dj_database_url
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
-from django.core.files.storage import default_storage
 
 # Import env.py if it exists
 if os.path.isfile("env.py"):
@@ -303,15 +302,13 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = None  # No local storage, rely on Cloudinary
 
-# Debug Cloudinary config and storage backend
+# Configure Cloudinary
 import cloudinary
 cloudinary.config(
     cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
     api_key=os.environ.get('CLOUDINARY_API_KEY'),
     api_secret=os.environ.get('CLOUDINARY_API_SECRET')
 )
-print(f"Cloudinary config initialized: {cloudinary.config().cloud_name}")
-print(f"Default storage backend after settings: {default_storage.__class__.__name__}")
 
 CACHES = {
     'default': {
