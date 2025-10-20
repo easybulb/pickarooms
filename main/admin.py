@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload
+from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload, TTLockToken
 from .ttlock_utils import TTLockClient
 import logging
 import random  # Added for randint
@@ -159,6 +159,22 @@ class PopularEventAdmin(admin.ModelAdmin):
     search_fields = ('name', 'venue', 'event_id')
     readonly_fields = ('event_id', 'created_at')
 
+class TTLockTokenAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'expires_at', 'is_expired_display', 'token_preview')
+    readonly_fields = ('access_token', 'refresh_token', 'expires_at', 'created_at', 'updated_at')
+    
+    def is_expired_display(self, obj):
+        return "❌ Expired" if obj.is_expired() else "✅ Valid"
+    is_expired_display.short_description = "Status"
+    
+    def token_preview(self, obj):
+        return f"{obj.access_token[:30]}..." if obj.access_token else "N/A"
+    token_preview.short_description = "Token Preview"
+    
+    def has_add_permission(self, request):
+        # Prevent manual creation through admin
+        return False
+
 # ✅ Register models
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
@@ -166,3 +182,4 @@ admin.site.register(ReviewCSVUpload, ReviewCSVUploadAdmin)
 admin.site.register(TTLock, TTLockAdmin)
 admin.site.register(AuditLog, AuditLogAdmin)
 admin.site.register(PopularEvent, PopularEventAdmin)
+admin.site.register(TTLockToken, TTLockTokenAdmin)

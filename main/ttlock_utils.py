@@ -9,13 +9,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 class TTLockClient:
-    def __init__(self):
+    def __init__(self, use_service=True):
         self.base_url = settings.TTLOCK_BASE_URL  # For API calls (e.g., https://euapi.sciener.com/v3)
         self.oauth_base_url = settings.TTLOCK_OAUTH_BASE_URL  # For OAuth calls (e.g., https://euapi.sciener.com)
         self.client_id = os.environ.get("SCIENER_CLIENT_ID")
         self.client_secret = os.environ.get("SCIENER_CLIENT_SECRET")
         
-        # Load tokens from a file if it exists, otherwise use env.py
+        # Try to use TTLockService for automatic token management
+        if use_service:
+            try:
+                from main.services import TTLockService
+                service = TTLockService()
+                self.access_token = service.get_valid_token()
+                self.refresh_token = None  # Handled by service
+                logger.info("Using TTLockService for token management")
+                return
+            except Exception as e:
+                logger.warning(f"TTLockService unavailable, falling back to legacy method: {str(e)}")
+        
+        # Fallback: Load tokens from a file if it exists, otherwise use env.py
         self.token_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tokens.json")
         self._load_tokens()
         

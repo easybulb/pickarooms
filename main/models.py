@@ -26,6 +26,31 @@ class TTLock(models.Model):
     def __str__(self):
         return f"{self.name} (Lock ID: {self.lock_id})"
 
+class TTLockToken(models.Model):
+    """Model to store TTLock API tokens"""
+    access_token = models.TextField()
+    refresh_token = models.TextField()
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "TTLock Token"
+        verbose_name_plural = "TTLock Tokens"
+
+    def __str__(self):
+        return f"TTLock Token (expires: {self.expires_at})"
+
+    @classmethod
+    def get_latest(cls):
+        """Get the most recent token"""
+        return cls.objects.order_by('-created_at').first()
+
+    def is_expired(self):
+        """Check if token is expired"""
+        from django.utils import timezone
+        return timezone.now() >= self.expires_at
+
 class Room(models.Model):
     name = models.CharField(max_length=100)
     ttlock = models.ForeignKey(TTLock, on_delete=models.SET_NULL, null=True, blank=True)
