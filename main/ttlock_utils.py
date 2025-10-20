@@ -99,19 +99,24 @@ class TTLockClient:
 
     def refresh_access_token(self):
         """Refresh the access token using the refresh token."""
-        endpoint = "/v3/refresh_token"  # OAuth endpoint
+        url = f"{self.oauth_base_url}/oauth/token"
         data = {
-            "clientId": self.client_id,
-            "clientSecret": self.client_secret,
-            "refreshToken": self.refresh_token,
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "refresh_token": self.refresh_token,
             "grant_type": "refresh_token",
         }
-        result = self._make_request("POST", endpoint, data=data, use_oauth_url=True)
+        
+        # Make direct request without using _make_request to avoid recursion
+        response = requests.post(url, data=data)
+        response.raise_for_status()
+        result = response.json()
 
         # Update tokens in the instance
         self.access_token = result.get("access_token")
         self.refresh_token = result.get("refresh_token")
         self._save_tokens()  # Persist the new tokens
+        logger.info("Access token refreshed successfully")
         return self.access_token
 
     def list_locks(self):

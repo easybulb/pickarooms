@@ -34,7 +34,7 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get(
     'ALLOWED_HOSTS',
-    '127.0.0.1,localhost,.herokuapp.com,www.pickarooms.com,pickarooms.com'
+    '127.0.0.1,localhost,.herokuapp.com,pickarooms-495ab160017c.herokuapp.com,www.pickarooms.com,pickarooms.com'
 ).split(',')
 
 GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
@@ -61,6 +61,7 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         "https://www.pickarooms.com",
         "https://pickarooms.com",
+        "https://pickarooms-495ab160017c.herokuapp.com",
     ]
 
 # HTTP Strict Transport Security (HSTS) - Forces HTTPS (Only in Production)
@@ -83,7 +84,7 @@ if not SCIENER_ACCESS_TOKEN or not SCIENER_REFRESH_TOKEN:
 
 TTLOCK_BASE_URL = os.environ.get("TTLOCK_BASE_URL", "https://euapi.sciener.com/v3")
 TTLOCK_OAUTH_BASE_URL = os.environ.get("TTLOCK_OAUTH_BASE_URL", "https://euapi.sciener.com")  # For OAuth endpoints
-TTLOCK_CALLBACK_URL = os.environ.get("TTLOCK_CALLBACK_URL", "https://pickarooms-3203aa136ccc.herokuapp.com/api/callback")
+TTLOCK_CALLBACK_URL = os.environ.get("TTLOCK_CALLBACK_URL", "https://pickarooms-495ab160017c.herokuapp.com/api/callback")
 
 # Ticketmaster API Configuration
 TICKETMASTER_CONSUMER_KEY = os.environ.get("TICKETMASTER_CONSUMER_KEY")

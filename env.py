@@ -10,7 +10,7 @@ import os
 # =========================
 os.environ.setdefault('SECRET_KEY', 'vs8(r)o$z8ccn=ctmo6y*6*_1#*yu)9mg7epxog492!zms+95i')
 os.environ.setdefault('DEBUG', 'True')  # Set to 'False' in production
-os.environ.setdefault('ALLOWED_HOSTS', '127.0.0.1,localhost,.herokuapp.com,www.pickarooms.com,pickarooms.com')
+os.environ.setdefault('ALLOWED_HOSTS', '127.0.0.1,localhost,.herokuapp.com,pickarooms-495ab160017c.herokuapp.com,www.pickarooms.com,pickarooms.com')
 
 # =========================
 # Database Configuration (PostgreSQL)
@@ -33,13 +33,13 @@ os.environ.setdefault('GOOGLE_MAPS_API_KEY', 'your_google_maps_api_key_here')
 # =========================
 # TTLock / Sciener API Configuration
 # =========================
-os.environ.setdefault('SCIENER_CLIENT_ID', 'your_sciener_client_id_here')
-os.environ.setdefault('SCIENER_CLIENT_SECRET', 'your_sciener_client_secret_here')
-os.environ.setdefault('SCIENER_ACCESS_TOKEN', 'your_sciener_access_token_here')
-os.environ.setdefault('SCIENER_REFRESH_TOKEN', 'your_sciener_refresh_token_here')
+os.environ.setdefault('SCIENER_CLIENT_ID', 'a599a704ba2c4d41969b2c75408ead2b')
+os.environ.setdefault('SCIENER_CLIENT_SECRET', 'd1f5f0ab5576c708502b9f51f31babd0')
+os.environ.setdefault('SCIENER_ACCESS_TOKEN', 'f998166fb628f555c29fb2a8eeb89f38')
+os.environ.setdefault('SCIENER_REFRESH_TOKEN', '196259dbe2977821578b3188bb75539a')
 os.environ.setdefault('TTLOCK_BASE_URL', 'https://euapi.sciener.com/v3')
 os.environ.setdefault('TTLOCK_OAUTH_BASE_URL', 'https://euapi.sciener.com')
-os.environ.setdefault('TTLOCK_CALLBACK_URL', 'https://pickarooms-3203aa136ccc.herokuapp.com/api/callback')
+os.environ.setdefault('TTLOCK_CALLBACK_URL', 'https://pickarooms-495ab160017c.herokuapp.com/api/callback')
 
 # =========================
 # Ticketmaster API Configuration
