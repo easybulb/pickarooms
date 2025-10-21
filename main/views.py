@@ -153,12 +153,9 @@ def checkin(request):
                     uk_timezone = pytz.timezone("Europe/London")
                     now_uk_time = timezone.now().astimezone(uk_timezone)
 
-                    # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
-                    check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
-                    start_date = uk_timezone.localize(
-                        datetime.datetime.combine(guest.check_in_date, check_in_time)
-                    )
-                    start_time = int(start_date.timestamp() * 1000)
+                    # Set start_time to NOW so PIN is immediately active in TTLock
+                    # (PIN visibility to guest is controlled separately in room_detail view with early_checkin_time)
+                    start_time = int(now_uk_time.timestamp() * 1000)
 
                     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                     end_date = uk_timezone.localize(
@@ -730,21 +727,9 @@ def admin_page(request):
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
 
-            # Set start time based on early_checkin_time (default to 2:00 PM if not set)
-            if early_checkin_time:
-                try:
-                    early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
-                    start_datetime = uk_timezone.localize(
-                        datetime.datetime.combine(check_in_date, early_checkin_time)
-                    )
-                except ValueError:
-                    messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
-                    return redirect('admin_page')
-            else:
-                start_datetime = uk_timezone.localize(
-                    datetime.datetime.combine(check_in_date, time(14, 0))
-                )
-            start_time = int(start_datetime.timestamp() * 1000)
+            # Set start_time to NOW so PIN is immediately active in TTLock
+            # (PIN visibility to guest is controlled separately in room_detail view with early_checkin_time)
+            start_time = int(now_uk_time.timestamp() * 1000)
 
             # Set end time based on late_checkout_time (default to 11:00 AM if not set)
             if late_checkout_time:
@@ -924,13 +909,11 @@ def edit_guest(request, guest_id):
 
             new_pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
             uk_timezone = pytz.timezone("Europe/London")
+            now_uk_time = timezone.now().astimezone(uk_timezone)
 
-            # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
-            check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
-            start_date = uk_timezone.localize(
-                datetime.datetime.combine(guest.check_in_date, check_in_time)
-            )
-            start_time = int(start_date.timestamp() * 1000)
+            # Set start_time to NOW so PIN is immediately active in TTLock
+            # (PIN visibility to guest is controlled separately in room_detail view with early_checkin_time)
+            start_time = int(now_uk_time.timestamp() * 1000)
 
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
@@ -1085,13 +1068,11 @@ def edit_guest(request, guest_id):
 
                         new_pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
                         uk_timezone = pytz.timezone("Europe/London")
+                        now_uk_time = timezone.now().astimezone(uk_timezone)
 
-                        # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
-                        check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
-                        start_date = uk_timezone.localize(
-                            datetime.datetime.combine(check_in_date, check_in_time)
-                        )
-                        start_time = int(start_date.timestamp() * 1000)
+                        # Set start_time to NOW so PIN is immediately active in TTLock
+                        # (PIN visibility to guest is controlled separately in room_detail view with early_checkin_time)
+                        start_time = int(now_uk_time.timestamp() * 1000)
 
                         check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                         end_date = uk_timezone.localize(
@@ -1327,13 +1308,11 @@ def manage_checkin_checkout(request, guest_id):
 
             new_pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
             uk_timezone = pytz.timezone("Europe/London")
+            now_uk_time = timezone.now().astimezone(uk_timezone)
 
-            # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
-            check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
-            start_date = uk_timezone.localize(
-                datetime.datetime.combine(guest.check_in_date, check_in_time)
-            )
-            start_time = int(start_date.timestamp() * 1000)
+            # Set start_time to NOW so PIN is immediately active in TTLock
+            # (PIN visibility to guest is controlled separately in room_detail view with early_checkin_time)
+            start_time = int(now_uk_time.timestamp() * 1000)
 
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
