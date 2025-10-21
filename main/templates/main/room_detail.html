@@ -51,6 +51,9 @@
         <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time. Your access details will be available then." %}</p>
         {% else %}
             <p class="pin-entry"><strong>{% trans "PIN (Front Door & Room):" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
+            <p class="pin-note" style="font-size: 0.85em; color: #666; margin-top: 0.5em;">
+                {% trans "Enter all 6 digits plus # on the keypad. The first 2 digits wake up the lock." %}
+            </p>
             <div class="quick-access">
                 <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
             </div>

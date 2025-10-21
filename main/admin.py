@@ -12,6 +12,9 @@ from django.contrib import messages  # Added for messages framework
 # Set up logging for TTLock interactions
 logger = logging.getLogger('main')
 
+# Import PIN generation helper
+from .pin_utils import generate_memorable_4digit_pin
+
 # ✅ Always show Cloudinary URL input (No file upload)
 class RoomAdminForm(forms.ModelForm):
     class Meta:
@@ -65,7 +68,7 @@ class GuestAdmin(admin.ModelAdmin):
                 room_lock = guest.assigned_room.ttlock
                 if front_door_lock and room_lock:
                     ttlock_client = TTLockClient()
-                    new_pin = str(random.randint(10000, 99999))  # Use random module
+                    new_pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
                     # Simplified regeneration (full logic can be reused from edit_guest)
                     guest.front_door_pin = new_pin
                     guest.save()

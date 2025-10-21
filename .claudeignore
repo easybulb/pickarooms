@@ -1,0 +1,17 @@
+# Common folders to ignore
+node_modules/
+venv/
+.env
+__pycache__/
+*.pyc
+migrations/
+media/
+static/
+build/
+dist/
+.idea/
+.vscode/
+
+# Optional: logs and cache
+*.log
+.cache/

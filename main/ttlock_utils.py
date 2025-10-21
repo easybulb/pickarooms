@@ -158,9 +158,9 @@ class TTLockClient:
 
     def generate_temporary_pin(self, lock_id, pin, start_time, end_time, name=None, add_type=2):
         """Generate a PIN for a lock (using type 2, which maps to Permanent in the app)."""
-        # Validate PIN length (must be 5 digits)
-        if not (len(pin) == 5 and pin.isdigit()):
-            raise ValueError("PIN must be exactly 5 digits.")
+        # Validate PIN length (must be 4 digits)
+        if not (len(pin) == 4 and pin.isdigit()):
+            raise ValueError("PIN must be exactly 4 digits.")
         
         data = {
             "lockId": lock_id,

@@ -27,6 +27,7 @@ import datetime
 import re
 from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload, PopularEvent
 from .ttlock_utils import TTLockClient
+from .pin_utils import generate_memorable_4digit_pin, add_wakeup_prefix
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -151,13 +152,20 @@ def checkin(request):
                     client = TTLockClient()
                     uk_timezone = pytz.timezone("Europe/London")
                     now_uk_time = timezone.now().astimezone(uk_timezone)
-                    start_time = int(now_uk_time.timestamp() * 1000)
+
+                    # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
+                    check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
+                    start_date = uk_timezone.localize(
+                        datetime.datetime.combine(guest.check_in_date, check_in_time)
+                    )
+                    start_time = int(start_date.timestamp() * 1000)
+
                     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                     end_date = uk_timezone.localize(
                         datetime.datetime.combine(guest.check_out_date, check_out_time)
                     ) + datetime.timedelta(days=1)
                     end_time = int(end_date.timestamp() * 1000)
-                    pin = str(random.randint(10000, 99999))  # 5-digit PIN
+                    pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
 
                     # Generate PIN for front door
                     front_door_response = client.generate_temporary_pin(
@@ -307,20 +315,41 @@ def room_detail(request, room_token):
     now_uk_time = timezone.now().astimezone(uk_timezone)
 
     check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
-    check_in_datetime = uk_timezone.localize(
-        datetime.datetime.combine(guest.check_in_date, check_in_time)
-    )
+    try:
+        check_in_datetime = uk_timezone.localize(
+            datetime.datetime.combine(guest.check_in_date, check_in_time)
+        )
+    except Exception as e:
+        logger.error(f"Error localizing check-in datetime for guest {guest.reservation_number}: {str(e)}")
+        # Fallback: Use replace instead of localize for DST safety
+        check_in_datetime = datetime.datetime.combine(guest.check_in_date, check_in_time).replace(tzinfo=uk_timezone)
 
     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-    check_out_datetime = uk_timezone.localize(
-        datetime.datetime.combine(guest.check_out_date, check_out_time)
-    )
+    try:
+        check_out_datetime = uk_timezone.localize(
+            datetime.datetime.combine(guest.check_out_date, check_out_time)
+        )
+    except Exception as e:
+        logger.error(f"Error localizing check-out datetime for guest {guest.reservation_number}: {str(e)}")
+        # Fallback: Use replace instead of localize for DST safety
+        check_out_datetime = datetime.datetime.combine(guest.check_out_date, check_out_time).replace(tzinfo=uk_timezone)
 
     if now_uk_time > check_out_datetime:
         request.session.pop("reservation_number", None)
         return redirect("rebook_guest")
 
     enforce_2pm_rule = now_uk_time < check_in_datetime
+
+    # Debug logging for early check-in troubleshooting
+    logger.info(f"Guest {guest.reservation_number} - Check-in time comparison:")
+    logger.info(f"  Current UK time: {now_uk_time}")
+    logger.info(f"  Check-in datetime: {check_in_datetime}")
+    logger.info(f"  Early check-in time set: {guest.early_checkin_time}")
+    logger.info(f"  Enforce 2PM rule: {enforce_2pm_rule}")
+    logger.info(f"  Show PIN: {not enforce_2pm_rule}")
+
+    # Add wakeup prefix to PIN for display (2 dummy digits + 4 actual PIN digits)
+    display_pin = add_wakeup_prefix(guest.front_door_pin) if guest.front_door_pin else None
 
     if request.method == "GET" and request.GET.get('modal'):
         return render(request, "main/room_detail.html", {
@@ -329,7 +358,7 @@ def room_detail(request, room_token):
             "image_url": room.image or None,
             "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
             "show_pin": not enforce_2pm_rule,
-            "front_door_pin": guest.front_door_pin,
+            "front_door_pin": display_pin,
             "id_uploads": guest.id_uploads.all(),
         }, content_type="text/html", status=200)
 
@@ -454,7 +483,7 @@ def room_detail(request, room_token):
             "image_url": room.image or None,
             "expiration_message": f"Your access will expire on {guest.check_out_date.strftime('%d %b %Y')} at {check_out_time.strftime('%I:%M %p')}.",
             "show_pin": not enforce_2pm_rule,
-            "front_door_pin": guest.front_door_pin,
+            "front_door_pin": display_pin,
             "id_uploads": guest.id_uploads.all(),
         },
     )
@@ -697,7 +726,7 @@ def admin_page(request):
                 messages.error(request, f"No lock assigned to room {room.name}. Please contact support.")
                 return redirect('admin_page')
 
-            pin = str(random.randint(10000, 99999))  # 5-digit PIN
+            pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
 
@@ -893,10 +922,16 @@ def edit_guest(request, guest_id):
                 except Exception as e:
                     messages.warning(request, f"Failed to delete old room PIN: {str(e)}")
 
-            new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
+            new_pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
             uk_timezone = pytz.timezone("Europe/London")
-            now_uk_time = timezone.now().astimezone(uk_timezone)
-            start_time = int(now_uk_time.timestamp() * 1000)
+
+            # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
+            check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
+            start_date = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_in_date, check_in_time)
+            )
+            start_time = int(start_date.timestamp() * 1000)
+
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             end_date = uk_timezone.localize(
@@ -1048,10 +1083,16 @@ def edit_guest(request, guest_id):
                                 keyboard_pwd_id=guest.front_door_pin_id,
                             )
 
-                        new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
+                        new_pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
                         uk_timezone = pytz.timezone("Europe/London")
-                        now_uk_time = timezone.now().astimezone(uk_timezone)
-                        start_time = int(now_uk_time.timestamp() * 1000)
+
+                        # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
+                        check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
+                        start_date = uk_timezone.localize(
+                            datetime.datetime.combine(check_in_date, check_in_time)
+                        )
+                        start_time = int(start_date.timestamp() * 1000)
+
                         check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                         end_date = uk_timezone.localize(
                             datetime.datetime.combine(check_out_date, check_out_time)
@@ -1284,10 +1325,16 @@ def manage_checkin_checkout(request, guest_id):
                 except Exception as e:
                     messages.warning(request, f"Failed to delete old room PIN: {str(e)}")
 
-            new_pin = str(random.randint(10000, 99999))  # 5-digit PIN
+            new_pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
             uk_timezone = pytz.timezone("Europe/London")
-            now_uk_time = timezone.now().astimezone(uk_timezone)
-            start_time = int(now_uk_time.timestamp() * 1000)
+
+            # Set start_time to early check-in time if specified, otherwise use check-in date at 2 PM
+            check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
+            start_date = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_in_date, check_in_time)
+            )
+            start_time = int(start_date.timestamp() * 1000)
+
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             end_date = uk_timezone.localize(

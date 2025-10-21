@@ -169,15 +169,15 @@
             const selectedRoomId = roomSelect.value;
             const roomChanged = selectedRoomId !== originalRoomId;
 
-            const dateTimeChanged = (
+            // Only check-in/out DATES require PIN regeneration, not TIMES
+            // Times only affect when the PIN is displayed to the guest
+            const dateChanged = (
                 currentCheckInDate !== originalCheckInDate ||
-                currentCheckOutDate !== originalCheckOutDate ||
-                currentEarlyCheckinTime !== originalEarlyCheckinTime ||
-                currentLateCheckoutTime !== originalLateCheckoutTime
+                currentCheckOutDate !== originalCheckOutDate
             );
 
-            if (dateTimeChanged || roomChanged) {
-                // Date/time or room has changed: hide the Save Changes button and show the appropriate message
+            if (dateChanged || roomChanged) {
+                // Date or room has changed: hide the Save Changes button and show the appropriate message
                 saveButton.style.display = 'none';
                 if (roomChanged) {
                     roomChangeMessage.style.display = 'block';
@@ -187,7 +187,7 @@
                     dateTimeChangeMessage.style.display = 'block';
                 }
             } else {
-                // No changes: show the Save Changes button and hide both messages
+                // No changes that require PIN regeneration: show the Save Changes button
                 saveButton.style.display = 'block';
                 roomChangeMessage.style.display = 'none';
                 dateTimeChangeMessage.style.display = 'none';
