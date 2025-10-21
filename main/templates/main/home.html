@@ -11,13 +11,28 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
-        <p>{% trans "Enter your Booking.com confirmation number to retrieve your check-in details." %}</p>
+        <p>{% trans "Enter your booking reference to retrieve your check-in details." %}</p>
         <p style="color: red; display: none;" class="error-message"></p> <!-- Placeholder for JS errors -->
         <form action="/checkin/" method="post" class="checkin-form">
             {% csrf_token %}
             <input type="text" name="reservation_number"
-                   placeholder="{% trans 'Enter your Booking.com confirmation number' %}"
-                   value="{{ reservation_number|default:'' }}">
+                   placeholder="{% trans 'Booking Reference (10 digits)' %}"
+                   value="{{ reservation_number|default:'' }}"
+                   required>
+
+            <!-- Additional fields for new reservations (shown via JavaScript if needed) -->
+            <div id="additional-fields" style="display: none; margin-top: 15px;">
+                <input type="text" name="full_name"
+                       placeholder="{% trans 'Full Name' %}"
+                       value="{{ full_name|default:'' }}">
+                <input type="email" name="email"
+                       placeholder="{% trans 'Email Address' %}"
+                       value="{{ email|default:'' }}">
+                <input type="tel" name="phone_number"
+                       placeholder="{% trans 'Phone Number (e.g., +44...)' %}"
+                       value="{{ phone_number|default:'' }}">
+            </div>
+
             <button type="submit">{% trans "Check In" %}</button>
         </form>
 

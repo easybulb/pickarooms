@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload, TTLockToken
+from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload, TTLockToken, RoomICalConfig, Reservation
 from .ttlock_utils import TTLockClient
 import logging
 import random  # Added for randint
@@ -165,18 +165,99 @@ class PopularEventAdmin(admin.ModelAdmin):
 class TTLockTokenAdmin(admin.ModelAdmin):
     list_display = ('created_at', 'expires_at', 'is_expired_display', 'token_preview')
     readonly_fields = ('access_token', 'refresh_token', 'expires_at', 'created_at', 'updated_at')
-    
+
     def is_expired_display(self, obj):
         return "❌ Expired" if obj.is_expired() else "✅ Valid"
     is_expired_display.short_description = "Status"
-    
+
     def token_preview(self, obj):
         return f"{obj.access_token[:30]}..." if obj.access_token else "N/A"
     token_preview.short_description = "Token Preview"
-    
+
     def has_add_permission(self, request):
         # Prevent manual creation through admin
         return False
+
+class RoomICalConfigAdmin(admin.ModelAdmin):
+    list_display = ('room', 'is_active', 'last_synced', 'sync_status_display', 'updated_at')
+    list_filter = ('is_active', 'last_synced')
+    search_fields = ('room__name', 'ical_url')
+    readonly_fields = ('last_synced', 'last_sync_status', 'created_at', 'updated_at')
+
+    fieldsets = (
+        ('Room Configuration', {
+            'fields': ('room', 'ical_url', 'is_active')
+        }),
+        ('Sync Status', {
+            'fields': ('last_synced', 'last_sync_status'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def sync_status_display(self, obj):
+        if not obj.last_sync_status:
+            return "Never synced"
+        if "success" in obj.last_sync_status.lower():
+            return format_html('<span style="color: green;">✅ {}</span>', obj.last_sync_status)
+        elif "error" in obj.last_sync_status.lower():
+            return format_html('<span style="color: red;">❌ {}</span>', obj.last_sync_status)
+        return obj.last_sync_status
+    sync_status_display.short_description = "Sync Status"
+
+    actions = ['sync_now']
+
+    def sync_now(self, request, queryset):
+        """Manually trigger sync for selected rooms"""
+        from main.tasks import sync_room_ical_feed
+        synced_count = 0
+        for config in queryset:
+            if config.is_active:
+                sync_room_ical_feed.delay(config.id)
+                synced_count += 1
+
+        if synced_count > 0:
+            self.message_user(request, f"Sync triggered for {synced_count} room(s). Check logs for results.", messages.SUCCESS)
+        else:
+            self.message_user(request, "No active configurations selected.", messages.WARNING)
+    sync_now.short_description = "Sync selected rooms now"
+
+class ReservationAdmin(admin.ModelAdmin):
+    list_display = ('guest_name', 'booking_reference', 'room', 'check_in_date', 'check_out_date', 'status', 'enrichment_status', 'created_at')
+    list_filter = ('status', 'room', 'check_in_date', 'check_out_date')
+    search_fields = ('guest_name', 'booking_reference', 'ical_uid', 'guest__full_name', 'guest__phone_number', 'guest__email')
+    readonly_fields = ('ical_uid', 'guest', 'raw_ical_data', 'created_at', 'updated_at')
+
+    fieldsets = (
+        ('Reservation Details', {
+            'fields': ('room', 'guest_name', 'booking_reference', 'check_in_date', 'check_out_date', 'status')
+        }),
+        ('Guest Enrichment', {
+            'fields': ('guest',),
+            'description': 'Linked Guest record (created after user provides full details)'
+        }),
+        ('Technical Details', {
+            'fields': ('ical_uid', 'raw_ical_data'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def enrichment_status(self, obj):
+        if obj.is_enriched():
+            return format_html('<span style="color: green;">✅ Enriched</span>')
+        return format_html('<span style="color: orange;">⏳ Pending</span>')
+    enrichment_status.short_description = "Enrichment"
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related('room', 'guest', 'guest__assigned_room')
 
 # ✅ Register models
 admin.site.register(Room, RoomAdmin)
@@ -186,3 +267,5 @@ admin.site.register(TTLock, TTLockAdmin)
 admin.site.register(AuditLog, AuditLogAdmin)
 admin.site.register(PopularEvent, PopularEventAdmin)
 admin.site.register(TTLockToken, TTLockTokenAdmin)
+admin.site.register(RoomICalConfig, RoomICalConfigAdmin)
+admin.site.register(Reservation, ReservationAdmin)

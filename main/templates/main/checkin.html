@@ -16,10 +16,24 @@
         {% endif %}
         <form method="post" class="checkin-form">
             {% csrf_token %}
-            <input type="text" name="reservation_number" class="checkin-input" 
-                   placeholder="Enter your confirmation number"
+            <input type="text" name="reservation_number" class="checkin-input"
+                   placeholder="{% trans 'Booking Reference (10 digits)' %}"
                    value="{{ reservation_number|default:'' }}" required>
-            <button type="submit">Check In</button>
+
+            <!-- Additional fields for new reservations (shown via JavaScript if needed) -->
+            <div id="additional-fields" style="display: none; margin-top: 15px;">
+                <input type="text" name="full_name"
+                       placeholder="{% trans 'Full Name' %}"
+                       value="{{ full_name|default:'' }}">
+                <input type="email" name="email"
+                       placeholder="{% trans 'Email Address' %}"
+                       value="{{ email|default:'' }}">
+                <input type="tel" name="phone_number"
+                       placeholder="{% trans 'Phone Number (e.g., +44...)' %}"
+                       value="{{ phone_number|default:'' }}">
+            </div>
+
+            <button type="submit">{% trans "Check In" %}</button>
         </form>
 
         <!-- Links for Popups -->

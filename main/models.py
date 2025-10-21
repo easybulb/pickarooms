@@ -346,3 +346,59 @@ class PopularEvent(models.Model):
 
     def __str__(self):
         return f"{self.name} at {self.venue} on {self.date}"
+
+class RoomICalConfig(models.Model):
+    """Configuration for iCal feed polling per room"""
+    room = models.OneToOneField(Room, on_delete=models.CASCADE, related_name='ical_config')
+    ical_url = models.URLField(max_length=500, help_text="iCal feed URL from Booking.com or Airbnb")
+    is_active = models.BooleanField(default=True, help_text="Enable/disable polling for this room")
+    last_synced = models.DateTimeField(null=True, blank=True, help_text="Last successful sync timestamp")
+    last_sync_status = models.CharField(max_length=255, blank=True, help_text="Status of last sync attempt")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Room iCal Configuration"
+        verbose_name_plural = "Room iCal Configurations"
+
+    def __str__(self):
+        return f"iCal Config for {self.room.name} ({'Active' if self.is_active else 'Inactive'})"
+
+class Reservation(models.Model):
+    """iCal booking reservation - synced from external platforms"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='reservations')
+    ical_uid = models.CharField(max_length=500, unique=True, help_text="Unique identifier from iCal event (UID)")
+    booking_reference = models.CharField(max_length=50, blank=True, help_text="Extracted booking reference (10-digit number)")
+    guest_name = models.CharField(max_length=200, help_text="Guest name from iCal SUMMARY")
+    check_in_date = models.DateField()
+    check_out_date = models.DateField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
+    guest = models.OneToOneField(Guest, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservation', help_text="Linked Guest record (created after enrichment)")
+    raw_ical_data = models.TextField(blank=True, help_text="Raw iCal event data for debugging")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Reservation"
+        verbose_name_plural = "Reservations"
+        ordering = ['-check_in_date']
+        indexes = [
+            models.Index(fields=['ical_uid']),
+            models.Index(fields=['booking_reference']),
+            models.Index(fields=['check_in_date']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        guest_info = f"{self.guest_name} ({self.booking_reference})" if self.booking_reference else self.guest_name
+        return f"{guest_info} - {self.room.name} ({self.check_in_date} to {self.check_out_date})"
+
+    def is_enriched(self):
+        """Check if reservation has been enriched with full guest details"""
+        return self.guest is not None

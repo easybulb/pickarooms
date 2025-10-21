@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: pickarooms-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  celery-worker:
+    build: .
+    container_name: pickarooms-celery-worker
+    command: celery -A pickarooms worker --loglevel=info --pool=solo
+    volumes:
+      - .:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=pickarooms.settings
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  celery-beat:
+    build: .
+    container_name: pickarooms-celery-beat
+    command: celery -A pickarooms beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=pickarooms.settings
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery-worker:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  redis_data:

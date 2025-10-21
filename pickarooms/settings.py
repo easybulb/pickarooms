@@ -161,6 +161,8 @@ INSTALLED_APPS = [
     'main',
     'cloudinary',
     'cloudinary_storage',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 LANGUAGE_CODE = 'en'  # Default language
@@ -316,3 +318,30 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+# =========================
+# Celery Configuration
+# =========================
+# Celery Broker URL (Redis)
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+# Celery Result Backend (Redis)
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+# Celery Accept Content
+CELERY_ACCEPT_CONTENT = ['application/json']
+
+# Celery Task Serializer
+CELERY_TASK_SERIALIZER = 'json'
+
+# Celery Result Serializer
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Celery Timezone
+CELERY_TIMEZONE = 'Europe/London'
+
+# Celery Beat Scheduler (use DatabaseScheduler for django-celery-beat)
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# Store task results in Django database
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
