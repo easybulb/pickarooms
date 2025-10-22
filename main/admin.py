@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload, TTLockToken, RoomICalConfig, Reservation
+from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload, TTLockToken, RoomICalConfig, Reservation, MessageTemplate
 from .ttlock_utils import TTLockClient
 import logging
 import random  # Added for randint
@@ -287,6 +287,37 @@ class ReservationAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs.select_related('room', 'guest', 'guest__assigned_room')
 
+class MessageTemplateAdmin(admin.ModelAdmin):
+    list_display = ('message_type', 'subject', 'is_active', 'last_edited_by', 'last_edited_at', 'character_count')
+    list_filter = ('is_active', 'message_type')
+    search_fields = ('message_type', 'subject', 'content')
+    readonly_fields = ('last_edited_by', 'last_edited_at', 'created_at')
+
+    fieldsets = (
+        ('Template Info', {
+            'fields': ('message_type', 'is_active')
+        }),
+        ('Email Content', {
+            'fields': ('subject', 'content'),
+            'description': 'Use variables: {guest_name}, {room_name}, {check_in_date}, {check_out_date}, {reservation_number}, {pin}, {room_detail_url}, {platform_name}'
+        }),
+        ('Metadata', {
+            'fields': ('last_edited_by', 'last_edited_at', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def character_count(self, obj):
+        count = len(obj.content)
+        if 'sms' in obj.message_type and count > 160:
+            return format_html('<span style="color: orange; font-weight: bold;">{} chars ⚠️</span>', count)
+        return f"{count} chars"
+    character_count.short_description = "Length"
+
+    def save_model(self, request, obj, form, change):
+        obj.last_edited_by = request.user
+        obj.save()
+
 # ✅ Register models
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
@@ -297,3 +328,4 @@ admin.site.register(PopularEvent, PopularEventAdmin)
 admin.site.register(TTLockToken, TTLockTokenAdmin)
 admin.site.register(RoomICalConfig, RoomICalConfigAdmin)
 admin.site.register(Reservation, ReservationAdmin)
+admin.site.register(MessageTemplate, MessageTemplateAdmin)
