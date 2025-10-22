@@ -1,0 +1,563 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "All Reservations" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .back-link {
+        color: #007bff;
+        text-decoration: none;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    h1 {
+        margin-bottom: 30px;
+    }
+
+    /* Filter form styling */
+    .filter-form {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+
+    /* Table container with horizontal scrolling */
+    .table-container {
+        overflow-x: auto;
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 900px; /* Ensures horizontal scroll on small screens */
+    }
+
+    .admin-table thead {
+        background: #343a40;
+        color: white;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .admin-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    .admin-table tbody tr:nth-child(even) {
+        background: #f9f9f9;
+    }
+
+    .admin-table tbody tr:nth-child(even):hover {
+        background: #f0f0f0;
+    }
+
+    /* Status badges */
+    .badge {
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .badge-upcoming {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .badge-current {
+        background: #28a745;
+        color: white;
+    }
+
+    .badge-past {
+        background: #6c757d;
+        color: white;
+    }
+
+    .badge-cancelled {
+        background: #dc3545;
+        color: white;
+    }
+
+    .badge-confirmed {
+        background: #007bff;
+        color: white;
+    }
+
+    .badge-enriched {
+        background: #28a745;
+        color: white;
+    }
+
+    .badge-unenriched {
+        background: #ffc107;
+        color: #000;
+    }
+
+    /* Platform badges */
+    .platform-booking {
+        background: #003580;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+    }
+
+    .platform-airbnb {
+        background: #FF5A5F;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+    }
+
+    /* Pagination controls */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .pagination button {
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        background: white;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .pagination button:hover:not(:disabled) {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .pagination button:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    .pagination button.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .pagination-info {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 10px;
+        }
+
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+
+        .admin-table {
+            font-size: 12px;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 8px;
+        }
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+
+    .action-link {
+        color: #007bff;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+
+    .action-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+    <br>
+    <h1>{% trans "All Reservations" %}</h1>
+
+    <!-- Filter Form -->
+    <form method="GET" class="filter-form">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="platform">{% trans "Platform:" %}</label>
+                <select id="platform" name="platform">
+                    <option value="all" {% if platform_filter == 'all' %}selected{% endif %}>{% trans "All Platforms" %}</option>
+                    <option value="booking" {% if platform_filter == 'booking' %}selected{% endif %}>{% trans "Booking.com" %}</option>
+                    <option value="airbnb" {% if platform_filter == 'airbnb' %}selected{% endif %}>{% trans "Airbnb" %}</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="status">{% trans "Status:" %}</label>
+                <select id="status" name="status">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{% trans "All Statuses" %}</option>
+                    <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>{% trans "Confirmed" %}</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="enrichment">{% trans "Enrichment:" %}</label>
+                <select id="enrichment" name="enrichment">
+                    <option value="all" {% if enrichment_filter == 'all' %}selected{% endif %}>{% trans "All" %}</option>
+                    <option value="enriched" {% if enrichment_filter == 'enriched' %}selected{% endif %}>{% trans "Enriched" %}</option>
+                    <option value="unenriched" {% if enrichment_filter == 'unenriched' %}selected{% endif %}>{% trans "Unenriched" %}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-group">
+                <label for="date_from">{% trans "Check-in From:" %}</label>
+                <input type="date" id="date_from" name="date_from" value="{{ date_from }}">
+            </div>
+
+            <div class="filter-group">
+                <label for="date_to">{% trans "Check-in To:" %}</label>
+                <input type="date" id="date_to" name="date_to" value="{{ date_to }}">
+            </div>
+
+            <div class="filter-group">
+                <label for="search">{% trans "Search:" %}</label>
+                <input type="text" id="search" name="search" placeholder="{% trans 'Booking ref or guest name...' %}" value="{{ search_query }}">
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">{% trans "Apply Filters" %}</button>
+            <a href="{% url 'all_reservations' %}" class="btn btn-secondary">{% trans "Clear Filters" %}</a>
+        </div>
+    </form>
+
+    <!-- Results count -->
+    <p class="pagination-info">
+        <strong>{% trans "Total:" %}</strong> <span id="total-count">{{ reservations|length }}</span> {% trans "reservation(s)" %}
+        | <strong>{% trans "Showing:" %}</strong> <span id="showing-info">1-10</span>
+    </p>
+
+    <!-- Reservations Table -->
+    <div class="table-container">
+        <table class="admin-table" id="reservations-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Booking Ref" %}</th>
+                    <th>{% trans "Guest Name" %}</th>
+                    <th>{% trans "Platform" %}</th>
+                    <th>{% trans "Room" %}</th>
+                    <th>{% trans "Check-in" %}</th>
+                    <th>{% trans "Check-out" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Time Status" %}</th>
+                    <th>{% trans "Enrichment" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody id="reservations-tbody">
+                {% for reservation in reservations %}
+                <tr class="reservation-row">
+                    <td>{{ reservation.booking_reference }}</td>
+                    <td>
+                        {% if reservation.guest %}
+                            <strong>{{ reservation.guest.full_name }}</strong>
+                        {% else %}
+                            {{ reservation.guest_name|default:"Not available" }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reservation.platform == 'booking' %}
+                            <span class="platform-booking">📘 Booking.com</span>
+                        {% elif reservation.platform == 'airbnb' %}
+                            <span class="platform-airbnb">🏠 Airbnb</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ reservation.room.name }}</td>
+                    <td>
+                        {{ reservation.check_in_date }}
+                        {% if reservation.early_checkin_time %}
+                            <br><small>{{ reservation.early_checkin_time|time:"h:i A" }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ reservation.check_out_date }}
+                        {% if reservation.late_checkout_time %}
+                            <br><small>{{ reservation.late_checkout_time|time:"h:i A" }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reservation.status == 'confirmed' %}
+                            <span class="badge badge-confirmed">✓ Confirmed</span>
+                        {% elif reservation.status == 'cancelled' %}
+                            <span class="badge badge-cancelled">✗ Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ reservation.time_status|lower }}">{{ reservation.time_status }}</span>
+                    </td>
+                    <td>
+                        {% if reservation.guest %}
+                            <span class="badge badge-enriched">✓ Enriched</span>
+                        {% else %}
+                            <span class="badge badge-unenriched">⚠ Unenriched</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if reservation.guest %}
+                            <a href="{% url 'guest_details' reservation.guest.id %}" class="action-link">{% trans "View Guest" %}</a>
+                        {% else %}
+                            <a href="{% url 'edit_reservation' reservation.id %}" class="action-link">{% trans "Edit" %}</a> |
+                            <a href="{% url 'manual_checkin_reservation' reservation.id %}" class="action-link">{% trans "Check In" %}</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="empty-state">
+                        {% trans "No reservations found matching your filters." %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination" id="pagination-controls"></div>
+
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+</div>
+
+<!-- JavaScript Pagination -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const rowsPerPage = 10;
+    let currentPage = 1;
+
+    const tbody = document.getElementById("reservations-tbody");
+    const rows = Array.from(document.querySelectorAll(".reservation-row"));
+    const totalCount = document.getElementById("total-count");
+    const showingInfo = document.getElementById("showing-info");
+    const paginationControls = document.getElementById("pagination-controls");
+
+    const totalRows = rows.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+    function displayPage(page) {
+        currentPage = page;
+
+        // Hide all rows
+        rows.forEach(row => row.style.display = "none");
+
+        // Calculate start and end indices
+        const start = (page - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, totalRows);
+
+        // Show rows for current page
+        for (let i = start; i < end; i++) {
+            rows[i].style.display = "";
+        }
+
+        // Update showing info
+        if (totalRows === 0) {
+            showingInfo.textContent = "0";
+        } else {
+            showingInfo.textContent = `${start + 1}-${end} of ${totalRows}`;
+        }
+
+        // Update pagination controls
+        renderPaginationControls();
+    }
+
+    function renderPaginationControls() {
+        paginationControls.innerHTML = "";
+
+        if (totalPages <= 1) {
+            return; // No pagination needed
+        }
+
+        // Previous button
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "← Previous";
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.addEventListener("click", () => displayPage(currentPage - 1));
+        paginationControls.appendChild(prevBtn);
+
+        // Page number buttons
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        // Adjust if we're near the end
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // First page button
+        if (startPage > 1) {
+            const firstBtn = document.createElement("button");
+            firstBtn.textContent = "1";
+            firstBtn.addEventListener("click", () => displayPage(1));
+            paginationControls.appendChild(firstBtn);
+
+            if (startPage > 2) {
+                const ellipsis = document.createElement("span");
+                ellipsis.textContent = "...";
+                ellipsis.style.padding = "8px";
+                paginationControls.appendChild(ellipsis);
+            }
+        }
+
+        // Page number buttons
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement("button");
+            pageBtn.textContent = i;
+            pageBtn.classList.toggle("active", i === currentPage);
+            pageBtn.addEventListener("click", () => displayPage(i));
+            paginationControls.appendChild(pageBtn);
+        }
+
+        // Last page button
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsis = document.createElement("span");
+                ellipsis.textContent = "...";
+                ellipsis.style.padding = "8px";
+                paginationControls.appendChild(ellipsis);
+            }
+
+            const lastBtn = document.createElement("button");
+            lastBtn.textContent = totalPages;
+            lastBtn.addEventListener("click", () => displayPage(totalPages));
+            paginationControls.appendChild(lastBtn);
+        }
+
+        // Next button
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Next →";
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.addEventListener("click", () => displayPage(currentPage + 1));
+        paginationControls.appendChild(nextBtn);
+    }
+
+    // Initialize pagination
+    if (totalRows > 0) {
+        displayPage(1);
+    } else {
+        showingInfo.textContent = "0";
+    }
+});
+</script>
+{% endblock %}

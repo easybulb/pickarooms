@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit Reservation" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_guest.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+    <br>
+    <h1>{% trans "Edit Reservation" %}</h1>
+
+    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="margin: 0;"><strong>ℹ️ Note:</strong> This reservation has not been checked in yet. You can set early check-in and late check-out times here, and they will be applied when the guest checks in and their PIN is generated.</p>
+    </div>
+
+    <form method="POST" class="admin-form">
+        {% csrf_token %}
+
+        <label>{% trans "Booking Reference:" %}</label>
+        <p><strong>{{ reservation.booking_reference }}</strong></p>
+
+        <label>{% trans "Guest Name (from iCal):" %}</label>
+        <p><strong>{{ reservation.guest_name|default:"Not available" }}</strong></p>
+
+        <label>{% trans "Platform:" %}</label>
+        <p>
+            {% if reservation.platform == 'booking' %}
+                <span style="background: #003580; color: white; padding: 3px 8px; border-radius: 3px;">📘 Booking.com</span>
+            {% elif reservation.platform == 'airbnb' %}
+                <span style="background: #FF5A5F; color: white; padding: 3px 8px; border-radius: 3px;">🏠 Airbnb</span>
+            {% else %}
+                {{ reservation.get_platform_display }}
+            {% endif %}
+        </p>
+
+        <label for="check_in_date">{% trans "Check-In Date:" %}</label>
+        <input type="date" id="check_in_date" name="check_in_date" value="{{ reservation.check_in_date|date:'Y-m-d' }}" required>
+
+        <label for="check_out_date">{% trans "Check-Out Date:" %}</label>
+        <input type="date" id="check_out_date" name="check_out_date" value="{{ reservation.check_out_date|date:'Y-m-d' }}" required>
+
+        <label for="early_checkin_time">{% trans "Early Check-In Time:" %}</label>
+        <input type="time" id="early_checkin_time" name="early_checkin_time" value="{% if reservation.early_checkin_time %}{{ reservation.early_checkin_time|time:'H:i' }}{% endif %}">
+        <p class="note">{% trans "Leave blank for default (2:00 PM). This will be applied when the guest checks in." %}</p>
+
+        <label for="late_checkout_time">{% trans "Late Check-Out Time:" %}</label>
+        <input type="time" id="late_checkout_time" name="late_checkout_time" value="{% if reservation.late_checkout_time %}{{ reservation.late_checkout_time|time:'H:i' }}{% endif %}">
+        <p class="note">{% trans "Leave blank for default (11:00 AM). This will be applied when the guest checks in." %}</p>
+
+        <label for="room">{% trans "Assign Room:" %}</label>
+        <select id="room" name="room" required>
+            {% for room in rooms %}
+                <option value="{{ room.id }}" {% if room.id == reservation.room.id %}selected{% endif %}>
+                    {{ room.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>{% trans "Status:" %}</label>
+        <p><strong>{{ reservation.get_status_display }}</strong></p>
+
+        <button type="submit" class="btn-save">{% trans "Save Changes" %}</button>
+    </form>
+
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+</div>
+
+<!-- JavaScript for Updating Available Rooms Dynamically -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function updateRooms() {
+            const checkInDate = document.getElementById('check_in_date').value;
+            const checkOutDate = document.getElementById('check_out_date').value;
+
+            if (checkInDate && checkOutDate) {
+                fetch(`/admin-page/available-rooms/?check_in_date=${checkInDate}&check_out_date=${checkOutDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const roomSelect = document.getElementById('room');
+                        const currentRoomId = "{{ reservation.room.id }}";
+                        roomSelect.innerHTML = '';
+                        data.rooms.forEach(room => {
+                            const option = document.createElement('option');
+                            option.value = room.id;
+                            option.textContent = room.name;
+                            if (room.id == currentRoomId) {
+                                option.selected = true;
+                            }
+                            roomSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching available rooms:', error));
+            }
+        }
+
+        // Add event listeners for date changes
+        document.getElementById('check_in_date').addEventListener('change', updateRooms);
+        document.getElementById('check_out_date').addEventListener('change', updateRooms);
+    });
+</script>
+{% endblock %}

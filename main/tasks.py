@@ -173,3 +173,113 @@ def cleanup_old_reservations():
     logger.info(f"Cleanup complete: {total_deleted} total reservation(s) deleted")
 
     return f"Deleted {cancelled_count} cancelled, {completed_count} unenriched (total: {total_deleted})"
+
+
+@shared_task
+def archive_past_guests():
+    """
+    Task to archive guests whose check-out time has passed
+    - Deletes TTLock PINs (front door + room)
+    - Marks guest as archived
+    - Sends post-stay message
+
+    Runs 3 times per day:
+    - 12:15 PM UK time: Catches default 11 AM checkouts (15 min buffer)
+    - 3:00 PM UK time: Catches late checkouts (most late checkouts by 2 PM)
+    - 11:00 PM UK time: End of day safety net for any missed guests
+
+    Only checks guests whose check_out_date is today or earlier (optimization)
+    Multi-night stays (e.g., 5 days) will NOT be archived until their actual checkout date
+    """
+    from main.models import Guest, TTLock
+    from main.ttlock_utils import TTLockClient
+    from datetime import time
+    import pytz
+    import datetime
+
+    logger.info("Starting hourly guest archiving task...")
+
+    uk_timezone = pytz.timezone("Europe/London")
+    now_time = timezone.now().astimezone(uk_timezone)
+    today = now_time.date()
+
+    # Only check guests whose check_out_date is today or earlier (major optimization)
+    guests_to_check = Guest.objects.filter(
+        is_archived=False,
+        check_out_date__lte=today
+    ).select_related('assigned_room', 'assigned_room__ttlock')
+
+    if not guests_to_check.exists():
+        logger.info("No guests need archiving at this time")
+        return "No guests to archive"
+
+    logger.info(f"Found {guests_to_check.count()} guest(s) to check for archiving")
+
+    front_door_lock = TTLock.objects.filter(is_front_door=True).first()
+    ttlock_client = TTLockClient()
+
+    archived_count = 0
+    error_count = 0
+
+    for guest in guests_to_check:
+        try:
+            # Determine the check-out datetime based on late_checkout_time or default to 11:00 AM
+            check_out_time_val = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
+            check_out_datetime = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_out_date, check_out_time_val)
+            )
+
+            # Only archive if current time has passed check-out time
+            if now_time <= check_out_datetime:
+                logger.debug(f"Guest {guest.reservation_number} check-out time not reached yet ({check_out_datetime})")
+                continue
+
+            logger.info(f"Archiving guest: {guest.full_name} (Res: {guest.reservation_number})")
+
+            # Delete front door PIN
+            if guest.front_door_pin_id and front_door_lock:
+                try:
+                    ttlock_client.delete_pin(
+                        lock_id=front_door_lock.lock_id,
+                        keyboard_pwd_id=guest.front_door_pin_id,
+                    )
+                    logger.info(f"Deleted front door PIN for guest {guest.reservation_number}")
+                except Exception as e:
+                    logger.error(f"Failed to delete front door PIN for guest {guest.reservation_number}: {str(e)}")
+
+            # Delete room PIN
+            room_lock = guest.assigned_room.ttlock
+            if guest.room_pin_id and room_lock:
+                try:
+                    ttlock_client.delete_pin(
+                        lock_id=room_lock.lock_id,
+                        keyboard_pwd_id=guest.room_pin_id,
+                    )
+                    logger.info(f"Deleted room PIN for guest {guest.reservation_number}")
+                except Exception as e:
+                    logger.error(f"Failed to delete room PIN for guest {guest.reservation_number}: {str(e)}")
+
+            # Update guest status
+            guest.front_door_pin = None
+            guest.front_door_pin_id = None
+            guest.room_pin_id = None
+            guest.is_archived = True
+            guest.save()
+
+            # Send post-stay message if the guest has contact info
+            if guest.phone_number or guest.email:
+                try:
+                    guest.send_post_stay_message()
+                    logger.info(f"Sent post-stay message to {guest.full_name}")
+                except Exception as e:
+                    logger.error(f"Failed to send post-stay message to {guest.full_name}: {str(e)}")
+
+            archived_count += 1
+            logger.info(f"Successfully archived guest {guest.full_name} (Res: {guest.reservation_number})")
+
+        except Exception as e:
+            error_count += 1
+            logger.error(f"Failed to archive guest {guest.reservation_number}: {str(e)}")
+
+    logger.info(f"Archiving task complete: {archived_count} archived, {error_count} errors")
+    return f"Archived {archived_count} guest(s), {error_count} error(s)"

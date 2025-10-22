@@ -43,11 +43,15 @@ if DEBUG:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+    CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF cookie for debugging
+    CSRF_USE_SESSIONS = False  # Use cookie-based CSRF tokens (not session-based)
+    CSRF_COOKIE_SAMESITE = 'Lax'  # Less strict for local development
 else:
     SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True  # Cookies only sent over HTTPS
     CSRF_COOKIE_SECURE = True  # CSRF protection only works over HTTPS
+    CSRF_COOKIE_SAMESITE = 'Strict'
 
 # CSRF Trusted Origins (Includes Localhost and Dev Tunnels for Testing)
 if DEBUG:
@@ -230,6 +234,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.csrf',  # Added for CSRF token support
                 "django.template.context_processors.i18n",
                 'main.context_processors.ipgeolocation_api_key',
             ],

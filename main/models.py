@@ -401,6 +401,11 @@ class Reservation(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
     platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, default='booking', help_text="Source platform (Booking.com or Airbnb)")
     guest = models.OneToOneField(Guest, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservation', help_text="Linked Guest record (created after enrichment)")
+
+    # Admin-configurable check-in/out times (set before guest checks in)
+    early_checkin_time = models.TimeField(null=True, blank=True, help_text="Early check-in time (e.g., 12:00). If not set, defaults to 2:00 PM.")
+    late_checkout_time = models.TimeField(null=True, blank=True, help_text="Late check-out time (e.g., 14:00). If not set, defaults to 11:00 AM.")
+
     raw_ical_data = models.TextField(blank=True, help_text="Raw iCal event data for debugging")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

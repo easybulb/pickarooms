@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Manual Check-In" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/edit_guest.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+    <br>
+    <h1>{% trans "Manual Check-In" %}</h1>
+
+    <div style="background: #e7f3ff; border: 1px solid #2196F3; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="margin: 0;"><strong>ℹ️ Checking In Reservation:</strong></p>
+        <p style="margin: 5px 0 0 0;">
+            <strong>Booking Ref:</strong> {{ reservation.booking_reference }}<br>
+            <strong>Guest Name (iCal):</strong> {{ reservation.guest_name|default:"Not available" }}<br>
+            <strong>Platform:</strong>
+            {% if reservation.platform == 'booking' %}
+                <span style="background: #003580; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">📘 Booking.com</span>
+            {% elif reservation.platform == 'airbnb' %}
+                <span style="background: #FF5A5F; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">🏠 Airbnb</span>
+            {% endif %}<br>
+            <strong>Room:</strong> {{ reservation.room.name }}<br>
+            <strong>Dates:</strong> {{ reservation.check_in_date }} - {{ reservation.check_out_date }}
+        </p>
+    </div>
+
+    <div style="background: #fff8dc; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="margin: 0;"><strong>⚠️ Important:</strong></p>
+        <p style="margin: 5px 0 0 0;">
+            Please provide the guest's full name and contact details. The system will generate a PIN and send check-in instructions if email or phone is provided.
+        </p>
+    </div>
+
+    <form method="POST" class="admin-form">
+        {% csrf_token %}
+
+        <label for="full_name">{% trans "Full Name:" %} <span style="color: red;">*</span></label>
+        <input type="text" id="full_name" name="full_name" value="{{ reservation.guest_name|default:'' }}" required autofocus>
+        <p class="note">{% trans "Confirm or update the guest's full name" %}</p>
+
+        <label for="phone_number">{% trans "Phone Number:" %}</label>
+        <input type="tel" id="phone_number" name="phone_number" placeholder="+44 7XXX XXXXXX">
+        <p class="note">{% trans "Required for sending PIN via SMS. Use international format (e.g., +44 7123 456789)" %}</p>
+
+        <label for="email">{% trans "Email (Optional):" %}</label>
+        <input type="email" id="email" name="email" placeholder="guest@example.com">
+        <p class="note">{% trans "For sending check-in instructions via email" %}</p>
+
+        <div style="background: #e8f5e9; border: 1px solid #4CAF50; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>✅ What happens next:</strong></p>
+            <ol style="margin: 10px 0 0 20px; padding: 0;">
+                <li>System generates a 4-digit memorable PIN</li>
+                <li>PIN is valid from {{ reservation.check_in_date }}
+                    {% if reservation.early_checkin_time %}
+                        {{ reservation.early_checkin_time|time:"h:i A" }}
+                    {% else %}
+                        2:00 PM
+                    {% endif %}
+                    to {{ reservation.check_out_date }}
+                    {% if reservation.late_checkout_time %}
+                        {{ reservation.late_checkout_time|time:"h:i A" }}
+                    {% else %}
+                        11:00 AM
+                    {% endif %}
+                </li>
+                <li>Guest receives check-in message with PIN and instructions</li>
+                <li>Guest can unlock doors using the PIN or remotely via their unique link</li>
+            </ol>
+        </div>
+
+        <button type="submit" class="btn-save" style="background: #4CAF50;">{% trans "Check In Guest & Generate PIN" %}</button>
+    </form>
+
+    <a href="{% url 'admin_page' %}" class="back-link">{% trans "Back to Admin Page" %}</a>
+</div>
+{% endblock %}

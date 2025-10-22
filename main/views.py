@@ -390,7 +390,7 @@ def enrich_reservation(request):
         email = reservation_data.get('email', '') or None  # Convert empty string to None
         phone_number = reservation_data.get('phone_number', '') or None  # Convert empty string to None
 
-        # Create the guest
+        # Create the guest (copy early/late times from reservation if set)
         guest = Guest.objects.create(
             full_name=full_name,
             email=email,
@@ -399,6 +399,8 @@ def enrich_reservation(request):
             check_in_date=reservation.check_in_date,
             check_out_date=reservation.check_out_date,
             assigned_room=reservation.room,
+            early_checkin_time=reservation.early_checkin_time,  # Copy from reservation
+            late_checkout_time=reservation.late_checkout_time,  # Copy from reservation
         )
         logger.info(f"Created new guest {guest.id} for reservation {reservation.booking_reference}")
 
@@ -867,67 +869,8 @@ class AdminLoginView(LoginView):
 @user_passes_test(lambda user: user.has_perm('main.view_admin_dashboard'), login_url='/unauthorized/')
 def admin_page(request):
     """Admin Dashboard to manage guests, rooms, and assignments."""
-    now_time = localtime(now())  # Current time in server's local timezone (assumed Europe/London)
-    uk_timezone = pytz.timezone("Europe/London")
-
-    # Archive guests and delete their PINs when their check-out time has passed
-    guests_to_archive = Guest.objects.filter(is_archived=False)
-    front_door_lock = TTLock.objects.filter(is_front_door=True).first()
-    ttlock_client = TTLockClient()
-
-    for guest in guests_to_archive:
-        # Determine the check-out datetime based on late_checkout_time or default to 11:00 AM
-        check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
-        check_out_datetime = uk_timezone.localize(
-            datetime.datetime.combine(guest.check_out_date, check_out_time)
-        )
-
-        if now_time > check_out_datetime:
-            # Delete front door PIN
-            if guest.front_door_pin_id and front_door_lock:
-                try:
-                    ttlock_client.delete_pin(
-                        lock_id=front_door_lock.lock_id,
-                        keyboard_pwd_id=guest.front_door_pin_id,
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to delete front door PIN for guest {guest.reservation_number}: {str(e)}")
-                    messages.warning(request, f"Failed to delete front door PIN for {guest.full_name}: {str(e)}")
-
-            # Delete room PIN
-            room_lock = guest.assigned_room.ttlock
-            if guest.room_pin_id and room_lock:
-                try:
-                    ttlock_client.delete_pin(
-                        lock_id=room_lock.lock_id,
-                        keyboard_pwd_id=guest.room_pin_id,
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to delete room PIN for guest {guest.reservation_number}: {str(e)}")
-                    messages.warning(request, f"Failed to delete room PIN for {guest.full_name}: {str(e)}")
-
-            # Update guest status and send post-stay message
-            guest.front_door_pin = None
-            guest.front_door_pin_id = None
-            guest.room_pin_id = None
-            guest.is_archived = True
-            try:
-                guest.save()
-                # Log the archiving action
-                AuditLog.objects.create(
-                    user=request.user,
-                    action="archive_guest",
-                    object_type="Guest",
-                    object_id=guest.id,
-                    details=f"Archived guest {guest.full_name} (Reservation: {guest.reservation_number})"
-                )
-                # Send post-stay message if the guest has contact info
-                if guest.phone_number or guest.email:
-                    guest.send_post_stay_message()
-                messages.success(request, f"Guest {guest.full_name} has been archived.")
-            except Exception as e:
-                logger.error(f"Failed to save archived guest {guest.reservation_number}: {str(e)}")
-                messages.error(request, f"Failed to archive {guest.full_name}: {str(e)}")
+    # Note: Guest archiving is now handled by Celery task 'archive_past_guests' (runs every hour)
+    # This removes the performance bottleneck of checking all guests on every page load
 
     # Get today's date for filtering
     today = date.today()
@@ -990,8 +933,8 @@ def admin_page(request):
             'pin': None,
             'check_in_date': reservation.check_in_date,
             'check_out_date': reservation.check_out_date,
-            'early_checkin_time': None,
-            'late_checkout_time': None,
+            'early_checkin_time': reservation.early_checkin_time,  # Include from reservation
+            'late_checkout_time': reservation.late_checkout_time,  # Include from reservation
             'platform': platform_badge,
             'platform_raw': reservation.platform,
         })
@@ -1619,6 +1562,295 @@ def edit_guest(request, guest_id):
     })
 
 @login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.view_admin_dashboard'), login_url='/unauthorized/')
+def edit_reservation(request, reservation_id):
+    """Edit unenriched iCal reservation (before guest checks in)"""
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+
+    # Store original values for comparison
+    original_check_in_date = reservation.check_in_date
+    original_check_out_date = reservation.check_out_date
+    original_early_checkin_time = reservation.early_checkin_time
+    original_late_checkout_time = reservation.late_checkout_time
+    original_room_id = reservation.room.id
+
+    if request.method == 'POST':
+        # Get form data
+        check_in_date = date.fromisoformat(request.POST.get('check_in_date'))
+        check_out_date = date.fromisoformat(request.POST.get('check_out_date'))
+        room_id = request.POST.get('room')
+        early_checkin_time = request.POST.get('early_checkin_time')
+        late_checkout_time = request.POST.get('late_checkout_time')
+
+        # Update early_checkin_time if provided
+        if early_checkin_time:
+            try:
+                reservation.early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+            except ValueError:
+                messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
+                return redirect('edit_reservation', reservation_id=reservation.id)
+        else:
+            reservation.early_checkin_time = None  # Revert to default if empty
+
+        # Update late_checkout_time if provided
+        if late_checkout_time:
+            try:
+                reservation.late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
+            except ValueError:
+                messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 14:00).")
+                return redirect('edit_reservation', reservation_id=reservation.id)
+        else:
+            reservation.late_checkout_time = None  # Revert to default if empty
+
+        # Update basic fields
+        reservation.check_in_date = check_in_date
+        reservation.check_out_date = check_out_date
+        reservation.room_id = room_id
+
+        # Save changes
+        reservation.save()
+
+        # Build changes message
+        changes = []
+        if str(room_id) != str(original_room_id):
+            changes.append(f"Room changed")
+        if check_in_date != original_check_in_date:
+            changes.append(f"Check-in date changed to {check_in_date}")
+        if check_out_date != original_check_out_date:
+            changes.append(f"Check-out date changed to {check_out_date}")
+        if reservation.early_checkin_time != original_early_checkin_time:
+            if reservation.early_checkin_time:
+                changes.append(f"Early check-in set to {reservation.early_checkin_time.strftime('%I:%M %p')}")
+            else:
+                changes.append("Early check-in removed (will default to 2:00 PM)")
+        if reservation.late_checkout_time != original_late_checkout_time:
+            if reservation.late_checkout_time:
+                changes.append(f"Late check-out set to {reservation.late_checkout_time.strftime('%I:%M %p')}")
+            else:
+                changes.append("Late check-out removed (will default to 11:00 AM)")
+
+        if changes:
+            changes_message = ". ".join(changes) + "."
+        else:
+            changes_message = "No changes were made."
+
+        messages.success(request, f"Reservation {reservation.booking_reference} updated successfully. {changes_message}")
+
+        # Log the action
+        AuditLog.objects.create(
+            user=request.user,
+            action="Reservation Updated",
+            object_type="Reservation",
+            object_id=reservation.id,
+            details=f"Updated reservation {reservation.booking_reference} - {changes_message}"
+        )
+
+        return redirect('admin_page')
+
+    # Get available rooms for the date range (include current room)
+    available_rooms = get_available_rooms(reservation.check_in_date, reservation.check_out_date) | Room.objects.filter(id=reservation.room.id)
+
+    return render(request, 'main/edit_reservation.html', {
+        'reservation': reservation,
+        'rooms': available_rooms,
+    })
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.view_admin_dashboard'), login_url='/unauthorized/')
+def manual_checkin_reservation(request, reservation_id):
+    """
+    Manually check in an unenriched iCal reservation
+    - Admin provides guest name, phone, email
+    - System generates PIN (respecting check-in date validation)
+    - Links Guest to Reservation
+    - Copies early/late times from Reservation to Guest
+    """
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+
+    # Ensure reservation is not already enriched
+    if reservation.guest:
+        messages.warning(request, f"This reservation is already checked in by {reservation.guest.full_name}.")
+        return redirect('admin_page')
+
+    if request.method == 'POST':
+        # Get form data
+        full_name = request.POST.get('full_name', '').strip()
+        phone_number = request.POST.get('phone_number', '').strip() or None
+        email = request.POST.get('email', '').strip() or None
+
+        # Validation
+        if not full_name:
+            messages.error(request, "Full name is required.")
+            return redirect('manual_checkin_reservation', reservation_id=reservation.id)
+
+        # Normalize phone number
+        if phone_number:
+            if not re.match(r'^\+?\d{9,15}$', phone_number):
+                messages.error(request, "Phone number must be in international format (e.g., +12025550123) or valid local number.")
+                return redirect('manual_checkin_reservation', reservation_id=reservation.id)
+            if phone_number.startswith('0') and len(phone_number) == 11 and phone_number[1] in '7':
+                phone_number = '+44' + phone_number[1:]
+
+        # Check if reservation number already exists (shouldn't happen, but safety check)
+        if Guest.objects.filter(reservation_number=reservation.booking_reference).exists():
+            existing_guest = Guest.objects.get(reservation_number=reservation.booking_reference)
+            messages.warning(request, f"A guest already exists with this booking reference: {existing_guest.full_name}. Linking reservation to existing guest.")
+            reservation.guest = existing_guest
+            reservation.save()
+            return redirect('admin_page')
+
+        # Check for returning guest
+        previous_stays = Guest.objects.filter(
+            Q(full_name__iexact=full_name)
+        ).exists()
+
+        # Check if it's the check-in day (or later) before generating PIN
+        uk_timezone = pytz.timezone("Europe/London")
+        now_uk_time = timezone.now().astimezone(uk_timezone)
+
+        # Only generate PIN on or after check-in date
+        if now_uk_time.date() < reservation.check_in_date:
+            # Too early - create guest without PIN
+            guest = Guest.objects.create(
+                full_name=full_name,
+                email=email,
+                phone_number=phone_number,
+                reservation_number=reservation.booking_reference,
+                check_in_date=reservation.check_in_date,
+                check_out_date=reservation.check_out_date,
+                assigned_room=reservation.room,
+                early_checkin_time=reservation.early_checkin_time,
+                late_checkout_time=reservation.late_checkout_time,
+                is_returning=previous_stays,
+            )
+            reservation.guest = guest
+            reservation.save()
+
+            logger.info(f"Guest {guest.id} created via manual check-in but PIN generation deferred until check-in date")
+            messages.info(request, f"Guest {full_name} checked in successfully. PIN will be generated on {reservation.check_in_date.strftime('%d %b %Y')}.")
+
+            # Log the action
+            AuditLog.objects.create(
+                user=request.user,
+                action="Manual Check-In (Early)",
+                object_type="Guest",
+                object_id=guest.id,
+                details=f"Manually checked in {full_name} for reservation {reservation.booking_reference} (PIN deferred until check-in date)"
+            )
+            return redirect('admin_page')
+
+        # Generate PIN (same logic as enrich_reservation)
+        try:
+            front_door_lock = TTLock.objects.get(is_front_door=True)
+            room_lock = reservation.room.ttlock
+
+            if not front_door_lock:
+                messages.error(request, "Front door lock not configured.")
+                return redirect('manual_checkin_reservation', reservation_id=reservation.id)
+            if not room_lock:
+                messages.error(request, f"No lock assigned to room {reservation.room.name}.")
+                return redirect('manual_checkin_reservation', reservation_id=reservation.id)
+
+            pin = generate_memorable_4digit_pin()
+
+            # Set start_time to NOW so PIN is immediately active
+            start_time = int(now_uk_time.timestamp() * 1000)
+
+            # Set end time based on late_checkout_time (from reservation or default)
+            check_out_time_val = reservation.late_checkout_time if reservation.late_checkout_time else time(11, 0)
+            end_date = uk_timezone.localize(
+                datetime.datetime.combine(reservation.check_out_date, check_out_time_val)
+            ) + datetime.timedelta(days=1)
+            end_time = int(end_date.timestamp() * 1000)
+
+            ttlock_client = TTLockClient()
+
+            # Generate front door PIN
+            front_door_response = ttlock_client.generate_temporary_pin(
+                lock_id=front_door_lock.lock_id,
+                pin=pin,
+                start_time=start_time,
+                end_time=end_time,
+                name=f"Front Door - {reservation.room.name} - {full_name} - {pin}",
+            )
+            if "keyboardPwdId" not in front_door_response:
+                logger.error(f"Failed to generate front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
+                messages.error(request, f"Failed to generate front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
+                return redirect('manual_checkin_reservation', reservation_id=reservation.id)
+            keyboard_pwd_id_front = front_door_response["keyboardPwdId"]
+
+            # Generate room PIN
+            room_response = ttlock_client.generate_temporary_pin(
+                lock_id=room_lock.lock_id,
+                pin=pin,
+                start_time=start_time,
+                end_time=end_time,
+                name=f"Room - {reservation.room.name} - {full_name} - {pin}",
+            )
+            if "keyboardPwdId" not in room_response:
+                logger.error(f"Failed to generate room PIN: {room_response.get('errmsg', 'Unknown error')}")
+                # Roll back front door PIN
+                try:
+                    ttlock_client.delete_pin(lock_id=front_door_lock.lock_id, keyboard_pwd_id=keyboard_pwd_id_front)
+                except Exception as e:
+                    logger.error(f"Failed to roll back front door PIN: {str(e)}")
+                messages.error(request, f"Failed to generate room PIN: {room_response.get('errmsg', 'Unknown error')}")
+                return redirect('manual_checkin_reservation', reservation_id=reservation.id)
+            keyboard_pwd_id_room = room_response["keyboardPwdId"]
+
+            # Create guest with PIN
+            guest = Guest.objects.create(
+                full_name=full_name,
+                email=email,
+                phone_number=phone_number,
+                reservation_number=reservation.booking_reference,
+                check_in_date=reservation.check_in_date,
+                check_out_date=reservation.check_out_date,
+                assigned_room=reservation.room,
+                early_checkin_time=reservation.early_checkin_time,
+                late_checkout_time=reservation.late_checkout_time,
+                is_returning=previous_stays,
+                front_door_pin=pin,
+                front_door_pin_id=keyboard_pwd_id_front,
+                room_pin_id=keyboard_pwd_id_room,
+            )
+
+            # Link guest to reservation
+            reservation.guest = guest
+            reservation.save()
+
+            logger.info(f"Guest {guest.id} created via manual check-in with PIN {pin}")
+            messages.success(request, f"Guest {full_name} checked in successfully! PIN (for both front door and room): {pin}")
+
+            # Log the action
+            AuditLog.objects.create(
+                user=request.user,
+                action="Manual Check-In",
+                object_type="Guest",
+                object_id=guest.id,
+                details=f"Manually checked in {full_name} for reservation {reservation.booking_reference} with PIN {pin}"
+            )
+
+            # Send welcome message if contact info provided
+            if guest.phone_number or guest.email:
+                try:
+                    guest.send_checkin_message()
+                except Exception as e:
+                    logger.error(f"Failed to send check-in message to {full_name}: {str(e)}")
+
+            return redirect('admin_page')
+
+        except Exception as e:
+            logger.error(f"Failed to manually check in reservation {reservation.id}: {str(e)}")
+            messages.error(request, f"Failed to check in guest: {str(e)}")
+            return redirect('manual_checkin_reservation', reservation_id=reservation.id)
+
+    # GET request - show form
+    return render(request, 'main/manual_checkin_reservation.html', {
+        'reservation': reservation,
+    })
+
+@login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.has_perm('main.delete_guest'), login_url='/unauthorized/')
 def delete_guest(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
@@ -1668,7 +1900,12 @@ def delete_guest(request, guest_id):
 @user_passes_test(lambda user: user.has_perm('main.view_guest'), login_url='/unauthorized/')
 def past_guests(request):
     search_query = request.GET.get('search', '')
-    past_guests = Guest.objects.filter(is_archived=True)
+
+    # Optimize: Use select_related and prefetch_related to reduce queries
+    # Note: is_returning is already a field on Guest model, no need to annotate
+    past_guests = Guest.objects.filter(
+        is_archived=True
+    ).select_related('assigned_room').prefetch_related('reservation')
 
     if search_query:
         past_guests = past_guests.filter(
@@ -1678,11 +1915,6 @@ def past_guests(request):
             Q(assigned_room__name__icontains=search_query)
         )
 
-    for guest in past_guests:
-        guest.is_returning = Guest.objects.filter(
-            Q(full_name__iexact=guest.full_name) & Q(is_archived=False)
-        ).exists()
-
     past_guests = past_guests.order_by('-check_out_date')
     paginator = Paginator(past_guests, 50)
     page_number = request.GET.get('page')
@@ -1691,6 +1923,129 @@ def past_guests(request):
     return render(request, 'main/past_guests.html', {
         'past_guests': paginated_past_guests,
         'search_query': search_query,
+    })
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.view_admin_dashboard'), login_url='/unauthorized/')
+def all_reservations(request):
+    """
+    Display all reservations (past, present, future) with filtering
+    - Platform filter (Booking.com, Airbnb, Manual)
+    - Status filter (Confirmed, Cancelled)
+    - Enrichment filter (Enriched/Unenriched)
+    - Date range filter
+    - Search by booking reference or guest name
+    - JavaScript pagination (10 per page)
+    """
+    from datetime import datetime as dt
+
+    # Get filter parameters
+    platform_filter = request.GET.get('platform', 'all')
+    status_filter = request.GET.get('status', 'all')
+    enrichment_filter = request.GET.get('enrichment', 'all')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    search_query = request.GET.get('search', '')
+
+    # Start with all reservations
+    reservations = Reservation.objects.all().select_related('room', 'guest').order_by('-check_in_date')
+
+    # Apply platform filter
+    if platform_filter != 'all':
+        reservations = reservations.filter(platform=platform_filter)
+
+    # Apply status filter
+    if status_filter != 'all':
+        reservations = reservations.filter(status=status_filter)
+
+    # Apply enrichment filter
+    if enrichment_filter == 'enriched':
+        reservations = reservations.filter(guest__isnull=False)
+    elif enrichment_filter == 'unenriched':
+        reservations = reservations.filter(guest__isnull=True)
+
+    # Apply date range filter
+    if date_from:
+        try:
+            date_from_obj = dt.strptime(date_from, '%Y-%m-%d').date()
+            reservations = reservations.filter(check_in_date__gte=date_from_obj)
+        except ValueError:
+            pass
+
+    if date_to:
+        try:
+            date_to_obj = dt.strptime(date_to, '%Y-%m-%d').date()
+            reservations = reservations.filter(check_out_date__lte=date_to_obj)
+        except ValueError:
+            pass
+
+    # Apply search filter
+    if search_query:
+        reservations = reservations.filter(
+            Q(booking_reference__icontains=search_query) |
+            Q(guest_name__icontains=search_query) |
+            Q(guest__full_name__icontains=search_query)
+        )
+
+    # Get today's date for visual indicators
+    today = date.today()
+
+    # Prepare reservation list with enriched data
+    reservations_data = []
+    for reservation in reservations:
+        # Determine status badge
+        if reservation.check_in_date > today:
+            time_status = 'upcoming'
+            time_badge = 'Upcoming'
+        elif reservation.check_in_date <= today <= reservation.check_out_date:
+            time_status = 'current'
+            time_badge = 'Current'
+        else:
+            time_status = 'past'
+            time_badge = 'Past'
+
+        # Platform badge
+        if reservation.platform == 'booking':
+            platform_badge = '📘 Booking.com'
+        elif reservation.platform == 'airbnb':
+            platform_badge = '🏠 Airbnb'
+        else:
+            platform_badge = '👤 Manual'
+
+        # Enrichment status
+        is_enriched = reservation.guest is not None
+        enrichment_status = 'Checked In' if is_enriched else 'Pending'
+        guest_name = reservation.guest.full_name if is_enriched else reservation.guest_name or 'N/A'
+
+        reservations_data.append({
+            'id': reservation.id,
+            'booking_reference': reservation.booking_reference,
+            'guest_name': guest_name,
+            'room': reservation.room.name,
+            'check_in_date': reservation.check_in_date,
+            'check_out_date': reservation.check_out_date,
+            'platform': reservation.platform,
+            'platform_badge': platform_badge,
+            'status': reservation.status,
+            'time_status': time_status,
+            'time_badge': time_badge,
+            'is_enriched': is_enriched,
+            'enrichment_status': enrichment_status,
+            'guest_id': reservation.guest.id if is_enriched else None,
+            'early_checkin_time': reservation.early_checkin_time,
+            'late_checkout_time': reservation.late_checkout_time,
+        })
+
+    return render(request, 'main/all_reservations.html', {
+        'reservations': reservations_data,
+        'total_count': len(reservations_data),
+        'platform_filter': platform_filter,
+        'status_filter': status_filter,
+        'enrichment_filter': enrichment_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'search_query': search_query,
+        'today': today,
     })
 
 @login_required(login_url='/admin-page/login/')
