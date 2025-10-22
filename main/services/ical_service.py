@@ -250,19 +250,20 @@ def sync_reservations_for_room(config_id, platform='booking'):
                     errors.append(error_msg)
 
             # Mark reservations as cancelled if they're no longer in the feed
-            # (Only for confirmed reservations from this platform that haven't been enriched yet)
+            # Includes both enriched and unenriched reservations
+            # Signal handler will automatically trigger cancellation task for enriched ones
             missing_reservations = Reservation.objects.filter(
                 room=config.room,
                 platform=platform,
                 status='confirmed',
-                guest__isnull=True  # Only unenriched reservations
             ).exclude(ical_uid__in=current_uids)
 
             for reservation in missing_reservations:
                 reservation.status = 'cancelled'
-                reservation.save()
+                reservation.save()  # Triggers signal if enriched
                 cancelled_count += 1
-                logger.info(f"Marked as cancelled (removed from feed): {reservation}")
+                enrichment_status = "enriched" if reservation.guest else "unenriched"
+                logger.info(f"Marked as cancelled (removed from feed, {enrichment_status}): {reservation}")
 
         # Update platform-specific sync status
         sync_time = timezone.now()

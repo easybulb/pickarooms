@@ -73,12 +73,18 @@ def sync_room_ical_feed(config_id, platform='booking'):
 @shared_task
 def handle_reservation_cancellation(reservation_id):
     """
-    Handle cancelled reservation
-    - Delete guest (if linked and TTLock PINs)
-    - Send cancellation notification
+    Handle cancelled reservation with date-based logic
+
+    Only deletes guest and PINs if cancellation occurs BEFORE check-in date.
+    If cancellation comes on or after check-in date, assumes guest already checked in.
+
+    - Check if today < check_in_date
+    - If yes: Delete guest, delete TTLock PINs, send cancellation notification
+    - If no: Ignore (guest likely already checked in)
     """
     from main.models import Reservation
     from main.ttlock_utils import TTLockClient
+    import pytz
 
     logger.info(f"Handling cancellation for reservation ID: {reservation_id}")
 
@@ -92,6 +98,25 @@ def handle_reservation_cancellation(reservation_id):
 
         guest = reservation.guest
         logger.info(f"Processing cancellation for guest: {guest.full_name} ({guest.reservation_number})")
+
+        # Check if cancellation is BEFORE check-in date (Option 2 logic)
+        uk_tz = pytz.timezone("Europe/London")
+        today = timezone.now().astimezone(uk_tz).date()
+
+        if today >= reservation.check_in_date:
+            # Check-in date has passed - guest likely already checked in
+            logger.info(
+                f"Ignoring cancellation for reservation {reservation_id}. "
+                f"Check-in date ({reservation.check_in_date}) has passed or is today. "
+                f"Guest {guest.full_name} likely already checked in."
+            )
+            return f"Cancellation ignored - check-in date passed (guest likely already in room)"
+
+        # Cancellation is BEFORE check-in date - proceed with deletion
+        logger.info(
+            f"Cancellation is before check-in date ({reservation.check_in_date}). "
+            f"Proceeding with guest and PIN deletion for {guest.full_name}."
+        )
 
         # Delete TTLock PINs if they exist
         if guest.front_door_pin_id or guest.room_pin_id:
