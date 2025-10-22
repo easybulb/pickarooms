@@ -247,20 +247,29 @@ class Guest(models.Model):
                 logger.error(f"Failed to send update SMS to {self.phone_number}: {str(e)}, Status: {e.status}, Code: {e.code}, Details: {e.details}")
 
     def send_post_stay_message(self):
-        """Send a post-stay email and/or SMS to the guest after their reservation elapses, based on available contact info."""
+        """Send a platform-specific post-stay email and/or SMS to the guest after checkout."""
         if self.dont_send_review_message:  # Skip if guest is blocked from receiving review messages
             logger.info(f"Skipped post-stay message for guest {self.full_name} (ID: {self.id}) as review message is blocked")
             return
+
+        # Determine platform from linked reservation (if available)
+        platform_name = "Booking.com"  # Default
+        try:
+            if hasattr(self, 'reservation') and self.reservation:
+                platform_name = "Booking.com" if self.reservation.platform == 'booking' else "Airbnb"
+        except Exception:
+            # If no reservation linked (old guests), default to Booking.com
+            pass
 
         subject = "Thank You for Staying at Pickarooms!"
         email_message = (
             f"Dear {self.full_name},\n\n"
             f"Thank you for staying with us at Pickarooms! We hope you enjoyed your time at {self.assigned_room.name}.\n\n"
-            f"We’d love to welcome you back for your next visit. When Booking.com prompts you, please leave us a review to share your experience—it means the world to us!\n\n"
+            f"We'd love to welcome you back for your next visit. When {platform_name} prompts you, please leave us a review to share your experience—it means the world to us!\n\n"
             f"Best regards,\nThe Pickarooms Team"
         )
         sms_message = (
-            f"Thank you for staying at Pickarooms! We’d love you back. Please leave a review on Booking.com when prompted!"
+            f"Thank you for staying at Pickarooms! We'd love you back. Please leave a review on {platform_name} when prompted!"
         )
 
         # Send email if email is provided
