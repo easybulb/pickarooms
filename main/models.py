@@ -80,6 +80,46 @@ class Guest(models.Model):
     late_checkout_time = models.TimeField(null=True, blank=True)
     dont_send_review_message = models.BooleanField(default=False)
 
+    def is_ical_guest(self):
+        """Check if this guest is from iCal integration (has linked reservation)"""
+        try:
+            return hasattr(self, 'reservation') and self.reservation is not None
+        except Exception:
+            return False
+
+    def _get_message_context(self):
+        """Build context dict for message template rendering"""
+        return {
+            'guest_name': self.full_name,
+            'room_name': self.assigned_room.name,
+            'check_in_date': self.check_in_date.strftime('%Y-%m-%d'),
+            'check_out_date': self.check_out_date.strftime('%Y-%m-%d'),
+            'reservation_number': self.reservation_number,
+            'pin': self.front_door_pin or 'N/A',
+            'room_detail_url': 'https://www.pickarooms.com',
+            'platform_name': 'Booking.com' if (hasattr(self, 'reservation') and self.reservation and self.reservation.platform == 'booking') else 'Airbnb',
+        }
+
+    def _get_template_messages(self, message_type_prefix):
+        """
+        Generic method to load message templates for iCal guests
+        Returns (subject, email_message, sms_message) tuple
+        Falls back to None if templates not found
+        """
+        try:
+            from main.models import MessageTemplate
+            email_template = MessageTemplate.objects.filter(message_type=f'ical_{message_type_prefix}_email', is_active=True).first()
+            sms_template = MessageTemplate.objects.filter(message_type=f'ical_{message_type_prefix}_sms', is_active=True).first()
+
+            context = self._get_message_context()
+            subject = email_template.subject if email_template else None
+            email_message = email_template.render(**context) if email_template else None
+            sms_message = sms_template.render(**context) if sms_template else None
+            return (subject, email_message, sms_message)
+        except Exception as e:
+            logger.error(f"Failed to load {message_type_prefix} templates: {e}")
+            return (None, None, None)
+
     def save(self, *args, **kwargs):
         if not self.secure_token:
             self.secure_token = str(uuid.uuid4())
@@ -105,27 +145,34 @@ class Guest(models.Model):
 
     def send_welcome_message(self):
         """Send a welcome email and/or SMS to the guest when added, based on available contact info."""
-        checkin_url = "https://www.pickarooms.com"
-        property_address = "8 Rylance Street M11 3NP, UK"
-        subject = "Welcome to Pickarooms!"
-        email_message = (
-            f"Dear {self.full_name},\n\n"
-            f"Welcome to Pickarooms! We’re excited to have you.\n\n"
-            f"Check-In Date: {self.check_in_date}\n"
-            f"Assigned Room: {self.assigned_room.name}\n\n"
-            f"Please visit {checkin_url} to complete your check-in and obtain your unique PIN for the doors. "
-            f"The webapp provides all the details you need for a seamless stay, including your check-in guide and room information.\n\n"
-            f"Property address is {property_address}\n\n"
-            f"Best regards,\nThe Pickarooms Team"
-        )
-        sms_message = (
-            f"Welcome to Pickarooms! Check-in on {self.check_in_date} for {self.assigned_room.name}. "
-            f"Visit {checkin_url} to get your PIN and enjoy a breeze with all stay details! "
-            f"Property address is {property_address}"
-        )
+        if self.is_ical_guest():
+            # iCal guest - use editable MessageTemplates
+            subject, email_message, sms_message = self._get_template_messages('welcome')
+            if not subject:
+                subject = "Welcome to Pickarooms!"
+        else:
+            # Manual guest - use legacy hardcoded messages (backward compatibility)
+            checkin_url = "https://www.pickarooms.com"
+            property_address = "8 Rylance Street M11 3NP, UK"
+            subject = "Welcome to Pickarooms!"
+            email_message = (
+                f"Dear {self.full_name},\n\n"
+                f"Welcome to Pickarooms! We're excited to have you.\n\n"
+                f"Check-In Date: {self.check_in_date}\n"
+                f"Assigned Room: {self.assigned_room.name}\n\n"
+                f"Please visit {checkin_url} to complete your check-in and obtain your unique PIN for the doors. "
+                f"The webapp provides all the details you need for a seamless stay, including your check-in guide and room information.\n\n"
+                f"Property address is {property_address}\n\n"
+                f"Best regards,\nThe Pickarooms Team"
+            )
+            sms_message = (
+                f"Welcome to Pickarooms! Check-in on {self.check_in_date} for {self.assigned_room.name}. "
+                f"Visit {checkin_url} to get your PIN and enjoy a breeze with all stay details! "
+                f"Property address is {property_address}"
+            )
 
-        # Send email if email is provided
-        if self.email:
+        # Send email if email is provided and message content exists
+        if self.email and email_message:
             try:
                 send_mail(
                     subject,
@@ -138,8 +185,8 @@ class Guest(models.Model):
             except Exception as e:
                 logger.error(f"Failed to send welcome email to {self.email}: {str(e)}")
 
-        # Send SMS if phone number is provided
-        if self.phone_number:
+        # Send SMS if phone number is provided and message content exists
+        if self.phone_number and sms_message:
             try:
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
