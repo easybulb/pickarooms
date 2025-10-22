@@ -43,25 +43,37 @@ def fetch_ical_feed(url, timeout=30):
 
 def extract_booking_reference(text):
     """
-    Extract 10-digit booking reference from text using regex
+    Extract booking reference from text using regex
+
+    Supports:
+    - Booking.com: 10-digit numeric codes (e.g., 5282674483)
+    - Airbnb: 10-character alphanumeric codes (e.g., HMKHKPPZTQ)
 
     Args:
         text (str): Text to search (typically iCal SUMMARY field)
 
     Returns:
-        str or None: 10-digit booking reference if found, None otherwise
+        str or None: Booking reference if found, None otherwise
 
-    Example:
+    Examples:
         >>> extract_booking_reference("Booking.com Reservation 1234567890")
         '1234567890'
+        >>> extract_booking_reference("Airbnb HMKHKPPZTQ Reservation")
+        'HMKHKPPZTQ'
     """
     if not text:
         return None
 
-    # Match exactly 10 consecutive digits
+    # First try: Match exactly 10 consecutive digits (Booking.com format)
     match = re.search(r'\b(\d{10})\b', text)
     if match:
         return match.group(1)
+
+    # Second try: Match 10 uppercase letters (Airbnb format)
+    match = re.search(r'\b([A-Z]{10})\b', text)
+    if match:
+        return match.group(1)
+
     return None
 
 

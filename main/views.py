@@ -914,15 +914,17 @@ def admin_page(request):
     # Get today's date for filtering
     today = date.today()
 
-    # Get today's enriched guests (those who have checked in)
+    # Get today's enriched guests (currently staying: check_in <= today <= check_out)
     todays_guests = Guest.objects.filter(
         is_archived=False,
-        check_in_date=today
+        check_in_date__lte=today,
+        check_out_date__gte=today
     ).select_related('assigned_room').order_by('full_name')
 
-    # Get today's unenriched reservations (from iCal, awaiting check-in)
+    # Get today's unenriched reservations (currently staying: check_in <= today <= check_out)
     todays_reservations = Reservation.objects.filter(
-        check_in_date=today,
+        check_in_date__lte=today,
+        check_out_date__gte=today,
         status='confirmed',
         guest__isnull=True  # Not yet enriched
     ).select_related('room').order_by('booking_reference')
@@ -1998,9 +2000,20 @@ def all_reservations(request):
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
     search_query = request.GET.get('search', '')
+    quick_filter = request.GET.get('quick', '')  # New: today/tomorrow quick filter
 
-    # Start with all reservations
-    reservations = Reservation.objects.all().select_related('room', 'guest').order_by('-check_in_date')
+    # Start with all reservations - DEFAULT: nearest check-in first (ascending order)
+    reservations = Reservation.objects.all().select_related('room', 'guest').order_by('check_in_date')
+
+    # Handle quick filters (today/tomorrow) - Filter by stays active on that date
+    if quick_filter == 'today':
+        today = date.today()
+        # Show reservations where today is within the stay (check_in <= today <= check_out)
+        reservations = reservations.filter(check_in_date__lte=today, check_out_date__gte=today)
+    elif quick_filter == 'tomorrow':
+        tomorrow = date.today() + timedelta(days=1)
+        # Show reservations where tomorrow is within the stay (check_in <= tomorrow <= check_out)
+        reservations = reservations.filter(check_in_date__lte=tomorrow, check_out_date__gte=tomorrow)
 
     # Apply platform filter
     if platform_filter != 'all':
@@ -2016,20 +2029,21 @@ def all_reservations(request):
     elif enrichment_filter == 'unenriched':
         reservations = reservations.filter(guest__isnull=True)
 
-    # Apply date range filter
-    if date_from:
-        try:
-            date_from_obj = dt.strptime(date_from, '%Y-%m-%d').date()
-            reservations = reservations.filter(check_in_date__gte=date_from_obj)
-        except ValueError:
-            pass
+    # Apply date range filter (only when not using quick filters)
+    if not quick_filter:
+        if date_from:
+            try:
+                date_from_obj = dt.strptime(date_from, '%Y-%m-%d').date()
+                reservations = reservations.filter(check_in_date__gte=date_from_obj)
+            except ValueError:
+                pass
 
-    if date_to:
-        try:
-            date_to_obj = dt.strptime(date_to, '%Y-%m-%d').date()
-            reservations = reservations.filter(check_out_date__lte=date_to_obj)
-        except ValueError:
-            pass
+        if date_to:
+            try:
+                date_to_obj = dt.strptime(date_to, '%Y-%m-%d').date()
+                reservations = reservations.filter(check_in_date__lte=date_to_obj)
+            except ValueError:
+                pass
 
     # Apply search filter
     if search_query:

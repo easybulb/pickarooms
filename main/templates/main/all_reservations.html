@@ -340,6 +340,8 @@
         <div class="filter-actions">
             <button type="submit" class="btn btn-primary">{% trans "Apply Filters" %}</button>
             <a href="{% url 'all_reservations' %}" class="btn btn-secondary">{% trans "Clear Filters" %}</a>
+            <a href="{% url 'all_reservations' %}?quick=today" class="btn btn-primary">{% trans "Today" %}</a>
+            <a href="{% url 'all_reservations' %}?quick=tomorrow" class="btn btn-primary">{% trans "Tomorrow" %}</a>
         </div>
     </form>
 
