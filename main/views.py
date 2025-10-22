@@ -25,7 +25,7 @@ import uuid
 import pytz
 import datetime
 import re
-from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload, PopularEvent
+from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload, PopularEvent, Reservation, RoomICalConfig
 from .ttlock_utils import TTLockClient
 from .pin_utils import generate_memorable_4digit_pin, add_wakeup_prefix
 import logging
@@ -278,12 +278,58 @@ def checkin(request):
                     logger.info(f"Archived guest {guest.reservation_number} during check-in as check-out time {check_out_datetime} has passed")
                 return redirect("rebook_guest")
 
-        # Step 4: If no guest is found or none of the conditions match, show error
+        # Step 4: Check if reservation_number matches a Reservation.booking_reference (iCal integration)
+        reservation = Reservation.objects.filter(
+            booking_reference=reservation_number,
+            status='confirmed'
+        ).first()
+
+        if reservation:
+            # Check if reservation is already enriched (has linked guest)
+            if reservation.is_enriched():
+                # Guest already exists, redirect to room_detail
+                guest = reservation.guest
+                request.session['reservation_number'] = guest.reservation_number
+                messages.success(request, f"Welcome back, {guest.full_name}!")
+                return redirect('room_detail', room_token=guest.secure_token)
+
+            # Reservation found but not enriched - need contact details
+            full_name = request.POST.get('full_name', '').strip()
+            email = request.POST.get('email', '').strip()
+            phone_number = request.POST.get('phone_number', '').strip()
+
+            # Check if any contact details were provided
+            if full_name and (email or phone_number):
+                # Redirect to enrich_reservation view with all data
+                request.session['reservation_to_enrich'] = {
+                    'reservation_id': reservation.id,
+                    'reservation_number': reservation_number,
+                    'full_name': full_name,
+                    'email': email,
+                    'phone_number': phone_number,
+                }
+                return redirect('enrich_reservation')
+            else:
+                # Show error asking for contact details
+                error_message = mark_safe(
+                    _("Reservation found! To complete check-in, please provide your contact details below.") +
+                    "<br><small>" +
+                    _("We need at least your name and either email or phone number.") +
+                    "</small>"
+                )
+                return render(request, 'main/checkin.html', {
+                    'error': error_message,
+                    'reservation_number': reservation_number,
+                    'show_additional_fields': True,
+                    "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
+                })
+
+        # Step 5: If no guest or reservation is found, show error
         request.session['reservation_number'] = reservation_number
 
         error_message = mark_safe(
             _("No reservation found. Please enter the correct Booking.com confirmation number.") +
-            "<br>" 
+            "<br>"
             '<a href="#faq-booking-confirmation" class="faq-link" style="color: #FFD700; font-weight: 400; font-size: 15px">' +
             _("Where can I find my confirmation number?") +
             '</a>'
@@ -299,6 +345,203 @@ def checkin(request):
         "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         "reservation_number": request.session.get("reservation_number", ""),
     })
+
+def enrich_reservation(request):
+    """
+    Enriches a Reservation with full guest details and creates a Guest record.
+    This view handles the new iCal integration flow where reservations are auto-synced
+    but need manual enrichment with contact details.
+    """
+    # Get reservation data from session
+    reservation_data = request.session.get('reservation_to_enrich')
+    if not reservation_data:
+        messages.error(request, "No reservation data found. Please try checking in again.")
+        return redirect('checkin')
+
+    try:
+        # Get the reservation
+        reservation = Reservation.objects.get(id=reservation_data['reservation_id'])
+
+        # Validate reservation is still valid
+        if reservation.status != 'confirmed':
+            messages.error(request, "This reservation is no longer confirmed.")
+            del request.session['reservation_to_enrich']
+            return redirect('checkin')
+
+        if reservation.is_enriched():
+            # Already enriched, just redirect to existing guest
+            guest = reservation.guest
+            request.session['reservation_number'] = guest.reservation_number
+            del request.session['reservation_to_enrich']
+            messages.success(request, f"Welcome back, {guest.full_name}!")
+            return redirect('room_detail', room_token=guest.secure_token)
+
+        # Create new Guest record with reservation details
+        full_name = reservation_data['full_name']
+        email = reservation_data.get('email', '') or None  # Convert empty string to None
+        phone_number = reservation_data.get('phone_number', '') or None  # Convert empty string to None
+
+        # Create the guest
+        guest = Guest.objects.create(
+            full_name=full_name,
+            email=email,
+            phone_number=phone_number,
+            reservation_number=reservation.booking_reference,
+            check_in_date=reservation.check_in_date,
+            check_out_date=reservation.check_out_date,
+            assigned_room=reservation.room,
+        )
+        logger.info(f"Created new guest {guest.id} for reservation {reservation.booking_reference}")
+
+        # Generate TTLock PINs (reuse logic from checkin view)
+        try:
+            front_door_lock = TTLock.objects.get(is_front_door=True)
+            room_lock = guest.assigned_room.ttlock
+            if not room_lock:
+                logger.error(f"No TTLock assigned to room {guest.assigned_room.name} for guest {guest.reservation_number}")
+                messages.error(request, f"No lock assigned to room {guest.assigned_room.name}. Please contact support.")
+                guest.delete()  # Rollback guest creation
+                # Clear enrichment data but keep reservation_number for retry
+                if 'reservation_to_enrich' in request.session:
+                    del request.session['reservation_to_enrich']
+                return redirect("checkin")
+
+            client = TTLockClient()
+            uk_timezone = pytz.timezone("Europe/London")
+            now_uk_time = timezone.now().astimezone(uk_timezone)
+
+            # Set start_time to NOW so PIN is immediately active
+            start_time = int(now_uk_time.timestamp() * 1000)
+
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            end_date = uk_timezone.localize(
+                datetime.datetime.combine(guest.check_out_date, check_out_time)
+            ) + datetime.timedelta(days=1)
+            end_time = int(end_date.timestamp() * 1000)
+            pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
+
+            # Generate PIN for front door
+            front_door_response = client.generate_temporary_pin(
+                lock_id=str(front_door_lock.lock_id),
+                pin=pin,
+                start_time=start_time,
+                end_time=end_time,
+                name=f"Front Door - {guest.assigned_room.name} - {guest.full_name} - {pin}",
+            )
+            if "keyboardPwdId" not in front_door_response:
+                logger.error(f"Failed to generate front door PIN for guest {guest.reservation_number}: {front_door_response.get('errmsg', 'Unknown error')}")
+                messages.error(request, f"Failed to generate front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
+                guest.delete()  # Rollback guest creation
+                # Clear enrichment data but keep reservation_number for retry
+                if 'reservation_to_enrich' in request.session:
+                    del request.session['reservation_to_enrich']
+                return redirect("checkin")
+            guest.front_door_pin = pin
+            guest.front_door_pin_id = front_door_response["keyboardPwdId"]
+            logger.info(f"Generated front door PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
+
+            # Generate the same PIN for the room lock
+            room_response = client.generate_temporary_pin(
+                lock_id=str(room_lock.lock_id),
+                pin=pin,
+                start_time=start_time,
+                end_time=end_time,
+                name=f"Room - {guest.assigned_room.name} - {guest.full_name} - {pin}",
+            )
+            if "keyboardPwdId" not in room_response:
+                logger.error(f"Failed to generate room PIN for guest {guest.reservation_number}: {room_response.get('errmsg', 'Unknown error')}")
+                # Rollback front door PIN
+                try:
+                    client.delete_pin(
+                        lock_id=str(front_door_lock.lock_id),
+                        keyboard_pwd_id=guest.front_door_pin_id,
+                    )
+                    logger.info(f"Rolled back front door PIN for guest {guest.reservation_number}")
+                except Exception as e:
+                    logger.error(f"Failed to roll back front door PIN for guest {guest.reservation_number}: {str(e)}")
+                guest.delete()  # Rollback guest creation
+                messages.error(request, f"Failed to generate room PIN: {room_response.get('errmsg', 'Unknown error')}")
+                # Clear enrichment data but keep reservation_number for retry
+                if 'reservation_to_enrich' in request.session:
+                    del request.session['reservation_to_enrich']
+                return redirect("checkin")
+            guest.room_pin_id = room_response["keyboardPwdId"]
+            logger.info(f"Generated room PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {room_response['keyboardPwdId']})")
+            guest.save()
+
+            # Unlock the front door remotely
+            try:
+                unlock_response = client.unlock_lock(lock_id=str(front_door_lock.lock_id))
+                if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                    logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                    messages.warning(request, f"Generated PIN {pin}, but failed to unlock the front door remotely: {unlock_response.get('errmsg', 'Unknown error')}")
+                else:
+                    logger.info(f"Successfully unlocked front door for guest {guest.reservation_number}")
+                    messages.info(request, "The front door has been unlocked for you. You can also use your PIN or the unlock button on the next page.")
+            except Exception as e:
+                logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {str(e)}")
+                messages.warning(request, f"Generated PIN {pin}, but failed to unlock the front door remotely: {str(e)}")
+
+            # Unlock the room door remotely
+            try:
+                unlock_response = client.unlock_lock(lock_id=str(room_lock.lock_id))
+                if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                    logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                    messages.warning(request, f"Generated PIN {pin}, but failed to unlock the room door remotely: {unlock_response.get('errmsg', 'Unknown error')}")
+                else:
+                    logger.info(f"Successfully unlocked room door for guest {guest.reservation_number}")
+                    messages.info(request, "The room door has been unlocked for you.")
+            except Exception as e:
+                logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {str(e)}")
+                messages.warning(request, f"Generated PIN {pin}, but failed to unlock the room door remotely: {str(e)}")
+
+        except TTLock.DoesNotExist:
+            logger.error("Front door lock not configured in the database.")
+            messages.error(request, "Front door lock not configured. Please contact support.")
+            guest.delete()  # Rollback guest creation
+            # Clear enrichment data but keep reservation_number for retry
+            if 'reservation_to_enrich' in request.session:
+                del request.session['reservation_to_enrich']
+            return redirect("checkin")
+        except Exception as e:
+            logger.error(f"Failed to generate PIN for guest {guest.reservation_number}: {str(e)}")
+            messages.error(request, f"Failed to generate PIN: {str(e)}")
+            guest.delete()  # Rollback guest creation
+            # Clear enrichment data but keep reservation_number for retry
+            if 'reservation_to_enrich' in request.session:
+                del request.session['reservation_to_enrich']
+            return redirect("checkin")
+
+        # Link guest to reservation
+        reservation.guest = guest
+        reservation.save()
+        logger.info(f"Linked guest {guest.id} to reservation {reservation.id}")
+
+        # Store reservation_number in session and clean up enrichment data
+        request.session['reservation_number'] = guest.reservation_number
+        del request.session['reservation_to_enrich']
+
+        # Redirect to room_detail
+        messages.success(request, f"Welcome, {guest.full_name}!")
+        return redirect('room_detail', room_token=guest.secure_token)
+
+    except Reservation.DoesNotExist:
+        messages.error(request, "Reservation not found. Please try checking in again.")
+        if 'reservation_to_enrich' in request.session:
+            del request.session['reservation_to_enrich']
+        return redirect('checkin')
+    except IntegrityError as e:
+        logger.error(f"Database integrity error during reservation enrichment: {str(e)}")
+        messages.error(request, "A guest with this booking reference already exists. Please contact support if you need assistance.")
+        if 'reservation_to_enrich' in request.session:
+            del request.session['reservation_to_enrich']
+        return redirect('checkin')
+    except Exception as e:
+        logger.error(f"Unexpected error during reservation enrichment: {str(e)}")
+        messages.error(request, f"An error occurred during check-in: {str(e)}")
+        if 'reservation_to_enrich' in request.session:
+            del request.session['reservation_to_enrich']
+        return redirect('checkin')
 
 def room_detail(request, room_token):
     reservation_number = request.session.get("reservation_number", None)
@@ -675,6 +918,50 @@ def admin_page(request):
         available_rooms = Room.objects.all()
 
     if request.method == 'POST':
+        # Check if this is an iCal configuration submission
+        if 'ical_action' in request.POST:
+            action = request.POST.get('ical_action')
+            room_id = request.POST.get('ical_room_id')
+
+            if action == 'save_ical':
+                ical_url = request.POST.get('ical_url', '').strip()
+                is_active = request.POST.get('is_active') == 'on'
+
+                try:
+                    room = Room.objects.get(id=room_id)
+                    config, created = RoomICalConfig.objects.get_or_create(room=room)
+                    config.ical_url = ical_url
+                    config.is_active = is_active
+                    config.save()
+
+                    action_text = "created" if created else "updated"
+                    messages.success(request, f"iCal configuration {action_text} for {room.name}.")
+                    logger.info(f"iCal config {action_text} for room {room.name} by {request.user.username}")
+                except Room.DoesNotExist:
+                    messages.error(request, "Room not found.")
+                except Exception as e:
+                    messages.error(request, f"Failed to save iCal configuration: {str(e)}")
+                    logger.error(f"Failed to save iCal config for room {room_id}: {str(e)}")
+
+                return redirect('admin_page')
+
+            elif action == 'sync_now':
+                try:
+                    config = RoomICalConfig.objects.get(id=request.POST.get('config_id'))
+                    # Import the task here to avoid circular imports
+                    from main.tasks import sync_room_ical_feed
+                    sync_room_ical_feed.delay(config.id)
+                    messages.success(request, f"Sync started for {config.room.name}. Check back in a moment.")
+                    logger.info(f"Manual iCal sync triggered for {config.room.name} by {request.user.username}")
+                except RoomICalConfig.DoesNotExist:
+                    messages.error(request, "iCal configuration not found.")
+                except Exception as e:
+                    messages.error(request, f"Failed to trigger sync: {str(e)}")
+                    logger.error(f"Failed to trigger iCal sync: {str(e)}")
+
+                return redirect('admin_page')
+
+        # Original guest creation logic
         reservation_number = request.POST.get('reservation_number', '').strip()
         phone_number = request.POST.get('phone_number', '').strip() or None
         email = request.POST.get('email', '').strip() or None
@@ -823,11 +1110,21 @@ def admin_page(request):
             messages.error(request, "Reservation number already exists.")
             return redirect('admin_page')
 
+    # Get iCal configurations for all rooms
+    ical_configs = {}
+    for room in available_rooms:
+        try:
+            config = RoomICalConfig.objects.get(room=room)
+            ical_configs[room.id] = config
+        except RoomICalConfig.DoesNotExist:
+            ical_configs[room.id] = None
+
     return render(request, 'main/admin_page.html', {
         'rooms': available_rooms,
         'guests': guests,
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
+        'ical_configs': ical_configs,
     })
 
 def get_available_rooms(check_in_date, check_out_date):

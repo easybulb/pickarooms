@@ -14,6 +14,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
     path('checkin/', views.checkin, name='checkin'),
+    path('enrich-reservation/', views.enrich_reservation, name='enrich_reservation'),
     path('room/<str:room_token>/', views.room_detail, name='room_detail'),
     path("report_pin_issue/", report_pin_issue, name="report_pin_issue"),
     path("rebook/", views.rebook_guest, name="rebook_guest"),

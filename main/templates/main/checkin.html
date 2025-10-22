@@ -9,6 +9,9 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1>{% trans "Check-In" %}</h1>
+        <p style="font-size: 14px; color: #ccc; margin-bottom: 15px;">
+            {% trans "We use your contact details to provide your access code and manage your stay. Your details are stored securely and can be deleted at any time by contacting us." %}
+        </p>
         {% if error %}
         <p style="color: red;" class="error-message">{{ error }}</p>
         {% else %}
@@ -19,19 +22,23 @@
             <input type="text" name="reservation_number" class="checkin-input"
                    placeholder="{% trans 'Booking Reference (10 digits)' %}"
                    value="{{ reservation_number|default:'' }}" required>
+            <input type="text" name="full_name"
+                   placeholder="{% trans 'Full Name' %}"
+                   value="{{ full_name|default:'' }}"
+                   required>
+            <input type="email" name="email"
+                   placeholder="{% trans 'Email Address (optional)' %}"
+                   value="{{ email|default:'' }}">
+            <input type="tel" name="phone_number"
+                   placeholder="{% trans 'Phone Number (e.g., +44...)' %}"
+                   value="{{ phone_number|default:'' }}"
+                   required>
 
-            <!-- Additional fields for new reservations (shown via JavaScript if needed) -->
-            <div id="additional-fields" style="display: none; margin-top: 15px;">
-                <input type="text" name="full_name"
-                       placeholder="{% trans 'Full Name' %}"
-                       value="{{ full_name|default:'' }}">
-                <input type="email" name="email"
-                       placeholder="{% trans 'Email Address' %}"
-                       value="{{ email|default:'' }}">
-                <input type="tel" name="phone_number"
-                       placeholder="{% trans 'Phone Number (e.g., +44...)' %}"
-                       value="{{ phone_number|default:'' }}">
-            </div>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 15px; cursor: pointer;">
+                <input type="checkbox" name="consent" required>
+                {% trans "I agree to the" %} <a href="{% url 'privacy_policy' %}" target="_blank" style="color: #FFD700; text-decoration: underline;">{% trans "Privacy Policy" %}</a>
+                {% trans "and" %} <a href="{% url 'terms_conditions' %}" target="_blank" style="color: #FFD700; text-decoration: underline;">{% trans "Terms of Service" %}</a>
+            </label>
 
             <button type="submit">{% trans "Check In" %}</button>
         </form>

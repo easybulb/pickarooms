@@ -185,6 +185,95 @@
         </form>
     </div>
 
+    <!-- iCal Configuration Section -->
+    <div class="admin-section" style="margin-top: 40px;">
+        <h2>{% trans "iCal Feed Management" %}</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 20px;">
+            {% trans "Configure automatic booking synchronization from Booking.com and Airbnb iCal feeds." %}
+        </p>
+
+        <!-- Help Documentation -->
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; font-size: 16px;">{% trans "How to Use iCal Sync" %}</h3>
+            <ul style="margin: 10px 0; padding-left: 20px; font-size: 14px;">
+                <li>{% trans "Copy the iCal feed URL from Booking.com or Airbnb calendar settings and paste it below" %}</li>
+                <li>{% trans "The system automatically checks for new reservations every 10 minutes" %}</li>
+                <li>{% trans "Click 'Sync Now' to immediately fetch the latest reservations from the feed" %}</li>
+                <li>{% trans "New reservations appear as unenriched entries. Guests provide their details when checking in." %}</li>
+            </ul>
+            <p style="margin: 10px 0 0 0; font-size: 14px;">
+                <strong>{% trans "Status:" %}</strong>
+                <span style="color: #28a745;">✅ {% trans "Background sync active" %}</span>
+            </p>
+        </div>
+
+        {% for room in rooms %}
+        <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 8px; background: #fff;">
+            <h3 style="margin-top: 0;">{{ room.name }}</h3>
+
+            <form method="POST" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                <input type="hidden" name="ical_action" value="save_ical">
+                <input type="hidden" name="ical_room_id" value="{{ room.id }}">
+
+                <label for="ical_url_{{ room.id }}">{% trans "iCal Feed URL:" %}</label>
+                <input type="url"
+                       id="ical_url_{{ room.id }}"
+                       name="ical_url"
+                       placeholder="https://admin.booking.com/hotel/.../ical/..."
+                       value="{% for config_room_id, config in ical_configs.items %}{% if config_room_id == room.id and config %}{{ config.ical_url }}{% endif %}{% endfor %}"
+                       style="width: 100%; padding: 8px; margin-bottom: 10px;">
+
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox"
+                               name="is_active"
+                               {% for config_room_id, config in ical_configs.items %}{% if config_room_id == room.id and config and config.is_active %}checked{% endif %}{% endfor %}>
+                        <span style="margin-left: 5px;">{% trans "Enable automatic sync" %}</span>
+                    </label>
+                </div>
+
+                {% for config_room_id, config in ical_configs.items %}
+                {% if config_room_id == room.id and config %}
+                <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                    <strong>{% trans "Status:" %}</strong>
+                    {% if config.is_active %}
+                        <span style="color: #28a745;">✅ {% trans "Active" %}</span>
+                    {% else %}
+                        <span style="color: #dc3545;">❌ {% trans "Inactive" %}</span>
+                    {% endif %}
+                    <br>
+                    <strong>{% trans "Last Synced:" %}</strong>
+                    {% if config.last_synced %}
+                        {{ config.last_synced|date:"Y-m-d H:i" }} (UK)
+                    {% else %}
+                        {% trans "Never" %}
+                    {% endif %}
+                    {% if config.last_sync_status %}
+                        <br><strong>{% trans "Last Status:" %}</strong> {{ config.last_sync_status }}
+                    {% endif %}
+                </p>
+                {% endif %}
+                {% endfor %}
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="admin-button">{% trans "Save" %}</button>
+                    {% for config_room_id, config in ical_configs.items %}
+                    {% if config_room_id == room.id and config %}
+                    <button type="submit"
+                            formaction="{% url 'admin_page' %}"
+                            onclick="this.form.ical_action.value='sync_now'; this.form.config_id.value='{{ config.id }}';"
+                            class="admin-button"
+                            style="background: #17a2b8;">{% trans "Sync Now" %}</button>
+                    <input type="hidden" name="config_id">
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+
     <h2>{% trans "Past Guests" %}</h2>
     <p>
         <a href="{% url 'past_guests' %}" class="past-guests-link">{% trans "View past guests" %}</a>
