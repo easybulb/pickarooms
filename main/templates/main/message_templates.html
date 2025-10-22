@@ -6,134 +6,242 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
 <style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
     .nav-link {
         display: inline-block;
         margin-right: 20px;
-        color: #007bff;
+        color: white;
+        background: rgba(255,255,255,0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
         text-decoration: none;
-        font-size: 16px;
+        font-size: 14px;
+        transition: all 0.3s;
     }
     .nav-link:hover {
-        text-decoration: underline;
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+    .admin-title {
+        color: white;
+        font-size: 36px;
+        margin: 30px 0 10px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .page-subtitle {
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 30px;
+        font-size: 16px;
     }
     .template-card {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 5px;
-        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
         margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+    .template-card:hover {
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        transform: translateY(-3px);
     }
     .template-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
     }
     .template-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #333;
+        font-size: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     .template-status {
-        font-size: 14px;
-        padding: 5px 10px;
-        border-radius: 3px;
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .status-active {
-        background: #28a745;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
     .status-inactive {
-        background: #dc3545;
+        background: #e74c3c;
         color: white;
     }
     .template-preview {
-        background: white;
-        padding: 15px;
-        border-left: 4px solid #007bff;
-        margin: 10px 0;
-        font-family: monospace;
+        background: #f8f9fa;
+        padding: 20px;
+        border-left: 5px solid #667eea;
+        border-radius: 8px;
+        margin: 15px 0;
+        font-family: 'Courier New', monospace;
         font-size: 13px;
+        line-height: 1.6;
         white-space: pre-wrap;
+        color: #2c3e50;
+    }
+    .subject-line {
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 10px;
+        padding: 8px;
+        background: white;
+        border-radius: 4px;
     }
     .template-meta {
         font-size: 12px;
-        color: #666;
-        margin-top: 10px;
+        color: #7f8c8d;
+        margin-top: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
     }
     .edit-form {
         display: none;
-        background: white;
-        padding: 20px;
-        border: 2px solid #007bff;
-        border-radius: 5px;
-        margin-top: 15px;
+        background: #f8f9fa;
+        padding: 25px;
+        border: 2px solid #667eea;
+        border-radius: 12px;
+        margin-top: 20px;
     }
     .edit-form.show {
         display: block;
+        animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     textarea {
         width: 100%;
-        min-height: 150px;
-        padding: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        font-family: monospace;
+        min-height: 180px;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
         font-size: 13px;
+        line-height: 1.6;
+        transition: border-color 0.3s;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #667eea;
     }
     .btn {
-        padding: 10px 20px;
+        padding: 12px 24px;
         border: none;
-        border-radius: 4px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
+        font-weight: 600;
         margin-right: 10px;
+        transition: all 0.3s;
     }
     .btn-primary {
-        background: #007bff;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
     .btn-primary:hover {
-        background: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
     }
     .btn-secondary {
-        background: #6c757d;
+        background: #95a5a6;
         color: white;
     }
     .btn-secondary:hover {
-        background: #545b62;
+        background: #7f8c8d;
     }
     .sms-counter {
-        font-size: 12px;
-        color: #666;
-        margin-top: 5px;
+        font-size: 13px;
+        color: #7f8c8d;
+        margin-top: 8px;
+        padding: 8px;
+        background: white;
+        border-radius: 6px;
+        display: inline-block;
     }
     .sms-warning {
-        color: #ff8c00;
+        color: #e67e22;
         font-weight: bold;
     }
     .variables-list {
-        background: #e9ecef;
-        padding: 10px;
-        border-radius: 4px;
-        margin: 10px 0;
-        font-size: 12px;
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 2px dashed #e0e0e0;
     }
     .variables-list code {
-        background: white;
-        padding: 2px 5px;
-        border-radius: 2px;
-        margin-right: 5px;
+        background: #667eea;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        display: inline-block;
+        font-size: 12px;
     }
     .category-section {
-        margin-bottom: 40px;
+        margin-bottom: 50px;
     }
     .category-title {
-        font-size: 24px;
-        color: #333;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 10px;
+        font-size: 28px;
+        color: white;
+        padding: 15px 25px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .success-message, .error-message {
+        padding: 15px 20px;
+        border-radius: 8px;
         margin-bottom: 20px;
+        font-weight: 500;
+    }
+    .success-message {
+        background: #2ecc71;
+        color: white;
+    }
+    .error-message {
+        background: #e74c3c;
+        color: white;
+    }
+    label {
+        font-weight: 600;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 8px;
     }
 </style>
 {% endblock %}
@@ -160,7 +268,7 @@
     </div>
 
     <h1 class="admin-title">{% trans "Message Templates" %}</h1>
-    <p style="color: #666; margin-bottom: 30px;">{% trans "Edit message templates sent to iCal guests. Use variables like {guest_name}, {room_name}, {pin}, etc." %}</p>
+    <p class="page-subtitle">{% trans "Edit message templates sent to iCal guests. Use variables like {guest_name}, {room_name}, {pin}, etc." %}</p>
 
     {% if messages %}
         {% for message in messages %}
@@ -182,7 +290,9 @@
                 </span>
             </div>
 
-            <div><strong>{% trans "Subject:" %}</strong> {{ template.subject }}</div>
+            {% if template.subject %}
+            <div class="subject-line">{% trans "Subject:" %} {{ template.subject }}</div>
+            {% endif %}
 
             <div class="template-preview">{{ template.render|safe|default:"(No content)" }}</div>
 
