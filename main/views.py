@@ -28,6 +28,7 @@ import re
 from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUpload, PopularEvent, Reservation, RoomICalConfig
 from .ttlock_utils import TTLockClient
 from .pin_utils import generate_memorable_4digit_pin, add_wakeup_prefix
+from .phone_utils import normalize_phone_to_e164, validate_phone_number
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -306,6 +307,22 @@ def checkin(request):
             full_name = request.POST.get('full_name', '').strip()
             email = request.POST.get('email', '').strip()
             phone_number = request.POST.get('phone_number', '').strip()
+            country_code = request.POST.get('country_code', '+44').strip()  # Default to UK
+
+            # Normalize phone number to E.164 format if provided
+            if phone_number:
+                phone_number = normalize_phone_to_e164(phone_number, country_code)
+                if phone_number:
+                    is_valid, error_msg = validate_phone_number(phone_number)
+                    if not is_valid:
+                        error_message = _(f"Invalid phone number: {error_msg}")
+                        return render(request, 'main/home.html', {
+                            'error_message': error_message,
+                            'reservation_number': reservation_number,
+                            'full_name': full_name,
+                            'email': email,
+                            'phone_number': request.POST.get('phone_number', '').strip(),
+                        })
 
             # Check if any contact details were provided
             if full_name and (email or phone_number):
@@ -1026,11 +1043,13 @@ def admin_page(request):
 
         # Normalize and validate phone number
         if phone_number:
-            if not re.match(r'^\+?\d{9,15}$', phone_number):
-                messages.error(request, "Phone number must be in international format (e.g., +12025550123) or a valid local number (e.g., 07123456789 for UK).")
-                return redirect('admin_page')
-            if phone_number.startswith('0') and len(phone_number) == 11 and phone_number[1] in '7':
-                phone_number = '+44' + phone_number[1:]
+            # Normalize to E.164 format (default UK +44)
+            phone_number = normalize_phone_to_e164(phone_number, '+44')
+            if phone_number:
+                is_valid, error_msg = validate_phone_number(phone_number)
+                if not is_valid:
+                    messages.error(request, f"Invalid phone number: {error_msg}")
+                    return redirect('admin_page')
 
         try:
             room = Room.objects.get(id=room_id)
@@ -1365,6 +1384,16 @@ def edit_guest(request, guest_id):
             new_reservation_number = new_reservation_number
             new_phone_number = request.POST.get('phone_number') or None
             new_email = request.POST.get('email') or None
+
+            # Normalize and validate phone number if provided
+            if new_phone_number:
+                new_phone_number = normalize_phone_to_e164(new_phone_number.strip(), '+44')
+                if new_phone_number:
+                    is_valid, error_msg = validate_phone_number(new_phone_number)
+                    if not is_valid:
+                        messages.error(request, f"Invalid phone number: {error_msg}")
+                        return redirect('edit_guest', guest_id=guest.id)
+
             check_in_date = date.fromisoformat(request.POST.get('check_in_date'))
             check_out_date = date.fromisoformat(request.POST.get('check_out_date'))
             new_room_id = request.POST.get('room')
@@ -1683,13 +1712,14 @@ def manual_checkin_reservation(request, reservation_id):
             messages.error(request, "Full name is required.")
             return redirect('manual_checkin_reservation', reservation_id=reservation.id)
 
-        # Normalize phone number
+        # Normalize and validate phone number
         if phone_number:
-            if not re.match(r'^\+?\d{9,15}$', phone_number):
-                messages.error(request, "Phone number must be in international format (e.g., +12025550123) or valid local number.")
-                return redirect('manual_checkin_reservation', reservation_id=reservation.id)
-            if phone_number.startswith('0') and len(phone_number) == 11 and phone_number[1] in '7':
-                phone_number = '+44' + phone_number[1:]
+            phone_number = normalize_phone_to_e164(phone_number, '+44')
+            if phone_number:
+                is_valid, error_msg = validate_phone_number(phone_number)
+                if not is_valid:
+                    messages.error(request, f"Invalid phone number: {error_msg}")
+                    return redirect('manual_checkin_reservation', reservation_id=reservation.id)
 
         # Check if reservation number already exists (shouldn't happen, but safety check)
         if Guest.objects.filter(reservation_number=reservation.booking_reference).exists():

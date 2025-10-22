@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from twilio.rest import Client
 from twilio.base.exceptions import TwilioRestException
 import logging
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger('main')
 
@@ -82,6 +83,16 @@ class Guest(models.Model):
     def save(self, *args, **kwargs):
         if not self.secure_token:
             self.secure_token = str(uuid.uuid4())
+
+        # Validate and normalize phone number if provided
+        if self.phone_number:
+            from main.phone_utils import validate_phone_number
+            is_valid, error_msg = validate_phone_number(self.phone_number)
+            if not is_valid:
+                logger.warning(f"Invalid phone number for guest {self.reservation_number}: {error_msg}")
+                # Store as-is but log the warning - validation should happen at form level
+                # We don't want to block saving here in case admin manually enters data
+
         is_new = self._state.adding  # True if the guest is being created
         super().save(*args, **kwargs)  # Save the guest first
         if is_new and (self.phone_number or self.email):  # Send message if either phone_number or email is provided

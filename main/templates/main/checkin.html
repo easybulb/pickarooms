@@ -29,10 +29,51 @@
             <input type="email" name="email"
                    placeholder="{% trans 'Email Address (optional)' %}"
                    value="{{ email|default:'' }}">
-            <input type="tel" name="phone_number"
-                   placeholder="{% trans 'Phone Number (e.g., +44...)' %}"
-                   value="{{ phone_number|default:'' }}"
-                   required>
+
+            <!-- Phone Number with Country Code Dropdown -->
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 5px;">
+                <select name="country_code" id="country-code-checkin" style="width: 180px; padding: 12px; border: 1px solid #444; border-radius: 5px; background: rgba(0, 0, 0, 0.5); color: white; font-size: 14px;">
+                    <option value="+44" selected>🇬🇧 UK (+44)</option>
+                    <option value="+1">🇺🇸 US/CA (+1)</option>
+                    <option value="+91">🇮🇳 India (+91)</option>
+                    <option value="+234">🇳🇬 Nigeria (+234)</option>
+                    <option value="+86">🇨🇳 China (+86)</option>
+                    <option value="+33">🇫🇷 France (+33)</option>
+                    <option value="+49">🇩🇪 Germany (+49)</option>
+                    <option value="+81">🇯🇵 Japan (+81)</option>
+                    <option value="+61">🇦🇺 Australia (+61)</option>
+                    <option value="+55">🇧🇷 Brazil (+55)</option>
+                    <option value="+7">🇷🇺 Russia (+7)</option>
+                    <option value="+34">🇪🇸 Spain (+34)</option>
+                    <option value="+39">🇮🇹 Italy (+39)</option>
+                    <option value="+52">🇲🇽 Mexico (+52)</option>
+                    <option value="+90">🇹🇷 Turkey (+90)</option>
+                    <option value="+31">🇳🇱 Netherlands (+31)</option>
+                    <option value="+27">🇿🇦 S. Africa (+27)</option>
+                    <option value="+20">🇪🇬 Egypt (+20)</option>
+                    <option value="+66">🇹🇭 Thailand (+66)</option>
+                    <option value="+65">🇸🇬 Singapore (+65)</option>
+                    <option value="+60">🇲🇾 Malaysia (+60)</option>
+                    <option value="+63">🇵🇭 Philippines (+63)</option>
+                    <option value="+92">🇵🇰 Pakistan (+92)</option>
+                    <option value="+353">🇮🇪 Ireland (+353)</option>
+                    <option value="+64">🇳🇿 New Zealand (+64)</option>
+                    <option value="+351">🇵🇹 Portugal (+351)</option>
+                    <option value="+971">🇦🇪 UAE (+971)</option>
+                    <option value="+254">🇰🇪 Kenya (+254)</option>
+                    <option value="+233">🇬🇭 Ghana (+233)</option>
+                    <option value="+94">🇱🇰 Sri Lanka (+94)</option>
+                    <option value="+380">🇺🇦 Ukraine (+380)</option>
+                </select>
+                <input type="tel" name="phone_number" id="phone-number-checkin"
+                       placeholder="{% trans '7123456789' %}"
+                       value="{{ phone_number|default:'' }}"
+                       style="flex: 1; padding: 12px; border: 1px solid #444; border-radius: 5px; background: rgba(0, 0, 0, 0.5); color: white; font-size: 16px;"
+                       required>
+            </div>
+            <small style="color: #ccc; font-size: 12px; display: block; margin-bottom: 15px;">
+                {% trans "Enter without leading 0. Example: 07123456789 becomes 7123456789" %}
+            </small>
 
             <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 15px; cursor: pointer;">
                 <input type="checkbox" name="consent" required>
@@ -171,6 +212,17 @@
 <!-- Add JavaScript for Modals, Smooth Scrolling, Rate Limiting, and FAQ -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Phone Number Auto-Remove Leading 0
+        const phoneInput = document.getElementById('phone-number-checkin');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s+/g, ''); // Remove spaces
+                if (value.startsWith('0')) {
+                    e.target.value = value.substring(1); // Remove leading 0
+                }
+            });
+        }
+
         // Rate Limiting Variables
         const maxAttempts = 6;
         const timeWindow = 60 * 1000; // 60 seconds in milliseconds
