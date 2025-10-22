@@ -12,49 +12,61 @@ logger = logging.getLogger(__name__)
 def poll_all_ical_feeds():
     """
     Main scheduled task - runs every 10 minutes
-    Fetches all active RoomICalConfig and syncs each one
+    Fetches all RoomICalConfig and syncs active platforms (Booking.com and/or Airbnb)
     """
     from main.models import RoomICalConfig
 
     logger.info("Starting iCal feed polling...")
 
-    active_configs = RoomICalConfig.objects.filter(is_active=True).select_related('room')
+    all_configs = RoomICalConfig.objects.all().select_related('room')
 
-    if not active_configs.exists():
-        logger.info("No active iCal configurations found")
-        return "No active configurations"
+    if not all_configs.exists():
+        logger.info("No iCal configurations found")
+        return "No configurations"
 
     synced_count = 0
-    for config in active_configs:
-        logger.info(f"Triggering sync for room: {config.room.name}")
-        sync_room_ical_feed.delay(config.id)
-        synced_count += 1
+    for config in all_configs:
+        # Sync Booking.com if active
+        if config.booking_active and config.booking_ical_url:
+            logger.info(f"Triggering Booking.com sync for room: {config.room.name}")
+            sync_room_ical_feed.delay(config.id, platform='booking')
+            synced_count += 1
 
-    logger.info(f"Triggered sync for {synced_count} room(s)")
-    return f"Triggered sync for {synced_count} room(s)"
+        # Sync Airbnb if active
+        if config.airbnb_active and config.airbnb_ical_url:
+            logger.info(f"Triggering Airbnb sync for room: {config.room.name}")
+            sync_room_ical_feed.delay(config.id, platform='airbnb')
+            synced_count += 1
+
+    logger.info(f"Triggered {synced_count} platform sync(s)")
+    return f"Triggered {synced_count} platform sync(s)"
 
 
 @shared_task
-def sync_room_ical_feed(config_id):
+def sync_room_ical_feed(config_id, platform='booking'):
     """
-    Sync one room's iCal feed
+    Sync one room's iCal feed for a specific platform (booking or airbnb)
     Creates/updates/cancels reservations based on iCal data
+
+    Args:
+        config_id: RoomICalConfig ID
+        platform: 'booking' or 'airbnb'
     """
     from main.services.ical_service import sync_reservations_for_room
 
-    logger.info(f"Syncing iCal feed for config ID: {config_id}")
+    logger.info(f"Syncing {platform} iCal feed for config ID: {config_id}")
 
-    result = sync_reservations_for_room(config_id)
+    result = sync_reservations_for_room(config_id, platform=platform)
 
     if result['success']:
         logger.info(
-            f"Sync completed for config {config_id}: "
+            f"Sync completed for config {config_id} ({platform}): "
             f"{result['created']} created, {result['updated']} updated, "
             f"{result['cancelled']} cancelled"
         )
         return f"Success: {result['created']} created, {result['updated']} updated, {result['cancelled']} cancelled"
     else:
-        logger.error(f"Sync failed for config {config_id}: {result['errors']}")
+        logger.error(f"Sync failed for config {config_id} ({platform}): {result['errors']}")
         return f"Failed: {result['errors']}"
 
 

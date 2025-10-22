@@ -131,19 +131,20 @@ def parse_ical(ical_data):
         raise ValueError(f"Invalid iCal data: {str(e)}")
 
 
-def sync_reservations_for_room(config_id):
+def sync_reservations_for_room(config_id, platform='booking'):
     """
-    Sync reservations for a specific room from its iCal feed
+    Sync reservations for a specific room from its iCal feed for a specific platform
 
     This is the main sync function that:
-    1. Fetches the iCal feed
+    1. Fetches the platform-specific iCal feed
     2. Parses events
-    3. Creates/updates reservations
+    3. Creates/updates reservations with platform label
     4. Marks cancelled reservations
-    5. Updates sync status
+    5. Updates platform-specific sync status
 
     Args:
         config_id (int): RoomICalConfig ID
+        platform (str): 'booking' or 'airbnb'
 
     Returns:
         dict: Sync results with counts
@@ -159,20 +160,46 @@ def sync_reservations_for_room(config_id):
         # Get configuration
         config = RoomICalConfig.objects.select_related('room').get(id=config_id)
 
-        if not config.is_active:
-            logger.info(f"Skipping inactive config for room: {config.room.name}")
+        # Get platform-specific URL and active status
+        if platform == 'booking':
+            ical_url = config.booking_ical_url
+            is_active = config.booking_active
+        elif platform == 'airbnb':
+            ical_url = config.airbnb_ical_url
+            is_active = config.airbnb_active
+        else:
             return {
                 'success': False,
                 'created': 0,
                 'updated': 0,
                 'cancelled': 0,
-                'errors': ['Configuration is inactive']
+                'errors': [f'Invalid platform: {platform}']
             }
 
-        logger.info(f"Starting sync for room: {config.room.name}")
+        if not is_active:
+            logger.info(f"Skipping inactive {platform} config for room: {config.room.name}")
+            return {
+                'success': False,
+                'created': 0,
+                'updated': 0,
+                'cancelled': 0,
+                'errors': [f'{platform.capitalize()} configuration is inactive']
+            }
+
+        if not ical_url:
+            logger.info(f"No {platform} iCal URL configured for room: {config.room.name}")
+            return {
+                'success': False,
+                'created': 0,
+                'updated': 0,
+                'cancelled': 0,
+                'errors': [f'No {platform} iCal URL configured']
+            }
+
+        logger.info(f"Starting {platform} sync for room: {config.room.name}")
 
         # Fetch and parse iCal feed
-        ical_data = fetch_ical_feed(config.ical_url)
+        ical_data = fetch_ical_feed(ical_url)
         events = parse_ical(ical_data)
 
         created_count = 0
@@ -195,11 +222,12 @@ def sync_reservations_for_room(config_id):
                     # Determine status
                     event_status = 'cancelled' if event['status'] == 'CANCELLED' else 'confirmed'
 
-                    # Get or create reservation
+                    # Get or create reservation with platform
                     reservation, created = Reservation.objects.update_or_create(
                         ical_uid=uid,
                         defaults={
                             'room': config.room,
+                            'platform': platform,
                             'guest_name': event['summary'],
                             'booking_reference': booking_ref or '',
                             'check_in_date': event['dtstart'],
@@ -222,9 +250,10 @@ def sync_reservations_for_room(config_id):
                     errors.append(error_msg)
 
             # Mark reservations as cancelled if they're no longer in the feed
-            # (Only for confirmed reservations that haven't been enriched yet)
+            # (Only for confirmed reservations from this platform that haven't been enriched yet)
             missing_reservations = Reservation.objects.filter(
                 room=config.room,
+                platform=platform,
                 status='confirmed',
                 guest__isnull=True  # Only unenriched reservations
             ).exclude(ical_uid__in=current_uids)
@@ -235,12 +264,20 @@ def sync_reservations_for_room(config_id):
                 cancelled_count += 1
                 logger.info(f"Marked as cancelled (removed from feed): {reservation}")
 
-        # Update sync status
-        config.last_synced = timezone.now()
-        config.last_sync_status = f"Success: {created_count} created, {updated_count} updated, {cancelled_count} cancelled"
+        # Update platform-specific sync status
+        sync_time = timezone.now()
+        sync_status = f"Success: {created_count} created, {updated_count} updated, {cancelled_count} cancelled"
+
+        if platform == 'booking':
+            config.booking_last_synced = sync_time
+            config.booking_last_sync_status = sync_status
+        elif platform == 'airbnb':
+            config.airbnb_last_synced = sync_time
+            config.airbnb_last_sync_status = sync_status
+
         config.save()
 
-        logger.info(f"Sync completed for {config.room.name}: {created_count} created, {updated_count} updated, {cancelled_count} cancelled")
+        logger.info(f"{platform.capitalize()} sync completed for {config.room.name}: {created_count} created, {updated_count} updated, {cancelled_count} cancelled")
 
         return {
             'success': True,
@@ -262,13 +299,17 @@ def sync_reservations_for_room(config_id):
         }
 
     except Exception as e:
-        error_msg = f"Sync failed for config {config_id}: {str(e)}"
+        error_msg = f"Sync failed for config {config_id} ({platform}): {str(e)}"
         logger.error(error_msg)
 
-        # Update sync status with error
+        # Update platform-specific sync status with error
         try:
             config = RoomICalConfig.objects.get(id=config_id)
-            config.last_sync_status = f"Error: {str(e)}"
+            error_status = f"Error: {str(e)}"
+            if platform == 'booking':
+                config.booking_last_sync_status = error_status
+            elif platform == 'airbnb':
+                config.airbnb_last_sync_status = error_status
             config.save()
         except Exception:
             pass

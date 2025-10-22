@@ -52,11 +52,100 @@
         <input type="hidden" id="guest-added" value="{% if messages %}true{% else %}false{% endif %}">
     {% endif %}
 
-    <!-- Existing Guests -->
+    <!-- Today's Guests -->
     <div class="admin-section">
         <div class="existing-guests-header">
-            <h2>{% trans "Existing Guests" %}</h2>
-            <a href="#add-guest-form" class="add-guest-btn">{% trans "Add Guest" %}</a>
+            <h2>{% trans "Today's Guests" %}</h2>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="location.reload();" class="add-guest-btn" style="background: #28a745;">{% trans "Refresh" %}</button>
+                <a href="#add-guest-form" class="add-guest-btn">{% trans "Add Guest" %}</a>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{% trans "Full Name" %}</th>
+                        <th>{% trans "Booking Ref" %}</th>
+                        <th>{% trans "Platform" %}</th>
+                        <th>{% trans "Room" %}</th>
+                        <th>{% trans "PIN (Front Door & Room)" %}</th>
+                        <th>{% trans "PIN Validity" %}</th>
+                        <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in todays_entries %}
+                    <tr style="{% if not entry.is_enriched %}background-color: #fff8dc;{% endif %}">
+                        <td>
+                            {% if entry.is_enriched %}
+                                {% if user.is_superuser %}
+                                    <a href="{% url 'guest_details' entry.guest_id %}">{{ entry.full_name }}</a>
+                                {% else %}
+                                    {{ entry.full_name }}
+                                {% endif %}
+                                {% if entry.is_returning %}
+                                    <span class="returning-guest" title="Returning Guest"> (R) </span>
+                                {% endif %}
+                                <br>
+                                <small>{% trans "Tel:" %} {{ entry.phone_number|default:"Not provided" }}</small>
+                                <br>
+                                <small>{% trans "Email:" %} {{ entry.email|default:"Not provided" }}</small>
+                            {% else %}
+                                <strong style="color: #ff8c00;">{% trans "(Pending Check-In)" %}</strong>
+                                <br>
+                                <small>{% trans "Guest needs to check in via app or manual check-in below" %}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ entry.booking_ref }}</td>
+                        <td>{{ entry.platform|safe }}</td>
+                        <td>{{ entry.room.name }}</td>
+                        <td class="pin-code">
+                            {% if entry.pin %}
+                                {{ entry.pin }}
+                            {% else %}
+                                <span class="no-pin">{% trans "N/A" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.pin %}
+                                {{ entry.check_in_date }} {% if entry.early_checkin_time %}{{ entry.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %} -
+                                {{ entry.check_out_date }} {% if entry.late_checkout_time %}{{ entry.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %}
+                            {% else %}
+                                <span class="no-pin">{% trans "N/A" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.is_enriched %}
+                                <a href="{% url 'manage_checkin_checkout' entry.guest_id %}" class="edit-link">{% trans "Check-In/Out" %}</a> |
+                                <a href="{% url 'edit_guest' entry.guest_id %}" class="edit-link">{% trans "Edit" %}</a> |
+                                <a href="{% url 'delete_guest' entry.guest_id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest? This will also delete their PIN.');">
+                                    {% trans "Delete" %}
+                                </a>
+                            {% else %}
+                                <button class="edit-link" style="background: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer;" disabled title="Coming in Phase 2">
+                                    {% trans "Manual Check-In" %}
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">{% trans "No guests checking in today." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p>
+            <a href="{% url 'past_guests' %}" class="past-guests-link">{% trans "View past guests" %}</a>
+        </p>
+    </div>
+
+    <!-- All Guests (Other Dates) -->
+    <div class="admin-section" style="margin-top: 30px;">
+        <div class="existing-guests-header">
+            <h2>{% trans "All Other Guests" %}</h2>
         </div>
         <div class="table-container">
             <table>
@@ -64,7 +153,7 @@
                     <tr>
                         <th>{% trans "Full Name" %}</th>
                         <th>{% trans "Room" %}</th>
-                        <th>{% trans "PIN (Front Door & Room)" %}</th> 
+                        <th>{% trans "PIN (Front Door & Room)" %}</th>
                         <th>{% trans "PIN Validity" %}</th>
                         <th>{% trans "Check-In" %}</th>
                         <th>{% trans "Check-Out" %}</th>
@@ -89,7 +178,7 @@
                             <small>{% trans "Tel:" %} {{ guest.phone_number|default:"Not provided" }}</small>
                             <br>
                             <small>{% trans "Email:" %} {{ guest.email|default:"Not provided" }}</small>
-                        </td>                     
+                        </td>
                         <td>{{ guest.assigned_room.name }}</td>
                         <td class="pin-code">
                             {% if guest.front_door_pin %}
@@ -100,7 +189,7 @@
                         </td>
                         <td>
                             {% if guest.front_door_pin %}
-                                {{ guest.check_in_date }} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %} - 
+                                {{ guest.check_in_date }} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %} -
                                 {{ guest.check_out_date }} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %}
                             {% else %}
                                 <span class="no-pin">{% trans "N/A" %}</span>
@@ -124,9 +213,6 @@
                 </tbody>
             </table>
         </div>
-        <p>
-            <a href="{% url 'past_guests' %}" class="past-guests-link">{% trans "View past guests" %}</a>
-        </p>
     </div>
 
     <br id="add-guest-form">
@@ -134,7 +220,7 @@
     <!-- Guest Form -->
     <div class="admin-section">
         <h2>{% trans "Add New Guest" %}</h2>
-        <form method="POST">
+        <form id="add-guest-form-element" method="POST">
             {% csrf_token %}
             <label for="full_name">{% trans "Full Name:" %}</label>
             <input type="text" id="full_name" name="full_name" required>
@@ -192,6 +278,25 @@
             {% trans "Configure automatic booking synchronization from Booking.com and Airbnb iCal feeds." %}
         </p>
 
+        <!-- Overlapping Reservations Warning -->
+        {% if overlapping_warnings %}
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; font-size: 16px; color: #856404;">⚠️ {% trans "Overlapping Reservations Detected" %}</h3>
+            {% for warning in overlapping_warnings %}
+            <div style="margin: 10px 0; padding: 10px; background: #fff; border-left: 3px solid #ffc107;">
+                <strong>{{ warning.room }}</strong>:
+                <span style="background: #003580; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">{{ warning.platform1 }}</span>
+                ({{ warning.res1_guest }})
+                {% trans "and" %}
+                <span style="background: #FF5A5F; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">{{ warning.platform2 }}</span>
+                ({{ warning.res2_guest }})
+                <br>
+                <small>{% trans "Overlap period:" %} {{ warning.dates }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Help Documentation -->
         <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="margin-top: 0; font-size: 16px;">{% trans "How to Use iCal Sync" %}</h3>
@@ -200,6 +305,7 @@
                 <li>{% trans "The system automatically checks for new reservations every 10 minutes" %}</li>
                 <li>{% trans "Click 'Sync Now' to immediately fetch the latest reservations from the feed" %}</li>
                 <li>{% trans "New reservations appear as unenriched entries. Guests provide their details when checking in." %}</li>
+                <li>{% trans "You can enable one or both platforms per room" %}</li>
             </ul>
             <p style="margin: 10px 0 0 0; font-size: 14px;">
                 <strong>{% trans "Status:" %}</strong>
@@ -208,69 +314,135 @@
         </div>
 
         {% for room in rooms %}
+        {% for config_room_id, config in ical_configs.items %}
+        {% if config_room_id == room.id %}
         <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 8px; background: #fff;">
             <h3 style="margin-top: 0;">{{ room.name }}</h3>
 
-            <form method="POST" style="margin-bottom: 10px;">
-                {% csrf_token %}
-                <input type="hidden" name="ical_action" value="save_ical">
-                <input type="hidden" name="ical_room_id" value="{{ room.id }}">
+            <!-- Booking.com Configuration -->
+            <div style="border-left: 3px solid #003580; padding-left: 15px; margin-bottom: 20px;">
+                <h4 style="color: #003580; margin-top: 0;">📘 Booking.com</h4>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="ical_action" value="save_ical">
+                    <input type="hidden" name="ical_room_id" value="{{ room.id }}">
+                    <input type="hidden" name="platform" value="booking">
 
-                <label for="ical_url_{{ room.id }}">{% trans "iCal Feed URL:" %}</label>
-                <input type="url"
-                       id="ical_url_{{ room.id }}"
-                       name="ical_url"
-                       placeholder="https://admin.booking.com/hotel/.../ical/..."
-                       value="{% for config_room_id, config in ical_configs.items %}{% if config_room_id == room.id and config %}{{ config.ical_url }}{% endif %}{% endfor %}"
-                       style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                    <label for="booking_url_{{ room.id }}">{% trans "Booking.com iCal URL:" %}</label>
+                    <input type="url"
+                           id="booking_url_{{ room.id }}"
+                           name="ical_url"
+                           placeholder="https://admin.booking.com/hotel/.../ical/..."
+                           value="{% if config %}{{ config.booking_ical_url }}{% endif %}"
+                           style="width: 100%; padding: 8px; margin-bottom: 10px;">
 
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                    <label style="display: flex; align-items: center; cursor: pointer;">
-                        <input type="checkbox"
-                               name="is_active"
-                               {% for config_room_id, config in ical_configs.items %}{% if config_room_id == room.id and config and config.is_active %}checked{% endif %}{% endfor %}>
-                        <span style="margin-left: 5px;">{% trans "Enable automatic sync" %}</span>
-                    </label>
-                </div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox"
+                                   name="is_active"
+                                   {% if config and config.booking_active %}checked{% endif %}>
+                            <span style="margin-left: 5px;">{% trans "Enable Booking.com sync" %}</span>
+                        </label>
+                    </div>
 
-                {% for config_room_id, config in ical_configs.items %}
-                {% if config_room_id == room.id and config %}
-                <p style="font-size: 13px; color: #666; margin: 10px 0;">
-                    <strong>{% trans "Status:" %}</strong>
-                    {% if config.is_active %}
-                        <span style="color: #28a745;">✅ {% trans "Active" %}</span>
-                    {% else %}
-                        <span style="color: #dc3545;">❌ {% trans "Inactive" %}</span>
+                    {% if config %}
+                    <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                        <strong>{% trans "Status:" %}</strong>
+                        {% if config.booking_active %}
+                            <span style="color: #28a745;">✅ {% trans "Active" %}</span>
+                        {% else %}
+                            <span style="color: #dc3545;">❌ {% trans "Inactive" %}</span>
+                        {% endif %}
+                        <br>
+                        <strong>{% trans "Last Synced:" %}</strong>
+                        {% if config.booking_last_synced %}
+                            {{ config.booking_last_synced|date:"Y-m-d H:i" }} (UK)
+                        {% else %}
+                            {% trans "Never" %}
+                        {% endif %}
+                        {% if config.booking_last_sync_status %}
+                            <br><strong>{% trans "Last Status:" %}</strong> {{ config.booking_last_sync_status }}
+                        {% endif %}
+                    </p>
                     {% endif %}
-                    <br>
-                    <strong>{% trans "Last Synced:" %}</strong>
-                    {% if config.last_synced %}
-                        {{ config.last_synced|date:"Y-m-d H:i" }} (UK)
-                    {% else %}
-                        {% trans "Never" %}
-                    {% endif %}
-                    {% if config.last_sync_status %}
-                        <br><strong>{% trans "Last Status:" %}</strong> {{ config.last_sync_status }}
-                    {% endif %}
-                </p>
-                {% endif %}
-                {% endfor %}
 
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="admin-button">{% trans "Save" %}</button>
-                    {% for config_room_id, config in ical_configs.items %}
-                    {% if config_room_id == room.id and config %}
-                    <button type="submit"
-                            formaction="{% url 'admin_page' %}"
-                            onclick="this.form.ical_action.value='sync_now'; this.form.config_id.value='{{ config.id }}';"
-                            class="admin-button"
-                            style="background: #17a2b8;">{% trans "Sync Now" %}</button>
-                    <input type="hidden" name="config_id">
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="admin-button">{% trans "Save" %}</button>
+                        {% if config and config.booking_ical_url %}
+                        <button type="submit"
+                                formaction="{% url 'admin_page' %}"
+                                onclick="this.form.ical_action.value='sync_now'; this.form.config_id.value='{{ config.id }}'; this.form.platform.value='booking';"
+                                class="admin-button"
+                                style="background: #17a2b8;">{% trans "Sync Now" %}</button>
+                        <input type="hidden" name="config_id">
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
+            <!-- Airbnb Configuration -->
+            <div style="border-left: 3px solid #FF5A5F; padding-left: 15px;">
+                <h4 style="color: #FF5A5F; margin-top: 0;">🏠 Airbnb</h4>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="ical_action" value="save_ical">
+                    <input type="hidden" name="ical_room_id" value="{{ room.id }}">
+                    <input type="hidden" name="platform" value="airbnb">
+
+                    <label for="airbnb_url_{{ room.id }}">{% trans "Airbnb iCal URL:" %}</label>
+                    <input type="url"
+                           id="airbnb_url_{{ room.id }}"
+                           name="ical_url"
+                           placeholder="https://www.airbnb.com/calendar/ical/..."
+                           value="{% if config %}{{ config.airbnb_ical_url }}{% endif %}"
+                           style="width: 100%; padding: 8px; margin-bottom: 10px;">
+
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox"
+                                   name="is_active"
+                                   {% if config and config.airbnb_active %}checked{% endif %}>
+                            <span style="margin-left: 5px;">{% trans "Enable Airbnb sync" %}</span>
+                        </label>
+                    </div>
+
+                    {% if config %}
+                    <p style="font-size: 13px; color: #666; margin: 10px 0;">
+                        <strong>{% trans "Status:" %}</strong>
+                        {% if config.airbnb_active %}
+                            <span style="color: #28a745;">✅ {% trans "Active" %}</span>
+                        {% else %}
+                            <span style="color: #dc3545;">❌ {% trans "Inactive" %}</span>
+                        {% endif %}
+                        <br>
+                        <strong>{% trans "Last Synced:" %}</strong>
+                        {% if config.airbnb_last_synced %}
+                            {{ config.airbnb_last_synced|date:"Y-m-d H:i" }} (UK)
+                        {% else %}
+                            {% trans "Never" %}
+                        {% endif %}
+                        {% if config.airbnb_last_sync_status %}
+                            <br><strong>{% trans "Last Status:" %}</strong> {{ config.airbnb_last_sync_status }}
+                        {% endif %}
+                    </p>
                     {% endif %}
-                    {% endfor %}
-                </div>
-            </form>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="admin-button">{% trans "Save" %}</button>
+                        {% if config and config.airbnb_ical_url %}
+                        <button type="submit"
+                                formaction="{% url 'admin_page' %}"
+                                onclick="this.form.ical_action.value='sync_now'; this.form.config_id.value='{{ config.id }}'; this.form.platform.value='airbnb';"
+                                class="admin-button"
+                                style="background: #17a2b8;">{% trans "Sync Now" %}</button>
+                        <input type="hidden" name="config_id">
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
         </div>
+        {% endif %}
+        {% endfor %}
         {% endfor %}
     </div>
 
@@ -286,6 +458,27 @@
         const today = new Date().toISOString().split('T')[0];
         document.getElementById("check_in_date").value = today;
 
+        function updateRooms() {
+            const checkInDate = document.getElementById('check_in_date').value;
+            const checkOutDate = document.getElementById('check_out_date').value;
+
+            if (checkInDate && checkOutDate) {
+                fetch(`/admin-page/available-rooms/?check_in_date=${checkInDate}&check_out_date=${checkOutDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const roomSelect = document.getElementById('select-room');
+                        roomSelect.innerHTML = '<option value="">-- {% trans "Select Room" %} --</option>';
+                        data.rooms.forEach(room => {
+                            const option = document.createElement('option');
+                            option.value = room.id;
+                            option.textContent = room.name;
+                            roomSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching available rooms:', error));
+            }
+        }
+
         function updateCheckout(days) {
             if (!days) return;
             let checkIn = new Date(document.getElementById("check_in_date").value);
@@ -300,6 +493,29 @@
             });
         });
 
+        // Attach event listeners for date changes
+        document.getElementById('check_in_date').addEventListener('change', updateRooms);
+        document.getElementById('check_out_date').addEventListener('change', updateRooms);
+
+        // Attach form validation
+        document.getElementById("add-guest-form-element").addEventListener("submit", function (event) {
+            const selectedRoomId = document.getElementById('select-room').value;
+            const checkInDate = document.getElementById('check_in_date').value;
+            const checkOutDate = document.getElementById('check_out_date').value;
+
+            if (!selectedRoomId) {
+                alert("Please select a room.");
+                event.preventDefault();
+                return;
+            }
+
+            if (!checkInDate || !checkOutDate) {
+                alert("Please select check-in and check-out dates.");
+                event.preventDefault();
+                return;
+            }
+        });
+
         updateRooms();
 
         const guestAdded = document.getElementById("guest-added");
@@ -312,53 +528,8 @@
             }, 3000);
             updateRooms();
         }
-    });
 
-    document.getElementById('check_in_date').addEventListener('change', updateRooms);
-    document.getElementById('check_out_date').addEventListener('change', updateRooms);
-
-    function updateRooms() {
-        const checkInDate = document.getElementById('check_in_date').value;
-        const checkOutDate = document.getElementById('check_out_date').value;
-
-        if (checkInDate && checkOutDate) {
-            fetch(`/admin-page/available-rooms/?check_in_date=${checkInDate}&check_out_date=${checkOutDate}`)
-                .then(response => response.json())
-                .then(data => {
-                    const roomSelect = document.getElementById('select-room');
-                    roomSelect.innerHTML = '<option value="">-- {% trans "Select Room" %} --</option>';
-                    data.rooms.forEach(room => {
-                        const option = document.createElement('option');
-                        option.value = room.id;
-                        option.textContent = room.name;
-                        roomSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error fetching available rooms:', error));
-        }
-    }
-
-    function validateRoomSelection() {
-        const selectedRoom = document.getElementById('select-room').value;
-        const guests = document.querySelectorAll("tbody tr");
-
-        for (let guest of guests) {
-            const assignedRoom = guest.cells[1].textContent.trim();
-            if (assignedRoom === selectedRoom) {
-                alert("This room is already assigned to another guest during this period.");
-                return false;
-            }
-        }
-        return true;
-    }
-
-    document.querySelector("form").addEventListener("submit", function (event) {
-        if (!validateRoomSelection()) {
-            event.preventDefault();
-        }
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
+        // Handle localStorage for reassignment
         const nameField = document.getElementById("full_name");
         const phoneField = document.getElementById("phone_number");
         const emailField = document.getElementById("email");
@@ -377,6 +548,12 @@
             localStorage.removeItem("reassign_email");
         }
     });
+
+    // Auto-refresh the page every 60 seconds to update Today's Guests table
+    // This doesn't use Celery - just browser JavaScript timer
+    setTimeout(function() {
+        location.reload();
+    }, 60000); // 60 seconds = 60000 milliseconds
 </script>
 
 {% endblock %}

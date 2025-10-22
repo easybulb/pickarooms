@@ -348,12 +348,21 @@ class PopularEvent(models.Model):
         return f"{self.name} at {self.venue} on {self.date}"
 
 class RoomICalConfig(models.Model):
-    """Configuration for iCal feed polling per room"""
+    """Configuration for iCal feed polling per room - supports both Booking.com and Airbnb"""
     room = models.OneToOneField(Room, on_delete=models.CASCADE, related_name='ical_config')
-    ical_url = models.URLField(max_length=500, help_text="iCal feed URL from Booking.com or Airbnb")
-    is_active = models.BooleanField(default=True, help_text="Enable/disable polling for this room")
-    last_synced = models.DateTimeField(null=True, blank=True, help_text="Last successful sync timestamp")
-    last_sync_status = models.CharField(max_length=255, blank=True, help_text="Status of last sync attempt")
+
+    # Booking.com configuration
+    booking_ical_url = models.URLField(max_length=500, blank=True, null=True, help_text="Booking.com iCal feed URL")
+    booking_active = models.BooleanField(default=False, help_text="Enable Booking.com polling")
+    booking_last_synced = models.DateTimeField(null=True, blank=True, help_text="Last Booking.com sync timestamp")
+    booking_last_sync_status = models.CharField(max_length=255, blank=True, help_text="Booking.com last sync status")
+
+    # Airbnb configuration
+    airbnb_ical_url = models.URLField(max_length=500, blank=True, null=True, help_text="Airbnb iCal feed URL")
+    airbnb_active = models.BooleanField(default=False, help_text="Enable Airbnb polling")
+    airbnb_last_synced = models.DateTimeField(null=True, blank=True, help_text="Last Airbnb sync timestamp")
+    airbnb_last_sync_status = models.CharField(max_length=255, blank=True, help_text="Airbnb last sync status")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -362,7 +371,13 @@ class RoomICalConfig(models.Model):
         verbose_name_plural = "Room iCal Configurations"
 
     def __str__(self):
-        return f"iCal Config for {self.room.name} ({'Active' if self.is_active else 'Inactive'})"
+        active_platforms = []
+        if self.booking_active:
+            active_platforms.append('Booking.com')
+        if self.airbnb_active:
+            active_platforms.append('Airbnb')
+        status = ', '.join(active_platforms) if active_platforms else 'Inactive'
+        return f"iCal Config for {self.room.name} ({status})"
 
 class Reservation(models.Model):
     """iCal booking reservation - synced from external platforms"""
@@ -372,6 +387,11 @@ class Reservation(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
+    PLATFORM_CHOICES = [
+        ('booking', 'Booking.com'),
+        ('airbnb', 'Airbnb'),
+    ]
+
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='reservations')
     ical_uid = models.CharField(max_length=500, unique=True, help_text="Unique identifier from iCal event (UID)")
     booking_reference = models.CharField(max_length=50, blank=True, help_text="Extracted booking reference (10-digit number)")
@@ -379,6 +399,7 @@ class Reservation(models.Model):
     check_in_date = models.DateField()
     check_out_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
+    platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, default='booking', help_text="Source platform (Booking.com or Airbnb)")
     guest = models.OneToOneField(Guest, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservation', help_text="Linked Guest record (created after enrichment)")
     raw_ical_data = models.TextField(blank=True, help_text="Raw iCal event data for debugging")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -397,7 +418,8 @@ class Reservation(models.Model):
 
     def __str__(self):
         guest_info = f"{self.guest_name} ({self.booking_reference})" if self.booking_reference else self.guest_name
-        return f"{guest_info} - {self.room.name} ({self.check_in_date} to {self.check_out_date})"
+        platform_display = dict(self.PLATFORM_CHOICES).get(self.platform, self.platform)
+        return f"[{platform_display}] {guest_info} - {self.room.name} ({self.check_in_date} to {self.check_out_date})"
 
     def is_enriched(self):
         """Check if reservation has been enriched with full guest details"""

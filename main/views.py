@@ -139,8 +139,17 @@ def checkin(request):
             # Proceed with regular check-in logic
             request.session['reservation_number'] = guest.reservation_number
 
-            # Generate a PIN if the guest doesn't have one
+            # Generate a PIN if the guest doesn't have one AND it's on or after check-in date
             if not guest.front_door_pin:
+                # Check if it's the check-in day (or later) before generating PIN
+                uk_timezone = pytz.timezone("Europe/London")
+                now_uk_time = timezone.now().astimezone(uk_timezone)
+
+                # Only generate PIN on or after check-in date
+                if now_uk_time.date() < guest.check_in_date:
+                    # Too early - show message and redirect to room_detail without PIN
+                    messages.info(request, f"Your reservation starts on {guest.check_in_date.strftime('%d %b %Y')}. You can access your PIN on that day.")
+                    return redirect('room_detail', room_token=guest.secure_token)
                 try:
                     front_door_lock = TTLock.objects.get(is_front_door=True)
                     room_lock = guest.assigned_room.ttlock
@@ -392,6 +401,21 @@ def enrich_reservation(request):
             assigned_room=reservation.room,
         )
         logger.info(f"Created new guest {guest.id} for reservation {reservation.booking_reference}")
+
+        # Check if it's the check-in day (or later) before generating PIN
+        uk_timezone = pytz.timezone("Europe/London")
+        now_uk_time = timezone.now().astimezone(uk_timezone)
+
+        # Only generate PIN on or after check-in date
+        if now_uk_time.date() < guest.check_in_date:
+            # Too early - save guest without PIN, link to reservation, and show message
+            reservation.guest = guest
+            reservation.save()
+            request.session['reservation_number'] = guest.reservation_number
+            del request.session['reservation_to_enrich']
+            logger.info(f"Guest {guest.id} created but PIN generation deferred until check-in date {guest.check_in_date}")
+            messages.info(request, f"Your reservation starts on {guest.check_in_date.strftime('%d %b %Y')}. You can access your PIN on that day.")
+            return redirect('room_detail', room_token=guest.secure_token)
 
         # Generate TTLock PINs (reuse logic from checkin view)
         try:
@@ -905,6 +929,74 @@ def admin_page(request):
                 logger.error(f"Failed to save archived guest {guest.reservation_number}: {str(e)}")
                 messages.error(request, f"Failed to archive {guest.full_name}: {str(e)}")
 
+    # Get today's date for filtering
+    today = date.today()
+
+    # Get today's enriched guests (those who have checked in)
+    todays_guests = Guest.objects.filter(
+        is_archived=False,
+        check_in_date=today
+    ).select_related('assigned_room').order_by('full_name')
+
+    # Get today's unenriched reservations (from iCal, awaiting check-in)
+    todays_reservations = Reservation.objects.filter(
+        check_in_date=today,
+        status='confirmed',
+        guest__isnull=True  # Not yet enriched
+    ).select_related('room').order_by('booking_reference')
+
+    # Combine into unified list for "Today's Guests" table
+    todays_entries = []
+
+    # Add enriched guests
+    for guest in todays_guests:
+        todays_entries.append({
+            'type': 'guest',
+            'id': guest.id,
+            'guest_id': guest.id,
+            'object': guest,
+            'is_enriched': True,
+            'is_returning': guest.is_returning,
+            'full_name': guest.full_name,
+            'phone_number': guest.phone_number or '---',
+            'email': guest.email or '---',
+            'booking_ref': guest.reservation_number,
+            'room': guest.assigned_room,
+            'pin': guest.front_door_pin,
+            'check_in_date': guest.check_in_date,
+            'check_out_date': guest.check_out_date,
+            'early_checkin_time': guest.early_checkin_time,
+            'late_checkout_time': guest.late_checkout_time,
+            'platform': '👤 Manual',  # Manually created or from old system
+            'secure_token': guest.secure_token,
+        })
+
+    # Add unenriched reservations
+    for reservation in todays_reservations:
+        platform_badge = '📘 Booking.com' if reservation.platform == 'booking' else '🏠 Airbnb'
+
+        todays_entries.append({
+            'type': 'reservation',
+            'id': reservation.id,
+            'reservation_id': reservation.id,
+            'object': reservation,
+            'is_enriched': False,
+            'is_returning': False,
+            'full_name': reservation.guest_name or '(Guest Name Not Available)',
+            'phone_number': '---',
+            'email': '---',
+            'booking_ref': reservation.booking_reference or '---',
+            'room': reservation.room,
+            'pin': None,
+            'check_in_date': reservation.check_in_date,
+            'check_out_date': reservation.check_out_date,
+            'early_checkin_time': None,
+            'late_checkout_time': None,
+            'platform': platform_badge,
+            'platform_raw': reservation.platform,
+        })
+
+    # Keep old guests query for backward compatibility (if needed elsewhere)
     guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
 
     check_in_date = request.POST.get('check_in_date') or request.GET.get('check_in_date')
@@ -922,6 +1014,7 @@ def admin_page(request):
         if 'ical_action' in request.POST:
             action = request.POST.get('ical_action')
             room_id = request.POST.get('ical_room_id')
+            platform = request.POST.get('platform', 'booking')  # 'booking' or 'airbnb'
 
             if action == 'save_ical':
                 ical_url = request.POST.get('ical_url', '').strip()
@@ -930,13 +1023,21 @@ def admin_page(request):
                 try:
                     room = Room.objects.get(id=room_id)
                     config, created = RoomICalConfig.objects.get_or_create(room=room)
-                    config.ical_url = ical_url
-                    config.is_active = is_active
+
+                    # Update platform-specific fields
+                    if platform == 'booking':
+                        config.booking_ical_url = ical_url
+                        config.booking_active = is_active
+                    elif platform == 'airbnb':
+                        config.airbnb_ical_url = ical_url
+                        config.airbnb_active = is_active
+
                     config.save()
 
+                    platform_name = "Booking.com" if platform == 'booking' else "Airbnb"
                     action_text = "created" if created else "updated"
-                    messages.success(request, f"iCal configuration {action_text} for {room.name}.")
-                    logger.info(f"iCal config {action_text} for room {room.name} by {request.user.username}")
+                    messages.success(request, f"{platform_name} configuration {action_text} for {room.name}.")
+                    logger.info(f"{platform_name} config {action_text} for room {room.name} by {request.user.username}")
                 except Room.DoesNotExist:
                     messages.error(request, "Room not found.")
                 except Exception as e:
@@ -950,9 +1051,10 @@ def admin_page(request):
                     config = RoomICalConfig.objects.get(id=request.POST.get('config_id'))
                     # Import the task here to avoid circular imports
                     from main.tasks import sync_room_ical_feed
-                    sync_room_ical_feed.delay(config.id)
-                    messages.success(request, f"Sync started for {config.room.name}. Check back in a moment.")
-                    logger.info(f"Manual iCal sync triggered for {config.room.name} by {request.user.username}")
+                    sync_room_ical_feed.delay(config.id, platform=platform)
+                    platform_name = "Booking.com" if platform == 'booking' else "Airbnb"
+                    messages.success(request, f"{platform_name} sync started for {config.room.name}. Check back in a moment.")
+                    logger.info(f"Manual {platform_name} sync triggered for {config.room.name} by {request.user.username}")
                 except RoomICalConfig.DoesNotExist:
                     messages.error(request, "iCal configuration not found.")
                 except Exception as e:
@@ -1119,12 +1221,42 @@ def admin_page(request):
         except RoomICalConfig.DoesNotExist:
             ical_configs[room.id] = None
 
+    # Detect overlapping reservations (different platforms, same room, overlapping dates)
+    overlapping_warnings = []
+
+    for room in available_rooms:
+        # Get all confirmed reservations for this room
+        reservations = Reservation.objects.filter(
+            room=room,
+            status='confirmed'
+        ).order_by('check_in_date')
+
+        # Check for overlaps between different platforms
+        for i, res1 in enumerate(reservations):
+            for res2 in reservations[i+1:]:
+                # Only check if different platforms
+                if res1.platform != res2.platform:
+                    # Check if date ranges overlap
+                    if (res1.check_in_date < res2.check_out_date and
+                        res2.check_in_date < res1.check_out_date):
+                        warning = {
+                            'room': room.name,
+                            'platform1': dict(Reservation.PLATFORM_CHOICES).get(res1.platform),
+                            'platform2': dict(Reservation.PLATFORM_CHOICES).get(res2.platform),
+                            'dates': f"{max(res1.check_in_date, res2.check_in_date)} to {min(res1.check_out_date, res2.check_out_date)}",
+                            'res1_guest': res1.guest_name,
+                            'res2_guest': res2.guest_name,
+                        }
+                        overlapping_warnings.append(warning)
+
     return render(request, 'main/admin_page.html', {
         'rooms': available_rooms,
         'guests': guests,
+        'todays_entries': todays_entries,
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
         'ical_configs': ical_configs,
+        'overlapping_warnings': overlapping_warnings,
     })
 
 def get_available_rooms(check_in_date, check_out_date):

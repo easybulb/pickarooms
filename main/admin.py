@@ -179,18 +179,24 @@ class TTLockTokenAdmin(admin.ModelAdmin):
         return False
 
 class RoomICalConfigAdmin(admin.ModelAdmin):
-    list_display = ('room', 'is_active', 'last_synced', 'sync_status_display', 'updated_at')
-    list_filter = ('is_active', 'last_synced')
-    search_fields = ('room__name', 'ical_url')
-    readonly_fields = ('last_synced', 'last_sync_status', 'created_at', 'updated_at')
+    list_display = ('room', 'booking_status_display', 'airbnb_status_display', 'updated_at')
+    list_filter = ('booking_active', 'airbnb_active')
+    search_fields = ('room__name', 'booking_ical_url', 'airbnb_ical_url')
+    readonly_fields = (
+        'booking_last_synced', 'booking_last_sync_status',
+        'airbnb_last_synced', 'airbnb_last_sync_status',
+        'created_at', 'updated_at'
+    )
 
     fieldsets = (
-        ('Room Configuration', {
-            'fields': ('room', 'ical_url', 'is_active')
+        ('Booking.com Configuration', {
+            'fields': ('booking_ical_url', 'booking_active', 'booking_last_synced', 'booking_last_sync_status')
         }),
-        ('Sync Status', {
-            'fields': ('last_synced', 'last_sync_status'),
-            'classes': ('collapse',)
+        ('Airbnb Configuration', {
+            'fields': ('airbnb_ical_url', 'airbnb_active', 'airbnb_last_synced', 'airbnb_last_sync_status')
+        }),
+        ('Room', {
+            'fields': ('room',)
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -198,15 +204,29 @@ class RoomICalConfigAdmin(admin.ModelAdmin):
         }),
     )
 
-    def sync_status_display(self, obj):
-        if not obj.last_sync_status:
-            return "Never synced"
-        if "success" in obj.last_sync_status.lower():
-            return format_html('<span style="color: green;">✅ {}</span>', obj.last_sync_status)
-        elif "error" in obj.last_sync_status.lower():
-            return format_html('<span style="color: red;">❌ {}</span>', obj.last_sync_status)
-        return obj.last_sync_status
-    sync_status_display.short_description = "Sync Status"
+    def booking_status_display(self, obj):
+        if not obj.booking_active:
+            return "🔴 Inactive"
+        if not obj.booking_last_sync_status:
+            return "🟡 Never synced"
+        if "success" in obj.booking_last_sync_status.lower():
+            return format_html('<span style="color: green;">✅ Active</span>')
+        elif "error" in obj.booking_last_sync_status.lower():
+            return format_html('<span style="color: red;">❌ Error</span>')
+        return obj.booking_last_sync_status
+    booking_status_display.short_description = "Booking.com"
+
+    def airbnb_status_display(self, obj):
+        if not obj.airbnb_active:
+            return "🔴 Inactive"
+        if not obj.airbnb_last_sync_status:
+            return "🟡 Never synced"
+        if "success" in obj.airbnb_last_sync_status.lower():
+            return format_html('<span style="color: green;">✅ Active</span>')
+        elif "error" in obj.airbnb_last_sync_status.lower():
+            return format_html('<span style="color: red;">❌ Error</span>')
+        return obj.airbnb_last_sync_status
+    airbnb_status_display.short_description = "Airbnb"
 
     actions = ['sync_now']
 
@@ -226,14 +246,14 @@ class RoomICalConfigAdmin(admin.ModelAdmin):
     sync_now.short_description = "Sync selected rooms now"
 
 class ReservationAdmin(admin.ModelAdmin):
-    list_display = ('guest_name', 'booking_reference', 'room', 'check_in_date', 'check_out_date', 'status', 'enrichment_status', 'created_at')
-    list_filter = ('status', 'room', 'check_in_date', 'check_out_date')
+    list_display = ('platform_badge', 'guest_name', 'booking_reference', 'room', 'check_in_date', 'check_out_date', 'status', 'enrichment_status', 'created_at')
+    list_filter = ('platform', 'status', 'room', 'check_in_date', 'check_out_date')
     search_fields = ('guest_name', 'booking_reference', 'ical_uid', 'guest__full_name', 'guest__phone_number', 'guest__email')
     readonly_fields = ('ical_uid', 'guest', 'raw_ical_data', 'created_at', 'updated_at')
 
     fieldsets = (
         ('Reservation Details', {
-            'fields': ('room', 'guest_name', 'booking_reference', 'check_in_date', 'check_out_date', 'status')
+            'fields': ('room', 'platform', 'guest_name', 'booking_reference', 'check_in_date', 'check_out_date', 'status')
         }),
         ('Guest Enrichment', {
             'fields': ('guest',),
@@ -248,6 +268,14 @@ class ReservationAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    def platform_badge(self, obj):
+        if obj.platform == 'booking':
+            return format_html('<span style="background: #003580; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">📘 Booking.com</span>')
+        elif obj.platform == 'airbnb':
+            return format_html('<span style="background: #FF5A5F; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">🏠 Airbnb</span>')
+        return obj.platform
+    platform_badge.short_description = "Platform"
 
     def enrichment_status(self, obj):
         if obj.is_enriched():
