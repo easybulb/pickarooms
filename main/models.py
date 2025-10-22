@@ -200,23 +200,30 @@ class Guest(models.Model):
 
     def send_cancellation_message(self):
         """Send a cancellation email and/or SMS to the guest when deleted, based on available contact info."""
-        admin_email = "easybulb@gmail.com"  # Adjust as needed
-        subject = "Pickarooms Reservation Cancelled"
-        email_message = (
-            f"Dear {self.full_name},\n\n"
-            f"Your reservation at Pickarooms has been cancelled.\n"
-            f"Check-In Date: {self.check_in_date}\n"
-            f"Assigned Room: {self.assigned_room.name}\n\n"
-            f"If this was a mistake, please contact us at {admin_email}.\n\n"
-            f"Best regards,\nThe Pickarooms Team"
-        )
-        sms_message = (
-            f"Pickarooms: Your reservation on {self.check_in_date} for {self.assigned_room.name} has been cancelled. "
-            f"Contact us if needed."
-        )
+        if self.is_ical_guest():
+            # iCal guest - use editable MessageTemplates
+            subject, email_message, sms_message = self._get_template_messages('cancellation')
+            if not subject:
+                subject = "Pickarooms Reservation Cancelled"
+        else:
+            # Manual guest - use legacy hardcoded messages
+            admin_email = "easybulb@gmail.com"
+            subject = "Pickarooms Reservation Cancelled"
+            email_message = (
+                f"Dear {self.full_name},\n\n"
+                f"Your reservation at Pickarooms has been cancelled.\n"
+                f"Check-In Date: {self.check_in_date}\n"
+                f"Assigned Room: {self.assigned_room.name}\n\n"
+                f"If this was a mistake, please contact us at {admin_email}.\n\n"
+                f"Best regards,\nThe Pickarooms Team"
+            )
+            sms_message = (
+                f"Pickarooms: Your reservation on {self.check_in_date} for {self.assigned_room.name} has been cancelled. "
+                f"Contact us if needed."
+            )
 
-        # Send email if email is provided
-        if self.email:
+        # Send email if email is provided and message content exists
+        if self.email and email_message:
             try:
                 send_mail(
                     subject,
@@ -229,8 +236,8 @@ class Guest(models.Model):
             except Exception as e:
                 logger.error(f"Failed to send cancellation email to {self.email}: {str(e)}")
 
-        # Send SMS if phone number is provided
-        if self.phone_number:
+        # Send SMS if phone number is provided and message content exists
+        if self.phone_number and sms_message:
             try:
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
@@ -244,30 +251,37 @@ class Guest(models.Model):
 
     def send_update_message(self):
         """Send an update email and/or SMS to the guest when their details are edited, based on available contact info."""
-        checkin_url = "https://www.pickarooms.com"
-        property_address = "8 Rylance Street M11 3NP, UK"
-        subject = "Pickarooms Reservation Updated"
-        early_checkin_display = f"{self.early_checkin_time.strftime('%I:%M %p')}" if self.early_checkin_time else "2:00 PM"
-        late_checkout_display = f"{self.late_checkout_time.strftime('%I:%M %p')}" if self.late_checkout_time else "11:00 AM"
-        email_message = (
-            f"Dear {self.full_name},\n\n"
-            f"Your reservation at Pickarooms has been updated and a new access PIN generated. Here are your updated details:\n\n"
-            f"Check-In Date: {self.check_in_date} at {early_checkin_display}\n"
-            f"Check-Out Date: {self.check_out_date} at {late_checkout_display}\n"
-            f"Assigned Room: {self.assigned_room.name}\n\n"
-            f"Please visit {checkin_url} to complete your check-in and access your room details, including your PIN. "
-            f"The webapp provides all the information you need for a seamless stay.\n\n"
-            f"Property address is {property_address}\n\n"
-            f"Best regards,\nThe Pickarooms Team"
-        )
-        sms_message = (
-            f"Pickarooms: Your reservation has been updated and a new access PIN genereated for you. Check-in on {self.check_in_date} at {early_checkin_display}, "
-            f"Check-out on {self.check_out_date} at {late_checkout_display}, Room: {self.assigned_room.name}. "
-            f"Visit {checkin_url} for details and your PIN."
-        )
+        if self.is_ical_guest():
+            # iCal guest - use editable MessageTemplates
+            subject, email_message, sms_message = self._get_template_messages('update')
+            if not subject:
+                subject = "Pickarooms Reservation Updated"
+        else:
+            # Manual guest - use legacy hardcoded messages
+            checkin_url = "https://www.pickarooms.com"
+            property_address = "8 Rylance Street M11 3NP, UK"
+            subject = "Pickarooms Reservation Updated"
+            early_checkin_display = f"{self.early_checkin_time.strftime('%I:%M %p')}" if self.early_checkin_time else "2:00 PM"
+            late_checkout_display = f"{self.late_checkout_time.strftime('%I:%M %p')}" if self.late_checkout_time else "11:00 AM"
+            email_message = (
+                f"Dear {self.full_name},\n\n"
+                f"Your reservation at Pickarooms has been updated and a new access PIN generated. Here are your updated details:\n\n"
+                f"Check-In Date: {self.check_in_date} at {early_checkin_display}\n"
+                f"Check-Out Date: {self.check_out_date} at {late_checkout_display}\n"
+                f"Assigned Room: {self.assigned_room.name}\n\n"
+                f"Please visit {checkin_url} to complete your check-in and access your room details, including your PIN. "
+                f"The webapp provides all the information you need for a seamless stay.\n\n"
+                f"Property address is {property_address}\n\n"
+                f"Best regards,\nThe Pickarooms Team"
+            )
+            sms_message = (
+                f"Pickarooms: Your reservation has been updated and a new access PIN genereated for you. Check-in on {self.check_in_date} at {early_checkin_display}, "
+                f"Check-out on {self.check_out_date} at {late_checkout_display}, Room: {self.assigned_room.name}. "
+                f"Visit {checkin_url} for details and your PIN."
+            )
 
-        # Send email if email is provided
-        if self.email:
+        # Send email if email is provided and message content exists
+        if self.email and email_message:
             try:
                 send_mail(
                     subject,
@@ -280,8 +294,8 @@ class Guest(models.Model):
             except Exception as e:
                 logger.error(f"Failed to send update email to {self.email}: {str(e)}")
 
-        # Send SMS if phone number is provided
-        if self.phone_number:
+        # Send SMS if phone number is provided and message content exists
+        if self.phone_number and sms_message:
             try:
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
@@ -295,32 +309,31 @@ class Guest(models.Model):
 
     def send_post_stay_message(self):
         """Send a platform-specific post-stay email and/or SMS to the guest after checkout."""
-        if self.dont_send_review_message:  # Skip if guest is blocked from receiving review messages
+        if self.dont_send_review_message:
             logger.info(f"Skipped post-stay message for guest {self.full_name} (ID: {self.id}) as review message is blocked")
             return
 
-        # Determine platform from linked reservation (if available)
-        platform_name = "Booking.com"  # Default
-        try:
-            if hasattr(self, 'reservation') and self.reservation:
-                platform_name = "Booking.com" if self.reservation.platform == 'booking' else "Airbnb"
-        except Exception:
-            # If no reservation linked (old guests), default to Booking.com
-            pass
+        if self.is_ical_guest():
+            # iCal guest - use editable MessageTemplates (platform-specific via {platform_name} variable)
+            subject, email_message, sms_message = self._get_template_messages('post_stay')
+            if not subject:
+                subject = "Thank You for Staying at Pickarooms!"
+        else:
+            # Manual guest - use legacy hardcoded messages
+            platform_name = "Booking.com"  # Default for manual guests
+            subject = "Thank You for Staying at Pickarooms!"
+            email_message = (
+                f"Dear {self.full_name},\n\n"
+                f"Thank you for staying with us at Pickarooms! We hope you enjoyed your time at {self.assigned_room.name}.\n\n"
+                f"We'd love to welcome you back for your next visit. When {platform_name} prompts you, please leave us a review to share your experience—it means the world to us!\n\n"
+                f"Best regards,\nThe Pickarooms Team"
+            )
+            sms_message = (
+                f"Thank you for staying at Pickarooms! We'd love you back. Please leave a review on {platform_name} when prompted!"
+            )
 
-        subject = "Thank You for Staying at Pickarooms!"
-        email_message = (
-            f"Dear {self.full_name},\n\n"
-            f"Thank you for staying with us at Pickarooms! We hope you enjoyed your time at {self.assigned_room.name}.\n\n"
-            f"We'd love to welcome you back for your next visit. When {platform_name} prompts you, please leave us a review to share your experience—it means the world to us!\n\n"
-            f"Best regards,\nThe Pickarooms Team"
-        )
-        sms_message = (
-            f"Thank you for staying at Pickarooms! We'd love you back. Please leave a review on {platform_name} when prompted!"
-        )
-
-        # Send email if email is provided
-        if self.email:
+        # Send email if email is provided and message content exists
+        if self.email and email_message:
             try:
                 send_mail(
                     subject,
@@ -333,8 +346,8 @@ class Guest(models.Model):
             except Exception as e:
                 logger.error(f"Failed to send post-stay email to {self.email}: {str(e)}")
 
-        # Send SMS if phone number is provided
-        if self.phone_number:
+        # Send SMS if phone number is provided and message content exists
+        if self.phone_number and sms_message:
             try:
                 client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
                 message = client.messages.create(
