@@ -394,20 +394,42 @@ def enrich_reservation(request):
             del request.session['reservation_to_enrich']
             return redirect('checkin')
 
-        if reservation.is_enriched():
-            # Already enriched, just redirect to existing guest
-            guest = reservation.guest
-            request.session['reservation_number'] = guest.reservation_number
-            del request.session['reservation_to_enrich']
-            messages.success(request, f"Welcome back, {guest.full_name}!")
-            return redirect('room_detail', room_token=guest.secure_token)
-
-        # Create new Guest record with reservation details
+        # Extract guest details from session
         full_name = reservation_data['full_name']
         email = reservation_data.get('email', '') or None  # Convert empty string to None
         phone_number = reservation_data.get('phone_number', '') or None  # Convert empty string to None
 
-        # Create the guest (copy early/late times from reservation if set)
+        if reservation.is_enriched():
+            # Guest already exists (early enrichment by admin)
+            # Update with guest-provided contact details
+            guest = reservation.guest
+
+            # Update name if provided (guest's input takes precedence)
+            if full_name:
+                guest.full_name = full_name
+
+            # Update contact info if provided and not already set
+            if phone_number and not guest.phone_number:
+                guest.phone_number = phone_number
+            elif phone_number:
+                # Update phone if guest provides a different one
+                guest.phone_number = phone_number
+
+            if email and not guest.email:
+                guest.email = email
+            elif email:
+                # Update email if guest provides a different one
+                guest.email = email
+
+            guest.save()
+            logger.info(f"Updated existing guest {guest.id} with app check-in details for reservation {reservation.booking_reference}")
+
+            request.session['reservation_number'] = guest.reservation_number
+            del request.session['reservation_to_enrich']
+            messages.success(request, f"Welcome back, {guest.full_name}! Your details have been updated.")
+            return redirect('room_detail', room_token=guest.secure_token)
+
+        # Create new Guest record with reservation details
         guest = Guest.objects.create(
             full_name=full_name,
             email=email,
