@@ -3206,3 +3206,64 @@ def sms_reply_handler(request):
 
         return HttpResponse('<Response></Response>', content_type='text/xml')
     return HttpResponse(status=405)
+
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.view_admin_dashboard'), login_url='/unauthorized/')
+def message_templates(request):
+    """
+    Message Templates page - Admin can view and edit all message templates for iCal guests
+    """
+    from main.models import MessageTemplate
+
+    # Handle template edit
+    if request.method == 'POST':
+        template_id = request.POST.get('template_id')
+        action = request.POST.get('action')
+
+        if action == 'edit':
+            template = get_object_or_404(MessageTemplate, id=template_id)
+            subject = request.POST.get('subject', '').strip()
+            content = request.POST.get('content', '').strip()
+            is_active = request.POST.get('is_active') == 'on'
+
+            # Validation
+            if not content:
+                messages.error(request, "Message content cannot be empty.")
+                return redirect('message_templates')
+
+            # Update template
+            template.subject = subject
+            template.content = content
+            template.is_active = is_active
+            template.last_edited_by = request.user
+            template.save()
+
+            messages.success(request, f"'{template.get_message_type_display()}' updated successfully!")
+            logger.info(f"Message template {template.message_type} updated by {request.user.username}")
+            return redirect('message_templates')
+
+    # Get all message templates
+    templates = MessageTemplate.objects.all().order_by('message_type')
+
+    # Group templates by category for better display
+    email_templates = templates.filter(message_type__contains='email')
+    sms_templates = templates.filter(message_type__contains='sms')
+
+    # Generate sample preview data
+    sample_data = {
+        'guest_name': 'John Smith',
+        'room_name': 'Room 101',
+        'check_in_date': '2025-01-20',
+        'check_out_date': '2025-01-22',
+        'reservation_number': 'BK1234567890',
+        'pin': '1234',
+        'room_detail_url': 'https://www.pickarooms.com',
+        'platform_name': 'Booking.com',
+    }
+
+    return render(request, 'main/message_templates.html', {
+        'email_templates': email_templates,
+        'sms_templates': sms_templates,
+        'sample_data': sample_data,
+    })

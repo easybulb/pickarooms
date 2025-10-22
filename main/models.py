@@ -449,3 +449,65 @@ class Reservation(models.Model):
     def is_enriched(self):
         """Check if reservation has been enriched with full guest details"""
         return self.guest is not None
+
+
+class MessageTemplate(models.Model):
+    """
+    Editable message templates for guest communications
+    Supports variable substitution like {guest_name}, {pin}, {room_name}, etc.
+    """
+    MESSAGE_TYPES = [
+        ('ical_welcome_email', 'iCal Welcome Email'),
+        ('ical_welcome_sms', 'iCal Welcome SMS'),
+        ('ical_update_email', 'iCal Update Email'),
+        ('ical_update_sms', 'iCal Update SMS'),
+        ('ical_cancellation_email', 'iCal Cancellation Email'),
+        ('ical_cancellation_sms', 'iCal Cancellation SMS'),
+        ('ical_post_stay_email', 'iCal Post-Stay Email'),
+        ('ical_post_stay_sms', 'iCal Post-Stay SMS'),
+    ]
+
+    message_type = models.CharField(max_length=50, choices=MESSAGE_TYPES, unique=True, help_text="Type of message")
+    subject = models.CharField(max_length=200, blank=True, help_text="Email subject (leave blank for SMS)")
+    content = models.TextField(help_text="Message content with variables like {guest_name}, {pin}, {room_name}")
+    is_active = models.BooleanField(default=True, help_text="Enable/disable this message without deleting it")
+    last_edited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, help_text="User who last edited")
+    last_edited_at = models.DateTimeField(auto_now=True, help_text="Last edit timestamp")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Message Template"
+        verbose_name_plural = "Message Templates"
+        ordering = ['message_type']
+
+    def __str__(self):
+        return f"{self.get_message_type_display()} {'(Active)' if self.is_active else '(Inactive)'}"
+
+    def get_available_variables(self):
+        """Return list of available variables for this message type"""
+        common_vars = [
+            '{guest_name}', '{room_name}', '{check_in_date}', '{check_out_date}',
+            '{reservation_number}', '{room_detail_url}'
+        ]
+
+        if 'welcome' in self.message_type or 'update' in self.message_type:
+            return common_vars + ['{pin}']
+        elif 'post_stay' in self.message_type:
+            return common_vars + ['{platform_name}']
+        else:
+            return common_vars
+
+    def render(self, **context):
+        """
+        Render template with provided context variables
+        Example: template.render(guest_name="John", pin="1234")
+        """
+        try:
+            return self.content.format(**context)
+        except KeyError as e:
+            logger.error(f"Missing variable in template {self.message_type}: {e}")
+            return self.content  # Return unformatted if variable missing
+
+    def get_character_count(self):
+        """Get character count (useful for SMS messages)"""
+        return len(self.content)

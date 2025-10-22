@@ -29,6 +29,7 @@
     <div class="nav-link">
         <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
         <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
+        <a href="{% url 'message_templates' %}" class="nav-link">{% trans "Message Templates" %}</a>
         {% if 'main.can_give_access' in perms %}
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
         {% endif %}

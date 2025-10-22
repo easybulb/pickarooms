@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
+<style>
+    .nav-link {
+        display: inline-block;
+        margin-right: 20px;
+        color: #007bff;
+        text-decoration: none;
+        font-size: 16px;
+    }
+    .nav-link:hover {
+        text-decoration: underline;
+    }
+    .template-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .template-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .template-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+    .template-status {
+        font-size: 14px;
+        padding: 5px 10px;
+        border-radius: 3px;
+    }
+    .status-active {
+        background: #28a745;
+        color: white;
+    }
+    .status-inactive {
+        background: #dc3545;
+        color: white;
+    }
+    .template-preview {
+        background: white;
+        padding: 15px;
+        border-left: 4px solid #007bff;
+        margin: 10px 0;
+        font-family: monospace;
+        font-size: 13px;
+        white-space: pre-wrap;
+    }
+    .template-meta {
+        font-size: 12px;
+        color: #666;
+        margin-top: 10px;
+    }
+    .edit-form {
+        display: none;
+        background: white;
+        padding: 20px;
+        border: 2px solid #007bff;
+        border-radius: 5px;
+        margin-top: 15px;
+    }
+    .edit-form.show {
+        display: block;
+    }
+    textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+    }
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+    }
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    .sms-counter {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+    .sms-warning {
+        color: #ff8c00;
+        font-weight: bold;
+    }
+    .variables-list {
+        background: #e9ecef;
+        padding: 10px;
+        border-radius: 4px;
+        margin: 10px 0;
+        font-size: 12px;
+    }
+    .variables-list code {
+        background: white;
+        padding: 2px 5px;
+        border-radius: 2px;
+        margin-right: 5px;
+    }
+    .category-section {
+        margin-bottom: 40px;
+    }
+    .category-title {
+        font-size: 24px;
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block title %}{% trans "Message Templates" %}{% endblock %}
+
+{% block content %}
+<section class="admin-container">
+    <!-- Navigation -->
+    <div class="nav-link" style="margin-bottom: 20px;">
+        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
+        <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
+        <a href="{% url 'message_templates' %}" class="nav-link" style="font-weight: bold;">{% trans "Message Templates" %}</a>
+        {% if 'main.can_give_access' in perms %}
+            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
+        {% endif %}
+        {% if 'main.manage_rooms' in perms %}
+        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
+            <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
+        {% endif %}
+    </div>
+
+    <h1 class="admin-title">{% trans "Message Templates" %}</h1>
+    <p style="color: #666; margin-bottom: 30px;">{% trans "Edit message templates sent to iCal guests. Use variables like {guest_name}, {room_name}, {pin}, etc." %}</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}">
+                {{ message }}
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Email Templates -->
+    <div class="category-section">
+        <h2 class="category-title">📧 {% trans "Email Messages" %}</h2>
+        {% for template in email_templates %}
+        <div class="template-card">
+            <div class="template-header">
+                <span class="template-title">{{ template.get_message_type_display }}</span>
+                <span class="template-status {% if template.is_active %}status-active{% else %}status-inactive{% endif %}">
+                    {% if template.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                </span>
+            </div>
+
+            <div><strong>{% trans "Subject:" %}</strong> {{ template.subject }}</div>
+
+            <div class="template-preview">{{ template.render|safe|default:"(No content)" }}</div>
+
+            <div class="template-meta">
+                <strong>{% trans "Available Variables:" %}</strong>
+                {% for var in template.get_available_variables %}
+                    <code>{{ var }}</code>
+                {% endfor %}
+            </div>
+
+            <div class="template-meta">
+                {% if template.last_edited_by %}
+                    {% trans "Last edited by" %} {{ template.last_edited_by.username }} on {{ template.last_edited_at|date:"Y-m-d H:i" }}
+                {% else %}
+                    {% trans "Never edited" %}
+                {% endif %}
+            </div>
+
+            <button class="btn btn-primary" onclick="toggleEdit('{{ template.id }}')">{% trans "Edit" %}</button>
+
+            <!-- Edit Form -->
+            <div class="edit-form" id="edit-form-{{ template.id }}">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="template_id" value="{{ template.id }}">
+                    <input type="hidden" name="action" value="edit">
+
+                    <label><strong>{% trans "Subject:" %}</strong></label>
+                    <input type="text" name="subject" value="{{ template.subject }}" style="width: 100%; padding: 8px; margin-bottom: 15px;" required>
+
+                    <label><strong>{% trans "Content:" %}</strong></label>
+                    <textarea name="content" required>{{ template.content }}</textarea>
+
+                    <div class="variables-list">
+                        <strong>{% trans "Available Variables:" %}</strong>
+                        {% for var in template.get_available_variables %}
+                            <code>{{ var }}</code>
+                        {% endfor %}
+                    </div>
+
+                    <label>
+                        <input type="checkbox" name="is_active" {% if template.is_active %}checked{% endif %}>
+                        {% trans "Active (Send this message)" %}
+                    </label>
+                    <br><br>
+
+                    <button type="submit" class="btn btn-primary">{% trans "Save Changes" %}</button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleEdit('{{ template.id }}')">{% trans "Cancel" %}</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- SMS Templates -->
+    <div class="category-section">
+        <h2 class="category-title">📱 {% trans "SMS Messages" %}</h2>
+        {% for template in sms_templates %}
+        <div class="template-card">
+            <div class="template-header">
+                <span class="template-title">{{ template.get_message_type_display }}</span>
+                <span class="template-status {% if template.is_active %}status-active{% else %}status-inactive{% endif %}">
+                    {% if template.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}
+                </span>
+            </div>
+
+            <div class="template-preview">{{ template.render|safe|default:"(No content)" }}</div>
+
+            <div class="sms-counter">
+                {% trans "Character count:" %} {{ template.get_character_count }}
+                {% if template.get_character_count > 160 %}
+                    <span class="sms-warning">⚠️ {% trans "Over 160 characters (may be split into multiple messages)" %}</span>
+                {% endif %}
+            </div>
+
+            <div class="template-meta">
+                <strong>{% trans "Available Variables:" %}</strong>
+                {% for var in template.get_available_variables %}
+                    <code>{{ var }}</code>
+                {% endfor %}
+            </div>
+
+            <div class="template-meta">
+                {% if template.last_edited_by %}
+                    {% trans "Last edited by" %} {{ template.last_edited_by.username }} on {{ template.last_edited_at|date:"Y-m-d H:i" %}
+                {% else %}
+                    {% trans "Never edited" %}
+                {% endif %}
+            </div>
+
+            <button class="btn btn-primary" onclick="toggleEdit('{{ template.id }}')">{% trans "Edit" %}</button>
+
+            <!-- Edit Form -->
+            <div class="edit-form" id="edit-form-{{ template.id }}">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="template_id" value="{{ template.id }}">
+                    <input type="hidden" name="action" value="edit">
+
+                    <label><strong>{% trans "Content:" %}</strong></label>
+                    <textarea name="content" id="content-{{ template.id }}" onkeyup="updateCharCount('{{ template.id }}')" required>{{ template.content }}</textarea>
+
+                    <div class="sms-counter" id="char-count-{{ template.id }}">
+                        {% trans "Character count:" %} {{ template.get_character_count }}
+                    </div>
+
+                    <div class="variables-list">
+                        <strong>{% trans "Available Variables:" %}</strong>
+                        {% for var in template.get_available_variables %}
+                            <code>{{ var }}</code>
+                        {% endfor %}
+                    </div>
+
+                    <label>
+                        <input type="checkbox" name="is_active" {% if template.is_active %}checked{% endif %}>
+                        {% trans "Active (Send this message)" %}
+                    </label>
+                    <br><br>
+
+                    <button type="submit" class="btn btn-primary">{% trans "Save Changes" %}</button>
+                    <button type="button" class="btn btn-secondary" onclick="toggleEdit('{{ template.id }}')">{% trans "Cancel" %}</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+function toggleEdit(templateId) {
+    const form = document.getElementById('edit-form-' + templateId);
+    form.classList.toggle('show');
+}
+
+function updateCharCount(templateId) {
+    const textarea = document.getElementById('content-' + templateId);
+    const counter = document.getElementById('char-count-' + templateId);
+    const count = textarea.value.length;
+
+    let warning = '';
+    if (count > 160) {
+        warning = ' <span class="sms-warning">⚠️ Over 160 characters (may be split into multiple messages)</span>';
+    }
+
+    counter.innerHTML = 'Character count: ' + count + warning;
+}
+</script>
+{% endblock %}

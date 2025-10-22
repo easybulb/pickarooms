@@ -36,6 +36,7 @@ urlpatterns = [
     path('edit-room/<int:room_id>/', views.edit_room, name='edit_room'),
     path('admin-page/past-guests/', views.past_guests, name='past_guests'),
     path('admin-page/all-reservations/', views.all_reservations, name='all_reservations'),
+    path('admin-page/message-templates/', views.message_templates, name='message_templates'),
     path('privacy-policy/', privacy_policy, name='privacy_policy'),
     path('terms-of-use/', terms_of_use, name='terms_of_use'),
     path('terms-and-conditions/', terms_conditions, name='terms_conditions'),
