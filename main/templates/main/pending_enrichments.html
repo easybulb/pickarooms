@@ -59,11 +59,13 @@
         background: white;
         border: 1px solid #dee2e6;
         border-radius: 8px;
+        margin-bottom: 20px;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
+        min-width: 900px; /* Ensures horizontal scroll on small screens */
     }
 
     thead {
@@ -141,6 +143,47 @@
         color: #28a745;
         margin-bottom: 10px;
     }
+
+    /* Pagination controls */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        margin-top: 20px;
+    }
+
+    .pagination button {
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        background: white;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+
+    .pagination button:hover:not(:disabled) {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination button.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .pagination-info {
+        text-align: center;
+        margin-top: 15px;
+        color: #6c757d;
+        font-size: 14px;
+    }
 </style>
 {% endblock %}
 
@@ -151,6 +194,7 @@
         <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
         <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
         <a href="{% url 'enrichment_logs_page' %}" class="nav-link">{% trans "Enrichment Logs" %}</a>
+        <a href="{% url 'xls_upload_page' %}" class="nav-link">{% trans "XLS Upload" %}</a>
         <a href="{% url 'message_templates' %}" class="nav-link">{% trans "Message Templates" %}</a>
         {% if 'main.can_give_access' in perms %}
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
@@ -174,8 +218,10 @@
     </div>
 
     {% if pending_enrichments %}
+    <p class="pagination-info" id="pagination-info"></p>
+
     <div class="table-container">
-        <table>
+        <table id="pending-table">
             <thead>
                 <tr>
                     <th>{% trans "Booking Reference" %}</th>
@@ -222,6 +268,10 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination" id="pagination-controls"></div>
+
     {% else %}
     <div class="empty-state">
         <h3>✅ {% trans "All Clear!" %}</h3>
@@ -229,4 +279,94 @@
     </div>
     {% endif %}
 </div>
+
+<!-- JavaScript Pagination -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById("pending-table");
+    if (!table) return;
+
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    const paginationInfo = document.getElementById("pagination-info");
+    const paginationControls = document.getElementById("pagination-controls");
+
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+    function displayPage(page) {
+        currentPage = page;
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.forEach((row, index) => {
+            row.style.display = (index >= start && index < end) ? "" : "none";
+        });
+
+        // Update pagination info
+        const showing = Math.min(end, rows.length);
+        paginationInfo.textContent = `Showing ${start + 1}-${showing} of ${rows.length} pending enrichments`;
+
+        // Update pagination controls
+        renderPaginationControls();
+    }
+
+    function renderPaginationControls() {
+        paginationControls.innerHTML = "";
+
+        if (totalPages <= 1) {
+            return; // No pagination needed
+        }
+
+        // Previous button
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "←";
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.addEventListener("click", () => displayPage(currentPage - 1));
+        paginationControls.appendChild(prevBtn);
+
+        // Page numbers (show first, last, current, and adjacent pages)
+        const pagesToShow = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                pagesToShow.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                pagesToShow.push(1, 2, 3, 4, "...", totalPages);
+            } else if (currentPage >= totalPages - 2) {
+                pagesToShow.push(1, "...", totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pagesToShow.push(1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages);
+            }
+        }
+
+        pagesToShow.forEach(page => {
+            if (page === "...") {
+                const ellipsis = document.createElement("span");
+                ellipsis.textContent = "...";
+                ellipsis.style.padding = "8px";
+                paginationControls.appendChild(ellipsis);
+            } else {
+                const pageBtn = document.createElement("button");
+                pageBtn.textContent = page;
+                pageBtn.className = page === currentPage ? "active" : "";
+                pageBtn.addEventListener("click", () => displayPage(page));
+                paginationControls.appendChild(pageBtn);
+            }
+        });
+
+        // Next button
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "→";
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.addEventListener("click", () => displayPage(currentPage + 1));
+        paginationControls.appendChild(nextBtn);
+    }
+
+    // Initialize pagination
+    displayPage(1);
+});
+</script>
 {% endblock %}
