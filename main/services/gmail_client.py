@@ -116,6 +116,9 @@ class GmailClient:
         """
         Get unread emails from Booking.com
 
+        Optionally filters by Gmail label if GMAIL_LABEL_FILTER is set in settings.
+        This prevents processing old unread emails and reduces Redis usage.
+
         Returns:
             list: List of email dictionaries with keys:
                 - id: Gmail message ID
@@ -123,8 +126,22 @@ class GmailClient:
                 - received_at: Datetime when email was received
         """
         try:
+            from django.conf import settings
+
             # Search query: unread emails from Booking.com
             query = 'from:noreply@booking.com is:unread'
+
+            # Add label filter if configured (prevents processing old emails)
+            label_filter = getattr(settings, 'GMAIL_LABEL_FILTER', '').strip()
+            if label_filter:
+                # Gmail label syntax: label:LabelName or label:"Label With Spaces"
+                if ' ' in label_filter:
+                    query += f' label:"{label_filter}"'
+                else:
+                    query += f' label:{label_filter}'
+                logger.info(f"Using Gmail label filter: '{label_filter}' - Query: {query}")
+            else:
+                logger.info("No Gmail label filter configured - processing all unread Booking.com emails")
 
             # Call Gmail API
             results = self.service.users().messages().list(

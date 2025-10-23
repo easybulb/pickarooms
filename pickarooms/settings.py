@@ -200,6 +200,12 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+# Gmail API Label Filter (optional)
+# If set, only emails with this label will be processed
+# Example: 'Pickarooms' or 'Booking/Process'
+# If not set or empty, all unread Booking.com emails will be processed
+GMAIL_LABEL_FILTER = os.environ.get("GMAIL_LABEL_FILTER", "").strip()
+
 # ✅ reCAPTCHA Configuration
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
