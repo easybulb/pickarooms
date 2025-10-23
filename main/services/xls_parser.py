@@ -120,7 +120,7 @@ def create_reservations_from_xls_row(row, warnings_list=None):
             logger.error(f"Room {room_name} not found in database")
             continue
 
-        # Check if reservation already exists
+                # Check if reservation already exists
         existing = Reservation.objects.filter(
             booking_reference=booking_ref,
             room=room,
@@ -129,6 +129,7 @@ def create_reservations_from_xls_row(row, warnings_list=None):
 
         if existing:
             # Update existing
+            existing.booking_reference = booking_ref  # FIX: Ensure booking ref is set (for iCal-synced reservations)
             existing.guest_name = guest_name
             existing.check_out_date = check_out
             if status == 'cancelled_by_guest':
