@@ -786,3 +786,8 @@ Traceback (most recent call last):
   File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
     raise NoReverseMatch(msg)
 django.urls.exceptions.NoReverseMatch: Reverse for 'manage_checkin_checkout' with arguments '(None,)' not found. 1 pattern(s) tried: ['admin\\-page/manage\\-checkin\\-checkout/(?P<guest_id>[0-9]+)/\\Z']
+ERROR 2025-10-23 23:04:05,834 models Failed to send welcome email to easybulb@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-429898adc81sm6028186f8f.26 - gsmtp')
+ERROR 2025-10-23 23:04:13,918 ttlock_utils TTLock API error: The gateway is busy. Please try again later. (errcode: -3003)
+ERROR 2025-10-23 23:04:13,919 views Failed to unlock front door for guest 5282674483: TTLock API error: The gateway is busy. Please try again later. (errcode: -3003)
+ERROR 2025-10-23 23:04:14,464 ttlock_utils TTLock API error: The gateway is busy. Please try again later. (errcode: -3003)
+ERROR 2025-10-23 23:04:14,464 views Failed to generate PIN for guest 5282674483: TTLock API error: The gateway is busy. Please try again later. (errcode: -3003)

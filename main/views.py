@@ -2113,6 +2113,111 @@ def all_reservations(request):
     })
 
 @login_required(login_url='/admin-page/login/')
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.delete_guest'), login_url='/unauthorized/')
+def delete_reservation(request, reservation_id):
+    """Delete individual reservation"""
+    if request.method == 'POST':
+        try:
+            reservation = get_object_or_404(Reservation, id=reservation_id)
+            booking_ref = reservation.booking_reference
+            room_name = reservation.room.name
+            
+            # Check if reservation is enriched (has linked guest)
+            if reservation.guest:
+                messages.warning(request, f"Cannot delete reservation {booking_ref} - it is linked to guest {reservation.guest.full_name}. Delete the guest first.")
+                return redirect('all_reservations')
+            
+            # Delete the reservation
+            reservation.delete()
+            
+            # Log the deletion
+            AuditLog.objects.create(
+                user=request.user,
+                action="Reservation Deleted",
+                object_type="Reservation",
+                object_id=reservation_id,
+                details=f"Deleted unenriched reservation {booking_ref} for room {room_name}"
+            )
+            
+            logger.info(f"Reservation {booking_ref} deleted by {request.user.username}")
+            messages.success(request, f"Reservation {booking_ref} deleted successfully.")
+            
+        except Exception as e:
+            logger.error(f"Error deleting reservation {reservation_id}: {str(e)}")
+            messages.error(request, f"Failed to delete reservation: {str(e)}")
+    
+    return redirect('all_reservations')
+
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.delete_guest'), login_url='/unauthorized/')
+def bulk_delete_reservations(request):
+    """Delete multiple reservations at once"""
+    if request.method == 'POST':
+        reservation_ids = request.POST.getlist('reservation_ids')
+        
+        if not reservation_ids:
+            messages.warning(request, "No reservations selected for deletion.")
+            return redirect('all_reservations')
+        
+        deleted_count = 0
+        skipped_count = 0
+        skipped_bookings = []
+        
+        for res_id in reservation_ids:
+            try:
+                reservation = Reservation.objects.get(id=res_id)
+                
+                # Skip enriched reservations (linked to guests)
+                if reservation.guest:
+                    skipped_count += 1
+                    skipped_bookings.append(reservation.booking_reference)
+                    continue
+                
+                booking_ref = reservation.booking_reference
+                room_name = reservation.room.name
+                
+                # Delete the reservation
+                reservation.delete()
+                
+                # Log the deletion
+                AuditLog.objects.create(
+                    user=request.user,
+                    action="Reservation Deleted (Bulk)",
+                    object_type="Reservation",
+                    object_id=res_id,
+                    details=f"Bulk deleted unenriched reservation {booking_ref} for room {room_name}"
+                )
+                
+                deleted_count += 1
+                
+            except Reservation.DoesNotExist:
+                logger.warning(f"Reservation {res_id} not found during bulk delete")
+                continue
+            except Exception as e:
+                logger.error(f"Error deleting reservation {res_id}: {str(e)}")
+                continue
+        
+        # Prepare success/warning messages
+        if deleted_count > 0:
+            messages.success(request, f"Successfully deleted {deleted_count} reservation(s).")
+        
+        if skipped_count > 0:
+            skipped_list = ", ".join(skipped_bookings[:5])  # Show first 5
+            if len(skipped_bookings) > 5:
+                skipped_list += f" (+{len(skipped_bookings) - 5} more)"
+            messages.warning(request, f"Skipped {skipped_count} enriched reservation(s) (linked to guests): {skipped_list}")
+        
+        if deleted_count == 0 and skipped_count == 0:
+            messages.info(request, "No reservations were deleted.")
+        
+        logger.info(f"Bulk delete completed by {request.user.username}: {deleted_count} deleted, {skipped_count} skipped")
+    
+    return redirect('all_reservations')
+
+
 @user_passes_test(lambda user: user.has_perm('main.change_guest'), login_url='/unauthorized/')
 def manage_checkin_checkout(request, guest_id):
     guest = get_object_or_404(Guest, id=guest_id)
