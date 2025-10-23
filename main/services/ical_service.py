@@ -234,27 +234,46 @@ def sync_reservations_for_room(config_id, platform='booking'):
                     # Determine status
                     event_status = 'cancelled' if event['status'] == 'CANCELLED' else 'confirmed'
 
-                    # Get or create reservation with platform
-                    reservation, created = Reservation.objects.update_or_create(
-                        ical_uid=uid,
-                        defaults={
-                            'room': config.room,
-                            'platform': platform,
-                            'guest_name': event['summary'],
-                            'booking_reference': booking_ref or '',
-                            'check_in_date': event['dtstart'],
-                            'check_out_date': event['dtend'],
-                            'status': event_status,
-                            'raw_ical_data': event['raw']
-                        }
-                    )
+                    # Check if reservation already exists
+                    try:
+                        reservation = Reservation.objects.get(ical_uid=uid)
+                        created = False
 
-                    if created:
+                        # UPDATE EXISTING: Preserve XLS-enriched data
+                        # Only update fields that iCal should control (dates, status, raw data)
+                        reservation.check_in_date = event['dtstart']
+                        reservation.check_out_date = event['dtend']
+                        reservation.status = event_status
+                        reservation.raw_ical_data = event['raw']
+
+                        # Only update guest_name if it's still the iCal default (not enriched by XLS)
+                        # XLS enrichment sets full name like "Daniel Helyar"
+                        # iCal has format like "BDC-1234567890" or guest initials
+                        if not reservation.booking_reference or len(reservation.booking_reference) < 5:
+                            # No XLS enrichment yet, safe to update from iCal
+                            reservation.guest_name = event['summary']
+                            reservation.booking_reference = booking_ref or ''
+                        # else: Preserve XLS-enriched booking_reference and guest_name
+
+                        reservation.save()
+                        updated_count += 1
+                        logger.info(f"Updated reservation (preserved enrichments): {reservation}")
+
+                    except Reservation.DoesNotExist:
+                        # CREATE NEW: First time seeing this iCal event
+                        reservation = Reservation.objects.create(
+                            ical_uid=uid,
+                            room=config.room,
+                            platform=platform,
+                            guest_name=event['summary'],
+                            booking_reference=booking_ref or '',
+                            check_in_date=event['dtstart'],
+                            check_out_date=event['dtend'],
+                            status=event_status,
+                            raw_ical_data=event['raw']
+                        )
                         created_count += 1
                         logger.info(f"Created reservation: {reservation}")
-                    else:
-                        updated_count += 1
-                        logger.info(f"Updated reservation: {reservation}")
 
                 except Exception as e:
                     error_msg = f"Error processing event {event.get('uid', 'unknown')}: {str(e)}"
