@@ -50,13 +50,14 @@ def parse_multi_room_unit_type(unit_type_str):
     return rooms
 
 
-def create_reservations_from_xls_row(row):
+def create_reservations_from_xls_row(row, warnings_list=None):
     """
     Create one or more Reservation objects from XLS row
     Handles both single-room and multi-room bookings
 
     Args:
         row (pandas.Series): Row from XLS dataframe
+        warnings_list (list): Optional list to append warnings to
 
     Returns:
         list: List of tuples (action, reservation) where action is 'created' or 'updated'
@@ -75,6 +76,40 @@ def create_reservations_from_xls_row(row):
     if not rooms:
         logger.error(f"No rooms mapped for booking {booking_ref}, unit type: {unit_type}")
         return []
+
+    # Check for room changes (booking moved to different room)
+    existing_reservations = Reservation.objects.filter(
+        booking_reference=booking_ref,
+        check_in_date=check_in
+    )
+
+    if existing_reservations.exists():
+        existing_rooms = set(res.room.name for res in existing_reservations)
+        new_rooms = set(rooms)
+
+        # Detect room changes
+        removed_rooms = existing_rooms - new_rooms
+        added_rooms = new_rooms - existing_rooms
+
+        if removed_rooms or added_rooms:
+            warning_msg = f"⚠️ ROOM CHANGE DETECTED for booking {booking_ref} ({guest_name}, {check_in}):"
+            if removed_rooms:
+                warning_msg += f" Removed from {', '.join(removed_rooms)}."
+            if added_rooms:
+                warning_msg += f" Added to {', '.join(added_rooms)}."
+            warning_msg += " Please manually check/delete old reservations from Django admin."
+
+            logger.warning(warning_msg)
+            if warnings_list is not None:
+                warnings_list.append({
+                    'type': 'room_change',
+                    'booking_ref': booking_ref,
+                    'guest_name': guest_name,
+                    'check_in': check_in,
+                    'removed_rooms': list(removed_rooms),
+                    'added_rooms': list(added_rooms),
+                    'message': warning_msg
+                })
 
     created_reservations = []
 
@@ -152,6 +187,7 @@ def process_xls_file(xls_file, uploaded_by=None):
         'updated_count': 0,
         'enrichment_results': [],
         'discrepancies': [],
+        'warnings': [],  # Room change warnings
     }
 
     for _, row in df.iterrows():
@@ -175,8 +211,8 @@ def process_xls_file(xls_file, uploaded_by=None):
         else:
             results['single_room_count'] += 1
 
-        # Create reservations
-        created_reservations = create_reservations_from_xls_row(row)
+        # Create reservations (pass warnings list for room change detection)
+        created_reservations = create_reservations_from_xls_row(row, warnings_list=results['warnings'])
 
         for action, reservation in created_reservations:
             if action == 'created':

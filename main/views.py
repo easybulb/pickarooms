@@ -3365,6 +3365,7 @@ def xls_upload_page(request):
             results = process_xls_file(xls_file, uploaded_by=request.user)
 
             if results['success']:
+                # Show success message
                 messages.success(
                     request,
                     f"XLS processed successfully! "
@@ -3372,6 +3373,21 @@ def xls_upload_page(request):
                     f"Updated: {results['updated_count']}, "
                     f"Multi-room bookings: {results['multi_room_count']}"
                 )
+
+                # Show room change warnings if any
+                if results.get('warnings'):
+                    for warning in results['warnings']:
+                        if warning['type'] == 'room_change':
+                            warning_msg = (
+                                f"ROOM CHANGE: Booking {warning['booking_ref']} "
+                                f"({warning['guest_name']}, {warning['check_in']}) - "
+                            )
+                            if warning['removed_rooms']:
+                                warning_msg += f"Removed from {', '.join(warning['removed_rooms'])}. "
+                            if warning['added_rooms']:
+                                warning_msg += f"Added to {', '.join(warning['added_rooms'])}. "
+                            warning_msg += "Please check Django admin to delete old reservations."
+                            messages.warning(request, warning_msg)
             else:
                 messages.error(request, f"Error processing XLS: {results.get('error', 'Unknown error')}")
 
