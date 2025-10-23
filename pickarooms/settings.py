@@ -327,10 +327,11 @@ CACHES = {
 # Celery Configuration
 # =========================
 # Celery Broker URL (Redis)
-CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+# Heroku uses REDISCLOUD_URL, local uses REDIS_URL
+CELERY_BROKER_URL = os.environ.get('REDISCLOUD_URL') or os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
 # Celery Result Backend (Redis)
-CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('REDISCLOUD_URL') or os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 
 # Celery Accept Content
 CELERY_ACCEPT_CONTENT = ['application/json']
