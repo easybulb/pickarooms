@@ -235,10 +235,35 @@ def sync_reservations_for_room(config_id, platform='booking'):
                     event_status = 'cancelled' if event['status'] == 'CANCELLED' else 'confirmed'
 
                     # Check if reservation already exists
-                    try:
-                        reservation = Reservation.objects.get(ical_uid=uid)
-                        created = False
+                    # Strategy: Try multiple matching methods to prevent duplicates
+                    # 1. Match by booking_reference + room + check_in (catches XLS-created reservations)
+                    # 2. Match by ical_uid (catches iCal-created reservations)
+                    reservation = None
+                    created = False
+                    match_method = None
 
+                    # Method 1: Try matching by booking_reference + room + check_in_date
+                    # This prevents duplicates when XLS upload happens before iCal sync
+                    if booking_ref and len(booking_ref) >= 5:
+                        reservation = Reservation.objects.filter(
+                            booking_reference=booking_ref,
+                            room=config.room,
+                            check_in_date=event['dtstart']
+                        ).first()
+                        if reservation:
+                            match_method = 'booking_ref'
+                            logger.info(f"Found existing reservation by booking_ref: {booking_ref}")
+
+                    # Method 2: Try matching by ical_uid (standard iCal behavior)
+                    if not reservation:
+                        try:
+                            reservation = Reservation.objects.get(ical_uid=uid)
+                            match_method = 'ical_uid'
+                            logger.info(f"Found existing reservation by ical_uid: {uid}")
+                        except Reservation.DoesNotExist:
+                            pass
+
+                    if reservation:
                         # UPDATE EXISTING: Preserve XLS-enriched data
                         # Only update fields that iCal should control (dates, status, raw data)
                         reservation.check_in_date = event['dtstart']
@@ -246,9 +271,16 @@ def sync_reservations_for_room(config_id, platform='booking'):
                         reservation.status = event_status
                         reservation.raw_ical_data = event['raw']
 
-                        # Only update guest_name if it's still the iCal default (not enriched by XLS)
-                        # XLS enrichment sets full name like "Daniel Helyar"
-                        # iCal has format like "BDC-1234567890" or guest initials
+                        # IMPORTANT: Update ical_uid if matched by booking_ref
+                        # This links XLS-created reservations to iCal feed for future updates
+                        if match_method == 'booking_ref' and reservation.ical_uid != uid:
+                            old_uid = reservation.ical_uid
+                            reservation.ical_uid = uid
+                            logger.info(f"Updated ical_uid: {old_uid} → {uid}")
+
+                        # Only update guest_name/booking_ref if NOT XLS-enriched
+                        # XLS enrichment sets full booking_reference (8-10 digits)
+                        # iCal has truncated or empty booking_ref
                         if not reservation.booking_reference or len(reservation.booking_reference) < 5:
                             # No XLS enrichment yet, safe to update from iCal
                             reservation.guest_name = event['summary']
@@ -257,9 +289,9 @@ def sync_reservations_for_room(config_id, platform='booking'):
 
                         reservation.save()
                         updated_count += 1
-                        logger.info(f"Updated reservation (preserved enrichments): {reservation}")
+                        logger.info(f"Updated reservation (method={match_method}, preserved enrichments): {reservation}")
 
-                    except Reservation.DoesNotExist:
+                    else:
                         # CREATE NEW: First time seeing this iCal event
                         reservation = Reservation.objects.create(
                             ical_uid=uid,
@@ -273,7 +305,7 @@ def sync_reservations_for_room(config_id, platform='booking'):
                             raw_ical_data=event['raw']
                         )
                         created_count += 1
-                        logger.info(f"Created reservation: {reservation}")
+                        logger.info(f"Created new reservation: {reservation}")
 
                 except Exception as e:
                     error_msg = f"Error processing event {event.get('uid', 'unknown')}: {str(e)}"
