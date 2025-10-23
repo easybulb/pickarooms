@@ -3423,28 +3423,97 @@ def xls_upload_page(request):
 @user_passes_test(lambda user: user.has_perm('main.view_reservation'), login_url='/unauthorized/')
 def enrichment_logs_page(request):
     """
-    Admin page showing enrichment audit trail
+    Admin page showing enrichment audit trail with timeline view option
     """
-    from main.models import EnrichmentLog
+    from main.models import EnrichmentLog, PendingEnrichment
+    from collections import defaultdict
+    from django.db.models import Q
 
-    # Get recent logs
-    logs = EnrichmentLog.objects.all().select_related(
+    view_mode = request.GET.get('view', 'list')  # 'list' or 'timeline'
+    search_ref = request.GET.get('search', '').strip()
+
+    # Base query
+    logs_query = EnrichmentLog.objects.all().select_related(
         'pending_enrichment', 'reservation', 'room'
-    ).order_by('-timestamp')[:100]
+    )
 
-    logs_data = []
-    for log in logs:
-        logs_data.append({
-            'id': log.id,
-            'action': log.get_action_display(),
-            'booking_reference': log.booking_reference,
-            'room': log.room.name if log.room else 'N/A',
-            'method': log.method if hasattr(log, 'method') else 'N/A',
-            'timestamp': log.timestamp,
-            'details': log.details,
+    # Apply search filter
+    if search_ref:
+        logs_query = logs_query.filter(booking_reference__icontains=search_ref)
+
+    # Limit to recent logs
+    logs = logs_query.order_by('-timestamp')[:200]
+
+    if view_mode == 'timeline':
+        # Group logs by booking reference to show process flow
+        timelines = defaultdict(list)
+        for log in logs:
+            timelines[log.booking_reference].append({
+                'id': log.id,
+                'action': log.get_action_display(),
+                'action_code': log.action,
+                'booking_reference': log.booking_reference,
+                'room': log.room.name if log.room else 'N/A',
+                'method': log.method if hasattr(log, 'method') else 'N/A',
+                'timestamp': log.timestamp,
+                'details': log.details,
+                'pending_enrichment_id': log.pending_enrichment_id,
+                'reservation_id': log.reservation_id,
+            })
+
+        # Sort each timeline by timestamp
+        for ref in timelines:
+            timelines[ref] = sorted(timelines[ref], key=lambda x: x['timestamp'])
+
+        # Get corresponding PendingEnrichment status
+        timeline_data = []
+        for ref, events in timelines.items():
+            # Get latest PendingEnrichment for this booking reference
+            pending = PendingEnrichment.objects.filter(
+                booking_reference=ref
+            ).order_by('-created_at').first()
+
+            timeline_data.append({
+                'booking_reference': ref,
+                'events': events,
+                'pending_status': pending.status if pending else None,
+                'pending_attempts': pending.attempts if pending else 0,
+                'email_type': pending.get_email_type_display() if pending else 'N/A',
+                'check_in_date': pending.check_in_date if pending else None,
+            })
+
+        # Sort timelines by most recent event
+        timeline_data = sorted(
+            timeline_data,
+            key=lambda x: x['events'][0]['timestamp'] if x['events'] else timezone.now(),
+            reverse=True
+        )
+
+        return render(request, 'main/enrichment_logs.html', {
+            'view_mode': 'timeline',
+            'timelines': timeline_data,
+            'total_count': len(timeline_data),
+            'search_ref': search_ref,
         })
 
-    return render(request, 'main/enrichment_logs.html', {
-        'logs': logs_data,
-        'total_count': len(logs_data),
-    })
+    else:
+        # List view (original)
+        logs_data = []
+        for log in logs:
+            logs_data.append({
+                'id': log.id,
+                'action': log.get_action_display(),
+                'action_code': log.action,
+                'booking_reference': log.booking_reference,
+                'room': log.room.name if log.room else 'N/A',
+                'method': log.method if hasattr(log, 'method') else 'N/A',
+                'timestamp': log.timestamp,
+                'details': log.details,
+            })
+
+        return render(request, 'main/enrichment_logs.html', {
+            'view_mode': 'list',
+            'logs': logs_data,
+            'total_count': len(logs_data),
+            'search_ref': search_ref,
+        })
