@@ -3,6 +3,13 @@ Diagnostic script to check production data
 Run with: heroku run python check_production_data.py -a pickarooms
 """
 
+import os
+import django
+
+# Setup Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pickarooms.settings')
+django.setup()
+
 from datetime import date
 from main.models import Reservation, Guest, CSVEnrichmentLog
 
