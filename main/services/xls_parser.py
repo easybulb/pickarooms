@@ -220,23 +220,37 @@ def process_xls_file(xls_file, uploaded_by=None):
             elif action == 'updated':
                 results['updated_count'] += 1
 
+            # Get guest name safely (handle NaN values)
+            guest_name_value = row.get('Guest Name(s)', '')
+            if pd.isna(guest_name_value):
+                guest_name_value = '(Unknown)'
+            else:
+                guest_name_value = str(guest_name_value).strip()
+
             # Log enrichment
             EnrichmentLog.objects.create(
                 reservation=reservation,
                 action='xls_enriched_multi' if len(rooms) > 1 else 'xls_enriched_single',
-                booking_reference=row['Book Number'],
+                booking_reference=str(row['Book Number']).strip(),
                 room=reservation.room,
                 method='csv_upload',
                 details={
                     'room_count': len(rooms),
                     'rooms': rooms,
-                    'guest_name': row.get('Guest Name(s)', ''),
+                    'guest_name': guest_name_value,
                 }
             )
 
+        # Get guest name safely for results
+        guest_name_display = row.get('Guest Name(s)', '')
+        if pd.isna(guest_name_display):
+            guest_name_display = '(Unknown)'
+        else:
+            guest_name_display = str(guest_name_display).strip()
+
         results['enrichment_results'].append({
-            'booking_ref': row['Book Number'],
-            'guest_name': row.get('Guest Name(s)', '(Unknown)'),
+            'booking_ref': str(row['Book Number']).strip(),
+            'guest_name': guest_name_display,
             'rooms': rooms,
             'action': f"{len(created_reservations)} reservation(s) processed",
         })
