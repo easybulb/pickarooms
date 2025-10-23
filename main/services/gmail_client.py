@@ -37,12 +37,25 @@ class GmailClient:
         Authenticate with Gmail API using OAuth2
 
         Credentials flow:
-        1. Check if token.json exists (stored refresh token)
-        2. If token expired, refresh it
-        3. If no token, initiate OAuth flow (first-time setup)
+        1. Check if GMAIL_TOKEN_BASE64 env variable exists (Heroku deployment)
+        2. Check if token.json exists (local development)
+        3. If token expired, refresh it
+        4. If no token, initiate OAuth flow (first-time setup)
         """
         token_path = os.path.join(os.getcwd(), 'gmail_token.json')
         credentials_path = os.path.join(os.getcwd(), 'gmail_credentials.json')
+
+        # HEROKU: Check for base64-encoded token in environment variable
+        token_base64 = os.environ.get('GMAIL_TOKEN_BASE64')
+        if token_base64 and not os.path.exists(token_path):
+            try:
+                import base64
+                token_data = base64.b64decode(token_base64)
+                with open(token_path, 'wb') as f:
+                    f.write(token_data)
+                logger.info("Decoded Gmail token from GMAIL_TOKEN_BASE64 environment variable")
+            except Exception as e:
+                logger.error(f"Error decoding GMAIL_TOKEN_BASE64: {str(e)}")
 
         # Load existing credentials
         if os.path.exists(token_path):

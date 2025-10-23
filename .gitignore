@@ -53,3 +53,7 @@ tokens.json
 # Documentation that may contain sensitive info
 HEROKU_DEPLOYMENT_SUMMARY.md
 SUPERUSER_UPDATE_SUMMARY.md
+gmail_token.json
+gmail_credentials.json
+test_gmail_auth.py
+gmail_token_base64.txt

@@ -568,3 +568,6 @@ ERROR 2025-10-22 19:28:41,711 models Missing variable in template ical_post_stay
 ERROR 2025-10-22 19:28:41,711 models Missing variable in template ical_update_sms: 'check_in_date'
 ERROR 2025-10-22 19:28:41,712 models Missing variable in template ical_welcome_sms: 'check_in_date'
 ERROR 2025-10-22 19:29:08,986 models Failed to send cancellation email to easybulb@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-475c428a534sm66249155e9.6 - gsmtp')
+ERROR 2025-10-23 10:13:09,821 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(6886022978, booking) already exists.
+
