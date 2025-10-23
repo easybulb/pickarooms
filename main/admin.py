@@ -324,6 +324,7 @@ class PendingEnrichmentAdmin(admin.ModelAdmin):
     list_filter = ('status', 'email_type', 'platform', 'check_in_date')
     search_fields = ('booking_reference', 'matched_reservation__guest_name')
     readonly_fields = ('email_received_at', 'enriched_at', 'alert_sent_at', 'alert_sms_sid')
+    actions = ['delete_selected_enrichments']
 
     fieldsets = (
         ('Booking Details', {
@@ -343,6 +344,13 @@ class PendingEnrichmentAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+    def delete_selected_enrichments(self, request, queryset):
+        """Bulk delete selected PendingEnrichments"""
+        count = queryset.count()
+        queryset.delete()
+        self.message_user(request, f"Successfully deleted {count} PendingEnrichment(s).")
+    delete_selected_enrichments.short_description = "Delete selected pending enrichments"
 
 class EnrichmentLogAdmin(admin.ModelAdmin):
     list_display = ('timestamp', 'action', 'booking_reference', 'room', 'method')
