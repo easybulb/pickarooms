@@ -278,14 +278,20 @@ def sync_reservations_for_room(config_id, platform='booking'):
                             reservation.ical_uid = uid
                             logger.info(f"Updated ical_uid: {old_uid} → {uid}")
 
-                        # Only update guest_name/booking_ref if NOT XLS-enriched
-                        # XLS enrichment sets full booking_reference (8-10 digits)
-                        # iCal has truncated or empty booking_ref
-                        if not reservation.booking_reference or len(reservation.booking_reference) < 5:
-                            # No XLS enrichment yet, safe to update from iCal
+                        # Preserve XLS-enriched booking_reference (5+ chars)
+                        # Only update if iCal has a valid booking_ref AND reservation doesn't have one yet
+                        if booking_ref and len(booking_ref) >= 5:
+                            # iCal has valid booking ref - update it
+                            reservation.booking_reference = booking_ref
                             reservation.guest_name = event['summary']
-                            reservation.booking_reference = booking_ref or ''
-                        # else: Preserve XLS-enriched booking_reference and guest_name
+                            logger.info(f"Updated booking_ref from iCal: {booking_ref}")
+                        elif not reservation.booking_reference or len(reservation.booking_reference) < 5:
+                            # No enrichment yet, update guest_name but keep booking_ref as-is (don't overwrite with empty)
+                            reservation.guest_name = event['summary']
+                            logger.info(f"Updated guest_name only, preserved booking_ref: {reservation.booking_reference or 'empty'}")
+                        else:
+                            # Preserve XLS-enriched data (booking_reference >= 5 chars)
+                            logger.info(f"Preserved XLS-enriched booking_ref: {reservation.booking_reference}")
 
                         reservation.save()
                         updated_count += 1
