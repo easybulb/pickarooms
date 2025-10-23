@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Pending Enrichments" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .back-link {
+        color: #007bff;
+        text-decoration: none;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    h1 {
+        margin-bottom: 30px;
+    }
+
+    .info-box {
+        background: #f0f8ff;
+        border-left: 4px solid #007bff;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+
+    .info-box p {
+        margin: 5px 0;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: #343a40;
+        color: white;
+    }
+
+    thead th {
+        padding: 12px;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    tbody td {
+        padding: 12px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status-pending {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .status-failed {
+        background: #dc3545;
+        color: white;
+    }
+
+    .email-type-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    .email-new {
+        background: #28a745;
+        color: white;
+    }
+
+    .email-modification {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .email-cancellation {
+        background: #dc3545;
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .empty-state h3 {
+        color: #28a745;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">← {% trans "Back to Admin Dashboard" %}</a>
+
+    <h1>📋 {% trans "Pending Enrichments" %}</h1>
+
+    <div class="info-box">
+        <p><strong>{% trans "Total Pending/Failed:" %}</strong> {{ total_count }}</p>
+        <p><em>{% trans "This page shows Booking.com reservations that failed automatic matching and require manual assignment." %}</em></p>
+    </div>
+
+    {% if pending_enrichments %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Booking Reference" %}</th>
+                    <th>{% trans "Check-In Date" %}</th>
+                    <th>{% trans "Email Type" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Attempts" %}</th>
+                    <th>{% trans "Email Received" %}</th>
+                    <th>{% trans "Alert Sent" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrichment in pending_enrichments %}
+                <tr>
+                    <td><strong>{{ enrichment.booking_reference }}</strong></td>
+                    <td>{{ enrichment.check_in_date|date:"d M Y" }}</td>
+                    <td>
+                        {% if enrichment.email_type == 'new' %}
+                            <span class="email-type-badge email-new">NEW</span>
+                        {% elif enrichment.email_type == 'modification' %}
+                            <span class="email-type-badge email-modification">MODIFIED</span>
+                        {% elif enrichment.email_type == 'cancellation' %}
+                            <span class="email-type-badge email-cancellation">CANCELLED</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if enrichment.status == 'pending' %}
+                            <span class="status-badge status-pending">PENDING</span>
+                        {% elif enrichment.status == 'failed_awaiting_manual' %}
+                            <span class="status-badge status-failed">AWAITING MANUAL</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ enrichment.attempts }} / 5</td>
+                    <td>{{ enrichment.email_received_at|date:"d M Y H:i" }}</td>
+                    <td>
+                        {% if enrichment.alert_sent_at %}
+                            {{ enrichment.alert_sent_at|date:"d M Y H:i" }}
+                        {% else %}
+                            <em>Not sent</em>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>✅ {% trans "All Clear!" %}</h3>
+        <p>{% trans "No pending enrichments requiring manual assignment." %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

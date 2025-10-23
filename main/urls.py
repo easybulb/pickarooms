@@ -51,4 +51,10 @@ urlpatterns = [
     path('block-review-messages/', views.block_review_messages, name='block_review_messages'),
     path('event-finder/', views.event_finder, name='event_finder'),
     path('price-suggester/', views.price_suggester, name='price_suggester'),
+
+    # Email Enrichment System URLs
+    path('webhooks/twilio/sms/', views.handle_twilio_sms_webhook, name='twilio_sms_webhook'),
+    path('admin-page/pending-enrichments/', views.pending_enrichments_page, name='pending_enrichments_page'),
+    path('admin-page/xls-upload/', views.xls_upload_page, name='xls_upload_page'),
+    path('admin-page/enrichment-logs/', views.enrichment_logs_page, name='enrichment_logs_page'),
 ]

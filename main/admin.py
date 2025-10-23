@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.conf import settings
 from django import forms
-from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload, TTLockToken, RoomICalConfig, Reservation, MessageTemplate
+from .models import Room, Guest, ReviewCSVUpload, TTLock, AuditLog, PopularEvent, GuestIDUpload, TTLockToken, RoomICalConfig, Reservation, MessageTemplate, PendingEnrichment, EnrichmentLog, CSVEnrichmentLog
 from .ttlock_utils import TTLockClient
 import logging
 import random  # Added for randint
@@ -318,6 +318,52 @@ class MessageTemplateAdmin(admin.ModelAdmin):
         obj.last_edited_by = request.user
         obj.save()
 
+# Email Enrichment System Admin Classes
+class PendingEnrichmentAdmin(admin.ModelAdmin):
+    list_display = ('booking_reference', 'check_in_date', 'email_type', 'status', 'attempts', 'email_received_at', 'alert_sent_at')
+    list_filter = ('status', 'email_type', 'platform', 'check_in_date')
+    search_fields = ('booking_reference', 'matched_reservation__guest_name')
+    readonly_fields = ('email_received_at', 'enriched_at', 'alert_sent_at', 'alert_sms_sid')
+
+    fieldsets = (
+        ('Booking Details', {
+            'fields': ('platform', 'booking_reference', 'check_in_date', 'email_type')
+        }),
+        ('Matching Status', {
+            'fields': ('status', 'attempts', 'matched_reservation', 'room_matched')
+        }),
+        ('Alert Tracking', {
+            'fields': ('alert_sent_at', 'alert_sms_sid')
+        }),
+        ('Enrichment', {
+            'fields': ('enriched_via', 'enriched_at')
+        }),
+        ('Timestamps', {
+            'fields': ('email_received_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+class EnrichmentLogAdmin(admin.ModelAdmin):
+    list_display = ('timestamp', 'action', 'booking_reference', 'room', 'method')
+    list_filter = ('action', 'method', 'timestamp')
+    search_fields = ('booking_reference', 'reservation__guest_name')
+    readonly_fields = ('timestamp', 'pending_enrichment', 'reservation', 'action', 'booking_reference', 'room', 'method', 'details')
+
+    def has_add_permission(self, request):
+        # Logs should be auto-created, not manually added
+        return False
+
+class CSVEnrichmentLogAdmin(admin.ModelAdmin):
+    list_display = ('file_name', 'uploaded_at', 'uploaded_by', 'total_rows', 'single_room_count', 'multi_room_count', 'created_count', 'updated_count')
+    list_filter = ('uploaded_at', 'uploaded_by')
+    search_fields = ('file_name',)
+    readonly_fields = ('uploaded_at', 'uploaded_by', 'file_name', 'total_rows', 'single_room_count', 'multi_room_count', 'created_count', 'updated_count', 'enrichment_summary')
+
+    def has_add_permission(self, request):
+        # Logs should be auto-created via XLS upload page
+        return False
+
 # ✅ Register models
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Guest, GuestAdmin)
@@ -329,3 +375,6 @@ admin.site.register(TTLockToken, TTLockTokenAdmin)
 admin.site.register(RoomICalConfig, RoomICalConfigAdmin)
 admin.site.register(Reservation, ReservationAdmin)
 admin.site.register(MessageTemplate, MessageTemplateAdmin)
+admin.site.register(PendingEnrichment, PendingEnrichmentAdmin)
+admin.site.register(EnrichmentLog, EnrichmentLogAdmin)
+admin.site.register(CSVEnrichmentLog, CSVEnrichmentLogAdmin)

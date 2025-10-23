@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "XLS Upload" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .back-link {
+        color: #007bff;
+        text-decoration: none;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    h1 {
+        margin-bottom: 30px;
+    }
+
+    .upload-section {
+        background: #f8f9fa;
+        border: 2px dashed #007bff;
+        padding: 40px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .upload-section h3 {
+        color: #007bff;
+        margin-bottom: 15px;
+    }
+
+    .upload-form {
+        display: inline-block;
+        text-align: left;
+    }
+
+    .file-input-group {
+        margin-bottom: 15px;
+    }
+
+    .file-input-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .file-input-group input[type="file"] {
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: white;
+    }
+
+    .btn {
+        padding: 10px 30px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .info-box {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+
+    .info-box ul {
+        margin: 10px 0 0 20px;
+    }
+
+    .info-box li {
+        margin-bottom: 5px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead {
+        background: #343a40;
+        color: white;
+    }
+
+    thead th {
+        padding: 12px;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    tbody td {
+        padding: 12px;
+    }
+
+    .stat-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        margin: 0 3px;
+    }
+
+    .badge-created {
+        background: #28a745;
+        color: white;
+    }
+
+    .badge-updated {
+        background: #17a2b8;
+        color: white;
+    }
+
+    .badge-multi {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .messages {
+        margin-bottom: 20px;
+    }
+
+    .message {
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+
+    .message-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <a href="{% url 'admin_page' %}" class="back-link">← {% trans "Back to Admin Dashboard" %}</a>
+
+    <h1>📊 {% trans "XLS Upload - Booking.com Export" %}</h1>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="upload-section">
+        <h3>📤 {% trans "Upload Booking.com XLS Export" %}</h3>
+        <p>{% trans "Upload your Booking.com reservation export file to enrich existing reservations." %}</p>
+
+        <form method="POST" enctype="multipart/form-data" class="upload-form">
+            {% csrf_token %}
+            <div class="file-input-group">
+                <label for="xls_file">{% trans "Select XLS File:" %}</label>
+                <input type="file" name="xls_file" id="xls_file" accept=".xls,.xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-primary">{% trans "Upload & Process" %}</button>
+        </form>
+    </div>
+
+    <div class="info-box">
+        <strong>ℹ️ {% trans "Important Notes:" %}</strong>
+        <ul>
+            <li>{% trans "Only reservations from TODAY onwards will be processed" %}</li>
+            <li>{% trans "Multi-room bookings are automatically detected and handled" %}</li>
+            <li>{% trans "Room mapping:" %}
+                <ul>
+                    <li>"Single Room" → Room 3</li>
+                    <li>"Middle Floor Room with OnSuite" → Room 2</li>
+                    <li>"No Onsuite middle floor double room" → Room 1</li>
+                    <li>"Topmost Room" → Room 4</li>
+                </ul>
+            </li>
+            <li>{% trans "File must be in .xls or .xlsx format from Booking.com" %}</li>
+        </ul>
+    </div>
+
+    <h2>📜 {% trans "Recent Upload History" %}</h2>
+
+    {% if recent_logs %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "File Name" %}</th>
+                    <th>{% trans "Uploaded At" %}</th>
+                    <th>{% trans "Uploaded By" %}</th>
+                    <th>{% trans "Total Rows" %}</th>
+                    <th>{% trans "Statistics" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                <tr>
+                    <td><strong>{{ log.file_name }}</strong></td>
+                    <td>{{ log.uploaded_at|date:"d M Y H:i" }}</td>
+                    <td>{{ log.uploaded_by }}</td>
+                    <td>{{ log.total_rows }}</td>
+                    <td>
+                        <span class="stat-badge badge-created">Created: {{ log.created_count }}</span>
+                        <span class="stat-badge badge-updated">Updated: {{ log.updated_count }}</span>
+                        {% if log.multi_room_count > 0 %}
+                            <span class="stat-badge badge-multi">Multi-Room: {{ log.multi_room_count }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>{% trans "No upload history yet. Upload your first XLS file above." %}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

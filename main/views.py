@@ -3281,3 +3281,156 @@ def message_templates(request):
         'sms_templates': sms_templates,
         'sample_data': sample_data,
     })
+
+
+# =========================================
+# Email Enrichment System Views
+# =========================================
+
+@csrf_exempt
+def handle_twilio_sms_webhook(request):
+    """
+    Twilio SMS webhook handler for manual room assignment
+    Processes SMS replies in format: "2-3" (Room 2, 3 nights) or "A1-3" (Booking A, Room 1, 3 nights)
+    """
+    from main.services.sms_reply_handler import handle_sms_room_assignment
+    from main.enrichment_config import WHITELISTED_SMS_NUMBERS
+
+    if request.method != 'POST':
+        return HttpResponse('Method not allowed', status=405)
+
+    from_number = request.POST.get('From', '')
+    body = request.POST.get('Body', '')
+
+    logger.info(f"Received SMS from {from_number}: {body}")
+
+    # Security check
+    if from_number not in WHITELISTED_SMS_NUMBERS:
+        logger.warning(f"Unauthorized SMS from {from_number}")
+        return HttpResponse('Unauthorized', status=403)
+
+    try:
+        result = handle_sms_room_assignment(from_number, body)
+        return HttpResponse(result, status=200)
+    except Exception as e:
+        logger.error(f"Error processing SMS: {str(e)}")
+        return HttpResponse(f"Error: {str(e)}", status=500)
+
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.view_reservation'), login_url='/unauthorized/')
+def pending_enrichments_page(request):
+    """
+    Admin page showing pending enrichments that failed auto-matching
+    """
+    from main.models import PendingEnrichment
+
+    # Get all failed enrichments
+    pending = PendingEnrichment.objects.filter(
+        status__in=['failed_awaiting_manual', 'pending']
+    ).select_related('matched_reservation', 'room_matched').order_by('-email_received_at')
+
+    pending_data = []
+    for enrichment in pending:
+        pending_data.append({
+            'id': enrichment.id,
+            'booking_reference': enrichment.booking_reference,
+            'check_in_date': enrichment.check_in_date,
+            'email_type': enrichment.email_type,
+            'email_received_at': enrichment.email_received_at,
+            'attempts': enrichment.attempts,
+            'status': enrichment.status,
+            'alert_sent_at': enrichment.alert_sent_at,
+        })
+
+    return render(request, 'main/pending_enrichments.html', {
+        'pending_enrichments': pending_data,
+        'total_count': len(pending_data),
+    })
+
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.add_reservation'), login_url='/unauthorized/')
+def xls_upload_page(request):
+    """
+    Admin page for uploading Booking.com XLS exports
+    Supports multi-room bookings
+    """
+    from main.services.xls_parser import process_xls_file
+    from main.models import CSVEnrichmentLog
+
+    if request.method == 'POST' and request.FILES.get('xls_file'):
+        xls_file = request.FILES['xls_file']
+
+        try:
+            # Process XLS file
+            results = process_xls_file(xls_file, uploaded_by=request.user)
+
+            if results['success']:
+                messages.success(
+                    request,
+                    f"XLS processed successfully! "
+                    f"Created: {results['created_count']}, "
+                    f"Updated: {results['updated_count']}, "
+                    f"Multi-room bookings: {results['multi_room_count']}"
+                )
+            else:
+                messages.error(request, f"Error processing XLS: {results.get('error', 'Unknown error')}")
+
+        except Exception as e:
+            logger.error(f"XLS upload error: {str(e)}")
+            messages.error(request, f"Error uploading XLS: {str(e)}")
+
+        return redirect('xls_upload_page')
+
+    # Get recent upload logs
+    recent_logs = CSVEnrichmentLog.objects.all().order_by('-uploaded_at')[:20]
+
+    logs_data = []
+    for log in recent_logs:
+        logs_data.append({
+            'id': log.id,
+            'file_name': log.file_name,
+            'uploaded_at': log.uploaded_at,
+            'uploaded_by': log.uploaded_by.username if log.uploaded_by else 'System',
+            'total_rows': log.total_rows,
+            'single_room_count': log.single_room_count,
+            'multi_room_count': log.multi_room_count,
+            'created_count': log.created_count,
+            'updated_count': log.updated_count,
+        })
+
+    return render(request, 'main/xls_upload.html', {
+        'recent_logs': logs_data,
+    })
+
+
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.view_reservation'), login_url='/unauthorized/')
+def enrichment_logs_page(request):
+    """
+    Admin page showing enrichment audit trail
+    """
+    from main.models import EnrichmentLog
+
+    # Get recent logs
+    logs = EnrichmentLog.objects.all().select_related(
+        'pending_enrichment', 'reservation', 'room'
+    ).order_by('-timestamp')[:100]
+
+    logs_data = []
+    for log in logs:
+        logs_data.append({
+            'id': log.id,
+            'action': log.get_action_display(),
+            'booking_reference': log.booking_reference,
+            'room': log.room.name if log.room else 'N/A',
+            'method': log.method if hasattr(log, 'method') else 'N/A',
+            'timestamp': log.timestamp,
+            'details': log.details,
+        })
+
+    return render(request, 'main/enrichment_logs.html', {
+        'logs': logs_data,
+        'total_count': len(logs_data),
+    })

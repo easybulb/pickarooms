@@ -308,3 +308,349 @@ def archive_past_guests():
 
     logger.info(f"Archiving task complete: {archived_count} archived, {error_count} errors")
     return f"Archived {archived_count} guest(s), {error_count} error(s)"
+
+
+# =========================
+# EMAIL ENRICHMENT TASKS
+# =========================
+
+@shared_task
+def poll_booking_com_emails():
+    """
+    Poll Gmail for Booking.com reservation emails
+    Scheduled to run every 2 minutes
+    Creates PendingEnrichment records and triggers iCal sync
+    """
+    from main.services.email_parser import parse_booking_com_email_subject
+    from main.models import PendingEnrichment
+    from main.services.gmail_client import GmailClient
+    from main.enrichment_config import ICAL_SYNC_RETRY_SCHEDULE
+
+    logger.info("Polling Booking.com emails...")
+
+    try:
+        # Initialize Gmail client
+        gmail = GmailClient()
+
+        # Search for unread Booking.com emails
+        emails = gmail.get_unread_booking_emails()
+
+        if not emails:
+            logger.info("No new Booking.com emails found")
+            return "No new emails"
+
+        logger.info(f"Found {len(emails)} new Booking.com email(s)")
+        processed_count = 0
+
+        for email_data in emails:
+            subject = email_data['subject']
+            email_id = email_data['id']
+            received_at = email_data['received_at']
+
+            # Parse email subject
+            parsed = parse_booking_com_email_subject(subject)
+
+            if not parsed:
+                logger.warning(f"Could not parse email subject: {subject}")
+                gmail.mark_as_read(email_id)
+                continue
+
+            email_type, booking_ref, check_in_date = parsed
+
+            # Check if we already have this pending enrichment
+            existing = PendingEnrichment.objects.filter(
+                booking_reference=booking_ref,
+                check_in_date=check_in_date,
+                email_type=email_type
+            ).first()
+
+            if existing:
+                logger.info(f"Pending enrichment already exists for {booking_ref}")
+                gmail.mark_as_read(email_id)
+                continue
+
+            # Create pending enrichment
+            pending = PendingEnrichment.objects.create(
+                platform='booking',
+                booking_reference=booking_ref,
+                check_in_date=check_in_date,
+                email_type=email_type,
+                status='pending'
+            )
+
+            logger.info(f"Created PendingEnrichment #{pending.id} for booking {booking_ref}")
+
+            # Mark email as read
+            gmail.mark_as_read(email_id)
+
+            # Trigger iCal sync workflow
+            # Schedule first attempt in 1 minute
+            countdown = ICAL_SYNC_RETRY_SCHEDULE[0]
+            sync_booking_com_rooms_for_enrichment.apply_async(
+                args=[pending.id],
+                countdown=countdown
+            )
+            match_pending_to_reservation.apply_async(
+                args=[pending.id, 1],
+                countdown=countdown + 30  # Wait 30 seconds after sync
+            )
+
+            processed_count += 1
+
+        logger.info(f"Processed {processed_count} Booking.com email(s)")
+        return f"Processed {processed_count} email(s)"
+
+    except Exception as e:
+        logger.error(f"Error polling Booking.com emails: {str(e)}")
+        return f"Error: {str(e)}"
+
+
+@shared_task
+def sync_booking_com_rooms_for_enrichment(pending_id):
+    """
+    Sync all Booking.com room iCal feeds
+    Triggered by email arrival for a specific pending enrichment
+
+    Args:
+        pending_id (int): PendingEnrichment ID that triggered this sync
+    """
+    from main.models import RoomICalConfig
+    from main.services.ical_service import sync_reservations_for_room
+
+    logger.info(f"Syncing Booking.com rooms for pending enrichment {pending_id}")
+
+    # Get all Booking.com iCal configs
+    configs = RoomICalConfig.objects.filter(
+        booking_active=True,
+        booking_ical_url__isnull=False
+    ).select_related('room')
+
+    if not configs.exists():
+        logger.warning("No active Booking.com iCal configurations found")
+        return "No configurations"
+
+    synced_count = 0
+    for config in configs:
+        try:
+            result = sync_reservations_for_room(config.id, platform='booking')
+            if result['success']:
+                synced_count += 1
+                logger.info(f"Synced {config.room.name}: {result['created']} created, {result['updated']} updated")
+        except Exception as e:
+            logger.error(f"Failed to sync {config.room.name}: {str(e)}")
+
+    logger.info(f"Synced {synced_count}/{configs.count()} Booking.com rooms")
+    return f"Synced {synced_count} room(s)"
+
+
+@shared_task
+def match_pending_to_reservation(pending_id, attempt_number):
+    """
+    Attempt to match pending enrichment to iCal reservation
+    Handles retry logic and collision detection
+
+    Args:
+        pending_id (int): PendingEnrichment ID
+        attempt_number (int): Current attempt number (1-5)
+    """
+    from main.services.enrichment_service import match_pending_enrichment
+    from main.enrichment_config import ICAL_SYNC_RETRY_SCHEDULE
+
+    logger.info(f"Matching attempt {attempt_number} for pending {pending_id}")
+
+    # Attempt to match
+    matched = match_pending_enrichment(pending_id, attempt_number)
+
+    if matched:
+        logger.info(f"Successfully matched pending {pending_id}")
+        return "Matched"
+
+    # Not matched - schedule retry if under 5 attempts
+    if attempt_number < 5:
+        next_attempt = attempt_number + 1
+        countdown = ICAL_SYNC_RETRY_SCHEDULE[next_attempt - 1] - ICAL_SYNC_RETRY_SCHEDULE[attempt_number - 1]
+
+        logger.info(f"Scheduling retry {next_attempt} for pending {pending_id} in {countdown}s")
+
+        # Schedule next sync + match
+        sync_booking_com_rooms_for_enrichment.apply_async(
+            args=[pending_id],
+            countdown=countdown
+        )
+        match_pending_to_reservation.apply_async(
+            args=[pending_id, next_attempt],
+            countdown=countdown + 30  # Give sync 30 sec to complete
+        )
+
+        return f"Scheduled retry {next_attempt}"
+
+    # Failed after 5 attempts - trigger alert
+    logger.warning(f"Failed to match pending {pending_id} after {attempt_number} attempts")
+    send_enrichment_failure_alert.delay(pending_id)
+    return "Failed - alert sent"
+
+
+@shared_task
+def send_enrichment_failure_alert(pending_id):
+    """
+    Send SMS and email alert for failed enrichment
+    Handles both single booking and collision scenarios
+
+    Args:
+        pending_id (int): PendingEnrichment ID
+    """
+    from main.models import PendingEnrichment, Room
+    from main.services.enrichment_service import get_collision_bookings
+    from main.enrichment_config import ADMIN_PHONE, ADMIN_EMAIL, ROOM_NUMBER_TO_NAME
+    from twilio.rest import Client
+    from django.conf import settings
+    from django.core.mail import send_mail
+
+    try:
+        pending = PendingEnrichment.objects.get(id=pending_id)
+    except PendingEnrichment.DoesNotExist:
+        logger.error(f"PendingEnrichment {pending_id} not found")
+        return "Not found"
+
+    # Check for collision (multiple bookings for same date)
+    collision_bookings = get_collision_bookings(pending.check_in_date)
+
+    if collision_bookings.count() > 1:
+        # Multiple bookings - send batch alert
+        send_collision_alert(collision_bookings)
+    else:
+        # Single booking - send individual alert
+        send_single_booking_alert(pending)
+
+    # Mark as alerted
+    pending.alert_sent_at = timezone.now()
+    pending.save()
+
+    return "Alert sent"
+
+
+def send_single_booking_alert(pending):
+    """Send SMS/Email alert for single booking failure"""
+    from main.enrichment_config import ADMIN_PHONE, ADMIN_EMAIL
+    from twilio.rest import Client
+    from django.conf import settings
+    from django.core.mail import send_mail
+
+    # SMS Message
+    sms_body = (
+        f"PickARooms Alert:\n"
+        f"Booking #{pending.booking_reference} for {pending.check_in_date.strftime('%d %b %Y')} "
+        f"not found in iCal.\n\n"
+        f"Reply format:\n"
+        f"1-3 = Room 1, 3 nights\n"
+        f"2-2 = Room 2, 2 nights\n"
+        f"3-1 = Room 3, 1 night\n"
+        f"4-5 = Room 4, 5 nights\n"
+        f"X = Cancel\n\n"
+        f"Example: Reply \"2-3\" for Room 2, 3 nights"
+    )
+
+    # Email Message
+    email_body = (
+        f"Manual Assignment Needed\n\n"
+        f"Booking Reference: {pending.booking_reference}\n"
+        f"Check-in Date: {pending.check_in_date.strftime('%d %B %Y')}\n"
+        f"Platform: Booking.com\n"
+        f"Email Received: {pending.email_received_at.strftime('%d %b %Y %H:%M')}\n"
+        f"Sync Attempts: 5 (failed)\n\n"
+        f"REPLY WITH ROOM NUMBER AND NIGHTS:\n"
+        f"Reply \"1-3\" - Room 1, 3 nights\n"
+        f"Reply \"2-2\" - Room 2, 2 nights\n"
+        f"Reply \"3-1\" - Room 3, 1 night\n"
+        f"Reply \"4-5\" - Room 4, 5 nights\n"
+        f"Reply \"X\" - Cancel assignment\n\n"
+        f"Or log in to: https://pickarooms.com/admin-page/pending-enrichments/"
+    )
+
+    # Send SMS
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            to=ADMIN_PHONE,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=sms_body
+        )
+        pending.alert_sms_sid = message.sid
+        pending.save()
+        logger.info(f"SMS alert sent for pending {pending.id}: {message.sid}")
+    except Exception as e:
+        logger.error(f"Failed to send SMS alert: {str(e)}")
+
+    # Send Email
+    try:
+        send_mail(
+            subject=f"Manual Assignment Needed - Booking #{pending.booking_reference}",
+            message=email_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[ADMIN_EMAIL],
+            fail_silently=False,
+        )
+        logger.info(f"Email alert sent for pending {pending.id}")
+    except Exception as e:
+        logger.error(f"Failed to send email alert: {str(e)}")
+
+
+def send_collision_alert(collision_bookings):
+    """Send SMS/Email alert for multiple bookings (collision)"""
+    from main.enrichment_config import ADMIN_PHONE, ADMIN_EMAIL
+    from twilio.rest import Client
+    from django.conf import settings
+    from django.core.mail import send_mail
+
+    bookings = list(collision_bookings[:4])  # Max 4
+    check_in_date = bookings[0].check_in_date if bookings else None
+
+    # Build SMS message
+    sms_lines = [
+        f"PickARooms Alert:",
+        f"{len(bookings)} Bookings for {check_in_date.strftime('%d %b %Y')}:",
+        ""
+    ]
+
+    letters = ['A', 'B', 'C', 'D']
+    for idx, booking in enumerate(bookings):
+        letter = letters[idx]
+        sms_lines.append(f"{letter}) #{booking.booking_reference}")
+
+    sms_lines.extend([
+        "",
+        "Reply format:",
+        "A1-3 = Booking A, Room 1, 3 nights",
+        "B2-2 = Booking B, Room 2, 2 nights",
+        "X = Cancel all",
+        "",
+        "Example: Reply \"A2-3\""
+    ])
+
+    sms_body = "\n".join(sms_lines)
+
+    # Send SMS
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            to=ADMIN_PHONE,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=sms_body
+        )
+        logger.info(f"Collision SMS alert sent: {message.sid}")
+    except Exception as e:
+        logger.error(f"Failed to send collision SMS: {str(e)}")
+
+    # Send Email
+    email_body = f"Multiple Bookings Detected\n\n{sms_body}"
+    try:
+        send_mail(
+            subject=f"Multiple Bookings - {check_in_date.strftime('%d %b %Y')}",
+            message=email_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[ADMIN_EMAIL],
+            fail_silently=False,
+        )
+        logger.info("Collision email alert sent")
+    except Exception as e:
+        logger.error(f"Failed to send collision email: {str(e)}")

@@ -4,3 +4,567 @@ ERROR 2025-10-20 12:38:49,588 ttlock_utils TTLock API error: invalid grant (errc
 ERROR 2025-10-20 12:38:49,841 ttlock_utils TTLock API error: invalid grant (errcode: 10004)
 ERROR 2025-10-20 13:07:44,366 ttlock_service Authentication failed: 'TTLock' object has no attribute 'login'
 ERROR 2025-10-20 13:09:24,235 ttlock_service Authentication failed: TTLock.get_token() missing 3 required positional arguments: 'username', 'password', and 'redirect_uri'
+ERROR 2025-10-20 13:32:00,574 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:00,574 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:00,692 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:00,693 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:00,807 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:00,808 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:07,568 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:07,568 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:07,685 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:07,685 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:07,793 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:07,793 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:47,301 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:47,301 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:47,420 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:47,420 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:47,530 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:32:47,530 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:35:43,330 ttlock_utils TTLock API error: The function is not supported for this lock. (errcode: -4043)
+ERROR 2025-10-20 13:42:21,764 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:42:21,764 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:42:21,873 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:42:21,873 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:42:21,984 ttlock_utils TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 13:42:21,984 views Failed to unlock manual_front (Lock ID: 18159702): TTLock API error: invalid client_id (errcode: 10000)
+ERROR 2025-10-20 14:36:20,092 ttlock_utils TTLock API error: failed or means no (errcode: 1)
+ERROR 2025-10-20 14:36:20,092 views Failed to generate PIN for guest 4454475: TTLock API error: failed or means no (errcode: 1)
+INFO 2025-10-20 15:03:59,747 autoreload run_with_reloader 668 Watching for file changes with StatReloader
+DEBUG 2025-10-20 15:03:59,954 utils debug_sql 151 (0.010) 
+            SELECT
+                c.relname,
+                CASE
+                    WHEN c.relispartition THEN 'p'
+                    WHEN c.relkind IN ('m', 'v') THEN 'v'
+                    ELSE 't'
+                END,
+                obj_description(c.oid, 'pg_class')
+            FROM pg_catalog.pg_class c
+            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relkind IN ('f', 'm', 'p', 'r', 'v')
+                AND n.nspname NOT IN ('pg_catalog', 'pg_toast')
+                AND pg_catalog.pg_table_is_visible(c.oid)
+        ; args=None; alias=default
+DEBUG 2025-10-20 15:03:59,961 utils debug_sql 151 (0.002) SELECT "django_migrations"."id", "django_migrations"."app", "django_migrations"."name", "django_migrations"."applied" FROM "django_migrations"; args=(); alias=default
+DEBUG 2025-10-20 15:05:38,959 utils debug_sql 151 (0.012) 
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name LIKE '%ttlock%'
+    ; args=None; alias=default
+DEBUG 2025-10-20 15:06:22,296 utils debug_sql 151 (0.010) 
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name LIKE '%ttlock%'
+    ; args=None; alias=default
+DEBUG 2025-10-20 15:06:22,303 utils debug_sql 151 (0.003) SELECT COUNT(*) AS "__count" FROM "main_ttlock"; args=(); alias=default
+DEBUG 2025-10-20 15:06:22,304 utils debug_sql 151 (0.001) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock"; args=(); alias=default
+DEBUG 2025-10-20 15:06:22,308 utils debug_sql 151 (0.003) SELECT COUNT(*) AS "__count" FROM "main_room"; args=(); alias=default
+DEBUG 2025-10-20 15:06:22,309 utils debug_sql 151 (0.000) SELECT "main_room"."id", "main_room"."name", "main_room"."ttlock_id", "main_room"."video_url", "main_room"."description", "main_room"."image" FROM "main_room"; args=(); alias=default
+DEBUG 2025-10-20 15:06:22,311 utils debug_sql 151 (0.001) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 1 LIMIT 21; args=(1,); alias=default
+DEBUG 2025-10-20 15:06:22,312 utils debug_sql 151 (0.000) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 2 LIMIT 21; args=(2,); alias=default
+DEBUG 2025-10-20 15:06:22,314 utils debug_sql 151 (0.001) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 3 LIMIT 21; args=(3,); alias=default
+DEBUG 2025-10-20 15:06:22,315 utils debug_sql 151 (0.001) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 4 LIMIT 21; args=(4,); alias=default
+DEBUG 2025-10-20 15:06:22,322 utils debug_sql 151 (0.006) SELECT COUNT(*) AS "__count" FROM "main_guest" WHERE NOT "main_guest"."is_archived"; args=(); alias=default
+DEBUG 2025-10-20 15:06:22,323 utils debug_sql 151 (0.001) SELECT "main_guest"."id", "main_guest"."full_name", "main_guest"."email", "main_guest"."phone_number", "main_guest"."reservation_number", "main_guest"."check_in_date", "main_guest"."check_out_date", "main_guest"."assigned_room_id", "main_guest"."is_archived", "main_guest"."is_returning", "main_guest"."secure_token", "main_guest"."front_door_pin", "main_guest"."front_door_pin_id", "main_guest"."room_pin_id", "main_guest"."early_checkin_time", "main_guest"."late_checkout_time", "main_guest"."dont_send_review_message" FROM "main_guest" WHERE NOT "main_guest"."is_archived"; args=(); alias=default
+DEBUG 2025-10-20 15:06:22,325 utils debug_sql 151 (0.001) SELECT "main_room"."id", "main_room"."name", "main_room"."ttlock_id", "main_room"."video_url", "main_room"."description", "main_room"."image" FROM "main_room" WHERE "main_room"."id" = 3 LIMIT 21; args=(3,); alias=default
+DEBUG 2025-10-20 15:06:22,327 utils debug_sql 151 (0.001) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 3 LIMIT 21; args=(3,); alias=default
+DEBUG 2025-10-20 15:06:22,332 utils debug_sql 151 (0.003) SELECT 1 AS "a" FROM "django_migrations" WHERE ("django_migrations"."app" = 'main' AND UPPER("django_migrations"."name"::text) LIKE UPPER('%ttlock%')) LIMIT 1; args=(1, 'main', '%ttlock%'); alias=default
+DEBUG 2025-10-20 15:06:22,333 utils debug_sql 151 (0.001) SELECT "django_migrations"."id", "django_migrations"."app", "django_migrations"."name", "django_migrations"."applied" FROM "django_migrations" WHERE ("django_migrations"."app" = 'main' AND UPPER("django_migrations"."name"::text) LIKE UPPER('%ttlock%')); args=('main', '%ttlock%'); alias=default
+DEBUG 2025-10-20 15:06:22,335 utils debug_sql 151 (0.001) SELECT COUNT(*) AS "__count" FROM "django_migrations" WHERE "django_migrations"."app" = 'main'; args=('main',); alias=default
+DEBUG 2025-10-20 15:06:22,336 utils debug_sql 151 (0.001) SELECT "django_migrations"."id", "django_migrations"."app", "django_migrations"."name", "django_migrations"."applied" FROM "django_migrations" WHERE "django_migrations"."app" = 'main' ORDER BY "django_migrations"."applied" DESC LIMIT 5; args=('main',); alias=default
+INFO 2025-10-20 15:11:12,697 autoreload run_with_reloader 668 Watching for file changes with StatReloader
+DEBUG 2025-10-20 15:11:12,897 utils debug_sql 151 (0.007) 
+            SELECT
+                c.relname,
+                CASE
+                    WHEN c.relispartition THEN 'p'
+                    WHEN c.relkind IN ('m', 'v') THEN 'v'
+                    ELSE 't'
+                END,
+                obj_description(c.oid, 'pg_class')
+            FROM pg_catalog.pg_class c
+            LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.relkind IN ('f', 'm', 'p', 'r', 'v')
+                AND n.nspname NOT IN ('pg_catalog', 'pg_toast')
+                AND pg_catalog.pg_table_is_visible(c.oid)
+        ; args=None; alias=default
+DEBUG 2025-10-20 15:11:12,903 utils debug_sql 151 (0.002) SELECT "django_migrations"."id", "django_migrations"."app", "django_migrations"."name", "django_migrations"."applied" FROM "django_migrations"; args=(); alias=default
+DEBUG 2025-10-20 15:11:19,093 utils debug_sql 151 (0.005) SELECT "django_session"."session_key", "django_session"."session_data", "django_session"."expire_date" FROM "django_session" WHERE ("django_session"."expire_date" > '2025-10-20T14:11:19.034527+00:00'::timestamptz AND "django_session"."session_key" = 'wi5t1lmztngmcpkdngcyxht7yqeds8sc') LIMIT 21; args=(datetime.datetime(2025, 10, 20, 14, 11, 19, 34527, tzinfo=datetime.timezone.utc), 'wi5t1lmztngmcpkdngcyxht7yqeds8sc'); alias=default
+DEBUG 2025-10-20 15:11:19,097 utils debug_sql 151 (0.003) SELECT "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user"."username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user"."is_active", "auth_user"."date_joined" FROM "auth_user" WHERE "auth_user"."id" = 2 LIMIT 21; args=(2,); alias=default
+DEBUG 2025-10-20 15:11:19,103 utils debug_sql 151 (0.003) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."is_front_door" ORDER BY "main_ttlock"."id" ASC LIMIT 1; args=(); alias=default
+DEBUG 2025-10-20 15:11:19,194 utils debug_sql 151 (0.003) SELECT "main_ttlocktoken"."id", "main_ttlocktoken"."access_token", "main_ttlocktoken"."refresh_token", "main_ttlocktoken"."expires_at", "main_ttlocktoken"."created_at", "main_ttlocktoken"."updated_at" FROM "main_ttlocktoken" ORDER BY "main_ttlocktoken"."created_at" DESC LIMIT 1; args=(); alias=default
+DEBUG 2025-10-20 15:11:19,205 utils debug_sql 151 (0.005) SELECT "main_guest"."id", "main_guest"."full_name", "main_guest"."email", "main_guest"."phone_number", "main_guest"."reservation_number", "main_guest"."check_in_date", "main_guest"."check_out_date", "main_guest"."assigned_room_id", "main_guest"."is_archived", "main_guest"."is_returning", "main_guest"."secure_token", "main_guest"."front_door_pin", "main_guest"."front_door_pin_id", "main_guest"."room_pin_id", "main_guest"."early_checkin_time", "main_guest"."late_checkout_time", "main_guest"."dont_send_review_message" FROM "main_guest" WHERE ("main_guest"."id" = 1 AND NOT "main_guest"."is_archived") LIMIT 21; args=(1,); alias=default
+DEBUG 2025-10-20 15:11:22,279 utils debug_sql 151 (0.005) SELECT "django_session"."session_key", "django_session"."session_data", "django_session"."expire_date" FROM "django_session" WHERE ("django_session"."expire_date" > '2025-10-20T14:11:22.221292+00:00'::timestamptz AND "django_session"."session_key" = 'wi5t1lmztngmcpkdngcyxht7yqeds8sc') LIMIT 21; args=(datetime.datetime(2025, 10, 20, 14, 11, 22, 221292, tzinfo=datetime.timezone.utc), 'wi5t1lmztngmcpkdngcyxht7yqeds8sc'); alias=default
+DEBUG 2025-10-20 15:11:22,285 utils debug_sql 151 (0.004) SELECT "auth_user"."id", "auth_user"."password", "auth_user"."last_login", "auth_user"."is_superuser", "auth_user"."username", "auth_user"."first_name", "auth_user"."last_name", "auth_user"."email", "auth_user"."is_staff", "auth_user"."is_active", "auth_user"."date_joined" FROM "auth_user" WHERE "auth_user"."id" = 2 LIMIT 21; args=(2,); alias=default
+DEBUG 2025-10-20 15:11:22,290 utils debug_sql 151 (0.003) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."is_front_door" ORDER BY "main_ttlock"."id" ASC LIMIT 1; args=(); alias=default
+DEBUG 2025-10-20 15:11:22,309 utils debug_sql 151 (0.004) SELECT "main_guest"."id", "main_guest"."full_name", "main_guest"."email", "main_guest"."phone_number", "main_guest"."reservation_number", "main_guest"."check_in_date", "main_guest"."check_out_date", "main_guest"."assigned_room_id", "main_guest"."is_archived", "main_guest"."is_returning", "main_guest"."secure_token", "main_guest"."front_door_pin", "main_guest"."front_door_pin_id", "main_guest"."room_pin_id", "main_guest"."early_checkin_time", "main_guest"."late_checkout_time", "main_guest"."dont_send_review_message" FROM "main_guest" WHERE NOT "main_guest"."is_archived" ORDER BY "main_guest"."check_in_date" ASC; args=(); alias=default
+DEBUG 2025-10-20 15:11:22,313 utils debug_sql 151 (0.003) SELECT "main_room"."id", "main_room"."name", "main_room"."ttlock_id", "main_room"."video_url", "main_room"."description", "main_room"."image" FROM "main_room" WHERE "main_room"."id" = 3 LIMIT 21; args=(3,); alias=default
+DEBUG 2025-10-20 15:11:22,315 utils debug_sql 151 (0.000) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 3 LIMIT 21; args=(3,); alias=default
+DEBUG 2025-10-20 15:11:22,316 utils debug_sql 151 (0.000) SELECT "main_room"."id", "main_room"."name", "main_room"."ttlock_id", "main_room"."video_url", "main_room"."description", "main_room"."image" FROM "main_room"; args=(); alias=default
+DEBUG 2025-10-20 15:11:22,318 utils debug_sql 151 (0.001) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 1 LIMIT 21; args=(1,); alias=default
+DEBUG 2025-10-20 15:11:22,320 utils debug_sql 151 (0.000) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 2 LIMIT 21; args=(2,); alias=default
+DEBUG 2025-10-20 15:11:22,322 utils debug_sql 151 (0.001) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 3 LIMIT 21; args=(3,); alias=default
+DEBUG 2025-10-20 15:11:22,324 utils debug_sql 151 (0.000) SELECT "main_ttlock"."id", "main_ttlock"."lock_id", "main_ttlock"."name", "main_ttlock"."is_front_door" FROM "main_ttlock" WHERE "main_ttlock"."id" = 4 LIMIT 21; args=(4,); alias=default
+INFO 2025-10-20 15:15:52,682 autoreload trigger_reload 266 C:\Users\easyb\pickarooms\main\ttlock_utils.py changed, reloading.
+ERROR 2025-10-22 05:32:54,187 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\pickarooms\main\views.py", line 942, in admin_page
+    todays_reservations = Reservation.objects.filter(
+                          ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'Reservation' where it is not associated with a value
+ERROR 2025-10-22 05:33:50,794 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\pickarooms\main\views.py", line 942, in admin_page
+    todays_reservations = Reservation.objects.filter(
+                          ^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'Reservation' where it is not associated with a value
+ERROR 2025-10-22 05:36:20,091 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\pickarooms\main\views.py", line 1248, in admin_page
+    return render(request, 'main/admin_page.html', {
+        'rooms': available_rooms,
+    ...<5 lines>...
+        'overlapping_warnings': overlapping_warnings,
+    })
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'guest_details' with arguments '('',)' not found. 1 pattern(s) tried: ['admin\\-page/guest\\-details/(?P<guest_id>[0-9]+)/\\Z']
+ERROR 2025-10-22 05:36:34,950 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\pickarooms\main\views.py", line 1248, in admin_page
+    return render(request, 'main/admin_page.html', {
+        'rooms': available_rooms,
+    ...<5 lines>...
+        'overlapping_warnings': overlapping_warnings,
+    })
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'guest_details' with arguments '('',)' not found. 1 pattern(s) tried: ['admin\\-page/guest\\-details/(?P<guest_id>[0-9]+)/\\Z']
+ERROR 2025-10-22 05:36:58,009 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\pickarooms\main\views.py", line 1248, in admin_page
+    return render(request, 'main/admin_page.html', {
+        'rooms': available_rooms,
+    ...<5 lines>...
+        'overlapping_warnings': overlapping_warnings,
+    })
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'guest_details' with arguments '('',)' not found. 1 pattern(s) tried: ['admin\\-page/guest\\-details/(?P<guest_id>[0-9]+)/\\Z']
+ERROR 2025-10-22 05:37:51,648 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\pickarooms\main\views.py", line 1248, in admin_page
+    return render(request, 'main/admin_page.html', {
+        'rooms': available_rooms,
+    ...<5 lines>...
+        'overlapping_warnings': overlapping_warnings,
+    })
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'guest_details' with arguments '('',)' not found. 1 pattern(s) tried: ['admin\\-page/guest\\-details/(?P<guest_id>[0-9]+)/\\Z']
+ERROR 2025-10-22 10:30:57,377 log Internal Server Error: /admin-page/past-guests/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\pickarooms\main\views.py", line 1908, in past_guests
+    past_guests = Guest.objects.filter(is_archived=True).annotate(
+                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        is_returning=Exists(
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    ).select_related('assigned_room').prefetch_related('reservation')
+    ^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\db\models\query.py", line 1630, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\db\models\query.py", line 1673, in _annotate
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: The annotation 'is_returning' conflicts with a field on the model.
+ERROR 2025-10-22 15:06:47,225 models Failed to send welcome email to easybulb@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-475c429e745sm46877165e9.9 - gsmtp')
+ERROR 2025-10-22 19:06:19,981 models Missing variable in template ical_cancellation_email: 'guest_name'
+ERROR 2025-10-22 19:06:19,984 models Missing variable in template ical_post_stay_email: 'guest_name'
+ERROR 2025-10-22 19:06:19,985 models Missing variable in template ical_update_email: 'guest_name'
+ERROR 2025-10-22 19:06:19,986 models Missing variable in template ical_welcome_email: 'guest_name'
+ERROR 2025-10-22 19:06:20,010 models Missing variable in template ical_cancellation_sms: 'check_in_date'
+ERROR 2025-10-22 19:06:20,011 models Missing variable in template ical_post_stay_sms: 'platform_name'
+ERROR 2025-10-22 19:06:20,012 models Missing variable in template ical_update_sms: 'check_in_date'
+ERROR 2025-10-22 19:06:20,012 models Missing variable in template ical_welcome_sms: 'check_in_date'
+ERROR 2025-10-22 19:09:28,365 models Missing variable in template ical_cancellation_email: 'guest_name'
+ERROR 2025-10-22 19:09:28,366 models Missing variable in template ical_post_stay_email: 'guest_name'
+ERROR 2025-10-22 19:09:28,366 models Missing variable in template ical_update_email: 'guest_name'
+ERROR 2025-10-22 19:09:28,368 models Missing variable in template ical_welcome_email: 'guest_name'
+ERROR 2025-10-22 19:09:28,392 models Missing variable in template ical_cancellation_sms: 'check_in_date'
+ERROR 2025-10-22 19:09:28,392 models Missing variable in template ical_post_stay_sms: 'platform_name'
+ERROR 2025-10-22 19:09:28,393 models Missing variable in template ical_update_sms: 'check_in_date'
+ERROR 2025-10-22 19:09:28,394 models Missing variable in template ical_welcome_sms: 'check_in_date'
+ERROR 2025-10-22 19:10:49,351 models Missing variable in template ical_cancellation_email: 'guest_name'
+ERROR 2025-10-22 19:10:49,352 models Missing variable in template ical_post_stay_email: 'guest_name'
+ERROR 2025-10-22 19:10:49,353 models Missing variable in template ical_update_email: 'guest_name'
+ERROR 2025-10-22 19:10:49,353 models Missing variable in template ical_welcome_email: 'guest_name'
+ERROR 2025-10-22 19:10:49,374 models Missing variable in template ical_cancellation_sms: 'check_in_date'
+ERROR 2025-10-22 19:10:49,376 models Missing variable in template ical_post_stay_sms: 'platform_name'
+ERROR 2025-10-22 19:10:49,376 models Missing variable in template ical_update_sms: 'check_in_date'
+ERROR 2025-10-22 19:10:49,377 models Missing variable in template ical_welcome_sms: 'check_in_date'
+ERROR 2025-10-22 19:23:31,802 models Missing variable in template ical_cancellation_email: 'guest_name'
+ERROR 2025-10-22 19:23:31,803 models Missing variable in template ical_post_stay_email: 'guest_name'
+ERROR 2025-10-22 19:23:31,803 models Missing variable in template ical_update_email: 'guest_name'
+ERROR 2025-10-22 19:23:31,804 models Missing variable in template ical_welcome_email: 'guest_name'
+ERROR 2025-10-22 19:23:31,854 models Missing variable in template ical_cancellation_sms: 'check_in_date'
+ERROR 2025-10-22 19:23:31,855 models Missing variable in template ical_post_stay_sms: 'platform_name'
+ERROR 2025-10-22 19:23:31,855 models Missing variable in template ical_update_sms: 'check_in_date'
+ERROR 2025-10-22 19:23:31,856 models Missing variable in template ical_welcome_sms: 'check_in_date'
+ERROR 2025-10-22 19:27:47,824 models Missing variable in template ical_cancellation_email: 'guest_name'
+ERROR 2025-10-22 19:27:47,825 models Missing variable in template ical_post_stay_email: 'guest_name'
+ERROR 2025-10-22 19:27:47,826 models Missing variable in template ical_update_email: 'guest_name'
+ERROR 2025-10-22 19:27:47,826 models Missing variable in template ical_welcome_email: 'guest_name'
+ERROR 2025-10-22 19:27:47,870 models Missing variable in template ical_cancellation_sms: 'check_in_date'
+ERROR 2025-10-22 19:27:47,871 models Missing variable in template ical_post_stay_sms: 'platform_name'
+ERROR 2025-10-22 19:27:47,871 models Missing variable in template ical_update_sms: 'check_in_date'
+ERROR 2025-10-22 19:27:47,872 models Missing variable in template ical_welcome_sms: 'check_in_date'
+ERROR 2025-10-22 19:28:41,663 models Missing variable in template ical_cancellation_email: 'guest_name'
+ERROR 2025-10-22 19:28:41,664 models Missing variable in template ical_post_stay_email: 'guest_name'
+ERROR 2025-10-22 19:28:41,664 models Missing variable in template ical_update_email: 'guest_name'
+ERROR 2025-10-22 19:28:41,665 models Missing variable in template ical_welcome_email: 'guest_name'
+ERROR 2025-10-22 19:28:41,710 models Missing variable in template ical_cancellation_sms: 'check_in_date'
+ERROR 2025-10-22 19:28:41,711 models Missing variable in template ical_post_stay_sms: 'platform_name'
+ERROR 2025-10-22 19:28:41,711 models Missing variable in template ical_update_sms: 'check_in_date'
+ERROR 2025-10-22 19:28:41,712 models Missing variable in template ical_welcome_sms: 'check_in_date'
+ERROR 2025-10-22 19:29:08,986 models Failed to send cancellation email to easybulb@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-475c428a534sm66249155e9.6 - gsmtp')

@@ -348,6 +348,17 @@ CELERY_TIMEZONE = 'Europe/London'
 # Celery Beat Scheduler (use DatabaseScheduler for django-celery-beat)
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+# Celery Beat Schedule (Email Enrichment System)
+CELERY_BEAT_SCHEDULE = {
+    'poll-booking-com-emails': {
+        'task': 'main.tasks.poll_booking_com_emails',
+        'schedule': 120.0,  # Every 2 minutes (120 seconds)
+        'options': {
+            'expires': 60,  # Task expires after 60 seconds if not picked up
+        }
+    },
+}
+
 # Store task results in Django database
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'

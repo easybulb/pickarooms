@@ -571,3 +571,141 @@ class MessageTemplate(models.Model):
     def get_character_count(self):
         """Get character count (useful for SMS messages)"""
         return len(self.content)
+
+
+class PendingEnrichment(models.Model):
+    """
+    Tracks booking references extracted from Booking.com emails
+    awaiting matching with iCal reservations
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pending Match'),
+        ('matched', 'Matched'),
+        ('failed_awaiting_manual', 'Failed - Awaiting Manual Assignment'),
+        ('manually_assigned', 'Manually Assigned'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    EMAIL_TYPE_CHOICES = [
+        ('new', 'New Booking'),
+        ('modification', 'Modification'),
+        ('cancellation', 'Cancellation'),
+    ]
+
+    ENRICHMENT_METHOD_CHOICES = [
+        ('email_ical_auto', 'Email + iCal Auto-Match'),
+        ('sms_reply', 'SMS Reply'),
+        ('email_reply', 'Email Reply'),
+        ('csv_upload', 'CSV Upload'),
+        ('admin_manual', 'Admin Manual'),
+    ]
+
+    platform = models.CharField(max_length=20, default='booking', choices=[('booking', 'Booking.com')])
+    booking_reference = models.CharField(max_length=50, db_index=True)
+    check_in_date = models.DateField(db_index=True)
+    email_type = models.CharField(max_length=20, choices=EMAIL_TYPE_CHOICES, default='new')
+    email_received_at = models.DateTimeField(auto_now_add=True)
+    attempts = models.IntegerField(default=0)
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending', db_index=True)
+
+    # Matching results
+    matched_reservation = models.ForeignKey('Reservation', on_delete=models.SET_NULL, null=True, blank=True, related_name='pending_enrichments')
+    room_matched = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Alert tracking
+    alert_sent_at = models.DateTimeField(null=True, blank=True)
+    alert_sms_sid = models.CharField(max_length=100, blank=True, help_text="Twilio message SID")
+
+    # Manual assignment tracking
+    manual_assignment_method = models.CharField(max_length=20, null=True, blank=True, choices=[
+        ('sms_reply', 'SMS Reply'),
+        ('email_reply', 'Email Reply'),
+        ('admin_ui', 'Admin UI'),
+    ])
+
+    # Enrichment tracking
+    enriched_via = models.CharField(max_length=20, null=True, blank=True, choices=ENRICHMENT_METHOD_CHOICES)
+    enriched_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Pending Enrichment"
+        verbose_name_plural = "Pending Enrichments"
+        ordering = ['-email_received_at']
+        unique_together = [('booking_reference', 'platform')]
+        indexes = [
+            models.Index(fields=['booking_reference']),
+            models.Index(fields=['check_in_date']),
+            models.Index(fields=['status']),
+            models.Index(fields=['-email_received_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.booking_reference} - {self.check_in_date} ({self.get_status_display()})"
+
+
+class EnrichmentLog(models.Model):
+    """Audit trail for all enrichment actions"""
+    ACTION_CHOICES = [
+        ('email_parsed', 'Email Parsed'),
+        ('ical_synced', 'iCal Synced'),
+        ('auto_matched_single', 'Auto-Matched Single Room'),
+        ('auto_matched_multi_room', 'Auto-Matched Multi-Room'),
+        ('xls_enriched_single', 'XLS Enriched Single Room'),
+        ('xls_enriched_multi', 'XLS Enriched Multi-Room'),
+        ('sms_reply_assigned', 'SMS Reply Assigned'),
+        ('email_reply_assigned', 'Email Reply Assigned'),
+        ('collision_detected', 'Collision Detected'),
+        ('manual_admin_assigned', 'Manual Admin Assigned'),
+    ]
+
+    pending_enrichment = models.ForeignKey(PendingEnrichment, null=True, blank=True, on_delete=models.SET_NULL, related_name='logs')
+    reservation = models.ForeignKey('Reservation', null=True, blank=True, on_delete=models.SET_NULL, related_name='enrichment_logs')
+
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    booking_reference = models.CharField(max_length=50, db_index=True)
+    room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.SET_NULL)
+    method = models.CharField(max_length=50, blank=True)
+    details = models.JSONField(default=dict, help_text="Additional context (room_count, rooms list, etc.)")
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Enrichment Log"
+        verbose_name_plural = "Enrichment Logs"
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['booking_reference']),
+            models.Index(fields=['-timestamp']),
+        ]
+
+    def __str__(self):
+        return f"{self.booking_reference} - {self.get_action_display()} at {self.timestamp}"
+
+
+class CSVEnrichmentLog(models.Model):
+    """Tracks CSV/XLS upload enrichment sessions"""
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    file_name = models.CharField(max_length=255)
+
+    # Results
+    total_rows = models.IntegerField(default=0)
+    single_room_count = models.IntegerField(default=0)
+    multi_room_count = models.IntegerField(default=0)
+    created_count = models.IntegerField(default=0)
+    updated_count = models.IntegerField(default=0)
+    discrepancies_count = models.IntegerField(default=0)
+    errors_count = models.IntegerField(default=0)
+
+    # Summary table (JSON field)
+    enrichment_summary = models.JSONField(default=dict, help_text="Detailed results with enriched bookings and discrepancies")
+
+    class Meta:
+        verbose_name = "CSV Enrichment Log"
+        verbose_name_plural = "CSV Enrichment Logs"
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f"XLS Upload {self.file_name} at {self.uploaded_at}"
