@@ -914,17 +914,15 @@ def admin_page(request):
     # Get today's date for filtering
     today = date.today()
 
-    # Get today's enriched guests (currently staying: check_in <= today <= check_out)
+    # Get today's enriched guests (checking in today only)
     todays_guests = Guest.objects.filter(
         is_archived=False,
-        check_in_date__lte=today,
-        check_out_date__gte=today
+        check_in_date=today
     ).select_related('assigned_room').order_by('full_name')
 
-    # Get today's unenriched reservations (currently staying: check_in <= today <= check_out)
+    # Get today's unenriched reservations (checking in today only)
     todays_reservations = Reservation.objects.filter(
-        check_in_date__lte=today,
-        check_out_date__gte=today,
+        check_in_date=today,
         status='confirmed',
         guest__isnull=True  # Not yet enriched
     ).select_related('room').order_by('booking_reference')
