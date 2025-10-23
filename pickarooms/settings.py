@@ -14,6 +14,7 @@ import os
 import dj_database_url
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
+from celery.schedules import crontab
 
 # Import env.py if it exists
 if os.path.isfile("env.py"):
@@ -354,13 +355,54 @@ CELERY_TIMEZONE = 'Europe/London'
 # Celery Beat Scheduler (use DatabaseScheduler for django-celery-beat)
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-# Celery Beat Schedule (Email Enrichment System)
+# Celery Beat Schedule (Consolidated - All periodic tasks defined here)
 CELERY_BEAT_SCHEDULE = {
+    # Email polling - Reduced from 2min to 5min to reduce load
     'poll-booking-com-emails': {
         'task': 'main.tasks.poll_booking_com_emails',
-        'schedule': 120.0,  # Every 2 minutes (120 seconds)
+        'schedule': 300.0,  # Every 5 minutes (reduced from 2 min)
         'options': {
-            'expires': 60,  # Task expires after 60 seconds if not picked up
+            'expires': 120,  # Task expires after 2 minutes if not picked up
+        }
+    },
+    # iCal feed polling - Reduced from 10min to 15min
+    'poll-ical-feeds-every-15-minutes': {
+        'task': 'main.tasks.poll_all_ical_feeds',
+        'schedule': 900.0,  # Every 15 minutes (reduced from 10 min)
+        'options': {
+            'expires': 300,  # Task expires after 5 minutes if not picked up
+        }
+    },
+    # Archive past guests - Midday check (12:15 PM)
+    'archive-past-guests-midday': {
+        'task': 'main.tasks.archive_past_guests',
+        'schedule': crontab(hour=12, minute=15),  # 12:15 PM UK time
+        'options': {
+            'expires': 600,  # Task expires after 10 minutes if not picked up
+        }
+    },
+    # Archive past guests - Afternoon check (3:00 PM)
+    'archive-past-guests-afternoon': {
+        'task': 'main.tasks.archive_past_guests',
+        'schedule': crontab(hour=15, minute=0),  # 3:00 PM UK time
+        'options': {
+            'expires': 600,
+        }
+    },
+    # Archive past guests - Evening check (11:00 PM)
+    'archive-past-guests-evening': {
+        'task': 'main.tasks.archive_past_guests',
+        'schedule': crontab(hour=23, minute=0),  # 11:00 PM UK time
+        'options': {
+            'expires': 600,
+        }
+    },
+    # Cleanup old reservations - Daily at 3:00 AM
+    'cleanup-old-reservations-daily': {
+        'task': 'main.tasks.cleanup_old_reservations',
+        'schedule': crontab(hour=3, minute=0),  # Daily at 3 AM
+        'options': {
+            'expires': 1800,  # Task expires after 30 minutes if not picked up
         }
     },
 }
@@ -368,3 +410,11 @@ CELERY_BEAT_SCHEDULE = {
 # Store task results in Django database
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
+
+# Task execution settings - Prevent task buildup
+CELERY_TASK_ACKS_LATE = True  # Acknowledge tasks after completion, not before
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # Only fetch 1 task at a time
+CELERY_TASK_REJECT_ON_WORKER_LOST = True  # Reject tasks if worker crashes
+CELERY_TASK_TIME_LIMIT = 300  # Hard limit: 5 minutes per task
+CELERY_TASK_SOFT_TIME_LIMIT = 240  # Soft limit: 4 minutes per task
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 100  # Restart worker after 100 tasks to prevent memory leaks

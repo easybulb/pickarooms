@@ -19,29 +19,10 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 
-# Celery Beat Schedule
-app.conf.beat_schedule = {
-    'poll-ical-feeds-every-10-minutes': {
-        'task': 'main.tasks.poll_all_ical_feeds',
-        'schedule': crontab(minute='*/10'),  # Every 10 minutes
-    },
-    'archive-past-guests-midday': {
-        'task': 'main.tasks.archive_past_guests',
-        'schedule': crontab(hour=12, minute=15),  # 12:15 PM UK time - catches default 11 AM checkouts
-    },
-    'archive-past-guests-afternoon': {
-        'task': 'main.tasks.archive_past_guests',
-        'schedule': crontab(hour=15, minute=0),  # 3:00 PM UK time - catches late checkouts (up to 2 PM)
-    },
-    'archive-past-guests-evening': {
-        'task': 'main.tasks.archive_past_guests',
-        'schedule': crontab(hour=23, minute=0),  # 11:00 PM UK time - end of day safety net
-    },
-    'cleanup-old-reservations-daily': {
-        'task': 'main.tasks.cleanup_old_reservations',
-        'schedule': crontab(hour=3, minute=0),  # Daily at 3 AM
-    },
-}
+# NOTE: Celery Beat Schedule is now managed via Django Admin (django-celery-beat)
+# This allows dynamic schedule changes without redeployment
+# Schedule configured in: pickarooms/settings.py CELERY_BEAT_SCHEDULE
+# All periodic tasks should be configured there or via Django Admin
 
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):

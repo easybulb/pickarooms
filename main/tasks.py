@@ -8,10 +8,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@shared_task
-def poll_all_ical_feeds():
+@shared_task(bind=True, max_retries=0)
+def poll_all_ical_feeds(self):
     """
-    Main scheduled task - runs every 10 minutes
+    Main scheduled task - runs every 15 minutes (reduced from 10 min)
     Fetches all RoomICalConfig and syncs active platforms (Booking.com and/or Airbnb)
     """
     from main.models import RoomICalConfig
@@ -42,8 +42,8 @@ def poll_all_ical_feeds():
     return f"Triggered {synced_count} platform sync(s)"
 
 
-@shared_task
-def sync_room_ical_feed(config_id, platform='booking'):
+@shared_task(bind=True, max_retries=2, default_retry_delay=60)
+def sync_room_ical_feed(self, config_id, platform='booking'):
     """
     Sync one room's iCal feed for a specific platform (booking or airbnb)
     Creates/updates/cancels reservations based on iCal data
@@ -70,8 +70,8 @@ def sync_room_ical_feed(config_id, platform='booking'):
         return f"Failed: {result['errors']}"
 
 
-@shared_task
-def handle_reservation_cancellation(reservation_id):
+@shared_task(bind=True, max_retries=2, default_retry_delay=300)
+def handle_reservation_cancellation(self, reservation_id):
     """
     Handle cancelled reservation with date-based logic
 
@@ -155,8 +155,8 @@ def handle_reservation_cancellation(reservation_id):
         return f"Error: {str(e)}"
 
 
-@shared_task
-def cleanup_old_reservations():
+@shared_task(bind=True, max_retries=0)
+def cleanup_old_reservations(self):
     """
     Daily cleanup task
     Deletes old cancelled/completed reservations that are no longer needed
@@ -200,8 +200,8 @@ def cleanup_old_reservations():
     return f"Deleted {cancelled_count} cancelled, {completed_count} unenriched (total: {total_deleted})"
 
 
-@shared_task
-def archive_past_guests():
+@shared_task(bind=True, max_retries=0)
+def archive_past_guests(self):
     """
     Task to archive guests whose check-out time has passed
     - Deletes TTLock PINs (front door + room)
@@ -314,11 +314,11 @@ def archive_past_guests():
 # EMAIL ENRICHMENT TASKS
 # =========================
 
-@shared_task
-def poll_booking_com_emails():
+@shared_task(bind=True, max_retries=0)
+def poll_booking_com_emails(self):
     """
     Poll Gmail for Booking.com reservation emails
-    Scheduled to run every 2 minutes
+    Scheduled to run every 5 minutes (reduced from 2 min)
     Creates PendingEnrichment records and triggers iCal sync
     """
     from main.services.email_parser import parse_booking_com_email_subject
@@ -405,8 +405,8 @@ def poll_booking_com_emails():
         return f"Error: {str(e)}"
 
 
-@shared_task
-def sync_booking_com_rooms_for_enrichment(pending_id):
+@shared_task(bind=True, max_retries=1, rate_limit='10/m')
+def sync_booking_com_rooms_for_enrichment(self, pending_id):
     """
     Sync all Booking.com room iCal feeds
     Triggered by email arrival for a specific pending enrichment
@@ -443,8 +443,8 @@ def sync_booking_com_rooms_for_enrichment(pending_id):
     return f"Synced {synced_count} room(s)"
 
 
-@shared_task
-def match_pending_to_reservation(pending_id, attempt_number):
+@shared_task(bind=True, max_retries=0)
+def match_pending_to_reservation(self, pending_id, attempt_number):
     """
     Attempt to match pending enrichment to iCal reservation
     Handles retry logic and collision detection
@@ -490,8 +490,8 @@ def match_pending_to_reservation(pending_id, attempt_number):
     return "Failed - alert sent"
 
 
-@shared_task
-def send_enrichment_failure_alert(pending_id):
+@shared_task(bind=True, max_retries=2, rate_limit='5/m')
+def send_enrichment_failure_alert(self, pending_id):
     """
     Send SMS and email alert for failed enrichment
     Handles both single booking and collision scenarios

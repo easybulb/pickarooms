@@ -36,7 +36,7 @@ BOOKING_COM_EMAIL_PATTERNS = {
 }
 
 # Email polling interval (seconds)
-EMAIL_POLL_INTERVAL = 120  # 2 minutes
+EMAIL_POLL_INTERVAL = 300  # 5 minutes (reduced from 2 min to reduce worker load)
 
 # iCal sync retry schedule (seconds from email received)
 ICAL_SYNC_RETRY_SCHEDULE = [

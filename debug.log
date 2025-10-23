@@ -571,3 +571,218 @@ ERROR 2025-10-22 19:29:08,986 models Failed to send cancellation email to easybu
 ERROR 2025-10-23 10:13:09,821 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
 DETAIL:  Key (booking_reference, platform)=(6886022978, booking) already exists.
 
+ERROR 2025-10-23 11:06:06,728 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(5165446140, booking) already exists.
+
+ERROR 2025-10-23 11:08:05,634 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(5165446140, booking) already exists.
+
+ERROR 2025-10-23 11:12:06,221 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(5165446140, booking) already exists.
+
+ERROR 2025-10-23 11:14:06,439 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(5165446140, booking) already exists.
+
+ERROR 2025-10-23 11:16:06,761 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(5165446140, booking) already exists.
+
+ERROR 2025-10-23 11:20:07,026 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(5165446140, booking) already exists.
+
+ERROR 2025-10-23 11:20:07,096 ical_service RoomICalConfig with ID 3 not found
+ERROR 2025-10-23 11:20:07,096 tasks Sync failed for config 3 (booking): ['RoomICalConfig with ID 3 not found']
+ERROR 2025-10-23 11:20:07,161 ical_service RoomICalConfig with ID 4 not found
+ERROR 2025-10-23 11:20:07,162 tasks Sync failed for config 4 (booking): ['RoomICalConfig with ID 4 not found']
+ERROR 2025-10-23 11:22:14,817 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(6289109329, booking) already exists.
+
+ERROR 2025-10-23 11:23:06,518 models Missing variable in template ical_cancellation_email: 'guest_name'
+ERROR 2025-10-23 11:23:06,519 models Missing variable in template ical_post_stay_email: 'guest_name'
+ERROR 2025-10-23 11:23:06,520 models Missing variable in template ical_update_email: 'guest_name'
+ERROR 2025-10-23 11:23:06,521 models Missing variable in template ical_welcome_email: 'guest_name'
+ERROR 2025-10-23 11:23:06,570 models Missing variable in template ical_cancellation_sms: 'check_in_date'
+ERROR 2025-10-23 11:23:06,571 models Missing variable in template ical_post_stay_sms: 'platform_name'
+ERROR 2025-10-23 11:23:06,571 models Missing variable in template ical_update_sms: 'check_in_date'
+ERROR 2025-10-23 11:23:06,572 models Missing variable in template ical_welcome_sms: 'check_in_date'
+ERROR 2025-10-23 11:24:07,374 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(6289109329, booking) already exists.
+
+ERROR 2025-10-23 11:34:09,609 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(6870437239, booking) already exists.
+
+ERROR 2025-10-23 11:36:09,338 tasks Error polling Booking.com emails: duplicate key value violates unique constraint "main_pendingenrichment_booking_reference_platform_02cd7784_uniq"
+DETAIL:  Key (booking_reference, platform)=(6870437239, booking) already exists.
+
+ERROR 2025-10-23 15:25:07,068 views XLS upload error: invalid input syntax for type json
+LINE 1: ..._enriched_single', '5165446140', 3, 'csv_upload', '{"room_co...
+                                                             ^
+DETAIL:  Token "NaN" is invalid.
+CONTEXT:  JSON data, line 1: ...count": 1, "rooms": ["Room 3"], "guest_name": NaN...
+
+ERROR 2025-10-23 19:33:35,405 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "c:\Users\easyb\pickarooms\main\views.py", line 1243, in admin_page
+    return render(request, 'main/admin_page.html', {
+        'rooms': available_rooms,
+    ...<5 lines>...
+        'overlapping_warnings': overlapping_warnings,
+    })
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'guest_details' with arguments '('',)' not found. 1 pattern(s) tried: ['admin\\-page/guest\\-details/(?P<guest_id>[0-9]+)/\\Z']
+ERROR 2025-10-23 19:37:57,898 log Internal Server Error: /admin-page/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "c:\Users\easyb\pickarooms\main\views.py", line 1245, in admin_page
+    return render(request, 'main/admin_page.html', {
+        'rooms': available_rooms,
+    ...<5 lines>...
+        'overlapping_warnings': overlapping_warnings,
+    })
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\urls\resolvers.py", line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'manage_checkin_checkout' with arguments '(None,)' not found. 1 pattern(s) tried: ['admin\\-page/manage\\-checkin\\-checkout/(?P<guest_id>[0-9]+)/\\Z']
