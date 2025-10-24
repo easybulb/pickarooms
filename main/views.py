@@ -2101,8 +2101,7 @@ def all_reservations(request):
         })
 
     return render(request, 'main/all_reservations.html', {
-        'reservations': reservations_data,
-        'total_count': len(reservations_data),
+        'reservations': reservations,  # Pass queryset directly (room data via select_related)
         'platform_filter': platform_filter,
         'status_filter': status_filter,
         'enrichment_filter': enrichment_filter,
