@@ -231,19 +231,59 @@ class RoomICalConfigAdmin(admin.ModelAdmin):
     actions = ['sync_now']
 
     def sync_now(self, request, queryset):
-        """Manually trigger sync for selected rooms"""
-        from main.tasks import sync_room_ical_feed
+        """Manually trigger immediate sync for selected rooms (runs synchronously)"""
+        from main.services.ical_service import sync_reservations_for_room
+        
+        total_created = 0
+        total_updated = 0
+        total_cancelled = 0
         synced_count = 0
+        error_count = 0
+        
         for config in queryset:
-            if config.is_active:
-                sync_room_ical_feed.delay(config.id)
-                synced_count += 1
-
+            # Sync Booking.com if active
+            if config.booking_active and config.booking_ical_url:
+                try:
+                    result = sync_reservations_for_room(config.id, platform='booking')
+                    if result['success']:
+                        total_created += result['created']
+                        total_updated += result['updated']
+                        total_cancelled += result['cancelled']
+                        synced_count += 1
+                    else:
+                        error_count += 1
+                        logger.error(f"Booking.com sync failed for {config.room.name}: {result['errors']}")
+                except Exception as e:
+                    error_count += 1
+                    logger.error(f"Booking.com sync error for {config.room.name}: {str(e)}")
+            
+            # Sync Airbnb if active
+            if config.airbnb_active and config.airbnb_ical_url:
+                try:
+                    result = sync_reservations_for_room(config.id, platform='airbnb')
+                    if result['success']:
+                        total_created += result['created']
+                        total_updated += result['updated']
+                        total_cancelled += result['cancelled']
+                        synced_count += 1
+                    else:
+                        error_count += 1
+                        logger.error(f"Airbnb sync failed for {config.room.name}: {result['errors']}")
+                except Exception as e:
+                    error_count += 1
+                    logger.error(f"Airbnb sync error for {config.room.name}: {str(e)}")
+        
+        # Show summary message
         if synced_count > 0:
-            self.message_user(request, f"Sync triggered for {synced_count} room(s). Check logs for results.", messages.SUCCESS)
+            self.message_user(
+                request,
+                f"Sync complete: {total_created} created, {total_updated} updated, {total_cancelled} cancelled. Errors: {error_count}",
+                messages.SUCCESS if error_count == 0 else messages.WARNING
+            )
         else:
             self.message_user(request, "No active configurations selected.", messages.WARNING)
-    sync_now.short_description = "Sync selected rooms now"
+    
+    sync_now.short_description = "Sync selected rooms now (immediate)"
 
 class ReservationAdmin(admin.ModelAdmin):
     list_display = ('platform_badge', 'guest_name', 'booking_reference', 'room', 'check_in_date', 'check_out_date', 'status', 'enrichment_status', 'created_at')

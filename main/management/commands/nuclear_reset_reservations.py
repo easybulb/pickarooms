@@ -11,11 +11,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         count = Reservation.objects.count()
-        self.stdout.write(f'\n⚠️  WARNING: About to delete {count} reservations\n')
+        self.stdout.write(f'\nWARNING: About to delete {count} reservations\n')
         confirm = input('Type "DELETE ALL" to confirm: ')
         if confirm == 'DELETE ALL':
             Reservation.objects.all().delete()
-            self.stdout.write(self.style.SUCCESS(f'\n✓ Deleted all {count} reservations\n'))
+            self.stdout.write(self.style.SUCCESS(f'\nDeleted all {count} reservations\n'))
             self.stdout.write('Next: Re-sync iCal feeds, then upload XLS\n')
         else:
             self.stdout.write('Cancelled\n')
