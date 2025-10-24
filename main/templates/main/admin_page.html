@@ -74,6 +74,8 @@
                         <th>{% trans "Booking Ref" %}</th>
                         <th>{% trans "Platform" %}</th>
                         <th>{% trans "Room" %}</th>
+                        <th>{% trans "Check-In" %}</th>
+                        <th>{% trans "Check-Out" %}</th>
                         <th>{% trans "PIN (Front Door & Room)" %}</th>
                         <th>{% trans "PIN Validity" %}</th>
                         <th>{% trans "Actions" %}</th>
@@ -105,6 +107,22 @@
                         <td>{{ entry.booking_ref }}</td>
                         <td>{{ entry.platform|safe }}</td>
                         <td>{{ entry.room.name }}</td>
+                        <td>
+                            {{ entry.check_in_date }}
+                            {% if entry.early_checkin_time %}
+                                <br><small>{{ entry.early_checkin_time|time:"h:i A" }}</small>
+                            {% else %}
+                                <br><small>2:00 PM</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ entry.check_out_date }}
+                            {% if entry.late_checkout_time %}
+                                <br><small>{{ entry.late_checkout_time|time:"h:i A" }}</small>
+                            {% else %}
+                                <br><small>11:00 AM</small>
+                            {% endif %}
+                        </td>
                         <td class="pin-code">
                             {% if entry.pin %}
                                 {{ entry.pin }}
@@ -137,7 +155,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7">{% trans "No guests checking in today." %}</td>
+                        <td colspan="9">{% trans "No guests checking in today." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
