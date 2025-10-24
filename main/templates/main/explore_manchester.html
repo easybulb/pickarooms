@@ -139,7 +139,6 @@
 <script>
     // Get Directions Button Functionality
     document.addEventListener("DOMContentLoaded", function () {
-        console.log("DOM fully loaded, attaching event listeners...");
         const directionButtons = document.querySelectorAll(".get-directions-btn");
         if (directionButtons.length === 0) {
             console.error("No Get Directions buttons found!");
@@ -147,14 +146,11 @@
         }
 
         directionButtons.forEach(button => {
-            console.log("Attaching click listener to button:", button);
             button.addEventListener("click", function (event) {
-                event.preventDefault(); // Prevent default button behavior
-                console.log("Button clicked, retrieving lat/lng...");
+                event.preventDefault();
                 const lat = this.getAttribute("data-lat");
                 const lng = this.getAttribute("data-lng");
                 if (lat && lng) {
-                    console.log(`Opening modal for lat: ${lat}, lng: ${lng}`);
                     openModal(lat, lng);
                 } else {
                     console.error("Latitude or longitude not found on button:", this);
@@ -165,7 +161,6 @@
 
     // Custom Modal Functions
     function openModal(lat, lng) {
-        console.log("openModal called with lat:", lat, "lng:", lng);
         const modal = document.getElementById("directionsModal");
         if (!modal) {
             console.error("Modal element not found!");
@@ -173,11 +168,9 @@
         }
 
         const userLocation = new Promise((resolve, reject) => {
-            console.log("Attempting to get user location...");
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        console.log("Geolocation success:", position.coords);
                         resolve(`${position.coords.latitude},${position.coords.longitude}`);
                     },
                     (error) => {
@@ -186,27 +179,27 @@
                     }
                 );
             } else {
-                console.log("Geolocation not supported, using fallback...");
+    
                 resolve("53.480759,-2.244644"); // Fallback for no geolocation
             }
         });
 
         userLocation.then(location => {
-            console.log("User location resolved:", location);
+
             const apiKey = "{{ GOOGLE_MAPS_API_KEY }}"; // Use Django template variable
-            console.log("API Key:", apiKey); // Log the API key to verify it’s rendered correctly
+ // Log the API key to verify it’s rendered correctly
             if (!apiKey || apiKey.trim() === "") {
                 console.error("API Key is empty or not set in template!");
                 alert("API Key is missing. Please configure GOOGLE_MAPS_API_KEY in Django settings.");
                 return;
             }
             const url = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}&origin=${location}&destination=${lat},${lng}&mode=driving`;
-            console.log("Loading directions with URL:", url); // Log the URL for debugging
+ // Log the URL for debugging
             const modalMap = document.getElementById("modalMap");
             const externalDirections = document.getElementById("externalDirections");
 
             if (modalMap && externalDirections) {
-                console.log("Setting iframe src and link href...");
+
                 modalMap.src = url;
                 externalDirections.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
                 modal.style.display = "block";
@@ -217,7 +210,7 @@
             console.error('Error loading directions:', error);
             const modalMap = document.getElementById("modalMap");
             if (modalMap) {
-                console.log("Setting error message in iframe...");
+
                 modalMap.src = '';
                 modalMap.innerHTML = '<p>Directions failed to load. Please check your internet connection, API key, or ensure the Maps Embed API is enabled.</p>';
                 modal.style.display = "block";
@@ -226,7 +219,7 @@
     }
 
     function closeModal() {
-        console.log("closeModal called...");
+
         const modal = document.getElementById("directionsModal");
         const modalMap = document.getElementById("modalMap");
         if (modal) {
@@ -234,7 +227,7 @@
         }
         if (modalMap) {
             modalMap.src = ''; // Clear the iframe to prevent loading when closed
-            console.log("Iframe cleared...");
+
         }
     }
 </script>
