@@ -125,37 +125,57 @@ def create_reservations_from_xls_row(row, warnings_list=None):
             logger.error(f"Room {room_name} not found in database")
             continue
 
-                                # Check if reservation already exists
-        # CRITICAL: Prioritize confirmed reservations over cancelled ones
-        # This prevents XLS from enriching the wrong reservation when both exist
-        existing = Reservation.objects.filter(
-            booking_reference=booking_ref,
-            room=room,
-            check_in_date=check_in,
-            status='confirmed'  # Only match confirmed reservations
-        ).first()
+                                        # Check if reservation already exists
+        # Strategy 1: Match by booking_reference (for XLS-created or previously enriched reservations)
+        # Strategy 2: Match by room + dates (for iCal-synced reservations without booking_ref)
         
-        # If no confirmed reservation found, check for cancelled (fallback)
-        if not existing:
+        existing = None
+        
+        # Strategy 1: Try matching by booking_reference + room + check_in
+        # CRITICAL: Prioritize confirmed reservations over cancelled ones
+        if booking_ref:
             existing = Reservation.objects.filter(
                 booking_reference=booking_ref,
                 room=room,
                 check_in_date=check_in,
-                status='cancelled'
+                status='confirmed'  # Only match confirmed reservations
             ).first()
+            
+            # If no confirmed reservation found, check for cancelled (fallback)
+            if not existing:
+                existing = Reservation.objects.filter(
+                    booking_reference=booking_ref,
+                    room=room,
+                    check_in_date=check_in,
+                    status='cancelled'
+                ).first()
+        
+        # Strategy 2: If not found by booking_ref, try matching by room + dates + status
+        # This catches iCal-synced reservations that don't have booking_ref yet
+        if not existing:
+            existing = Reservation.objects.filter(
+                room=room,
+                check_in_date=check_in,
+                check_out_date=check_out,
+                status='confirmed',
+                booking_reference__in=['', None]  # Only match if booking_ref is empty
+                        ).first()
+            
+            if existing:
+                logger.info(f"Matched iCal reservation by dates: {room.name} {check_in} -> {check_out}")
 
         if existing:
-            # Update existing
-            existing.booking_reference = booking_ref  # FIX: Ensure booking ref is set (for iCal-synced reservations)
+            # Update existing (enriching iCal-synced or updating XLS-created)
+            existing.booking_reference = booking_ref  # Set/update booking ref
             existing.guest_name = guest_name
             existing.check_out_date = check_out
             if status == 'cancelled_by_guest':
                 existing.status = 'cancelled'
             existing.save()
             created_reservations.append(('updated', existing))
-            logger.info(f"Updated reservation: {booking_ref} → {room.name}")
+            logger.info(f"Enriched reservation: {booking_ref} -> {room.name} (was: '{existing.booking_reference or 'empty'}')")        
         else:
-            # Create new
+            # Create new (no matching reservation found - should be rare if iCal synced first)
             reservation_status = 'cancelled' if status == 'cancelled_by_guest' else 'confirmed'
             reservation = Reservation.objects.create(
                 room=room,
@@ -168,7 +188,7 @@ def create_reservations_from_xls_row(row, warnings_list=None):
                 ical_uid=f'xls_{booking_ref}_{room_name}_{timezone.now().timestamp()}',
             )
             created_reservations.append(('created', reservation))
-            logger.info(f"Created reservation: {booking_ref} → {room.name}")
+            logger.info(f"Created new reservation: {booking_ref} -> {room.name} (no iCal match found)")
 
     return created_reservations
 
