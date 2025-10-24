@@ -56,6 +56,18 @@ class GmailClient:
                 logger.info("Decoded Gmail token from GMAIL_TOKEN_BASE64 environment variable")
             except Exception as e:
                 logger.error(f"Error decoding GMAIL_TOKEN_BASE64: {str(e)}")
+        
+        # HEROKU: Check for base64-encoded credentials in environment variable
+        creds_base64 = os.environ.get('GMAIL_CREDENTIALS_BASE64')
+        if creds_base64 and not os.path.exists(credentials_path):
+            try:
+                import base64
+                creds_data = base64.b64decode(creds_base64)
+                with open(credentials_path, 'wb') as f:
+                    f.write(creds_data)
+                logger.info("Decoded Gmail credentials from GMAIL_CREDENTIALS_BASE64 environment variable")
+            except Exception as e:
+                logger.error(f"Error decoding GMAIL_CREDENTIALS_BASE64: {str(e)}")
 
         # Load existing credentials
         if os.path.exists(token_path):
