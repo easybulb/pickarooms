@@ -405,6 +405,14 @@ CELERY_BEAT_SCHEDULE = {
             'expires': 1800,  # Task expires after 30 minutes if not picked up
         }
     },
+    # Cleanup old enrichment logs - Daily at 3:05 AM
+    'cleanup-enrichment-logs-daily': {
+        'task': 'main.tasks.cleanup_old_enrichment_logs',
+        'schedule': crontab(hour=3, minute=5),  # Daily at 3:05 AM (5 min after reservations)
+        'options': {
+            'expires': 1800,  # Task expires after 30 minutes if not picked up
+        }
+    },
 }
 
 # Store task results in Django database

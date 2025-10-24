@@ -201,6 +201,51 @@ def cleanup_old_reservations(self):
 
 
 @shared_task(bind=True, max_retries=0)
+def cleanup_old_enrichment_logs(self):
+    """
+    Daily cleanup task for EnrichmentLog table
+    Runs at 3 AM daily along with other cleanup tasks
+    
+    Cleanup Strategy:
+    1. Delete logs older than 7 days
+    2. Keep maximum 1000 newest logs (failsafe)
+    
+    This prevents table bloat while maintaining recent history for debugging.
+    """
+    from main.models import EnrichmentLog
+    from datetime import timedelta
+
+    logger.info("Running daily cleanup of enrichment logs...")
+
+    # Step 1: Delete logs older than 7 days
+    cutoff_date = timezone.now() - timedelta(days=7)
+    old_logs = EnrichmentLog.objects.filter(timestamp__lt=cutoff_date)
+    old_count = old_logs.count()
+    
+    if old_count > 0:
+        old_logs.delete()
+        logger.info(f"Deleted {old_count} enrichment log(s) older than 7 days")
+
+    # Step 2: Keep only 1000 newest logs (failsafe)
+    total_logs = EnrichmentLog.objects.count()
+    
+    if total_logs > 1000:
+        # Get the ID of the 1000th newest log
+        logs_to_keep = EnrichmentLog.objects.order_by('-timestamp')[:1000].values_list('id', flat=True)
+        logs_to_delete = EnrichmentLog.objects.exclude(id__in=list(logs_to_keep))
+        excess_count = logs_to_delete.count()
+        
+        if excess_count > 0:
+            logs_to_delete.delete()
+            logger.info(f"Deleted {excess_count} excess enrichment log(s) to maintain 1000 max")
+    
+    final_count = EnrichmentLog.objects.count()
+    logger.info(f"Enrichment log cleanup complete: {final_count} logs remaining")
+    
+    return f"Cleaned enrichment logs: {old_count} old deleted, {final_count} remaining"
+
+
+@shared_task(bind=True, max_retries=0)
 def archive_past_guests(self):
     """
     Task to archive guests whose check-out time has passed
