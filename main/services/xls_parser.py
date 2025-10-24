@@ -70,6 +70,11 @@ def create_reservations_from_xls_row(row, warnings_list=None):
     phone = str(row['Phone number']).strip() if pd.notna(row.get('Phone number')) else ''
     status = str(row['Status']).strip() if pd.notna(row.get('Status')) else 'ok'
 
+    # CRITICAL: Skip cancelled bookings from XLS - don't process them at all
+    if status == 'cancelled_by_guest':
+        logger.info(f"Skipping cancelled booking {booking_ref} from XLS")
+        return []
+
     # Parse multi-room
     rooms = parse_multi_room_unit_type(unit_type)
 
