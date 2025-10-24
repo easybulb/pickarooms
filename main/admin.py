@@ -244,34 +244,44 @@ class RoomICalConfigAdmin(admin.ModelAdmin):
             # Sync Booking.com if active
             if config.booking_active and config.booking_ical_url:
                 try:
+                    logger.info(f"Admin: Syncing Booking.com for {config.room.name}")
                     result = sync_reservations_for_room(config.id, platform='booking')
                     if result['success']:
                         total_created += result['created']
                         total_updated += result['updated']
                         total_cancelled += result['cancelled']
                         synced_count += 1
+                        logger.info(f"Admin: Booking.com sync success for {config.room.name}")
                     else:
                         error_count += 1
                         logger.error(f"Booking.com sync failed for {config.room.name}: {result['errors']}")
+                        self.message_user(request, f"Booking.com sync failed for {config.room.name}: {result['errors']}", messages.ERROR)
                 except Exception as e:
                     error_count += 1
-                    logger.error(f"Booking.com sync error for {config.room.name}: {str(e)}")
+                    error_msg = f"Booking.com sync error for {config.room.name}: {str(e)}"
+                    logger.error(error_msg)
+                    self.message_user(request, error_msg, messages.ERROR)
             
             # Sync Airbnb if active
             if config.airbnb_active and config.airbnb_ical_url:
                 try:
+                    logger.info(f"Admin: Syncing Airbnb for {config.room.name}")
                     result = sync_reservations_for_room(config.id, platform='airbnb')
                     if result['success']:
                         total_created += result['created']
                         total_updated += result['updated']
                         total_cancelled += result['cancelled']
                         synced_count += 1
+                        logger.info(f"Admin: Airbnb sync success for {config.room.name}")
                     else:
                         error_count += 1
                         logger.error(f"Airbnb sync failed for {config.room.name}: {result['errors']}")
+                        self.message_user(request, f"Airbnb sync failed for {config.room.name}: {result['errors']}", messages.ERROR)
                 except Exception as e:
                     error_count += 1
-                    logger.error(f"Airbnb sync error for {config.room.name}: {str(e)}")
+                    error_msg = f"Airbnb sync error for {config.room.name}: {str(e)}"
+                    logger.error(error_msg)
+                    self.message_user(request, error_msg, messages.ERROR)
         
         # Show summary message
         if synced_count > 0:
