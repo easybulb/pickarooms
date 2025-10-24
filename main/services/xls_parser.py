@@ -120,12 +120,24 @@ def create_reservations_from_xls_row(row, warnings_list=None):
             logger.error(f"Room {room_name} not found in database")
             continue
 
-                # Check if reservation already exists
+                                # Check if reservation already exists
+        # CRITICAL: Prioritize confirmed reservations over cancelled ones
+        # This prevents XLS from enriching the wrong reservation when both exist
         existing = Reservation.objects.filter(
             booking_reference=booking_ref,
             room=room,
-            check_in_date=check_in
+            check_in_date=check_in,
+            status='confirmed'  # Only match confirmed reservations
         ).first()
+        
+        # If no confirmed reservation found, check for cancelled (fallback)
+        if not existing:
+            existing = Reservation.objects.filter(
+                booking_reference=booking_ref,
+                room=room,
+                check_in_date=check_in,
+                status='cancelled'
+            ).first()
 
         if existing:
             # Update existing
