@@ -357,6 +357,13 @@ def poll_booking_com_emails(self):
 
             email_type, booking_ref, check_in_date = parsed
 
+            # Skip cancellation emails - no need to create PendingEnrichment
+            # iCal will handle cancellations by removing from feed
+            if email_type == 'cancellation':
+                logger.info(f"Skipping cancellation email for {booking_ref} (handled by iCal sync)")
+                gmail.mark_as_read(email_id)
+                continue
+
             # Check if we already have this pending enrichment
             existing = PendingEnrichment.objects.filter(
                 booking_reference=booking_ref,
@@ -369,7 +376,7 @@ def poll_booking_com_emails(self):
                 gmail.mark_as_read(email_id)
                 continue
 
-            # Create pending enrichment
+            # Create pending enrichment (only for new/modification emails)
             pending = PendingEnrichment.objects.create(
                 platform='booking',
                 booking_reference=booking_ref,
