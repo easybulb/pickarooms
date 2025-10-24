@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load i18n %}
+{% load tz %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
@@ -307,7 +308,7 @@
                         <br>
                         <strong>{% trans "Last Synced:" %}</strong>
                         {% if config.booking_last_synced %}
-                            {{ config.booking_last_synced|date:"Y-m-d H:i" }} (UK)
+                            {% timezone "Europe/London" %}{{ config.booking_last_synced|date:"Y-m-d H:i" }}{% endtimezone %} (UK)
                         {% else %}
                             {% trans "Never" %}
                         {% endif %}
@@ -368,7 +369,7 @@
                         <br>
                         <strong>{% trans "Last Synced:" %}</strong>
                         {% if config.airbnb_last_synced %}
-                            {{ config.airbnb_last_synced|date:"Y-m-d H:i" }} (UK)
+                            {% timezone "Europe/London" %}{{ config.airbnb_last_synced|date:"Y-m-d H:i" }}{% endtimezone %} (UK)
                         {% else %}
                             {% trans "Never" %}
                         {% endif %}
