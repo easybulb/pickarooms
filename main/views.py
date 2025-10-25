@@ -3397,25 +3397,36 @@ def handle_twilio_sms_webhook(request):
     """
     from main.services.sms_reply_handler import handle_sms_room_assignment
     from main.enrichment_config import WHITELISTED_SMS_NUMBERS
+    import sys
 
     if request.method != 'POST':
+        print(f"[SMS WEBHOOK] Invalid method: {request.method}", file=sys.stderr)
         return HttpResponse('Method not allowed', status=405)
 
     from_number = request.POST.get('From', '')
     body = request.POST.get('Body', '')
 
+    # Force logging to both logger and stdout/stderr
+    print(f"[SMS WEBHOOK] Received SMS from {from_number}: '{body}'", file=sys.stderr)
     logger.info(f"Received SMS from {from_number}: {body}")
 
     # Security check
     if from_number not in WHITELISTED_SMS_NUMBERS:
+        print(f"[SMS WEBHOOK] Unauthorized sender: {from_number}", file=sys.stderr)
         logger.warning(f"Unauthorized SMS from {from_number}")
         return HttpResponse('Unauthorized', status=403)
 
     try:
+        print(f"[SMS WEBHOOK] Calling handler for {from_number}", file=sys.stderr)
         result = handle_sms_room_assignment(from_number, body)
+        print(f"[SMS WEBHOOK] Handler result: {result}", file=sys.stderr)
+        logger.info(f"SMS handler result: {result}")
         return HttpResponse(result, status=200)
     except Exception as e:
+        print(f"[SMS WEBHOOK] ERROR: {str(e)}", file=sys.stderr)
         logger.error(f"Error processing SMS: {str(e)}")
+        import traceback
+        traceback.print_exc(file=sys.stderr)
         return HttpResponse(f"Error: {str(e)}", status=500)
 
 
