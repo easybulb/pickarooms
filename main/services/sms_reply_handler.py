@@ -7,6 +7,8 @@ import re
 import logging
 from datetime import timedelta
 from django.utils import timezone
+from django.conf import settings
+from twilio.rest import Client
 
 from main.models import PendingEnrichment, Reservation, Room, EnrichmentLog
 from main.enrichment_config import WHITELISTED_SMS_NUMBERS, ROOM_NUMBER_TO_NAME
@@ -57,6 +59,28 @@ def is_authorized_sms(from_number):
     return from_number in WHITELISTED_SMS_NUMBERS
 
 
+def send_confirmation_sms(to_number, message):
+    """
+    Send SMS confirmation back to admin
+
+    Args:
+        to_number (str): Recipient phone number
+        message (str): Confirmation message
+    """
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        response = client.messages.create(
+            to=to_number,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=message
+        )
+        logger.info(f"Confirmation SMS sent to {to_number}: {response.sid}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send confirmation SMS: {str(e)}")
+        return False
+
+
 def handle_sms_room_assignment(from_number, body):
     """
     Handle SMS reply for room assignment
@@ -71,22 +95,33 @@ def handle_sms_room_assignment(from_number, body):
     # Security check
     if not is_authorized_sms(from_number):
         logger.warning(f"Unauthorized SMS from: {from_number}")
+        send_confirmation_sms(from_number, "❌ Unauthorized sender. Access denied.")
         return "Unauthorized"
 
     # Parse reply
     parsed = parse_sms_reply(body)
     if not parsed:
         logger.warning(f"Invalid SMS format from {from_number}: {body}")
+        send_confirmation_sms(
+            from_number,
+            f"❌ Invalid format: '{body}'\n\n"
+            "Valid formats:\n"
+            "• 2-3 (Room 2, 3 nights)\n"
+            "• A1-3 (Booking A, Room 1, 3 nights)\n"
+            "• X (Cancel)"
+        )
         return "Invalid format"
 
     booking_letter, room_number, nights = parsed
 
     # Handle cancellation
     if booking_letter == 'X':
-        return handle_cancellation_reply(from_number)
+        result = handle_cancellation_reply(from_number)
+        return result
 
     # Handle room assignment
-    return assign_room_from_sms(booking_letter, room_number, nights)
+    result = assign_room_from_sms(booking_letter, room_number, nights, from_number)
+    return result
 
 
 def handle_cancellation_reply(from_number):
@@ -98,16 +133,31 @@ def handle_cancellation_reply(from_number):
     ).order_by('-alert_sent_at').first()
 
     if not pending:
+        msg = "❌ No pending assignment found to cancel."
+        send_confirmation_sms(from_number, msg)
         return "No pending assignment found"
+
+    booking_ref = pending.booking_reference
+    check_in = pending.check_in_date.strftime('%d %b %Y')
 
     pending.status = 'cancelled'
     pending.save()
 
     logger.info(f"Cancelled pending enrichment {pending.id} via SMS")
+
+    # Send confirmation
+    confirmation = (
+        f"✅ CANCELLED\n\n"
+        f"Booking: #{booking_ref}\n"
+        f"Check-in: {check_in}\n\n"
+        f"No reservation created. Guest will need to book again if they still want the room."
+    )
+    send_confirmation_sms(from_number, confirmation)
+
     return "Assignment cancelled"
 
 
-def assign_room_from_sms(booking_letter, room_number, nights):
+def assign_room_from_sms(booking_letter, room_number, nights, from_number):
     """
     Assign room to pending enrichment based on SMS reply
 
@@ -115,6 +165,7 @@ def assign_room_from_sms(booking_letter, room_number, nights):
         booking_letter (str or None): Booking letter (A-D) for collision, None for single
         room_number (int): Room number (1-4)
         nights (int): Number of nights
+        from_number (str): Admin phone number for confirmation SMS
 
     Returns:
         str: Result message
@@ -122,18 +173,26 @@ def assign_room_from_sms(booking_letter, room_number, nights):
     # Get room
     room_name = ROOM_NUMBER_TO_NAME.get(room_number)
     if not room_name:
+        msg = f"❌ Invalid room number: {room_number}\n\nValid rooms: 1, 2, 3, 4"
+        send_confirmation_sms(from_number, msg)
         return f"Invalid room number: {room_number}"
 
     try:
         room = Room.objects.get(name=room_name)
     except Room.DoesNotExist:
         logger.error(f"Room {room_name} not found")
+        msg = f"❌ Room {room_name} not found in database. Please contact support."
+        send_confirmation_sms(from_number, msg)
         return f"Room {room_name} not found"
 
     # Find pending enrichment
     if booking_letter:
         # Multi-booking scenario - find by letter
         pending = find_pending_by_letter(booking_letter)
+        if not pending:
+            msg = f"❌ Booking {booking_letter} not found in recent collision alerts."
+            send_confirmation_sms(from_number, msg)
+            return f"Booking {booking_letter} not found"
     else:
         # Single booking scenario - find most recent failed
         pending = PendingEnrichment.objects.filter(
@@ -142,11 +201,20 @@ def assign_room_from_sms(booking_letter, room_number, nights):
         ).order_by('-alert_sent_at').first()
 
     if not pending:
+        msg = "❌ No pending assignment found. Check /admin-page/pending-enrichments/"
+        send_confirmation_sms(from_number, msg)
         return "No pending assignment found"
 
     # IDEMPOTENCY CHECK
     if pending.status == 'manually_assigned':
         logger.warning(f"Pending {pending.id} already manually assigned")
+        msg = (
+            f"⚠️ ALREADY ASSIGNED\n\n"
+            f"Booking #{pending.booking_reference} was already assigned to "
+            f"{pending.room_matched.name if pending.room_matched else 'a room'} earlier.\n\n"
+            f"No duplicate reservation created."
+        )
+        send_confirmation_sms(from_number, msg)
         return "Already assigned"
 
     # Calculate checkout date
@@ -191,6 +259,17 @@ def assign_room_from_sms(booking_letter, room_number, nights):
     logger.info(
         f"SMS assignment successful: {pending.booking_reference} → {room.name}, {nights} nights"
     )
+
+    # Send confirmation SMS
+    confirmation = (
+        f"✅ ENRICHMENT COMPLETE\n\n"
+        f"Booking: #{pending.booking_reference}\n"
+        f"Room: {room.name}\n"
+        f"Check-in: {pending.check_in_date.strftime('%d %b %Y')}\n"
+        f"Check-out: {check_out_date.strftime('%d %b %Y')} ({nights} nights)\n\n"
+        f"Reservation created and awaiting guest check-in. Guest will provide contact details when they check in via the app."
+    )
+    send_confirmation_sms(from_number, confirmation)
 
     return f"Assigned: {pending.booking_reference} → {room.name}, {nights} nights"
 
