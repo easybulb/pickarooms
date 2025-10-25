@@ -38,47 +38,138 @@
 
 {% block content %}
 
-<!-- Always Visible Access Section -->
-<div class="access-section">
-    <div class="welcome-section">
-        <h1 class="welcome-header">
-            <span class="room-name">{{ room.name }}</span>
-            <span>{% trans "Upstairs" %}</span>
-            <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1741110376/no-smoking_sw0fnf.png" alt="{% trans 'No Smoking' %}" class="no-smoking-icon">
+<!-- Hero PIN Section -->
+<div class="hero-section">
+    <div class="welcome-header">
+        <h1>
+            <span class="room-badge">{{ room.name }}</span>
+            <span class="upstairs-badge">{% trans "Upstairs" %}</span>
         </h1>
-        <p class="welcome-greeting">{% trans "Welcome," %} {{ guest.full_name }}!</p>
-        {% if not show_pin %}
-        <p class="pin-wait">{% trans "Check-in starts at" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %} {% trans "UK time. Your access details will be available then." %}</p>
-        {% else %}
-            <p class="pin-entry"><strong>{% trans "PIN (Front Door & Room):" %}</strong> <span class="pin-code">{{ front_door_pin|default:"Contact support" }}#</span></p>
-            <p class="pin-note" style="font-size: 0.85em; color: #666; margin-top: 0.5em;">
-                {% trans "Enter all 6 digits plus # on the keypad. The first 2 digits wake up the lock." %}
-            </p>
-            <div class="quick-access">
-                <button id="pin-help" class="pin-btn pin-help-btn" onclick="openModal('unlock-help-modal')">{% trans "Need Help?" %}</button>
+        <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1741110376/no-smoking_sw0fnf.png" alt="{% trans 'No Smoking' %}" class="no-smoking-icon">
+    </div>
+    
+    <p class="welcome-text">👋 {% trans "Welcome," %} <strong>{{ guest.full_name }}</strong>!</p>
+    
+    {% if not show_pin %}
+    <!-- Before Check-in Time -->
+    <div class="pin-hero-card waiting">
+        <div class="pin-hero-icon">⏰</div>
+        <h2 class="pin-hero-title">{% trans "Check-In Starts Soon" %}</h2>
+        <p class="pin-hero-subtitle">{% trans "Your access PIN will be available at" %}</p>
+        <div class="pin-hero-time">{% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %}</div>
+        <p class="pin-hero-note">🇬🇧 {% trans "UK Time" %}</p>
+    </div>
+    {% else %}
+    <!-- PIN Available -->
+    <div class="pin-hero-card active">
+        <div class="pin-hero-header">
+            <div class="pin-hero-icon">🔑</div>
+            <h2 class="pin-hero-title">{% trans "Your Access PIN" %}</h2>
+        </div>
+        <div class="pin-display-box">
+            <div class="pin-digits">
+                {{ front_door_pin|default:"Contact support" }}<span class="pin-hash">#</span>
             </div>
-        {% endif %}
-        <div class="welcome-info">
-            <p><strong>{% trans "Reservation Number:" %}</strong> {{ guest.reservation_number }}</p>
-            <p><strong>{% trans "Check-In:" %}</strong> {{ guest.check_in_date }} ({% trans "From" %} {% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2 PM{% endif %})</p>
-            <p><strong>{% trans "Check-Out:" %}</strong> {{ guest.check_out_date }} ({% trans "Before" %} {% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11 AM{% endif %})</p>
-            <p>
-                <strong>{% trans "Wifi Details:" %}</strong> Guest_2.4G 
-                <strong>{% trans "Password:" %}</strong> welcome1
-            </p>
+            <button class="pin-copy-btn" onclick="copyPIN('{{ front_door_pin }}#')">
+                <span class="copy-icon">📋</span> {% trans "Copy" %}
+            </button>
+        </div>
+        <p class="pin-hero-subtitle">✅ {% trans "Works for BOTH front door & room door" %}</p>
+        <div class="pin-instructions">
+            <p><strong>💡 {% trans "How to use:" %}</strong></p>
+            <ol>
+                <li>{% trans "Touch keypad to wake it up" %}</li>
+                <li>{% trans "Enter all 6 digits + # symbol" %}</li>
+                <li>{% trans "Turn handle immediately" %}</li>
+            </ol>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Quick Actions Bar -->
+{% if show_pin %}
+<div class="quick-actions-bar">
+    <button class="action-btn primary" onclick="watchEntryVideo()">
+        <span class="btn-icon">📹</span>
+        <span class="btn-text">{% trans "Watch Tutorial" %}</span>
+    </button>
+    <button class="action-btn secondary" onclick="openModal('unlock-help-modal')">
+        <span class="btn-icon">🚪</span>
+        <span class="btn-text">{% trans "Unlock Now" %}</span>
+    </button>
+    <a href="tel:+447539029629" class="action-btn tertiary">
+        <span class="btn-icon">📞</span>
+        <span class="btn-text">{% trans "Call Support" %}</span>
+    </a>
+</div>
+{% endif %}
+
+<!-- Status Cards Grid -->
+<div class="status-cards">
+    <div class="status-card">
+        <div class="status-icon">📅</div>
+        <div class="status-content">
+            <div class="status-label">{% trans "Check-In" %}</div>
+            <div class="status-value">{{ guest.check_in_date|date:"d M Y" }}</div>
+            <div class="status-time">{% if guest.early_checkin_time %}{{ guest.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %}</div>
+        </div>
+    </div>
+    <div class="status-card">
+        <div class="status-icon">📅</div>
+        <div class="status-content">
+            <div class="status-label">{% trans "Check-Out" %}</div>
+            <div class="status-value">{{ guest.check_out_date|date:"d M Y" }}</div>
+            <div class="status-time">{% if guest.late_checkout_time %}{{ guest.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %}</div>
+        </div>
+    </div>
+    <div class="status-card">
+        <div class="status-icon">📶</div>
+        <div class="status-content">
+            <div class="status-label">{% trans "WiFi" %}</div>
+            <div class="status-value">Guest_2.4G</div>
+            <div class="status-time">🔐 welcome1</div>
+        </div>
+    </div>
+    <div class="status-card">
+        <div class="status-icon">🔢</div>
+        <div class="status-content">
+            <div class="status-label">{% trans "Booking Ref" %}</div>
+            <div class="status-value">{{ guest.reservation_number }}</div>
         </div>
     </div>
 </div>
 
-<!-- Sticky Tab Navigation (Moved Below Access Section) -->
+<!-- Modern Tab Navigation -->
 <div class="section-nav">
-    <button class="tab-btn active" data-section="direction" onclick="showSection('direction')">{% trans "Location" %}</button>
-    <button class="tab-btn" data-section="access" onclick="showSection('access')">{% trans "How To Use PIN" %}</button>
-    <button class="tab-btn" data-section="parking" onclick="showSection('parking')">{% trans "Parking" %}</button>
-    <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">{% trans "Kitchen" %}</button>
-    <button class="tab-btn" data-section="nearby" onclick="showSection('nearby')">{% trans "Nearby" %}</button>
-    <button class="tab-btn" data-section="faq" onclick="showSection('faq')">{% trans "FAQs" %}</button>
-    <button class="tab-btn" data-section="upload-id" onclick="showSection('upload-id')">{% trans "Upload ID" %}</button>
+    <button class="tab-btn active" data-section="direction" onclick="showSection('direction')">
+        <span class="tab-icon">🗺️</span>
+        <span class="tab-label">{% trans "Location" %}</span>
+    </button>
+    <button class="tab-btn" data-section="access" onclick="showSection('access')">
+        <span class="tab-icon">🔑</span>
+        <span class="tab-label">{% trans "How To Use" %}</span>
+    </button>
+    <button class="tab-btn" data-section="parking" onclick="showSection('parking')">
+        <span class="tab-icon">🚗</span>
+        <span class="tab-label">{% trans "Parking" %}</span>
+    </button>
+    <button class="tab-btn" data-section="kitchen" onclick="showSection('kitchen')">
+        <span class="tab-icon">🍳</span>
+        <span class="tab-label">{% trans "Kitchen" %}</span>
+    </button>
+    <button class="tab-btn" data-section="nearby" onclick="showSection('nearby')">
+        <span class="tab-icon">🍽️</span>
+        <span class="tab-label">{% trans "Nearby" %}</span>
+    </button>
+    <button class="tab-btn" data-section="faq" onclick="showSection('faq')">
+        <span class="tab-icon">❓</span>
+        <span class="tab-label">{% trans "FAQs" %}</span>
+    </button>
+    <button class="tab-btn" data-section="upload-id" onclick="showSection('upload-id')">
+        <span class="tab-icon">🪪</span>
+        <span class="tab-label">{% trans "Upload ID" %}</span>
+    </button>
 </div>
 
 <!-- How To Use PIN Section -->
@@ -427,6 +518,22 @@
 
 <!-- JavaScript -->
 <script>
+    // Copy PIN to clipboard
+    function copyPIN(pin) {
+        navigator.clipboard.writeText(pin).then(function() {
+            const btn = event.target.closest('.pin-copy-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="copy-icon">✅</span> {% trans "Copied!" %}';
+            btn.style.background = '#10b981';
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.style.background = '';
+            }, 2000);
+        }).catch(function(err) {
+            alert('{% trans "Failed to copy PIN. Please copy manually." %}');
+        });
+    }
+
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         fetch(window.location.href + '?modal=' + modalId)
