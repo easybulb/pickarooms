@@ -146,13 +146,22 @@ def match_pending_enrichment(pending_id, attempt_number):
         )
         return True
 
-    # SCENARIO 4: No match yet
+        # SCENARIO 4: No match yet
     logger.info(
         f"No match found for {pending.booking_reference} on attempt {attempt_number}, "
         f"found {candidates.count()} candidates"
     )
 
     pending.attempts = attempt_number
+    
+    # After 5 failed attempts, mark as failed_awaiting_manual
+    if attempt_number >= 5:
+        pending.status = 'failed_awaiting_manual'
+        logger.warning(
+            f"Pending {pending_id} failed after 5 attempts, "
+            f"marking as failed_awaiting_manual"
+        )
+    
     pending.save()
 
     return False  # Needs retry
