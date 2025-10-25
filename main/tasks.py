@@ -517,8 +517,8 @@ def match_pending_to_reservation(self, pending_id, attempt_number):
         logger.info(f"Successfully matched pending {pending_id}")
         return "Matched"
 
-    # Not matched - schedule retry if under 5 attempts
-    if attempt_number < 5:
+    # Not matched - schedule retry if under 4 attempts
+    if attempt_number < 4:
         next_attempt = attempt_number + 1
         countdown = ICAL_SYNC_RETRY_SCHEDULE[next_attempt - 1] - ICAL_SYNC_RETRY_SCHEDULE[attempt_number - 1]
 
@@ -536,7 +536,7 @@ def match_pending_to_reservation(self, pending_id, attempt_number):
 
         return f"Scheduled retry {next_attempt}"
 
-    # Failed after 5 attempts - trigger alert
+    # Failed after 4 attempts - trigger alert
     logger.warning(f"Failed to match pending {pending_id} after {attempt_number} attempts")
     send_enrichment_failure_alert.delay(pending_id)
     return "Failed - alert sent"

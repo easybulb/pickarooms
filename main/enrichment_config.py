@@ -39,12 +39,14 @@ BOOKING_COM_EMAIL_PATTERNS = {
 EMAIL_POLL_INTERVAL = 300  # 5 minutes (reduced from 2 min to reduce worker load)
 
 # iCal sync retry schedule (seconds from email received)
+# HYBRID APPROACH: Better spacing to give Booking.com more time to update iCal feeds
+# Total time: 24 minutes (vs old 9 min), 4 attempts (vs old 5)
 ICAL_SYNC_RETRY_SCHEDULE = [
-    60,    # Attempt 1: 1 min after email
-    180,   # Attempt 2: 3 min after email (2 min since attempt 1)
-    300,   # Attempt 3: 5 min after email (2 min since attempt 2)
-    420,   # Attempt 4: 7 min after email (2 min since attempt 3)
-    540,   # Attempt 5: 9 min after email (2 min since attempt 4)
+    300,   # Attempt 1: 5 min after email (gives Booking.com initial time)
+    480,   # Attempt 2: 8 min after email (3 min gap - moderate wait)
+    720,   # Attempt 3: 12 min after email (4 min gap - longer wait)
+    1080,  # Attempt 4: 18 min after email (6 min gap - max patience)
+    # If no match after 18 min, alert sent (total 24 min from email)
 ]
 
 # Security: Whitelisted numbers and emails for SMS/Email replies

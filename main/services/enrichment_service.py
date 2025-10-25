@@ -23,9 +23,9 @@ def match_pending_enrichment(pending_id, attempt_number):
     Attempt to match pending enrichment to iCal reservation(s)
     Handles multi-room bookings and collision detection
 
-    Args:
+        Args:
         pending_id (int): PendingEnrichment ID
-        attempt_number (int): Current attempt number (1-5)
+        attempt_number (int): Current attempt number (1-4)
 
     Returns:
         bool: True if matched, False if needs retry
@@ -154,11 +154,11 @@ def match_pending_enrichment(pending_id, attempt_number):
 
     pending.attempts = attempt_number
     
-    # After 5 failed attempts, mark as failed_awaiting_manual
-    if attempt_number >= 5:
+    # After 4 failed attempts, mark as failed_awaiting_manual
+    if attempt_number >= 4:
         pending.status = 'failed_awaiting_manual'
         logger.warning(
-            f"Pending {pending_id} failed after 5 attempts, "
+            f"Pending {pending_id} failed after 4 attempts, "
             f"marking as failed_awaiting_manual"
         )
     
