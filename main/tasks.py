@@ -708,3 +708,161 @@ def send_collision_alert(collision_bookings):
         logger.info("Collision email alert sent")
     except Exception as e:
         logger.error(f"Failed to send collision email: {str(e)}")
+
+
+# =========================
+# CHECK-IN FLOW TASKS
+# =========================
+
+@shared_task(bind=True, max_retries=1)
+def generate_checkin_pin_background(self, session_key):
+    """
+    Generate TTLock PINs in background while guest fills parking info (Step 3)
+    Stores PIN in session for instant retrieval at Step 4 (Confirm)
+    
+    This provides a seamless UX - by the time guest reaches Step 4,
+    the PIN is already ready (no waiting/loading spinner).
+    
+    Args:
+        session_key (str): Django session key to store PIN results
+    """
+    from django.contrib.sessions.models import Session
+    from django.contrib.sessions.backends.db import SessionStore
+    from main.models import Reservation, TTLock
+    from main.ttlock_utils import TTLockClient
+    from main.pin_utils import generate_memorable_4digit_pin
+    import pytz
+    import datetime
+    
+    logger.info(f"Starting background PIN generation for session {session_key}")
+    
+    try:
+        # Get session data
+        logger.info(f"Looking for session with key: {session_key}")
+        session = Session.objects.get(session_key=session_key)
+        logger.info(f"Session found, decoding data...")
+        session_data = session.get_decoded()
+        logger.info(f"Session data keys: {session_data.keys()}")
+        flow_data = session_data.get('checkin_flow', {})
+        logger.info(f"Flow data: {flow_data}")
+        
+        if not flow_data:
+            logger.error(f"No checkin_flow data found in session {session_key}")
+            logger.error(f"Available session data: {list(session_data.keys())}")
+            return "No flow data"
+        
+        reservation_id = flow_data.get('reservation_id')
+        if not reservation_id:
+            logger.error(f"No reservation_id in checkin_flow for session {session_key}")
+            return "No reservation_id"
+        
+        reservation = Reservation.objects.select_related('room', 'room__ttlock').get(id=reservation_id)
+        
+        # Get locks
+        front_door_lock = TTLock.objects.filter(is_front_door=True).first()
+        room_lock = reservation.room.ttlock
+        
+        if not front_door_lock:
+            raise Exception("Front door lock not configured")
+        if not room_lock:
+            raise Exception(f"No TTLock assigned to room {reservation.room.name}")
+        
+        # Generate 4-digit memorable PIN
+        pin = generate_memorable_4digit_pin()
+        
+        # Setup time parameters
+        uk_timezone = pytz.timezone("Europe/London")
+        now_uk_time = timezone.now().astimezone(uk_timezone)
+        start_time = int(now_uk_time.timestamp() * 1000)
+        
+        # End time based on late_checkout_time or default 11 AM
+        check_out_time = reservation.late_checkout_time or datetime.time(11, 0)
+        end_date = uk_timezone.localize(
+            datetime.datetime.combine(reservation.check_out_date, check_out_time)
+        ) + datetime.timedelta(days=1)
+        end_time = int(end_date.timestamp() * 1000)
+        
+        ttlock_client = TTLockClient()
+        
+        # Generate front door PIN
+        front_door_response = ttlock_client.generate_temporary_pin(
+            lock_id=str(front_door_lock.lock_id),
+            pin=pin,
+            start_time=start_time,
+            end_time=end_time,
+            name=f"Front Door - {reservation.room.name} - {flow_data.get('full_name', 'Guest')} - {pin}"
+        )
+        
+        if "keyboardPwdId" not in front_door_response:
+            raise Exception(f"Front door PIN generation failed: {front_door_response.get('errmsg', 'Unknown error')}")
+        
+        keyboard_pwd_id_front = front_door_response["keyboardPwdId"]
+        
+        # Generate room PIN
+        room_response = ttlock_client.generate_temporary_pin(
+            lock_id=str(room_lock.lock_id),
+            pin=pin,
+            start_time=start_time,
+            end_time=end_time,
+            name=f"Room - {reservation.room.name} - {flow_data.get('full_name', 'Guest')} - {pin}"
+        )
+        
+        if "keyboardPwdId" not in room_response:
+            # Rollback front door PIN
+            try:
+                ttlock_client.delete_pin(
+                    lock_id=str(front_door_lock.lock_id),
+                    keyboard_pwd_id=keyboard_pwd_id_front
+                )
+            except Exception as e:
+                logger.error(f"Failed to rollback front door PIN: {str(e)}")
+            
+            raise Exception(f"Room PIN generation failed: {room_response.get('errmsg', 'Unknown error')}")
+        
+        keyboard_pwd_id_room = room_response["keyboardPwdId"]
+        
+        # ✅ Store in session
+        flow_data['pin_generated'] = True
+        flow_data['pin'] = pin
+        flow_data['front_door_pin_id'] = keyboard_pwd_id_front
+        flow_data['room_pin_id'] = keyboard_pwd_id_room
+        
+        session_data['checkin_flow'] = flow_data
+        
+        # Use SessionStore to properly encode and save the session
+        session_store = SessionStore(session_key=session_key)
+        session_store.update(session_data)
+        session_store.save()
+        
+        logger.info(f"✅ Background PIN generated successfully for session {session_key}: {pin}")
+        return f"PIN generated: {pin}"
+        
+    except Reservation.DoesNotExist:
+        logger.error(f"Reservation not found for session {session_key}")
+        error_msg = "Reservation not found"
+    except Session.DoesNotExist:
+        logger.error(f"Session {session_key} not found")
+        error_msg = "Session expired"
+    except Exception as e:
+        logger.error(f"Failed to generate PIN for session {session_key}: {str(e)}")
+        error_msg = str(e)
+    
+    # ❌ Mark as failed in session
+    try:
+        session = Session.objects.get(session_key=session_key)
+        session_data = session.get_decoded()
+        flow_data = session_data.get('checkin_flow', {})
+        flow_data['pin_generated'] = False
+        flow_data['pin_error'] = error_msg
+        session_data['checkin_flow'] = flow_data
+        
+        # Use SessionStore to properly encode and save the session
+        session_store = SessionStore(session_key=session_key)
+        session_store.update(session_data)
+        session_store.save()
+        
+        logger.info(f"Marked PIN generation as failed in session {session_key}")
+    except Exception as e:
+        logger.error(f"Failed to update session with error: {str(e)}")
+    
+    return f"Failed: {error_msg}"

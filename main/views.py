@@ -3,6 +3,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
 import requests
+
+# Import new multi-step check-in views
+from main.checkin_views import (
+    checkin_step1,
+    checkin_details,
+    checkin_parking,
+    checkin_confirm,
+    checkin_pin_status,
+    checkin_error
+)
 from django.core.mail import EmailMessage, BadHeaderError
 from django.conf import settings
 from django.http import HttpResponse
@@ -110,8 +120,10 @@ def explore_manchester(request):
         'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY
     })
 
+# Legacy check-in view (replaced by multi-step flow)
+# Kept for reference - DELETE after testing new flow
 @ratelimit(key='ip', rate='7/m', method='POST', block=True)
-def checkin(request):
+def checkin_legacy(request):
     if request.method == "POST":
         reservation_number = request.POST.get('reservation_number', '').strip()
 
@@ -372,6 +384,10 @@ def checkin(request):
         "GOOGLE_MAPS_API_KEY": settings.GOOGLE_MAPS_API_KEY,
         "reservation_number": request.session.get("reservation_number", ""),
     })
+
+# Alias for backward compatibility - redirect checkin to step1
+checkin = checkin_step1
+
 
 def enrich_reservation(request):
     """

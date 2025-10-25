@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Check-In - Technical Issue" %}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <!-- Error Icon -->
+        <div class="error-icon">⚠️</div>
+
+        <h1>{% trans "Technical Issue" %}</h1>
+        <p style="font-size: 16px; color: #ccc; margin-bottom: 20px;">
+            {% trans "We couldn't automatically generate your room access PIN." %}
+        </p>
+
+        <!-- Error Details Box -->
+        {% if booking_ref %}
+        <div class="error-box">
+            <div class="error-item">
+                <span class="label">{% trans "Booking Reference:" %}</span>
+                <span class="value">{{ booking_ref }}</span>
+            </div>
+            
+            {% if error %}
+            <div class="error-item" style="border-bottom: none;">
+                <span class="label">{% trans "Error:" %}</span>
+                <span class="value" style="color: #dc3545; font-size: 13px;">{{ error }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Contact Information -->
+        <div class="contact-box">
+            <h3>{% trans "Please Contact Us" %}</h3>
+            <p style="margin: 15px 0; color: #ccc; font-size: 14px;">
+                {% trans "Don't worry! We'll get you checked in right away. Please contact us using any of these methods:" %}
+            </p>
+
+            <div class="contact-methods">
+                <!-- Phone -->
+                <a href="tel:+447539029629" class="contact-method">
+                    <span class="contact-icon">📞</span>
+                    <div class="contact-info">
+                        <strong>{% trans "Phone" %}</strong>
+                        <span>+44 (0) 7539 029629</span>
+                    </div>
+                </a>
+
+                <!-- WhatsApp -->
+                <a href="https://wa.me/447539029629?text=Hi,%20I%20need%20help%20with%20check-in.%20Booking:%20{{ booking_ref }}" 
+                   target="_blank" 
+                   class="contact-method">
+                    <span class="contact-icon">💬</span>
+                    <div class="contact-info">
+                        <strong>{% trans "WhatsApp" %}</strong>
+                        <span>{% trans "Instant chat support" %}</span>
+                    </div>
+                </a>
+
+                <!-- Email -->
+                <a href="mailto:easybulb@gmail.com?subject=Check-in%20Issue%20-%20Booking%20{{ booking_ref }}&body=Hi,%20I'm%20having%20trouble%20checking%20in.%20My%20booking%20reference%20is%20{{ booking_ref }}." 
+                   class="contact-method">
+                    <span class="contact-icon">📧</span>
+                    <div class="contact-info">
+                        <strong>{% trans "Email" %}</strong>
+                        <span>easybulb@gmail.com</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Reassurance Message -->
+        <div class="reassurance-box">
+            <p>
+                ✨ {% trans "This is a rare issue - we'll resolve it quickly!" %}
+            </p>
+            <p style="margin-top: 10px; font-size: 13px; color: #aaa;">
+                {% trans "Average response time: Under 5 minutes" %}
+            </p>
+        </div>
+
+        <!-- Back to Home -->
+        <p style="margin-top: 20px;">
+            <a href="{% url 'home' %}" class="back-link">← {% trans "Back to Home" %}</a>
+        </p>
+    </div>
+    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739380781/grey-hero-pickarooms_i5lums.png"
+         alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
+</section>
+
+<style>
+    /* Error Icon */
+    .error-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    /* Error Box */
+    .error-box {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .error-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 14px;
+    }
+
+    .error-item:last-child {
+        border-bottom: none;
+    }
+
+    .error-item .label {
+        color: #ccc;
+        font-weight: 500;
+    }
+
+    .error-item .value {
+        color: #fff;
+        font-weight: 600;
+        text-align: right;
+    }
+
+    /* Contact Box */
+    .contact-box {
+        background: rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .contact-box h3 {
+        margin: 0 0 10px 0;
+        color: #FFD700;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    /* Contact Methods */
+    .contact-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 15px;
+    }
+
+    .contact-method {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+    }
+
+    .contact-method:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #667eea;
+        transform: translateX(5px);
+    }
+
+    .contact-icon {
+        font-size: 32px;
+        line-height: 1;
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: left;
+    }
+
+    .contact-info strong {
+        color: #fff;
+        font-size: 16px;
+    }
+
+    .contact-info span {
+        color: #ccc;
+        font-size: 14px;
+    }
+
+    /* Reassurance Box */
+    .reassurance-box {
+        background: rgba(40, 167, 69, 0.1);
+        border: 1px solid rgba(40, 167, 69, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        color: #fff;
+        font-size: 14px;
+    }
+
+    .reassurance-box p {
+        margin: 0;
+    }
+
+    /* Back Link */
+    .back-link {
+        color: #FFD700;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+
+        .error-icon {
+            font-size: 60px;
+        }
+
+        .contact-icon {
+            font-size: 28px;
+        }
+
+        .contact-info strong {
+            font-size: 14px;
+        }
+
+        .contact-info span {
+            font-size: 13px;
+        }
+
+        .error-item,
+        .contact-method {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .error-item .value {
+            text-align: left;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Page enter animation
+        document.body.style.opacity = '0';
+        setTimeout(() => {
+            document.body.style.transition = 'opacity 0.3s ease';
+            document.body.style.opacity = '1';
+        }, 50);
+
+        // Auto-focus on phone link for quick action
+        const phoneLink = document.querySelector('a[href^="tel:"]');
+        if (phoneLink && window.innerWidth > 768) {
+            phoneLink.style.outline = '2px solid #667eea';
+            phoneLink.style.outlineOffset = '4px';
+        }
+    });
+</script>
+{% endblock %}

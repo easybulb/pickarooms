@@ -11,84 +11,75 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1>{% trans "Welcome, Your Stay Starts Here!" %}</h1>
-        <p>{% trans "Enter your booking reference to retrieve your check-in details." %}</p>
-        <p style="font-size: 14px; color: #ccc; margin-bottom: 20px;">
-            {% trans "We use your contact details to provide your access code and manage your stay. Your details are stored securely and can be deleted at any time by contacting us." %}
+        <p style="font-size: 16px; color: #f0f0f0; margin-bottom: 30px; line-height: 1.6;">
+            {% trans "Ready to check in? Click below to start your seamless check-in experience." %}
         </p>
-        <p style="color: red; display: none;" class="error-message"></p> <!-- Placeholder for JS errors -->
-        <form action="/checkin/" method="post" class="checkin-form">
-            {% csrf_token %}
-            <input type="text" name="reservation_number"
-                   placeholder="{% trans 'Booking Reference (10 digits)' %}"
-                   value="{{ reservation_number|default:'' }}"
-                   required>
-            <input type="text" name="full_name"
-                   placeholder="{% trans 'Full Name' %}"
-                   value="{{ full_name|default:'' }}"
-                   required>
-            <input type="email" name="email"
-                   placeholder="{% trans 'Email Address (optional)' %}"
-                   value="{{ email|default:'' }}">
-
-            <!-- Phone Number with Country Code Dropdown -->
-            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 5px;">
-                <select name="country_code" id="country-code-home" style="width: 180px; padding: 12px; border: 1px solid #444; border-radius: 5px; background: rgba(0, 0, 0, 0.5); color: white; font-size: 14px;">
-                    <option value="+44" selected>🇬🇧 UK (+44)</option>
-                    <option value="+1">🇺🇸 US/CA (+1)</option>
-                    <option value="+91">🇮🇳 India (+91)</option>
-                    <option value="+234">🇳🇬 Nigeria (+234)</option>
-                    <option value="+86">🇨🇳 China (+86)</option>
-                    <option value="+33">🇫🇷 France (+33)</option>
-                    <option value="+49">🇩🇪 Germany (+49)</option>
-                    <option value="+81">🇯🇵 Japan (+81)</option>
-                    <option value="+61">🇦🇺 Australia (+61)</option>
-                    <option value="+55">🇧🇷 Brazil (+55)</option>
-                    <option value="+7">🇷🇺 Russia (+7)</option>
-                    <option value="+34">🇪🇸 Spain (+34)</option>
-                    <option value="+39">🇮🇹 Italy (+39)</option>
-                    <option value="+52">🇲🇽 Mexico (+52)</option>
-                    <option value="+90">🇹🇷 Turkey (+90)</option>
-                    <option value="+31">🇳🇱 Netherlands (+31)</option>
-                    <option value="+27">🇿🇦 S. Africa (+27)</option>
-                    <option value="+20">🇪🇬 Egypt (+20)</option>
-                    <option value="+66">🇹🇭 Thailand (+66)</option>
-                    <option value="+65">🇸🇬 Singapore (+65)</option>
-                    <option value="+60">🇲🇾 Malaysia (+60)</option>
-                    <option value="+63">🇵🇭 Philippines (+63)</option>
-                    <option value="+92">🇵🇰 Pakistan (+92)</option>
-                    <option value="+353">🇮🇪 Ireland (+353)</option>
-                    <option value="+64">🇳🇿 New Zealand (+64)</option>
-                    <option value="+351">🇵🇹 Portugal (+351)</option>
-                    <option value="+971">🇦🇪 UAE (+971)</option>
-                    <option value="+254">🇰🇪 Kenya (+254)</option>
-                    <option value="+233">🇬🇭 Ghana (+233)</option>
-                    <option value="+94">🇱🇰 Sri Lanka (+94)</option>
-                    <option value="+380">🇺🇦 Ukraine (+380)</option>
-                </select>
-                <input type="tel" name="phone_number" id="phone-number-home"
-                       placeholder="{% trans '7123456789' %}"
-                       value="{{ phone_number|default:'' }}"
-                       style="flex: 1; padding: 12px; border: 1px solid #444; border-radius: 5px; background: rgba(0, 0, 0, 0.5); color: white; font-size: 16px;"
-                       required>
-            </div>
-            <small style="color: #ccc; font-size: 12px; display: block; margin-bottom: 15px;">
-                {% trans "Enter without leading 0. Example: 07123456789 becomes 7123456789" %}
-            </small>
-
-            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; margin-top: 15px; cursor: pointer;">
-                <input type="checkbox" name="consent" required>
-                {% trans "I agree to the" %} <a href="{% url 'privacy_policy' %}" target="_blank" style="color: #FFD700; text-decoration: underline;">{% trans "Privacy Policy" %}</a>
-                {% trans "and" %} <a href="{% url 'terms_conditions' %}" target="_blank" style="color: #FFD700; text-decoration: underline;">{% trans "Terms of Service" %}</a>
-            </label>
-
-            <button type="submit">{% trans "Check In" %}</button>
-        </form>
+        
+        <!-- Check In Now Button -->
+        <a href="{% url 'checkin' %}" class="checkin-btn">
+            <span class="btn-icon">🔑</span>
+            {% trans "Check In Now" %}
+            <span class="btn-arrow">→</span>
+        </a>
+        
+        <p style="font-size: 13px; color: #ccc; margin-top: 20px;">
+            {% trans "Have your Booking.com confirmation number ready" %}
+        </p>
 
         <!-- Links for Popups -->
         <p class="how-to-use-link">
             <a href="#" id="open-how-to-use-modal">{% trans "How to Use" %}</a> |
             <a href="#" id="open-contact-modal">{% trans "Contact Us" %}</a>
         </p>
+
+        <style>
+            /* Check In Button Styling */
+            .checkin-btn {
+                display: inline-block;
+                padding: 18px 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                font-size: 20px;
+                font-weight: 700;
+                text-decoration: none;
+                border-radius: 50px;
+                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .checkin-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+            }
+            
+            .checkin-btn:active {
+                transform: translateY(-1px);
+            }
+            
+            .checkin-btn .btn-icon {
+                margin-right: 10px;
+                font-size: 22px;
+            }
+            
+            .checkin-btn .btn-arrow {
+                margin-left: 10px;
+                transition: transform 0.3s ease;
+            }
+            
+            .checkin-btn:hover .btn-arrow {
+                transform: translateX(5px);
+            }
+            
+            /* Mobile Responsive */
+            @media (max-width: 768px) {
+                .checkin-btn {
+                    font-size: 18px;
+                    padding: 16px 35px;
+                }
+            }
+        </style>
 
         <!-- How to Use Modal -->
         <div id="how-to-use-modal" class="modal" style="display: none;">
@@ -275,86 +266,12 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Phone Number Auto-Remove Leading 0
-        const phoneInput = document.getElementById('phone-number-home');
-        if (phoneInput) {
-            phoneInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\s+/g, ''); // Remove spaces
-                if (value.startsWith('0')) {
-                    e.target.value = value.substring(1); // Remove leading 0
-                }
-            });
-        }
-
-        // Rate Limiting Variables
-        const maxAttempts = 6; // Matches checkin.html
-        const timeWindow = 60 * 1000; // 60 seconds in milliseconds
-        let attempts = JSON.parse(localStorage.getItem('checkinAttempts')) || [];
-
-        // Form Elements
-        const checkinForm = document.querySelector('.checkin-form');
-        const submitButton = checkinForm.querySelector('button[type="submit"]');
-        const inputField = checkinForm.querySelector('input[name="reservation_number"]');
-        const errorMessage = document.querySelector('.error-message');
-
-        // Function to update attempts in localStorage
-        function updateAttempts() {
-            localStorage.setItem('checkinAttempts', JSON.stringify(attempts));
-        }
-
-        // Check rate limit on page load
-        const now = Date.now();
-        attempts = attempts.filter(time => now - time < timeWindow);
-        if (attempts.length >= maxAttempts) {
-            inputField.disabled = true;
-            submitButton.disabled = true;
-            errorMessage.textContent = "{% trans 'Too many attempts, please wait for 1 minute and try again.' %}";
-            errorMessage.style.display = 'block';
-            setTimeout(() => {
-                attempts = [];
-                updateAttempts();
-                inputField.disabled = false;
-                submitButton.disabled = false;
-                errorMessage.textContent = "";
-                errorMessage.style.display = 'none';
-            }, timeWindow - (now - attempts[0])); // Time until reset
-        }
-        updateAttempts();
-
-        // Form Submission with Rate Limiting
-        checkinForm.addEventListener('submit', function(event) {
-            const now = Date.now();
-            attempts = attempts.filter(time => now - time < timeWindow);
-            
-            if (attempts.length >= maxAttempts) {
-                event.preventDefault(); // Stop form submission
-                inputField.disabled = true;
-                submitButton.disabled = true;
-                errorMessage.textContent = "{% trans 'Too many attempts, please wait a moment.' %}";
-                errorMessage.style.display = 'block';
-
-                // Reset after remaining time
-                setTimeout(() => {
-                    attempts = [];
-                    updateAttempts();
-                    inputField.disabled = false;
-                    submitButton.disabled = false;
-                    errorMessage.textContent = "";
-                    errorMessage.style.display = 'none';
-                }, timeWindow - (now - attempts[0]));
-            } else {
-                attempts.push(now);
-                updateAttempts();
-            }
-        });
 
         // Modal Functionality
         const modals = document.querySelectorAll(".modal");
         const openHowToUseBtn = document.getElementById("open-how-to-use-modal");
         const openContactBtn = document.getElementById("open-contact-modal");
         const closeModalBtns = document.querySelectorAll(".close");
-        const navLinks = document.querySelector(".nav-links");
-        const menuToggle = document.getElementById("mobile-menu");
 
         // Ensure modals are hidden on page load
         modals.forEach(modal => modal.style.display = "none");
@@ -387,21 +304,7 @@
             });
         });
 
-        /*** ✅ FIXED - CLOSE MENU WHEN CLICKING BODY, BUT NOT ON TOGGLE BUTTON ***/
-        document.body.addEventListener("click", function (event) {
-            if (
-                !navLinks.contains(event.target) &&  // Click is outside menu
-                !menuToggle.contains(event.target) && // Click is NOT on menu toggle button
-                navLinks.classList.contains("active") // Menu is open
-            ) {
-                navLinks.classList.remove("active");
-            }
-        });
 
-        // ✅ Prevent immediate closing when clicking the menu toggle itself
-        menuToggle.addEventListener("click", function (event) {
-            event.stopPropagation(); // Prevents document.body click from firing
-        });
 
         // FAQ Functionality with Enhancements
         const faqItems = document.querySelectorAll(".faq-item");

@@ -79,6 +79,7 @@ class Guest(models.Model):
     early_checkin_time = models.TimeField(null=True, blank=True)
     late_checkout_time = models.TimeField(null=True, blank=True)
     dont_send_review_message = models.BooleanField(default=False)
+    car_registration = models.CharField(max_length=20, null=True, blank=True, help_text="Guest's car registration number (optional)")
 
     def is_ical_guest(self):
         """Check if this guest is from iCal integration (has linked reservation)"""
@@ -709,3 +710,28 @@ class CSVEnrichmentLog(models.Model):
 
     def __str__(self):
         return f"XLS Upload {self.file_name} at {self.uploaded_at}"
+
+
+class CheckInAnalytics(models.Model):
+    """Track check-in flow analytics to identify drop-off points"""
+    session_id = models.CharField(max_length=100, help_text="Django session key")
+    booking_reference = models.CharField(max_length=20, null=True, blank=True, help_text="Booking reference if entered")
+    step_reached = models.IntegerField(help_text="Last step reached (1-4)")
+    completed = models.BooleanField(default=False, help_text="Did guest complete full check-in?")
+    device_type = models.CharField(max_length=20, help_text="mobile or desktop")
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Check-In Analytics"
+        verbose_name_plural = "Check-In Analytics"
+        ordering = ['-started_at']
+        indexes = [
+            models.Index(fields=['session_id']),
+            models.Index(fields=['booking_reference']),
+            models.Index(fields=['-started_at']),
+        ]
+
+    def __str__(self):
+        status = "Completed" if self.completed else f"Dropped at Step {self.step_reached}"
+        return f"{self.booking_reference or 'Unknown'} - {status} ({self.device_type})"

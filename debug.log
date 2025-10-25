@@ -791,3 +791,35 @@ ERROR 2025-10-23 23:04:13,918 ttlock_utils TTLock API error: The gateway is busy
 ERROR 2025-10-23 23:04:13,919 views Failed to unlock front door for guest 5282674483: TTLock API error: The gateway is busy. Please try again later. (errcode: -3003)
 ERROR 2025-10-23 23:04:14,464 ttlock_utils TTLock API error: The gateway is busy. Please try again later. (errcode: -3003)
 ERROR 2025-10-23 23:04:14,464 views Failed to generate PIN for guest 5282674483: TTLock API error: The gateway is busy. Please try again later. (errcode: -3003)
+ERROR 2025-10-25 17:59:01,055 log Internal Server Error: /checkin/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django_ratelimit\decorators.py", line 27, in _wrapped
+    return fn(request, *args, **kw)
+  File "C:\Users\easyb\pickarooms\main\checkin_views.py", line 32, in checkin_step1
+    device_type = 'mobile' if request.user_agent.is_mobile else 'desktop'
+                              ^^^^^^^^^^^^^^^^^^
+AttributeError: 'WSGIRequest' object has no attribute 'user_agent'
+ERROR 2025-10-25 17:59:32,333 log Internal Server Error: /checkin/
+Traceback (most recent call last):
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\site-packages\django_ratelimit\decorators.py", line 27, in _wrapped
+    return fn(request, *args, **kw)
+  File "C:\Users\easyb\pickarooms\main\checkin_views.py", line 32, in checkin_step1
+    device_type = 'mobile' if request.user_agent.is_mobile else 'desktop'
+                              ^^^^^^^^^^^^^^^^^^
+AttributeError: 'WSGIRequest' object has no attribute 'user_agent'
+ERROR 2025-10-25 18:12:59,164 tasks Failed to generate PIN for session wtb8pl546py1l053mwzqsjkyw05euayy: 'Session' object has no attribute 'encode'
+ERROR 2025-10-25 18:12:59,166 tasks Failed to update session with error: 'Session' object has no attribute 'encode'
+ERROR 2025-10-25 18:13:09,764 tasks Failed to generate PIN for session wtb8pl546py1l053mwzqsjkyw05euayy: 'Session' object has no attribute 'encode'
+ERROR 2025-10-25 18:13:09,766 tasks Failed to update session with error: 'Session' object has no attribute 'encode'
+ERROR 2025-10-25 18:14:50,394 tasks Failed to generate PIN for session wtb8pl546py1l053mwzqsjkyw05euayy: 'Session' object has no attribute 'encode'
+ERROR 2025-10-25 18:14:50,396 tasks Failed to update session with error: 'Session' object has no attribute 'encode'
+ERROR 2025-10-25 18:20:28,316 tasks Failed to generate PIN for session wtb8pl546py1l053mwzqsjkyw05euayy: 'Session' object has no attribute 'encode'
+ERROR 2025-10-25 18:20:28,318 tasks Failed to update session with error: 'Session' object has no attribute 'encode'

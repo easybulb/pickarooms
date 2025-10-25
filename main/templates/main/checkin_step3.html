@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Check-In - Parking Information" %}{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="step completed">
+                <span class="step-number">1</span>
+                <span class="checkmark">✓</span>
+            </div>
+            <div class="step-line completed"></div>
+            <div class="step completed">
+                <span class="step-number">2</span>
+                <span class="checkmark">✓</span>
+            </div>
+            <div class="step-line completed"></div>
+            <div class="step active">
+                <span class="step-number">3</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step">
+                <span class="step-number">4</span>
+            </div>
+        </div>
+
+        <h1>🚗 {% trans "Parking Information" %}</h1>
+        <p style="font-size: 14px; color: #ccc; margin-bottom: 15px;">
+            {% trans "Are you arriving by car? We offer free on-street parking." %}
+        </p>
+
+        <form method="post" class="checkin-form" id="parking-form">
+            {% csrf_token %}
+            
+            <!-- Car Yes/No -->
+            <div class="form-group">
+                <label>{% trans "Are you arriving by car?" %} *</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="has_car" value="yes" id="car-yes" 
+                               {% if flow_data.has_car %}checked{% endif %}>
+                        <span class="radio-label">
+                            <span class="radio-icon">🚗</span>
+                            {% trans "Yes, I'm driving" %}
+                        </span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="has_car" value="no" id="car-no"
+                               {% if flow_data.has_car == False %}checked{% endif %}>
+                        <span class="radio-label">
+                            <span class="radio-icon">🚇</span>
+                            {% trans "No, other transport" %}
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Car Registration (Conditional) -->
+            <div id="car-details" style="display: none;">
+                <div class="form-group">
+                    <label for="car_registration">{% trans "Car Registration" %}</label>
+                    <input type="text" 
+                           name="car_registration" 
+                           id="car_registration"
+                           placeholder="{% trans 'AB12 CDE' %}"
+                           value="{{ flow_data.car_registration|default:'' }}"
+                           maxlength="10"
+                           style="text-transform: uppercase;">
+                    <small style="color: #ccc; font-size: 12px; display: block; margin-top: 5px;">
+                        {% trans "UK format: AB12 CDE" %}
+                    </small>
+                </div>
+
+                <!-- Parking Instructions -->
+                <div class="info-box">
+                    <h3>📍 {% trans "Parking Instructions" %}</h3>
+                    <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                        <li>{% trans "Free on-street parking available" %}</li>
+                        <li>{% trans "Park directly in front of the building" %}</li>
+                        <li>{% trans "No permit required" %}</li>
+                        <li>{% trans "24/7 access to your vehicle" %}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-primary" id="continue-btn">
+                {% trans "Continue" %} →
+            </button>
+        </form>
+
+        <!-- Back Link -->
+        <p style="margin-top: 15px;">
+            <a href="{% url 'checkin_details' %}" class="back-link">← {% trans "Back" %}</a>
+        </p>
+
+        <!-- Hidden message: PIN is generating in background -->
+        <div id="background-notice" style="display: none; margin-top: 20px; padding: 10px; background: rgba(102, 126, 234, 0.2); border-radius: 5px; font-size: 13px; color: #ccc;">
+            <span class="spinner"></span>
+            {% trans "Your access PIN is being prepared in the background..." %}
+        </div>
+    </div>
+    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739380781/grey-hero-pickarooms_i5lums.png"
+         alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
+</section>
+
+<style>
+    /* Progress Bar Styles (same as step2) */
+    .progress-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 30px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #fff;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .step.completed {
+        background: #28a745;
+        border-color: #28a745;
+    }
+
+    .step.active {
+        background: #667eea;
+        border-color: #667eea;
+        box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+    }
+
+    .step .step-number {
+        display: block;
+    }
+
+    .step.completed .step-number {
+        display: none;
+    }
+
+    .step .checkmark {
+        display: none;
+        font-size: 20px;
+    }
+
+    .step.completed .checkmark {
+        display: block;
+    }
+
+    .step-line {
+        width: 60px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .step-line.completed {
+        background: #28a745;
+    }
+
+    /* Radio Group Styles */
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .radio-option {
+        display: block;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .radio-option:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .radio-option input[type="radio"] {
+        margin-right: 10px;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-label {
+        font-weight: bold;
+    }
+
+    .radio-option:has(input:checked) {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.2);
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #fff;
+        font-size: 16px;
+    }
+
+    .radio-icon {
+        font-size: 24px;
+    }
+
+    /* Info Box */
+    .info-box {
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        color: #fff;
+    }
+
+    .info-box h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: #FFD700;
+    }
+
+    .info-box ul {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .info-box li {
+        color: #ccc;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #444;
+        border-radius: 5px;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        background: linear-gradient(90deg, #002147, #003580, #0056b3);
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 86, 179, 0.4);
+    }
+
+    .back-link {
+        color: #FFD700;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Spinner */
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .progress-bar {
+            max-width: 100%;
+            padding: 0 20px;
+        }
+
+        .step {
+            width: 35px;
+            height: 35px;
+            font-size: 14px;
+        }
+
+        .step-line {
+            width: 40px;
+        }
+
+        .hero-content h1 {
+            font-size: 2rem;
+        }
+
+        .radio-label {
+            font-size: 14px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const carYes = document.getElementById('car-yes');
+        const carNo = document.getElementById('car-no');
+        const carDetails = document.getElementById('car-details');
+        const carRegInput = document.getElementById('car_registration');
+        const continueBtn = document.getElementById('continue-btn');
+
+        // Show/hide car details based on selection
+        function toggleCarDetails() {
+            if (carYes.checked) {
+                carDetails.style.display = 'block';
+                carRegInput.focus();
+            } else {
+                carDetails.style.display = 'none';
+            }
+        }
+
+        // Initialize on page load
+        toggleCarDetails();
+
+        carYes.addEventListener('change', toggleCarDetails);
+        carNo.addEventListener('change', toggleCarDetails);
+
+        // Auto-format car registration (UK format: AB12 CDE)
+        if (carRegInput) {
+            carRegInput.addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                
+                // UK format: AB12 CDE (letters-numbers-letters)
+                if (value.length > 4) {
+                    value = value.slice(0, 4) + ' ' + value.slice(4, 7);
+                }
+                
+                e.target.value = value.trim();
+            });
+        }
+
+        // Ensure at least one radio is selected
+        const form = document.getElementById('parking-form');
+        form.addEventListener('submit', function(e) {
+            if (!carYes.checked && !carNo.checked) {
+                e.preventDefault();
+                alert('Please select whether you are arriving by car.');
+                return false;
+            }
+        });
+
+        // Page enter animation
+        document.body.style.opacity = '0';
+        setTimeout(() => {
+            document.body.style.transition = 'opacity 0.3s ease';
+            document.body.style.opacity = '1';
+        }, 50);
+
+        // Show background notice after 2 seconds (subtle hint that PIN is generating)
+        setTimeout(() => {
+            const notice = document.getElementById('background-notice');
+            if (notice) {
+                notice.style.display = 'block';
+            }
+        }, 2000);
+    });
+</script>
+{% endblock %}

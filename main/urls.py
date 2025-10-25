@@ -13,7 +13,15 @@ from main.views import ttlock_callback
 urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
-    path('checkin/', views.checkin, name='checkin'),
+    
+    # Multi-step check-in flow
+    path('checkin/', views.checkin, name='checkin'),  # Step 1: Booking reference
+    path('checkin/details/', views.checkin_details, name='checkin_details'),  # Step 2: Guest details
+    path('checkin/parking/', views.checkin_parking, name='checkin_parking'),  # Step 3: Parking info
+    path('checkin/confirm/', views.checkin_confirm, name='checkin_confirm'),  # Step 4: Confirmation
+    path('checkin/pin-status/', views.checkin_pin_status, name='checkin_pin_status'),  # AJAX endpoint
+    path('checkin/error/', views.checkin_error, name='checkin_error'),  # Error page
+    
     path('enrich-reservation/', views.enrich_reservation, name='enrich_reservation'),
     path('room/<str:room_token>/', views.room_detail, name='room_detail'),
     path("report_pin_issue/", report_pin_issue, name="report_pin_issue"),
