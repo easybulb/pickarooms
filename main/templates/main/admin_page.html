@@ -58,23 +58,29 @@
         <input type="hidden" id="guest-added" value="{% if messages %}true{% else %}false{% endif %}">
     {% endif %}
 
-    <!-- Today's Guests -->
+    <!-- Today's Guests / Current Guests Toggle -->
     <div class="admin-section">
         <div class="existing-guests-header">
-            <h2>{% trans "Today's Guests" %}</h2>
+            <h2 id="table-title">{% trans "Today's Guests" %}</h2>
             <div style="display: flex; gap: 10px;">
+                <button onclick="toggleGuestView()" class="add-guest-btn" style="background: #17a2b8;">
+                    <span id="toggle-text">{% trans "Show Current Guests" %}</span>
+                </button>
                 <button onclick="location.reload();" class="add-guest-btn" style="background: #28a745;">{% trans "Refresh" %}</button>
                 <a href="#add-guest-form" class="add-guest-btn">{% trans "Add Guest" %}</a>
             </div>
         </div>
-        <div class="table-container">
-            <table>
+        <!-- Today's Check-Ins Table -->
+        <div class="table-container" id="todays-table-container">
+            <table id="todays-table">
                 <thead>
                     <tr>
                         <th>{% trans "Full Name" %}</th>
                         <th>{% trans "Booking Ref" %}</th>
                         <th>{% trans "Platform" %}</th>
                         <th>{% trans "Room" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Night" %}</th>
                         <th>{% trans "Check-In" %}</th>
                         <th>{% trans "Check-Out" %}</th>
                         <th>{% trans "PIN (Front Door & Room)" %}</th>
@@ -108,6 +114,8 @@
                         <td>{{ entry.booking_ref }}</td>
                         <td>{{ entry.platform|safe }}</td>
                         <td>{{ entry.room.name }}</td>
+                        <td>{{ entry.status }}</td>
+                        <td>{{ entry.night_progress }}</td>
                         <td>
                             {{ entry.check_in_date }}
                             {% if entry.early_checkin_time %}
@@ -156,15 +164,144 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9">{% trans "No guests checking in today." %}</td>
+                        <td colspan="11">{% trans "No guests checking in today." %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Current Guests Table (Hidden by default) -->
+        <div class="table-container" id="current-table-container" style="display: none;">
+            <table id="current-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Full Name" %}</th>
+                        <th>{% trans "Booking Ref" %}</th>
+                        <th>{% trans "Platform" %}</th>
+                        <th>{% trans "Room" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Night" %}</th>
+                        <th>{% trans "Check-In" %}</th>
+                        <th>{% trans "Check-Out" %}</th>
+                        <th>{% trans "PIN (Front Door & Room)" %}</th>
+                        <th>{% trans "PIN Validity" %}</th>
+                        <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in current_entries %}
+                    <tr style="{% if not entry.is_enriched %}background-color: #fff8dc;{% endif %}">
+                        <td>
+                            {% if entry.is_enriched %}
+                                {% if user.is_superuser %}
+                                    <a href="{% url 'guest_details' entry.guest_id %}">{{ entry.full_name }}</a>
+                                {% else %}
+                                    {{ entry.full_name }}
+                                {% endif %}
+                                {% if entry.is_returning %}
+                                    <span class="returning-guest" title="Returning Guest"> (R) </span>
+                                {% endif %}
+                                <br>
+                                <small>{% trans "Tel:" %} {{ entry.phone_number|default:"Not provided" }}</small>
+                                <br>
+                                <small>{% trans "Email:" %} {{ entry.email|default:"Not provided" }}</small>
+                            {% else %}
+                                <strong style="color: #ff8c00;">{% trans "(Pending Check-In)" %}</strong>
+                                <br>
+                                <small>{% trans "Guest needs to check in via app or manual check-in below" %}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ entry.booking_ref }}</td>
+                        <td>{{ entry.platform|safe }}</td>
+                        <td>{{ entry.room.name }}</td>
+                        <td>{{ entry.status }}</td>
+                        <td>{{ entry.night_progress }}</td>
+                        <td>
+                            {{ entry.check_in_date }}
+                            {% if entry.early_checkin_time %}
+                                <br><small>{{ entry.early_checkin_time|time:"h:i A" }}</small>
+                            {% else %}
+                                <br><small>2:00 PM</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ entry.check_out_date }}
+                            {% if entry.late_checkout_time %}
+                                <br><small>{{ entry.late_checkout_time|time:"h:i A" }}</small>
+                            {% else %}
+                                <br><small>11:00 AM</small>
+                            {% endif %}
+                        </td>
+                        <td class="pin-code">
+                            {% if entry.pin %}
+                                {{ entry.pin }}
+                            {% else %}
+                                <span class="no-pin">{% trans "N/A" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.pin %}
+                                {{ entry.check_in_date }} {% if entry.early_checkin_time %}{{ entry.early_checkin_time|time:"h:i A" }}{% else %}2:00 PM{% endif %} -
+                                {{ entry.check_out_date }} {% if entry.late_checkout_time %}{{ entry.late_checkout_time|time:"h:i A" }}{% else %}11:00 AM{% endif %}
+                            {% else %}
+                                <span class="no-pin">{% trans "N/A" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.is_enriched %}
+                                <a href="{% url 'manage_checkin_checkout' entry.guest_id %}" class="edit-link">{% trans "Check-In/Out" %}</a> |
+                                <a href="{% url 'edit_guest' entry.guest_id %}" class="edit-link">{% trans "Edit" %}</a> |
+                                <a href="{% url 'delete_guest' entry.guest_id %}" class="delete-link" onclick="return confirm('Are you sure you want to delete this guest? This will also delete their PIN.');">
+                                    {% trans "Delete" %}
+                                </a>
+                            {% else %}
+                                <a href="{% url 'edit_reservation' entry.reservation_id %}" class="edit-link">{% trans "Edit" %}</a> |
+                                <a href="{% url 'manual_checkin_reservation' entry.reservation_id %}" class="edit-link" style="background: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; display: inline-block;">
+                                    {% trans "Manual Check-In" %}
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="11">{% trans "No current guests in rooms." %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
         <p>
             <a href="{% url 'past_guests' %}" class="past-guests-link">{% trans "View past guests" %}</a>
         </p>
+    </div>
+
+    <!-- Dashboard Summary Stats -->
+    <div class="admin-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
+        <h3>📊 {% trans "Dashboard Summary" %}</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+            <div class="stat-card" style="background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="stat-value" style="font-size: 32px; font-weight: bold; color: #28a745;">{{ dashboard_stats.in_house }}</div>
+                <div class="stat-label" style="color: #666; font-size: 14px; margin-top: 5px;">✅ {% trans "Currently In House" %}</div>
+            </div>
+            <div class="stat-card" style="background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="stat-value" style="font-size: 32px; font-weight: bold; color: #007bff;">{{ dashboard_stats.checking_in_today }}</div>
+                <div class="stat-label" style="color: #666; font-size: 14px; margin-top: 5px;">📥 {% trans "Checking In Today" %}</div>
+            </div>
+            <div class="stat-card" style="background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="stat-value" style="font-size: 32px; font-weight: bold; color: #ffc107;">{{ dashboard_stats.checking_out_today }}</div>
+                <div class="stat-label" style="color: #666; font-size: 14px; margin-top: 5px;">📤 {% trans "Checking Out Today" %}</div>
+            </div>
+            <div class="stat-card" style="background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="stat-value" style="font-size: 32px; font-weight: bold; color: #17a2b8;">{{ dashboard_stats.occupied_rooms }}/{{ dashboard_stats.total_rooms }}</div>
+                <div class="stat-label" style="color: #666; font-size: 14px; margin-top: 5px;">🏠 {% trans "Rooms Occupied" %}</div>
+            </div>
+            <div class="stat-card" style="background: white; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="stat-value" style="font-size: 32px; font-weight: bold; color: #dc3545;">{{ dashboard_stats.pending_checkins }}</div>
+                <div class="stat-label" style="color: #666; font-size: 14px; margin-top: 5px;">⏳ {% trans "Pending Check-Ins" %}</div>
+            </div>
+        </div>
     </div>
 
     <br id="add-guest-form">
@@ -505,6 +642,30 @@
             localStorage.removeItem("reassign_email");
         }
     });
+
+    // Toggle between Today's Guests and Current Guests views
+    let showingCurrent = false;
+
+    function toggleGuestView() {
+        const todaysContainer = document.getElementById('todays-table-container');
+        const currentContainer = document.getElementById('current-table-container');
+        const title = document.getElementById('table-title');
+        const toggleText = document.getElementById('toggle-text');
+        
+        showingCurrent = !showingCurrent;
+        
+        if (showingCurrent) {
+            todaysContainer.style.display = 'none';
+            currentContainer.style.display = 'block';
+            title.textContent = "{% trans 'Current Guests (In Rooms Now)' %}";
+            toggleText.textContent = "{% trans 'Show Today\'s Check-Ins' %}";
+        } else {
+            todaysContainer.style.display = 'block';
+            currentContainer.style.display = 'none';
+            title.textContent = "{% trans 'Today\'s Guests' %}";
+            toggleText.textContent = "{% trans 'Show Current Guests' %}";
+        }
+    }
 
     // Auto-refresh the page every 60 seconds to update Today's Guests table
     // This doesn't use Celery - just browser JavaScript timer

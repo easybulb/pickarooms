@@ -29,6 +29,7 @@ from .models import Guest, Room, ReviewCSVUpload, TTLock, AuditLog, GuestIDUploa
 from .ttlock_utils import TTLockClient
 from .pin_utils import generate_memorable_4digit_pin, add_wakeup_prefix
 from .phone_utils import normalize_phone_to_e164, validate_phone_number
+from .dashboard_helpers import get_current_guests_data, build_entries_list, get_guest_status, get_night_progress
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -974,9 +975,25 @@ def admin_page(request):
             'check_out_date': reservation.check_out_date,
             'early_checkin_time': reservation.early_checkin_time,  # Include from reservation
             'late_checkout_time': reservation.late_checkout_time,  # Include from reservation
-            'platform': platform_badge,
+                        'platform': platform_badge,
             'platform_raw': reservation.platform,
         })
+
+    # Get current guests data (all active stays - not just today's check-ins)
+    current_guests_data = get_current_guests_data(today)
+    current_entries = build_entries_list(
+        current_guests_data['current_guests'],
+        current_guests_data['current_reservations']
+    )
+
+    # Add status and night progress to both todays_entries and current_entries
+    for entry in todays_entries:
+        entry['status'] = get_guest_status(entry, today)
+        entry['night_progress'] = get_night_progress(entry['check_in_date'], entry['check_out_date'], today)
+
+    for entry in current_entries:
+        entry['status'] = get_guest_status(entry, today)
+        entry['night_progress'] = get_night_progress(entry['check_in_date'], entry['check_out_date'], today)
 
     # Keep old guests query for backward compatibility (if needed elsewhere)
     guests = Guest.objects.filter(is_archived=False).order_by('check_in_date')
@@ -1233,10 +1250,12 @@ def admin_page(request):
                         }
                         overlapping_warnings.append(warning)
 
-    return render(request, 'main/admin_page.html', {
+        return render(request, 'main/admin_page.html', {
         'rooms': available_rooms,
         'guests': guests,
         'todays_entries': todays_entries,
+        'current_entries': current_entries,
+        'dashboard_stats': current_guests_data['dashboard_stats'],
         'check_in_date': check_in_date,
         'check_out_date': check_out_date,
         'ical_configs': ical_configs,
