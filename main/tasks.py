@@ -593,13 +593,13 @@ def send_single_booking_alert(pending):
         f"PickARooms Alert:\n"
         f"Booking #{pending.booking_reference} for {pending.check_in_date.strftime('%d %b %Y')} "
         f"not found in iCal.\n\n"
-        f"Reply format:\n"
-        f"1-3 = Room 1, 3 nights\n"
-        f"2-2 = Room 2, 2 nights\n"
-        f"3-1 = Room 3, 1 night\n"
-        f"4-5 = Room 4, 5 nights\n"
-        f"X = Cancel\n\n"
-        f"Example: Reply \"2-3\" for Room 2, 3 nights"
+        f"Reply with:\n"
+        f"{pending.booking_reference}: ROOM-NIGHTS\n\n"
+        f"Examples:\n"
+        f"{pending.booking_reference}: 1-3\n"
+        f"{pending.booking_reference}: 2-2\n"
+        f"{pending.booking_reference}: 3-1\n"
+        f"Or reply X to cancel"
     )
 
     # Email Message
@@ -610,13 +610,15 @@ def send_single_booking_alert(pending):
         f"Platform: Booking.com\n"
         f"Email Received: {pending.email_received_at.strftime('%d %b %Y %H:%M')}\n"
         f"Sync Attempts: 5 (failed)\n\n"
-        f"REPLY WITH ROOM NUMBER AND NIGHTS:\n"
-        f"Reply \"1-3\" - Room 1, 3 nights\n"
-        f"Reply \"2-2\" - Room 2, 2 nights\n"
-        f"Reply \"3-1\" - Room 3, 1 night\n"
-        f"Reply \"4-5\" - Room 4, 5 nights\n"
-        f"Reply \"X\" - Cancel assignment\n\n"
-        f"Or log in to: https://pickarooms.com/admin-page/pending-enrichments/"
+        f"REPLY VIA SMS WITH:\n"
+        f"{pending.booking_reference}: ROOM-NIGHTS\n\n"
+        f"Examples:\n"
+        f"{pending.booking_reference}: 1-3  (Room 1, 3 nights)\n"
+        f"{pending.booking_reference}: 2-2  (Room 2, 2 nights)\n"
+        f"{pending.booking_reference}: 3-1  (Room 3, 1 night)\n"
+        f"{pending.booking_reference}: 4-5  (Room 4, 5 nights)\n\n"
+        f"Or reply X to cancel\n\n"
+        f"Web Dashboard: https://pickarooms.com/admin-page/pending-enrichments/"
     )
 
     # Send SMS

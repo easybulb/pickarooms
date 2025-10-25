@@ -18,38 +18,38 @@ logger = logging.getLogger('main')
 
 def parse_sms_reply(body):
     """
-    Parse SMS reply in format: "A1-3" or "2-3"
+    Parse SMS reply in format: "6582060925: 1-3" or "6582060925:1-3"
 
     Args:
         body (str): SMS message body
 
     Returns:
-        tuple: (booking_letter, room_number, nights) or None if invalid
+        tuple: (booking_ref, room_number, nights) or None if invalid
 
     Examples:
-        - "A1-3" → ('A', 1, 3)  # Booking A, Room 1, 3 nights
-        - "2-3"  → (None, 2, 3) # Single booking, Room 2, 3 nights
-        - "X"    → ('X', None, None)  # Cancel
+        - "6582060925: 1-3" → ('6582060925', 1, 3)  # Booking ref, Room 1, 3 nights
+        - "6582060925:1-3"  → ('6582060925', 1, 3)  # Same, no space
+        - "A" → ('A', None, None)  # Collision letter only (for future)
+        - "X" → ('X', None, None)  # Cancel
     """
-    body = body.strip().upper()
+    body = body.strip()
 
-    if body == 'X':
+    # Cancel command
+    if body.upper() == 'X':
         return ('X', None, None)
 
-    # Multi-booking format: A1-3, B2-2, C3-1, D4-5
-    match = re.match(r'([A-D])([1-4])-(\d+)', body)
+    # Collision letter only (A, B, C, D) - For future collision support
+    if body.upper() in ['A', 'B', 'C', 'D']:
+        return (body.upper(), None, None)
+
+    # New format: BOOKING_REF: ROOM-NIGHTS or BOOKING_REF:ROOM-NIGHTS
+    # Example: "6582060925: 1-3" or "6582060925:1-3"
+    match = re.match(r'(\d{10})\s*:\s*([1-4])-(\d+)', body)
     if match:
-        booking_letter = match.group(1)
+        booking_ref = match.group(1)
         room_number = int(match.group(2))
         nights = int(match.group(3))
-        return (booking_letter, room_number, nights)
-
-    # Single booking format: 1-3, 2-2, 3-1, 4-5
-    match = re.match(r'([1-4])-(\d+)', body)
-    if match:
-        room_number = int(match.group(1))
-        nights = int(match.group(2))
-        return (None, room_number, nights)
+        return (booking_ref, room_number, nights)
 
     return None  # Invalid format
 
@@ -98,29 +98,35 @@ def handle_sms_room_assignment(from_number, body):
         send_confirmation_sms(from_number, "❌ Unauthorized sender. Access denied.")
         return "Unauthorized"
 
-    # Parse reply
+        # Parse reply
     parsed = parse_sms_reply(body)
     if not parsed:
         logger.warning(f"Invalid SMS format from {from_number}: {body}")
         send_confirmation_sms(
             from_number,
             f"❌ Invalid format: '{body}'\n\n"
-            "Valid formats:\n"
-            "• 2-3 (Room 2, 3 nights)\n"
-            "• A1-3 (Booking A, Room 1, 3 nights)\n"
-            "• X (Cancel)"
+            "Valid format:\n"
+            "• BOOKING_REF: ROOM-NIGHTS\n"
+            "Example: 6582060925: 1-3\n\n"
+            "Or reply X to cancel"
         )
         return "Invalid format"
 
-    booking_letter, room_number, nights = parsed
+    booking_ref_or_letter, room_number, nights = parsed
 
     # Handle cancellation
-    if booking_letter == 'X':
+    if booking_ref_or_letter == 'X':
         result = handle_cancellation_reply(from_number)
         return result
 
+    # Handle collision letter (A, B, C, D) - Future feature
+    if booking_ref_or_letter in ['A', 'B', 'C', 'D'] and room_number is None:
+        msg = "❌ Collision format not yet supported. Please use: BOOKING_REF: ROOM-NIGHTS"
+        send_confirmation_sms(from_number, msg)
+        return "Collision format not supported"
+
     # Handle room assignment
-    result = assign_room_from_sms(booking_letter, room_number, nights, from_number)
+    result = assign_room_from_sms(booking_ref_or_letter, room_number, nights, from_number)
     return result
 
 
@@ -157,12 +163,12 @@ def handle_cancellation_reply(from_number):
     return "Assignment cancelled"
 
 
-def assign_room_from_sms(booking_letter, room_number, nights, from_number):
+def assign_room_from_sms(booking_ref, room_number, nights, from_number):
     """
     Assign room to pending enrichment based on SMS reply
 
     Args:
-        booking_letter (str or None): Booking letter (A-D) for collision, None for single
+        booking_ref (str): Booking reference number (10 digits)
         room_number (int): Room number (1-4)
         nights (int): Number of nights
         from_number (str): Admin phone number for confirmation SMS
@@ -185,25 +191,32 @@ def assign_room_from_sms(booking_letter, room_number, nights, from_number):
         send_confirmation_sms(from_number, msg)
         return f"Room {room_name} not found"
 
-    # Find pending enrichment
-    if booking_letter:
-        # Multi-booking scenario - find by letter
-        pending = find_pending_by_letter(booking_letter)
-        if not pending:
-            msg = f"❌ Booking {booking_letter} not found in recent collision alerts."
-            send_confirmation_sms(from_number, msg)
-            return f"Booking {booking_letter} not found"
-    else:
-        # Single booking scenario - find most recent failed
-        pending = PendingEnrichment.objects.filter(
-            status='failed_awaiting_manual',
-            alert_sent_at__isnull=False
-        ).order_by('-alert_sent_at').first()
+    # Find pending enrichment by booking reference
+    pending = PendingEnrichment.objects.filter(
+        booking_reference=booking_ref,
+        status='failed_awaiting_manual'
+    ).order_by('-created_at').first()
 
     if not pending:
-        msg = "❌ No pending assignment found. Check /admin-page/pending-enrichments/"
+        # Check if booking ref exists but in wrong status
+        any_pending = PendingEnrichment.objects.filter(
+            booking_reference=booking_ref
+        ).order_by('-created_at').first()
+        
+        if any_pending:
+            msg = (
+                f"❌ Booking #{booking_ref} found but status is '{any_pending.status}'.\n\n"
+                f"Expected: failed_awaiting_manual\n"
+                f"Check /admin-page/pending-enrichments/"
+            )
+        else:
+            msg = (
+                f"❌ Booking #{booking_ref} not found in system.\n\n"
+                f"Check /admin-page/pending-enrichments/"
+            )
+        
         send_confirmation_sms(from_number, msg)
-        return "No pending assignment found"
+        return "Booking not found"
 
     # IDEMPOTENCY CHECK
     if pending.status == 'manually_assigned':
