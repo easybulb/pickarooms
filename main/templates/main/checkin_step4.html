@@ -357,8 +357,21 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Fix footer overlap - add bottom spacing */
+    .hero-content {
+        padding-bottom: 100px;
+    }
+
+    /* PIN Status positioning */
+    #pin-status {
+        margin-bottom: 30px;
+    }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
+        .hero-content {
+            padding-bottom: 150px;
+        }
         .progress-bar {
             max-width: 100%;
             padding: 0 20px;
@@ -402,6 +415,10 @@
         .gdpr-consent-box p,
         .gdpr-consent-box ul {
             font-size: 12px;
+        }
+
+        #pin-status {
+            margin-bottom: 40px;
         }
     }
 </style>
