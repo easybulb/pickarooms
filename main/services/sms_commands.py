@@ -250,9 +250,8 @@ def handle_single_ref_enrichment(from_number, booking_ref):
         reservation = Reservation.objects.filter(
             platform='booking',
             status='confirmed',
-            guest__isnull=True
-        ).filter(
-            booking_reference__isnull=True
+            guest__isnull=True,
+            booking_reference=''  # Empty string means unenriched
         ).order_by('-created_at').first()
         
         if not reservation:
@@ -317,9 +316,8 @@ def handle_collision_enrichment(from_number, booking_ref, room_number, nights):
             room=room,
             platform='booking',
             status='confirmed',
-            guest__isnull=True
-        ).filter(
-            booking_reference__isnull=True
+            guest__isnull=True,
+            booking_reference=''  # Empty string means unenriched
         ).order_by('-created_at').first()
         
         if not reservation:
@@ -394,9 +392,8 @@ def handle_multi_collision_enrichment(from_number, enrichments):
                 room=room,
                 platform='booking',
                 status='confirmed',
-                guest__isnull=True
-            ).filter(
-                booking_reference__isnull=True
+                guest__isnull=True,
+                booking_reference=''  # Empty string means unenriched
             ).order_by('-created_at').first()
             
             if not reservation:

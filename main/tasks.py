@@ -386,13 +386,13 @@ def trigger_enrichment_workflow(self, reservation_id):
         return "Already enriched"
     
     # Check for collision: multiple unenriched bookings for same check-in date
+    # Only count reservations that don't have a booking_reference (truly unenriched)
     same_day_bookings = Reservation.objects.filter(
         check_in_date=reservation.check_in_date,
         platform='booking',
         status='confirmed',
-        guest__isnull=True  # Unenriched only
-    ).exclude(
-        booking_reference__isnull=False  # Exclude if already has booking ref
+        guest__isnull=True,  # Unenriched only
+        booking_reference=''  # No booking ref yet
     )
     
     collision_count = same_day_bookings.count()
@@ -579,14 +579,13 @@ def send_collision_alert_ical(self, check_in_date_str):
     
     check_in_date = date.fromisoformat(check_in_date_str)
     
-    # Get all unenriched bookings for this date
+    # Get all unenriched bookings for this date (no booking_reference yet)
     bookings = Reservation.objects.filter(
         check_in_date=check_in_date,
         platform='booking',
         status='confirmed',
-        guest__isnull=True
-    ).exclude(
-        booking_reference__isnull=False
+        guest__isnull=True,
+        booking_reference=''  # Truly unenriched
     ).select_related('room')[:4]  # Max 4
     
     if bookings.count() < 2:
