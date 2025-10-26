@@ -648,18 +648,38 @@ class PendingEnrichment(models.Model):
 
 
 class EnrichmentLog(models.Model):
-    """Audit trail for all enrichment actions"""
+    """Audit trail for all enrichment actions (iCal-driven flow)"""
     ACTION_CHOICES = [
+        # iCal-driven workflow
+        ('ical_new_booking', 'iCal: New Booking Detected'),
+        ('collision_detected', 'Collision: Multiple Same-Day Bookings'),
+        ('email_search_started', 'Email Search Started'),
+        ('email_found_matched', 'Email Found and Matched'),
+        ('email_not_found_alerted', 'Email Not Found - SMS Sent'),
+        
+        # Manual enrichment methods
+        ('manual_enrichment_sms', 'Manual Enrichment via SMS'),
+        ('multi_enrichment_sms', 'Multi-Booking Enrichment via SMS'),
+        ('sms_reply_assigned', 'SMS Reply Assigned'),  # Legacy
+        ('correction_applied', 'Correction Applied via SMS'),
+        ('manual_admin_assigned', 'Manual Admin Assigned'),
+        
+        # Command tracking
+        ('check_command_received', 'Check Command Received'),
+        ('cancel_command_received', 'Cancel Command Received'),
+        ('guide_command_received', 'Guide Command Received'),
+        
+        # Legacy actions (keep for backward compatibility)
         ('email_parsed', 'Email Parsed'),
         ('ical_synced', 'iCal Synced'),
         ('auto_matched_single', 'Auto-Matched Single Room'),
         ('auto_matched_multi_room', 'Auto-Matched Multi-Room'),
         ('xls_enriched_single', 'XLS Enriched Single Room'),
         ('xls_enriched_multi', 'XLS Enriched Multi-Room'),
-        ('sms_reply_assigned', 'SMS Reply Assigned'),
         ('email_reply_assigned', 'Email Reply Assigned'),
-        ('collision_detected', 'Collision Detected'),
-        ('manual_admin_assigned', 'Manual Admin Assigned'),
+        
+        # Cancellation
+        ('cancellation_detected', 'iCal: Booking Cancelled'),
     ]
 
     pending_enrichment = models.ForeignKey(PendingEnrichment, null=True, blank=True, on_delete=models.SET_NULL, related_name='logs')
