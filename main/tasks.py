@@ -500,6 +500,20 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
             
             # Check if check-in date matches
             if check_in_date == reservation.check_in_date:
+                
+                # ✅ PROTECTION: Check if this booking_ref already exists in database
+                already_exists = Reservation.objects.filter(
+                    booking_reference=booking_ref,
+                    platform='booking'
+                ).exists()
+                
+                if already_exists:
+                    logger.warning(f"Booking ref {booking_ref} already used in database, skipping this email")
+                    continue  # Try next email
+                
+                # Safe to use this email - booking ref is unique
+                logger.info(f"Using email: Ref {booking_ref}, Check-in {check_in_date}, Unread: {email_data.get('is_unread', False)}")
+                
                 # MATCH FOUND! Check if this is a multi-room booking
                 multi_room_reservations = Reservation.objects.filter(
                     check_in_date=check_in_date,
