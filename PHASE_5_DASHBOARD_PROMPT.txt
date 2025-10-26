@@ -1,0 +1,233 @@
+===========================================
+PHASE 5: ADMIN DASHBOARD UPDATES - IMPLEMENTATION PROMPT
+===========================================
+
+CONTEXT:
+--------
+We've completed Phases 1-4 of the iCal-driven enrichment system. Phase 5 (Admin Dashboard) was skipped to test core functionality first. Now we need to enhance the existing /admin-page/pending-enrichments/ page.
+
+WHAT WAS ALREADY IMPLEMENTED (Phases 1-4):
+-------------------------------------------
+✅ Phase 1: iCal sync triggers enrichment workflow
+✅ Phase 2: SMS commands (CHECK, CORRECT, CANCEL, GUIDE, collision, single-ref)
+✅ Phase 3: Updated EnrichmentLog model with new actions
+✅ Phase 4: Enhanced logging throughout enrichment flow
+
+CURRENT STATE:
+--------------
+- URL exists: /admin-page/pending-enrichments/ 
+- View function: views.pending_enrichments_page() in main/views.py
+- Template exists somewhere in templates/
+- Currently shows old PendingEnrichment model data (email-driven flow)
+
+NEW FLOW (iCal-driven):
+-----------------------
+1. iCal sync detects new booking → creates Reservation (booking_reference='')
+2. Checks for collision (multiple bookings same check_in_date)
+   - If collision → SMS alert immediately
+   - If single → Email search (4 attempts over 10 min)
+3. Email found → Auto-enriches reservation.booking_reference
+4. Email not found → SMS alert to admin
+5. Admin replies via SMS → Manual enrichment
+
+WHAT PHASE 5 NEEDS TO DO:
+--------------------------
+
+1. UPDATE /admin-page/pending-enrichments/ PAGE TO SHOW:
+
+   A. UNENRICHED RESERVATIONS TABLE
+      - Show reservations with booking_reference='' (waiting for enrichment)
+      - Columns:
+        * Room
+        * Check-in Date
+        * Check-out Date
+        * Nights
+        * Platform (Booking.com/Airbnb)
+        * Status (see below)
+        * Actions (Manual Enrich button)
+      
+      - Status Indicators:
+        * "Searching Email (Attempt 1/4)" - Yellow badge
+        * "Searching Email (Attempt 2/4)" - Yellow badge
+        * "Searching Email (Attempt 3/4)" - Orange badge
+        * "Searching Email (Attempt 4/4)" - Orange badge
+        * "Email Not Found - SMS Sent" - Red badge
+        * "Collision Detected - SMS Sent" - Purple badge
+        * "Awaiting Manual Enrichment" - Red badge
+      
+      - How to determine status:
+        * Query EnrichmentLog for most recent action on that reservation
+        * If action='email_search_started' → "Searching Email"
+        * If action='email_not_found_alerted' → "Email Not Found - SMS Sent"
+        * If action='collision_detected' → "Collision Detected - SMS Sent"
+        * Track attempt number from task retries
+
+   B. ENRICHED RESERVATIONS TABLE (Below unenriched)
+      - Show reservations with booking_reference != '' (recently enriched)
+      - Same columns as above
+      - Status: "Enriched ✅" - Green badge
+      - Show enrichment method:
+        * "Auto (Email)" if action='email_found_matched'
+        * "Manual (SMS)" if action='manual_enrichment_sms'
+        * "Multi (SMS)" if action='multi_enrichment_sms'
+      - Only show last 20 enriched reservations
+
+   C. ENRICHMENT LOGS SECTION (Bottom of page)
+      - Show recent EnrichmentLog entries
+      - Columns:
+        * Timestamp
+        * Action (human-readable from ACTION_CHOICES)
+        * Booking Reference
+        * Room
+        * Method
+        * Details (JSON collapsed, expandable)
+      - Pagination: 20 per page
+      - Filter by action type dropdown
+
+   D. MANUAL ENRICHMENT MODAL
+      - Trigger: Click "Manual Enrich" button on unenriched reservation
+      - Form fields:
+        * Booking Reference (10-digit input)
+        * Room (pre-filled, read-only)
+        * Check-in (pre-filled, read-only)
+        * Check-out (editable - allow adjusting nights)
+      - Submit button creates/updates reservation.booking_reference
+      - Log action as 'manual_admin_assigned'
+      - Show success message + refresh table
+
+   E. REAL-TIME STATUS (Optional Enhancement)
+      - Add "Refresh Status" button (AJAX)
+      - Auto-refresh every 30 seconds if unenriched reservations exist
+      - Show last updated timestamp
+
+2. VIEW FUNCTION UPDATES (views.py):
+
+   Query structure:
+   ```python
+   # Get unenriched reservations
+   unenriched = Reservation.objects.filter(
+       platform='booking',
+       status='confirmed',
+       guest__isnull=True,
+       booking_reference=''
+   ).select_related('room').order_by('check_in_date')
+   
+   # Get enrichment status for each
+   for reservation in unenriched:
+       latest_log = EnrichmentLog.objects.filter(
+           reservation=reservation
+       ).order_by('-timestamp').first()
+       reservation.enrichment_status = latest_log
+   
+   # Get recently enriched
+   enriched = Reservation.objects.filter(
+       platform='booking',
+       status='confirmed',
+       guest__isnull=True
+   ).exclude(
+       booking_reference=''
+   ).select_related('room').order_by('-updated_at')[:20]
+   
+   # Get recent logs
+   logs = EnrichmentLog.objects.select_related(
+       'reservation', 'room'
+   ).order_by('-timestamp')[:50]
+   ```
+
+3. TEMPLATE UPDATES:
+
+   - Use Bootstrap cards for each section
+   - Use badges for status indicators:
+     * bg-warning: Yellow (searching)
+     * bg-danger: Red (not found, awaiting manual)
+     * bg-success: Green (enriched)
+     * bg-info: Purple (collision)
+   - Use DataTables for sortable/searchable tables
+   - Use modal for manual enrichment form
+   - Mobile-responsive design
+
+4. PERMISSIONS:
+
+   - Require @login_required
+   - Require permission: 'main.view_admin_dashboard'
+
+5. TESTING CHECKLIST:
+
+   - [ ] Unenriched reservations show correct status
+   - [ ] Status updates when email search progresses
+   - [ ] Collision status shows correctly
+   - [ ] Manual enrichment form works
+   - [ ] Enriched reservations show enrichment method
+   - [ ] Logs display correctly with pagination
+   - [ ] Mobile responsive
+   - [ ] Permissions enforced
+
+FILES TO MODIFY:
+----------------
+1. main/views.py - Update pending_enrichments_page() function
+2. templates/main/pending_enrichments.html (or create if doesn't exist)
+3. main/static/css/ - Add custom styles if needed
+4. main/static/js/ - Add AJAX refresh logic if needed
+
+IMPORTANT NOTES:
+----------------
+- The OLD PendingEnrichment model is from the email-driven flow (deprecated)
+- NEW flow uses Reservation model + EnrichmentLog for tracking
+- Don't delete old PendingEnrichment yet (may have historical data)
+- Focus on Reservation.booking_reference='' as the indicator of unenriched
+- Email search happens in background (Celery tasks)
+- Status should reflect EnrichmentLog.action field
+
+REFERENCE DOCUMENTATION:
+------------------------
+- See IMPLEMENTATION_SUMMARY_ICAL_ENRICHMENT.md for complete flow
+- See TESTING_ICAL_ENRICHMENT.md for testing scenarios
+- See main/models.py EnrichmentLog.ACTION_CHOICES for all action types
+
+CURRENT ADMIN DASHBOARD SECTIONS:
+----------------------------------
+The main admin page (/admin-page/) has:
+- Today's Guests (enriched + unenriched)
+- Current Guests (active stays)
+- iCal Configuration
+- Add Guest Form
+
+The /admin-page/pending-enrichments/ should be a separate dedicated page for monitoring enrichment workflow.
+
+DESIGN GUIDELINES:
+------------------
+- Follow existing admin dashboard style (check /admin-page/ for reference)
+- Use same color scheme and layout
+- Make it admin-friendly (non-technical language where possible)
+- Add tooltips for status badges
+- Include "Last Updated" timestamp on page
+- Add "Sync Now" button to manually trigger iCal sync
+
+SUCCESS CRITERIA:
+-----------------
+✅ Admin can see all unenriched reservations at a glance
+✅ Admin can see enrichment status (searching, failed, collision)
+✅ Admin can manually enrich a reservation via UI (not just SMS)
+✅ Admin can see recent enrichment history
+✅ Page updates reflect real-time enrichment progress
+✅ Mobile-friendly interface
+
+OPTIONAL ENHANCEMENTS (if time permits):
+-----------------------------------------
+- WebSocket real-time updates (instead of AJAX polling)
+- Download enrichment logs as CSV
+- Filter by date range
+- Search by booking reference
+- Statistics dashboard (enrichment success rate, avg time to enrich, etc.)
+
+START HERE:
+-----------
+1. Check if templates/main/pending_enrichments.html exists
+2. Check current implementation of views.pending_enrichments_page()
+3. Understand current data shown on that page
+4. Design the new UI layout (sketch or wireframe)
+5. Update view function with new query logic
+6. Update template with new UI
+7. Test with real data
+
+GOOD LUCK!
