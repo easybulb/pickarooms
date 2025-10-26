@@ -49,8 +49,8 @@ def parse_sms_reply(body):
     """
     body = body.strip()
     
-    # GUIDE command
-    if body.lower() in ['guide', 'help']:
+    # GUIDE command (using 'commands' or 'menu' to avoid Twilio reserved keywords)
+    if body.lower() in ['commands', 'menu', 'guide']:
         return {'type': 'guide', 'data': None}
     
     # OK confirmation (for multi-room booking)
