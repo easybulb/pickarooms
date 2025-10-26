@@ -280,6 +280,17 @@ def handle_single_ref_enrichment(from_number, booking_ref):
         )
         send_confirmation_sms(from_number, confirmation)
         logger.info(f"Enriched reservation {reservation.id} with ref {booking_ref}")
+        
+        # Log the enrichment
+        EnrichmentLog.objects.create(
+            reservation=reservation,
+            action='manual_enrichment_sms',
+            booking_reference=booking_ref,
+            room=reservation.room,
+            method='sms_single_ref',
+            details={'check_in_date': str(reservation.check_in_date)}
+        )
+        
         return "Single ref enrichment complete"
         
     except Exception as e:
@@ -335,6 +346,17 @@ def handle_collision_enrichment(from_number, booking_ref, room_number, nights):
         )
         send_confirmation_sms(from_number, confirmation)
         logger.info(f"Collision enrichment: {booking_ref} → {room.name}, {nights}n")
+        
+        # Log the enrichment
+        EnrichmentLog.objects.create(
+            reservation=reservation,
+            action='manual_enrichment_sms',
+            booking_reference=booking_ref,
+            room=room,
+            method='sms_collision',
+            details={'nights': nights}
+        )
+        
         return "Collision enrichment complete"
         
     except Exception as e:
@@ -405,6 +427,16 @@ def handle_multi_collision_enrichment(from_number, enrichments):
             "\n\nAll reservations ready for check-in."
         )
         send_confirmation_sms(from_number, confirmation)
+        
+        # Log multi-collision enrichment
+        for data in enrichments:
+            EnrichmentLog.objects.create(
+                action='multi_enrichment_sms',
+                booking_reference=data['booking_ref'],
+                method='sms_multi_collision',
+                details={'total_bookings': len(enrichments)}
+            )
+        
         return f"Multi-collision enrichment: {len(results)} processed"
         
     except Exception as e:

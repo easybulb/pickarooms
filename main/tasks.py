@@ -400,11 +400,40 @@ def trigger_enrichment_workflow(self, reservation_id):
     if collision_count > 1:
         # COLLISION DETECTED - Send SMS immediately
         logger.warning(f"Collision detected: {collision_count} bookings for {reservation.check_in_date}")
+        
+        # Log collision
+        from main.models import EnrichmentLog
+        EnrichmentLog.objects.create(
+            reservation=reservation,
+            action='collision_detected',
+            booking_reference='',
+            room=reservation.room,
+            method='ical_detection',
+            details={
+                'collision_count': collision_count,
+                'check_in_date': str(reservation.check_in_date),
+            }
+        )
+        
         send_collision_alert_ical.delay(reservation.check_in_date.isoformat())
         return f"Collision detected: {collision_count} bookings"
     else:
         # SINGLE BOOKING - Start email search
         logger.info(f"Starting email search for reservation {reservation_id}")
+        
+        # Log email search start
+        from main.models import EnrichmentLog
+        EnrichmentLog.objects.create(
+            reservation=reservation,
+            action='email_search_started',
+            booking_reference='',
+            room=reservation.room,
+            method='email_search',
+            details={
+                'check_in_date': str(reservation.check_in_date),
+            }
+        )
+        
         search_email_for_reservation.delay(reservation_id, attempt=1)
         return "Email search started"
 
@@ -472,6 +501,20 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
                 # Mark email as read
                 gmail.mark_as_read(email_data['id'])
                 
+                # Log the enrichment
+                from main.models import EnrichmentLog
+                EnrichmentLog.objects.create(
+                    reservation=reservation,
+                    action='email_found_matched',
+                    booking_reference=booking_ref,
+                    room=reservation.room,
+                    method='email_search',
+                    details={
+                        'attempts': attempt,
+                        'check_in_date': str(reservation.check_in_date),
+                    }
+                )
+                
                 logger.info(f"✅ Email found! Enriched reservation {reservation_id} with ref {booking_ref}")
                 return f"Matched: {booking_ref}"
         
@@ -494,6 +537,21 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
         else:
             # All attempts exhausted - send SMS alert
             logger.warning(f"Email not found after 4 attempts for reservation {reservation_id}")
+            
+            # Log email not found
+            from main.models import EnrichmentLog
+            EnrichmentLog.objects.create(
+                reservation=reservation,
+                action='email_not_found_alerted',
+                booking_reference='',
+                room=reservation.room,
+                method='email_search',
+                details={
+                    'attempts': 4,
+                    'check_in_date': str(reservation.check_in_date),
+                }
+            )
+            
             send_email_not_found_alert.delay(reservation_id)
             return "Email not found - alert sent"
     
@@ -633,7 +691,10 @@ def send_email_not_found_alert(self, reservation_id):
 
 
 # =========================
-# OLD EMAIL ENRICHMENT TASKS (Keep for backward compatibility/cleanup)
+# OLD EMAIL ENRICHMENT TASKS (DEPRECATED - Keep for manual cleanup only)
+# These tasks are from the old email-driven flow (email → iCal)
+# New flow is iCal-driven (iCal → email search)
+# Can be removed after confirming new flow works
 # =========================
 
 @shared_task(bind=True, max_retries=0)
