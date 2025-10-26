@@ -453,23 +453,79 @@ def handle_multi_room_confirmation(from_number):
     Admin replied 'OK' to confirm the multi-room enrichment is correct
     """
     try:
-        confirmation = (
-            "✅ CONFIRMED\n\n"
-            "Multi-room booking verified.\n"
-            "All rooms ready for check-in."
-        )
+        # Find the most recently enriched multi-room booking
+        # Look for multiple reservations with same booking_ref and recent creation
+        from django.db.models import Count
+        from datetime import timedelta
+        
+        recent_time = timezone.now() - timedelta(minutes=15)
+        
+        # Find booking refs that have multiple reservations created recently
+        multi_room_refs = Reservation.objects.filter(
+            platform='booking',
+            status='confirmed',
+            created_at__gte=recent_time,
+            guest__isnull=True
+        ).exclude(
+            booking_reference=''
+        ).values('booking_reference').annotate(
+            room_count=Count('id')
+        ).filter(room_count__gte=2).order_by('-room_count')
+        
+        if not multi_room_refs.exists():
+            # Fallback to generic confirmation
+            confirmation = (
+                "✅ CONFIRMED\n\n"
+                "Multi-room booking verified.\n"
+                "All rooms ready for check-in."
+            )
+            send_confirmation_sms(from_number, confirmation)
+            logger.info(f"Multi-room booking confirmed (no recent multi-room found)")
+            return "Multi-room confirmed"
+        
+        # Get the first multi-room booking ref
+        booking_ref = multi_room_refs[0]['booking_reference']
+        
+        # Get all reservations for this booking
+        reservations = Reservation.objects.filter(
+            booking_reference=booking_ref,
+            platform='booking',
+            status='confirmed'
+        ).select_related('room').order_by('room__name')
+        
+        # Build detailed confirmation
+        confirmation_lines = [
+            "✅ MULTI-ROOM CONFIRMED\n",
+            f"Booking #{booking_ref}",
+            f"Total rooms: {reservations.count()}\n"
+        ]
+        
+        for res in reservations:
+            nights = (res.check_out_date - res.check_in_date).days
+            confirmation_lines.append(
+                f"✅ {res.room.name}\n"
+                f"   {res.check_in_date.strftime('%d %b')} - {res.check_out_date.strftime('%d %b')} ({nights}n)"
+            )
+        
+        confirmation_lines.append("\nAll rooms enriched and ready for guest check-in.")
+        
+        confirmation = "\n".join(confirmation_lines)
         send_confirmation_sms(from_number, confirmation)
-        logger.info(f"Multi-room booking confirmed by admin via SMS")
+        logger.info(f"Multi-room booking confirmed: {booking_ref} ({reservations.count()} rooms)")
         
         # Log the confirmation
         EnrichmentLog.objects.create(
             action='multi_room_confirmed',
-            booking_reference='',
+            booking_reference=booking_ref,
             method='sms_confirmation',
-            details={'confirmed_by': 'admin'}
+            details={
+                'confirmed_by': 'admin',
+                'room_count': reservations.count(),
+                'rooms': [r.room.name for r in reservations]
+            }
         )
         
-        return "Multi-room confirmed"
+        return f"Multi-room confirmed: {booking_ref}"
     except Exception as e:
         logger.error(f"Error in multi-room confirmation: {str(e)}")
         msg = f"❌ Error confirming multi-room: {str(e)}"
