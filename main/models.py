@@ -655,11 +655,13 @@ class EnrichmentLog(models.Model):
         ('collision_detected', 'Collision: Multiple Same-Day Bookings'),
         ('email_search_started', 'Email Search Started'),
         ('email_found_matched', 'Email Found and Matched'),
+        ('email_found_multi_room', 'Email Found - Multi-Room Detected'),
         ('email_not_found_alerted', 'Email Not Found - SMS Sent'),
         
         # Manual enrichment methods
         ('manual_enrichment_sms', 'Manual Enrichment via SMS'),
         ('multi_enrichment_sms', 'Multi-Booking Enrichment via SMS'),
+        ('multi_room_confirmed', 'Multi-Room Booking Confirmed'),
         ('sms_reply_assigned', 'SMS Reply Assigned'),  # Legacy
         ('correction_applied', 'Correction Applied via SMS'),
         ('manual_admin_assigned', 'Manual Admin Assigned'),
