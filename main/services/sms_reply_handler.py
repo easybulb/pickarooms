@@ -12,45 +12,101 @@ from twilio.rest import Client
 
 from main.models import PendingEnrichment, Reservation, Room, EnrichmentLog
 from main.enrichment_config import WHITELISTED_SMS_NUMBERS, ROOM_NUMBER_TO_NAME
+from main.services.sms_commands import (
+    handle_guide_command,
+    handle_check_command,
+    handle_cancel_command,
+    handle_correction_command,
+    handle_single_ref_enrichment,
+    handle_collision_enrichment,
+    handle_multi_collision_enrichment,
+    send_confirmation_sms as send_sms
+)
 
 logger = logging.getLogger('main')
 
 
 def parse_sms_reply(body):
     """
-    Parse SMS reply in format: "6582060925: 1-3" or "6582060925:1-3"
+    Parse SMS reply with support for multiple formats:
+    
+    1. Single ref only: "6588202211" (email not found case)
+    2. Collision format: "6588202211: 1-2" (single line)
+    3. Multi-line collision: Multiple lines of format 2
+    4. CHECK command: "check 6588202211" or "6588202211 check"
+    5. CORRECT command: "6588202211: 1-2 correct"
+    6. CANCEL command: "cancel 6588202211" or "6588202211 cancel"
+    7. GUIDE command: "guide" or "help"
 
     Args:
         body (str): SMS message body
 
     Returns:
-        tuple: (booking_ref, room_number, nights) or None if invalid
-
-    Examples:
-        - "6582060925: 1-3" → ('6582060925', 1, 3)  # Booking ref, Room 1, 3 nights
-        - "6582060925:1-3"  → ('6582060925', 1, 3)  # Same, no space
-        - "A" → ('A', None, None)  # Collision letter only (for future)
-        - "X" → ('X', None, None)  # Cancel
+        dict with:
+        - 'type': 'single_ref', 'collision', 'multi_collision', 'check', 'correct', 'cancel', 'guide'
+        - 'data': Parsed data (varies by type)
     """
     body = body.strip()
-
-    # Cancel command
-    if body.upper() == 'X':
-        return ('X', None, None)
-
-    # Collision letter only (A, B, C, D) - For future collision support
-    if body.upper() in ['A', 'B', 'C', 'D']:
-        return (body.upper(), None, None)
-
-    # New format: BOOKING_REF: ROOM-NIGHTS or BOOKING_REF:ROOM-NIGHTS
-    # Example: "6582060925: 1-3" or "6582060925:1-3"
-    match = re.match(r'(\d{10})\s*:\s*([1-4])-(\d+)', body)
-    if match:
-        booking_ref = match.group(1)
-        room_number = int(match.group(2))
-        nights = int(match.group(3))
-        return (booking_ref, room_number, nights)
-
+    
+    # GUIDE command
+    if body.lower() in ['guide', 'help']:
+        return {'type': 'guide', 'data': None}
+    
+    # CHECK command (flexible format)
+    check_match = re.match(r'(?:check\s+)?(\d{10})(?:\s+check)?', body, re.IGNORECASE)
+    if check_match and ('check' in body.lower()):
+        return {'type': 'check', 'data': {'booking_ref': check_match.group(1)}}
+    
+    # CANCEL command (flexible format)
+    cancel_match = re.match(r'(?:cancel\s+)?(\d{10})(?:\s+cancel)?', body, re.IGNORECASE)
+    if cancel_match and ('cancel' in body.lower()):
+        return {'type': 'cancel', 'data': {'booking_ref': cancel_match.group(1)}}
+    
+    # CORRECT command
+    correct_match = re.match(r'(\d{10})\s*:\s*([1-4])-(\d+)\s+correct', body, re.IGNORECASE)
+    if correct_match:
+        return {
+            'type': 'correct',
+            'data': {
+                'booking_ref': correct_match.group(1),
+                'room_number': int(correct_match.group(2)),
+                'nights': int(correct_match.group(3))
+            }
+        }
+    
+    # Multi-line collision (multiple lines with format REF: ROOM-NIGHTS)
+    lines = [line.strip() for line in body.split('\n') if line.strip()]
+    if len(lines) > 1:
+        # Check if all lines match collision format
+        parsed_lines = []
+        for line in lines:
+            match = re.match(r'(\d{10})\s*:\s*([1-4])-(\d+)', line)
+            if match:
+                parsed_lines.append({
+                    'booking_ref': match.group(1),
+                    'room_number': int(match.group(2)),
+                    'nights': int(match.group(3))
+                })
+        
+        if len(parsed_lines) == len(lines):  # All lines valid
+            return {'type': 'multi_collision', 'data': parsed_lines}
+    
+    # Single ref only (email not found case - just the booking reference)
+    if re.match(r'^\d{10}$', body):
+        return {'type': 'single_ref', 'data': {'booking_ref': body}}
+    
+    # Collision format (single line: REF: ROOM-NIGHTS)
+    collision_match = re.match(r'(\d{10})\s*:\s*([1-4])-(\d+)', body)
+    if collision_match:
+        return {
+            'type': 'collision',
+            'data': {
+                'booking_ref': collision_match.group(1),
+                'room_number': int(collision_match.group(2)),
+                'nights': int(collision_match.group(3))
+            }
+        }
+    
     return None  # Invalid format
 
 
@@ -59,31 +115,13 @@ def is_authorized_sms(from_number):
     return from_number in WHITELISTED_SMS_NUMBERS
 
 
-def send_confirmation_sms(to_number, message):
-    """
-    Send SMS confirmation back to admin
-
-    Args:
-        to_number (str): Recipient phone number
-        message (str): Confirmation message
-    """
-    try:
-        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-        response = client.messages.create(
-            to=to_number,
-            from_=settings.TWILIO_PHONE_NUMBER,
-            body=message
-        )
-        logger.info(f"Confirmation SMS sent to {to_number}: {response.sid}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to send confirmation SMS: {str(e)}")
-        return False
+# Use send_confirmation_sms from sms_commands module
+send_confirmation_sms = send_sms
 
 
 def handle_sms_room_assignment(from_number, body):
     """
-    Handle SMS reply for room assignment
+    Handle SMS reply - routes to appropriate handler based on command type
 
     Args:
         from_number (str): Sender phone number
@@ -98,36 +136,50 @@ def handle_sms_room_assignment(from_number, body):
         send_confirmation_sms(from_number, "❌ Unauthorized sender. Access denied.")
         return "Unauthorized"
 
-        # Parse reply
+    # Parse reply
     parsed = parse_sms_reply(body)
     if not parsed:
         logger.warning(f"Invalid SMS format from {from_number}: {body}")
         send_confirmation_sms(
             from_number,
             f"❌ Invalid format: '{body}'\n\n"
-            "Valid format:\n"
-            "• BOOKING_REF: ROOM-NIGHTS\n"
-            "Example: 6582060925: 1-3\n\n"
-            "Or reply X to cancel"
+            "Send 'guide' for help"
         )
         return "Invalid format"
 
-    booking_ref_or_letter, room_number, nights = parsed
-
-    # Handle cancellation
-    if booking_ref_or_letter == 'X':
-        result = handle_cancellation_reply(from_number)
-        return result
-
-    # Handle collision letter (A, B, C, D) - Future feature
-    if booking_ref_or_letter in ['A', 'B', 'C', 'D'] and room_number is None:
-        msg = "❌ Collision format not yet supported. Please use: BOOKING_REF: ROOM-NIGHTS"
-        send_confirmation_sms(from_number, msg)
-        return "Collision format not supported"
-
-    # Handle room assignment
-    result = assign_room_from_sms(booking_ref_or_letter, room_number, nights, from_number)
-    return result
+    # Route to appropriate handler
+    cmd_type = parsed['type']
+    
+    if cmd_type == 'guide':
+        return handle_guide_command(from_number)
+    elif cmd_type == 'check':
+        return handle_check_command(from_number, parsed['data']['booking_ref'])
+    elif cmd_type == 'cancel':
+        return handle_cancel_command(from_number, parsed['data']['booking_ref'])
+    elif cmd_type == 'correct':
+        return handle_correction_command(
+            from_number,
+            parsed['data']['booking_ref'],
+            parsed['data']['room_number'],
+            parsed['data']['nights']
+        )
+    elif cmd_type == 'single_ref':
+        # Email not found case - just booking ref provided
+        return handle_single_ref_enrichment(from_number, parsed['data']['booking_ref'])
+    elif cmd_type == 'collision':
+        # Single collision line
+        return handle_collision_enrichment(
+            from_number,
+            parsed['data']['booking_ref'],
+            parsed['data']['room_number'],
+            parsed['data']['nights']
+        )
+    elif cmd_type == 'multi_collision':
+        # Multiple collision lines
+        return handle_multi_collision_enrichment(from_number, parsed['data'])
+    else:
+        send_confirmation_sms(from_number, "❌ Unknown command. Send 'guide' for help")
+        return "Unknown command"
 
 
 def handle_cancellation_reply(from_number):
