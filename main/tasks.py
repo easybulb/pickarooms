@@ -493,30 +493,76 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
             
             # Check if check-in date matches
             if check_in_date == reservation.check_in_date:
-                # MATCH FOUND! Enrich reservation
-                reservation.booking_reference = booking_ref
-                reservation.guest_name = f"Guest {booking_ref}"  # Placeholder
-                reservation.save()
-                
-                # Mark email as read
-                gmail.mark_as_read(email_data['id'])
-                
-                # Log the enrichment
-                from main.models import EnrichmentLog
-                EnrichmentLog.objects.create(
-                    reservation=reservation,
-                    action='email_found_matched',
-                    booking_reference=booking_ref,
-                    room=reservation.room,
-                    method='email_search',
-                    details={
-                        'attempts': attempt,
-                        'check_in_date': str(reservation.check_in_date),
-                    }
+                # MATCH FOUND! Check if this is a multi-room booking
+                multi_room_reservations = Reservation.objects.filter(
+                    check_in_date=check_in_date,
+                    platform='booking',
+                    status='confirmed',
+                    guest__isnull=True,
+                    booking_reference=''  # Unenriched
                 )
                 
-                logger.info(f"✅ Email found! Enriched reservation {reservation_id} with ref {booking_ref}")
-                return f"Matched: {booking_ref}"
+                room_count = multi_room_reservations.count()
+                
+                if room_count > 1:
+                    # MULTI-ROOM BOOKING - Enrich all rooms with same ref
+                    logger.info(f"Multi-room booking detected: {room_count} rooms for {booking_ref}")
+                    
+                    for res in multi_room_reservations:
+                        res.booking_reference = booking_ref
+                        res.guest_name = f"Guest {booking_ref}"
+                        res.save()
+                    
+                    # Mark email as read
+                    gmail.mark_as_read(email_data['id'])
+                    
+                    # Log the multi-room enrichment
+                    from main.models import EnrichmentLog
+                    EnrichmentLog.objects.create(
+                        reservation=reservation,
+                        action='email_found_multi_room',
+                        booking_reference=booking_ref,
+                        room=reservation.room,
+                        method='email_search',
+                        details={
+                            'attempts': attempt,
+                            'room_count': room_count,
+                            'rooms': [r.room.name for r in multi_room_reservations],
+                            'check_in_date': str(check_in_date),
+                        }
+                    )
+                    
+                    logger.info(f"✅ Multi-room enrichment! {room_count} rooms enriched with ref {booking_ref}")
+                    
+                    # Send confirmation SMS to admin
+                    send_multi_room_confirmation_sms.delay(booking_ref, check_in_date.isoformat())
+                    
+                    return f"Multi-room matched: {booking_ref} ({room_count} rooms)"
+                else:
+                    # SINGLE ROOM - Standard enrichment
+                    reservation.booking_reference = booking_ref
+                    reservation.guest_name = f"Guest {booking_ref}"  # Placeholder
+                    reservation.save()
+                    
+                    # Mark email as read
+                    gmail.mark_as_read(email_data['id'])
+                    
+                    # Log the enrichment
+                    from main.models import EnrichmentLog
+                    EnrichmentLog.objects.create(
+                        reservation=reservation,
+                        action='email_found_matched',
+                        booking_reference=booking_ref,
+                        room=reservation.room,
+                        method='email_search',
+                        details={
+                            'attempts': attempt,
+                            'check_in_date': str(reservation.check_in_date),
+                        }
+                    )
+                    
+                    logger.info(f"✅ Email found! Enriched reservation {reservation_id} with ref {booking_ref}")
+                    return f"Matched: {booking_ref}"
         
         # Email not found - schedule retry or send alert
         if attempt < 4:
@@ -632,6 +678,79 @@ def send_collision_alert_ical(self, check_in_date_str):
         return f"Collision SMS sent: {message.sid}"
     except Exception as e:
         logger.error(f"Failed to send collision SMS: {str(e)}")
+        return f"SMS failed: {str(e)}"
+
+
+@shared_task(bind=True, max_retries=2)
+def send_multi_room_confirmation_sms(self, booking_ref, check_in_date_str):
+    """
+    Send confirmation SMS when multiple rooms enriched with same ref
+    Admin can confirm (OK) or correct if wrong
+    
+    Args:
+        booking_ref: Booking reference that was applied to multiple rooms
+        check_in_date_str: Check-in date as ISO string (YYYY-MM-DD)
+    """
+    from main.models import Reservation
+    from main.enrichment_config import ADMIN_PHONE
+    from twilio.rest import Client
+    from django.conf import settings
+    from datetime import date
+    
+    check_in_date = date.fromisoformat(check_in_date_str)
+    
+    # Get all reservations enriched with this ref
+    reservations = Reservation.objects.filter(
+        booking_reference=booking_ref,
+        check_in_date=check_in_date,
+        platform='booking',
+        status='confirmed'
+    ).select_related('room').order_by('room__name')
+    
+    if reservations.count() < 2:
+        logger.warning(f"Multi-room confirmation called but found {reservations.count()} reservation(s)")
+        return "Not multi-room"
+    
+    # Build SMS message
+    sms_lines = [
+        "PickARooms Alert",
+        "",
+        "Multi-room booking detected:",
+        f"Check-in: {check_in_date.strftime('%d %b %Y')}",
+        "",
+        f"Enriched {reservations.count()} rooms with ref:",
+        f"#{booking_ref}",
+        ""
+    ]
+    
+    for res in reservations:
+        nights = (res.check_out_date - res.check_in_date).days
+        sms_lines.append(f"{res.room.name} ({nights} nights)")
+    
+    sms_lines.extend([
+        "",
+        "✅ Reply 'OK' to confirm",
+        "❌ Reply booking refs if wrong:",
+        "",
+        "Example (if wrong):",
+        "6588202211: 1-2",
+        "6717790453: 2-2"
+    ])
+    
+    sms_body = "\n".join(sms_lines)
+    
+    # Send SMS
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            to=ADMIN_PHONE,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=sms_body
+        )
+        logger.info(f"Multi-room confirmation SMS sent for {booking_ref}: {message.sid}")
+        return f"SMS sent: {message.sid}"
+    except Exception as e:
+        logger.error(f"Failed to send multi-room confirmation SMS: {str(e)}")
         return f"SMS failed: {str(e)}"
 
 

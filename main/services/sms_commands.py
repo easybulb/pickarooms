@@ -44,6 +44,10 @@ def handle_guide_command(from_number):
         "6588202211: 1-2\n"
         "6717790453: 3-1\n\n"
         "━━━━━━━━━━━━━━━━━━━\n"
+        "MULTI-ROOM CONFIRMATION\n"
+        "━━━━━━━━━━━━━━━━━━━\n"
+        "Reply 'OK' to confirm\n\n"
+        "━━━━━━━━━━━━━━━━━━━\n"
         "EMAIL NOT FOUND\n"
         "━━━━━━━━━━━━━━━━━━━\n"
         "Reply with ref only:\n\n"
@@ -439,5 +443,35 @@ def handle_multi_collision_enrichment(from_number, enrichments):
     except Exception as e:
         logger.error(f"Error in multi-collision enrichment: {str(e)}")
         msg = f"❌ Error: {str(e)}"
+        send_confirmation_sms(from_number, msg)
+        return f"Error: {str(e)}"
+
+
+def handle_multi_room_confirmation(from_number):
+    """
+    Handle admin confirmation of multi-room booking enrichment
+    Admin replied 'OK' to confirm the multi-room enrichment is correct
+    """
+    try:
+        confirmation = (
+            "✅ CONFIRMED\n\n"
+            "Multi-room booking verified.\n"
+            "All rooms ready for check-in."
+        )
+        send_confirmation_sms(from_number, confirmation)
+        logger.info(f"Multi-room booking confirmed by admin via SMS")
+        
+        # Log the confirmation
+        EnrichmentLog.objects.create(
+            action='multi_room_confirmed',
+            booking_reference='',
+            method='sms_confirmation',
+            details={'confirmed_by': 'admin'}
+        )
+        
+        return "Multi-room confirmed"
+    except Exception as e:
+        logger.error(f"Error in multi-room confirmation: {str(e)}")
+        msg = f"❌ Error confirming multi-room: {str(e)}"
         send_confirmation_sms(from_number, msg)
         return f"Error: {str(e)}"

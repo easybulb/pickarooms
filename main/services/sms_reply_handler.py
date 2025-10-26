@@ -20,6 +20,7 @@ from main.services.sms_commands import (
     handle_single_ref_enrichment,
     handle_collision_enrichment,
     handle_multi_collision_enrichment,
+    handle_multi_room_confirmation,
     send_confirmation_sms as send_sms
 )
 
@@ -51,6 +52,10 @@ def parse_sms_reply(body):
     # GUIDE command
     if body.lower() in ['guide', 'help']:
         return {'type': 'guide', 'data': None}
+    
+    # OK confirmation (for multi-room booking)
+    if body.strip().upper() == 'OK':
+        return {'type': 'confirm_multi_room', 'data': None}
     
     # CHECK command (flexible format)
     check_match = re.match(r'(?:check\s+)?(\d{10})(?:\s+check)?', body, re.IGNORECASE)
@@ -152,6 +157,8 @@ def handle_sms_room_assignment(from_number, body):
     
     if cmd_type == 'guide':
         return handle_guide_command(from_number)
+    elif cmd_type == 'confirm_multi_room':
+        return handle_multi_room_confirmation(from_number)
     elif cmd_type == 'check':
         return handle_check_command(from_number, parsed['data']['booking_ref'])
     elif cmd_type == 'cancel':
