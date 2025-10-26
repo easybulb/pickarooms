@@ -56,3 +56,7 @@ WHITELISTED_EMAILS = ['easybulb@gmail.com']
 # Admin contact
 ADMIN_PHONE = '+447539029629'
 ADMIN_EMAIL = 'easybulb@gmail.com'
+
+# Email search configuration (iCal-driven enrichment)
+EMAIL_SEARCH_LOOKBACK_COUNT = 10  # Number of recent emails to search (read or unread)
+EMAIL_SEARCH_LOOKBACK_DAYS = 30  # Only search emails from last N days

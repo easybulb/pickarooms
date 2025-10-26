@@ -473,9 +473,16 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
         return "Already enriched"
     
     try:
-        # Search Gmail for emails with matching check-in date
+        # Search Gmail for recent emails (read or unread) - bulletproof approach
+        from main.enrichment_config import EMAIL_SEARCH_LOOKBACK_COUNT, EMAIL_SEARCH_LOOKBACK_DAYS
+        
         gmail = GmailClient()
-        emails = gmail.get_unread_booking_emails()
+        emails = gmail.get_recent_booking_emails(
+            max_results=EMAIL_SEARCH_LOOKBACK_COUNT,
+            lookback_days=EMAIL_SEARCH_LOOKBACK_DAYS
+        )
+        
+        logger.info(f"Searching {len(emails)} recent Booking.com emails for check-in date {reservation.check_in_date}")
         
         # Filter emails by check-in date
         for email_data in emails:

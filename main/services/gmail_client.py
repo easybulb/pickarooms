@@ -224,6 +224,111 @@ class GmailClient:
             logger.error(f"Error getting unread Booking.com emails: {str(e)}")
             raise
 
+    def get_recent_booking_emails(self, max_results=10, lookback_days=30):
+        """
+        Get recent Booking.com emails (read OR unread)
+        
+        This is more bulletproof than get_unread_booking_emails() because:
+        - Forgives human error (accidentally marking email as read)
+        - Only searches recent emails (faster, more relevant)
+        - Prevents matching ancient emails
+        
+        Args:
+            max_results: Number of recent emails to fetch (default: 10)
+            lookback_days: Only search emails from last N days (default: 30)
+        
+        Returns:
+            list: Recent emails sorted by date (newest first) with keys:
+                - id: Gmail message ID
+                - subject: Email subject line
+                - received_at: Datetime when email was received
+        """
+        try:
+            from datetime import timedelta
+            
+            # Calculate date filter (last N days)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=lookback_days)
+            date_filter = cutoff_date.strftime('%Y/%m/%d')
+            
+            # Search query: all Booking.com emails from last N days (read + unread)
+            query = f'from:noreply@booking.com after:{date_filter}'
+            
+            logger.info(f"Searching recent Booking.com emails: last {max_results} emails from last {lookback_days} days")
+            
+            # Call Gmail API
+            results = self.service.users().messages().list(
+                userId='me',
+                q=query,
+                maxResults=max_results
+            ).execute()
+            
+            messages = results.get('messages', [])
+            
+            if not messages:
+                logger.info("No recent Booking.com emails found")
+                return []
+            
+            logger.info(f"Found {len(messages)} recent Booking.com email(s)")
+            
+            # Fetch full details for each message
+            emails = []
+            for msg in messages:
+                try:
+                    message = self.service.users().messages().get(
+                        userId='me',
+                        id=msg['id'],
+                        format='full'
+                    ).execute()
+                    
+                    # Extract headers
+                    headers = message['payload']['headers']
+                    subject = None
+                    date_str = None
+                    
+                    for header in headers:
+                        if header['name'].lower() == 'subject':
+                            subject = header['value']
+                        elif header['name'].lower() == 'date':
+                            date_str = header['value']
+                    
+                    if not subject:
+                        logger.warning(f"Email {msg['id']} has no subject, skipping")
+                        continue
+                    
+                    # Parse date
+                    received_at = None
+                    if date_str:
+                        try:
+                            received_at = parsedate_to_datetime(date_str)
+                        except Exception as e:
+                            logger.warning(f"Could not parse date '{date_str}': {str(e)}")
+                            received_at = datetime.now(timezone.utc)
+                    else:
+                        received_at = datetime.now(timezone.utc)
+                    
+                    emails.append({
+                        'id': msg['id'],
+                        'subject': subject,
+                        'received_at': received_at,
+                    })
+                
+                except HttpError as e:
+                    logger.error(f"Error fetching message {msg['id']}: {str(e)}")
+                    continue
+            
+            # Sort by date descending (newest first)
+            emails.sort(key=lambda x: x['received_at'], reverse=True)
+            
+            logger.info(f"Returning {len(emails)} recent Booking.com email(s) sorted by date")
+            return emails
+        
+        except HttpError as e:
+            logger.error(f"Gmail API error: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Error getting recent Booking.com emails: {str(e)}")
+            raise
+    
     def mark_as_read(self, message_id):
         """
         Mark an email as read
