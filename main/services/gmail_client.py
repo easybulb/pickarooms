@@ -280,8 +280,11 @@ class GmailClient:
                         format='full'
                     ).execute()
                     
-                    # Extract headers
+                    # Extract headers and check if unread
                     headers = message['payload']['headers']
+                    label_ids = message.get('labelIds', [])
+                    is_unread = 'UNREAD' in label_ids
+                    
                     subject = None
                     date_str = None
                     
@@ -310,14 +313,16 @@ class GmailClient:
                         'id': msg['id'],
                         'subject': subject,
                         'received_at': received_at,
+                        'is_unread': is_unread,
                     })
                 
                 except HttpError as e:
                     logger.error(f"Error fetching message {msg['id']}: {str(e)}")
                     continue
             
-            # Sort by date descending (newest first)
-            emails.sort(key=lambda x: x['received_at'], reverse=True)
+            # Sort by unread first, then by date descending (newest first)
+            # This prioritizes unread emails when there are multiple matches
+            emails.sort(key=lambda x: (not x['is_unread'], -x['received_at'].timestamp()))
             
             logger.info(f"Returning {len(emails)} recent Booking.com email(s) sorted by date")
             return emails
