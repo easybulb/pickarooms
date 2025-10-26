@@ -356,7 +356,284 @@ def archive_past_guests(self):
 
 
 # =========================
-# EMAIL ENRICHMENT TASKS
+# EMAIL ENRICHMENT TASKS (iCal-Driven)
+# =========================
+
+@shared_task(bind=True, max_retries=0)
+def trigger_enrichment_workflow(self, reservation_id):
+    """
+    Triggered when iCal creates a new unenriched reservation
+    
+    Workflow:
+    1. Check for collision (multiple bookings for same check_in_date)
+    2. If collision → send SMS alert immediately
+    3. If single → start email search (4 attempts over 10 min)
+    
+    Args:
+        reservation_id: ID of newly created Reservation
+    """
+    from main.models import Reservation
+    
+    try:
+        reservation = Reservation.objects.select_related('room').get(id=reservation_id)
+    except Reservation.DoesNotExist:
+        logger.error(f"Reservation {reservation_id} not found")
+        return "Reservation not found"
+    
+    # Skip if already enriched
+    if reservation.booking_reference and len(reservation.booking_reference) >= 5:
+        logger.info(f"Reservation {reservation_id} already enriched, skipping workflow")
+        return "Already enriched"
+    
+    # Check for collision: multiple unenriched bookings for same check-in date
+    same_day_bookings = Reservation.objects.filter(
+        check_in_date=reservation.check_in_date,
+        platform='booking',
+        status='confirmed',
+        guest__isnull=True  # Unenriched only
+    ).exclude(
+        booking_reference__isnull=False  # Exclude if already has booking ref
+    )
+    
+    collision_count = same_day_bookings.count()
+    
+    if collision_count > 1:
+        # COLLISION DETECTED - Send SMS immediately
+        logger.warning(f"Collision detected: {collision_count} bookings for {reservation.check_in_date}")
+        send_collision_alert_ical.delay(reservation.check_in_date.isoformat())
+        return f"Collision detected: {collision_count} bookings"
+    else:
+        # SINGLE BOOKING - Start email search
+        logger.info(f"Starting email search for reservation {reservation_id}")
+        search_email_for_reservation.delay(reservation_id, attempt=1)
+        return "Email search started"
+
+
+@shared_task(bind=True, max_retries=3)
+def search_email_for_reservation(self, reservation_id, attempt=1):
+    """
+    Search Gmail for email matching reservation's check-in date
+    
+    Retry schedule:
+    - Attempt 1: Immediate
+    - Attempt 2: 2 min later  
+    - Attempt 3: 5 min later
+    - Attempt 4: 10 min later
+    
+    If not found after 4 attempts → send SMS alert
+    
+    Args:
+        reservation_id: Reservation ID
+        attempt: Current attempt number (1-4)
+    """
+    from main.models import Reservation
+    from main.services.gmail_client import GmailClient
+    from main.services.email_parser import parse_booking_com_email_subject
+    
+    logger.info(f"Email search attempt {attempt}/4 for reservation {reservation_id}")
+    
+    try:
+        reservation = Reservation.objects.get(id=reservation_id)
+    except Reservation.DoesNotExist:
+        logger.error(f"Reservation {reservation_id} not found")
+        return "Reservation not found"
+    
+    # Skip if already enriched
+    if reservation.booking_reference and len(reservation.booking_reference) >= 5:
+        logger.info(f"Reservation {reservation_id} already enriched during search")
+        return "Already enriched"
+    
+    try:
+        # Search Gmail for emails with matching check-in date
+        gmail = GmailClient()
+        emails = gmail.get_unread_booking_emails()
+        
+        # Filter emails by check-in date
+        for email_data in emails:
+            subject = email_data['subject']
+            parsed = parse_booking_com_email_subject(subject)
+            
+            if not parsed:
+                continue
+            
+            email_type, booking_ref, check_in_date = parsed
+            
+            # Skip cancellations
+            if email_type == 'cancellation':
+                continue
+            
+            # Check if check-in date matches
+            if check_in_date == reservation.check_in_date:
+                # MATCH FOUND! Enrich reservation
+                reservation.booking_reference = booking_ref
+                reservation.guest_name = f"Guest {booking_ref}"  # Placeholder
+                reservation.save()
+                
+                # Mark email as read
+                gmail.mark_as_read(email_data['id'])
+                
+                logger.info(f"✅ Email found! Enriched reservation {reservation_id} with ref {booking_ref}")
+                return f"Matched: {booking_ref}"
+        
+        # Email not found - schedule retry or send alert
+        if attempt < 4:
+            # Schedule next attempt
+            retry_delays = {
+                1: 120,   # 2 min after attempt 1
+                2: 180,   # 3 min after attempt 2 (5 min total)
+                3: 300,   # 5 min after attempt 3 (10 min total)
+            }
+            countdown = retry_delays.get(attempt, 120)
+            
+            logger.info(f"Email not found, scheduling attempt {attempt + 1} in {countdown}s")
+            search_email_for_reservation.apply_async(
+                args=[reservation_id, attempt + 1],
+                countdown=countdown
+            )
+            return f"Retry scheduled: attempt {attempt + 1}"
+        else:
+            # All attempts exhausted - send SMS alert
+            logger.warning(f"Email not found after 4 attempts for reservation {reservation_id}")
+            send_email_not_found_alert.delay(reservation_id)
+            return "Email not found - alert sent"
+    
+    except Exception as e:
+        logger.error(f"Error searching email for reservation {reservation_id}: {str(e)}")
+        # Retry on error
+        if attempt < 4:
+            self.retry(countdown=60, exc=e)
+        return f"Error: {str(e)}"
+
+
+@shared_task(bind=True, max_retries=2)
+def send_collision_alert_ical(self, check_in_date_str):
+    """
+    Send SMS alert when iCal detects multiple bookings for same date
+    
+    Args:
+        check_in_date_str: Check-in date as ISO string (YYYY-MM-DD)
+    """
+    from main.models import Reservation
+    from main.enrichment_config import ADMIN_PHONE
+    from twilio.rest import Client
+    from django.conf import settings
+    from datetime import date
+    
+    check_in_date = date.fromisoformat(check_in_date_str)
+    
+    # Get all unenriched bookings for this date
+    bookings = Reservation.objects.filter(
+        check_in_date=check_in_date,
+        platform='booking',
+        status='confirmed',
+        guest__isnull=True
+    ).exclude(
+        booking_reference__isnull=False
+    ).select_related('room')[:4]  # Max 4
+    
+    if bookings.count() < 2:
+        logger.warning(f"Collision alert called but found {bookings.count()} booking(s) for {check_in_date}")
+        return "Not a collision"
+    
+    # Build SMS message
+    sms_lines = [
+        "PickARooms Alert",
+        "",
+        f"Multiple bookings detected:",
+        f"Check-in: {check_in_date.strftime('%d %b %Y')}",
+        ""
+    ]
+    
+    for booking in bookings:
+        nights = (booking.check_out_date - booking.check_in_date).days
+        sms_lines.append(f"{booking.room.name} ({nights} nights)")
+    
+    sms_lines.extend([
+        "",
+        "Reply with booking ref for EACH room:",
+        "",
+        "Format: REF: ROOM-NIGHTS",
+        "",
+        "Example:",
+        "6588202211: 1-2",
+        "6717790453: 3-1",
+        "",
+        "(One per line)"
+    ])
+    
+    sms_body = "\n".join(sms_lines)
+    
+    # Send SMS
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            to=ADMIN_PHONE,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=sms_body
+        )
+        logger.info(f"Collision SMS sent for {check_in_date}: {message.sid}")
+        return f"Collision SMS sent: {message.sid}"
+    except Exception as e:
+        logger.error(f"Failed to send collision SMS: {str(e)}")
+        return f"SMS failed: {str(e)}"
+
+
+@shared_task(bind=True, max_retries=2)
+def send_email_not_found_alert(self, reservation_id):
+    """
+    Send SMS alert when email not found after 4 search attempts
+    
+    Args:
+        reservation_id: Reservation ID
+    """
+    from main.models import Reservation
+    from main.enrichment_config import ADMIN_PHONE
+    from twilio.rest import Client
+    from django.conf import settings
+    
+    try:
+        reservation = Reservation.objects.select_related('room').get(id=reservation_id)
+    except Reservation.DoesNotExist:
+        logger.error(f"Reservation {reservation_id} not found")
+        return "Reservation not found"
+    
+    nights = (reservation.check_out_date - reservation.check_in_date).days
+    
+    # Build SMS message
+    sms_lines = [
+        "PickARooms Alert",
+        "",
+        "New booking detected (iCal)",
+        "Email not found after 10 min",
+        "",
+        f"Room: {reservation.room.name}",
+        f"Check-in: {reservation.check_in_date.strftime('%d %b %Y')}",
+        f"Check-out: {reservation.check_out_date.strftime('%d %b %Y')} ({nights} nights)",
+        "",
+        "Reply with booking ref only:",
+        "",
+        "Example: 6588202211"
+    ]
+    
+    sms_body = "\n".join(sms_lines)
+    
+    # Send SMS
+    try:
+        client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        message = client.messages.create(
+            to=ADMIN_PHONE,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            body=sms_body
+        )
+        logger.info(f"Email not found SMS sent for reservation {reservation_id}: {message.sid}")
+        return f"SMS sent: {message.sid}"
+    except Exception as e:
+        logger.error(f"Failed to send SMS alert: {str(e)}")
+        return f"SMS failed: {str(e)}"
+
+
+# =========================
+# OLD EMAIL ENRICHMENT TASKS (Keep for backward compatibility/cleanup)
 # =========================
 
 @shared_task(bind=True, max_retries=0)

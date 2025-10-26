@@ -312,6 +312,13 @@ def sync_reservations_for_room(config_id, platform='booking'):
                         )
                         created_count += 1
                         logger.info(f"Created new reservation: {reservation}")
+                        
+                        # NEW: Trigger enrichment workflow after creating reservation
+                        # Only for Booking.com platform (we need emails for enrichment)
+                        if platform == 'booking' and event_status == 'confirmed':
+                            # Import here to avoid circular imports
+                            from main.tasks import trigger_enrichment_workflow
+                            trigger_enrichment_workflow.delay(reservation.id)
 
                 except Exception as e:
                     error_msg = f"Error processing event {event.get('uid', 'unknown')}: {str(e)}"
