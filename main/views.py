@@ -454,153 +454,165 @@ def enrich_reservation(request):
         ).select_related('room')
 
         # Create new Guest record with reservation details
-        guest = Guest.objects.create(
-            full_name=full_name,
-            email=email,
-            phone_number=phone_number,
-            reservation_number=reservation.booking_reference,
-            check_in_date=reservation.check_in_date,
-            check_out_date=reservation.check_out_date,
-            assigned_room=reservation.room,
-            early_checkin_time=reservation.early_checkin_time,  # Copy from reservation
-            late_checkout_time=reservation.late_checkout_time,  # Copy from reservation
-        )
-        logger.info(f"Created new guest {guest.id} for reservation {reservation.booking_reference}")
-
-        # MULTI-ROOM: Link ALL reservations to this guest
-        room_count = 0
-        for res in all_reservations:
-            res.guest = guest
-            res.save()
-            room_count += 1
-            logger.info(f"Linked reservation {res.id} ({res.room.name}) to guest {guest.id}")
+        # Use transaction to ensure atomic PIN generation
+        from django.db import transaction
         
-        if room_count > 1:
-            logger.info(f"Multi-room booking detected: {room_count} rooms linked to guest {guest.id}")
-
-        # Check if it's the check-in day (or later) before generating PIN
-        uk_timezone = pytz.timezone("Europe/London")
-        now_uk_time = timezone.now().astimezone(uk_timezone)
-
-        # Only generate PIN on or after check-in date
-        if now_uk_time.date() < guest.check_in_date:
-            # Too early - all reservations already linked above
-            # No need to link reservation again
-            request.session['reservation_number'] = guest.reservation_number
-            del request.session['reservation_to_enrich']
-            logger.info(f"Guest {guest.id} created but PIN generation deferred until check-in date {guest.check_in_date}")
-            messages.info(request, f"Your reservation starts on {guest.check_in_date.strftime('%d %b %Y')}. You can access your PIN on that day.")
-            return redirect('room_detail', room_token=guest.secure_token)
-
-        # Generate TTLock PINs (reuse logic from checkin view)
         try:
-            front_door_lock = TTLock.objects.get(is_front_door=True)
-            room_lock = guest.assigned_room.ttlock
-            if not room_lock:
-                logger.error(f"No TTLock assigned to room {guest.assigned_room.name} for guest {guest.reservation_number}")
-                messages.error(request, f"No lock assigned to room {guest.assigned_room.name}. Please contact support.")
-                guest.delete()  # Rollback guest creation
-                # Clear enrichment data but keep reservation_number for retry
-                if 'reservation_to_enrich' in request.session:
-                    del request.session['reservation_to_enrich']
-                return redirect("checkin")
+            with transaction.atomic():
+                guest = Guest.objects.create(
+                    full_name=full_name,
+                    email=email,
+                    phone_number=phone_number,
+                    reservation_number=reservation.booking_reference,
+                    check_in_date=reservation.check_in_date,
+                    check_out_date=reservation.check_out_date,
+                    assigned_room=reservation.room,
+                    early_checkin_time=reservation.early_checkin_time,  # Copy from reservation
+                    late_checkout_time=reservation.late_checkout_time,  # Copy from reservation
+                )
+                logger.info(f"Created new guest {guest.id} for reservation {reservation.booking_reference}")
 
-            client = TTLockClient()
-            uk_timezone = pytz.timezone("Europe/London")
-            now_uk_time = timezone.now().astimezone(uk_timezone)
-
-            # Set start_time to NOW so PIN is immediately active
-            start_time = int(now_uk_time.timestamp() * 1000)
-
-            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
-            end_date = uk_timezone.localize(
-                datetime.datetime.combine(guest.check_out_date, check_out_time)
-            ) + datetime.timedelta(days=1)
-            end_time = int(end_date.timestamp() * 1000)
-            pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
-
-            # Generate PIN for front door
-            front_door_response = client.generate_temporary_pin(
-                lock_id=str(front_door_lock.lock_id),
-                pin=pin,
-                start_time=start_time,
-                end_time=end_time,
-                name=f"Front Door - {guest.assigned_room.name} - {guest.full_name} - {pin}",
-            )
-            if "keyboardPwdId" not in front_door_response:
-                logger.error(f"Failed to generate front door PIN for guest {guest.reservation_number}: {front_door_response.get('errmsg', 'Unknown error')}")
-                messages.error(request, f"Failed to generate front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
-                guest.delete()  # Rollback guest creation
-                # Clear enrichment data but keep reservation_number for retry
-                if 'reservation_to_enrich' in request.session:
-                    del request.session['reservation_to_enrich']
-                return redirect("checkin")
-            guest.front_door_pin = pin
-            guest.front_door_pin_id = front_door_response["keyboardPwdId"]
-            logger.info(f"Generated front door PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
-
-            # MULTI-ROOM: Generate the same PIN for ALL room locks
-            room_pin_ids = []
-            failed_rooms = []
-            
-            for res in all_reservations:
-                room_lock = res.room.ttlock
-                if not room_lock:
-                    logger.warning(f"No TTLock assigned to room {res.room.name} - skipping PIN generation")
-                    failed_rooms.append(res.room.name)
-                    continue
+                # MULTI-ROOM: Link ALL reservations to this guest
+                room_count = 0
+                for res in all_reservations:
+                    res.guest = guest
+                    res.save()
+                    room_count += 1
+                    logger.info(f"Linked reservation {res.id} ({res.room.name}) to guest {guest.id}")
                 
-                room_response = client.generate_temporary_pin(
-                    lock_id=str(room_lock.lock_id),
+                if room_count > 1:
+                    logger.info(f"Multi-room booking detected: {room_count} rooms linked to guest {guest.id}")
+
+                # Check if it's the check-in day (or later) before generating PIN
+                uk_timezone = pytz.timezone("Europe/London")
+                now_uk_time = timezone.now().astimezone(uk_timezone)
+
+                # Only generate PIN on or after check-in date
+                if now_uk_time.date() < guest.check_in_date:
+                    # Too early - all reservations already linked above
+                    # Transaction will commit here (guest + reservation links saved)
+                    request.session['reservation_number'] = guest.reservation_number
+                    del request.session['reservation_to_enrich']
+                    logger.info(f"Guest {guest.id} created but PIN generation deferred until check-in date {guest.check_in_date}")
+                    messages.info(request, f"Your reservation starts on {guest.check_in_date.strftime('%d %b %Y')}. You can access your PIN on that day.")
+                    return redirect('room_detail', room_token=guest.secure_token)
+
+                # Generate TTLock PINs (reuse logic from checkin view)
+                front_door_lock = TTLock.objects.get(is_front_door=True)
+                room_lock = guest.assigned_room.ttlock
+                if not room_lock:
+                    logger.error(f"No TTLock assigned to room {guest.assigned_room.name} for guest {guest.reservation_number}")
+                    messages.error(request, f"No lock assigned to room {guest.assigned_room.name}. Please contact support.")
+                    # Transaction will rollback automatically
+                    if 'reservation_to_enrich' in request.session:
+                        del request.session['reservation_to_enrich']
+                    return redirect("checkin")
+
+                client = TTLockClient()
+                uk_timezone = pytz.timezone("Europe/London")
+                now_uk_time = timezone.now().astimezone(uk_timezone)
+
+                # Set start_time to NOW so PIN is immediately active
+                start_time = int(now_uk_time.timestamp() * 1000)
+
+                check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+                end_date = uk_timezone.localize(
+                    datetime.datetime.combine(guest.check_out_date, check_out_time)
+                ) + datetime.timedelta(days=1)
+                end_time = int(end_date.timestamp() * 1000)
+                pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
+
+                # Generate PIN for front door
+                front_door_response = client.generate_temporary_pin(
+                    lock_id=str(front_door_lock.lock_id),
                     pin=pin,
                     start_time=start_time,
                     end_time=end_time,
-                    name=f"Room - {res.room.name} - {guest.full_name} - {pin}",
+                    name=f"Front Door - {guest.assigned_room.name} - {guest.full_name} - {pin}",
                 )
+                if "keyboardPwdId" not in front_door_response:
+                    logger.error(f"Failed to generate front door PIN for guest {guest.reservation_number}: {front_door_response.get('errmsg', 'Unknown error')}")
+                    messages.error(request, f"Failed to generate front door PIN: {front_door_response.get('errmsg', 'Unknown error')}")
+                    # Transaction will rollback automatically
+                    if 'reservation_to_enrich' in request.session:
+                        del request.session['reservation_to_enrich']
+                    return redirect("checkin")
+                guest.front_door_pin = pin
+                guest.front_door_pin_id = front_door_response["keyboardPwdId"]
+                logger.info(f"Generated front door PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
+
+                # MULTI-ROOM: Generate the same PIN for ALL room locks
+                room_pin_ids = []
+                failed_rooms = []
                 
-                if "keyboardPwdId" not in room_response:
-                    logger.error(f"Failed to generate room PIN for {res.room.name}: {room_response.get('errmsg', 'Unknown error')}")
-                    failed_rooms.append(res.room.name)
-                else:
-                    room_pin_ids.append({
-                        'room_name': res.room.name,
-                        'pin_id': room_response["keyboardPwdId"]
-                    })
-                    logger.info(f"Generated room PIN {pin} for {res.room.name} (Keyboard Password ID: {room_response['keyboardPwdId']})")
-            
-            if failed_rooms:
-                # Rollback: Delete all created PINs
-                logger.error(f"Failed to generate PINs for rooms: {', '.join(failed_rooms)}. Rolling back...")
-                try:
-                    client.delete_pin(
-                        lock_id=str(front_door_lock.lock_id),
-                        keyboard_pwd_id=guest.front_door_pin_id,
+                for res in all_reservations:
+                    room_lock = res.room.ttlock
+                    if not room_lock:
+                        logger.warning(f"No TTLock assigned to room {res.room.name} - skipping PIN generation")
+                        failed_rooms.append(res.room.name)
+                        continue
+                    
+                    room_response = client.generate_temporary_pin(
+                        lock_id=str(room_lock.lock_id),
+                        pin=pin,
+                        start_time=start_time,
+                        end_time=end_time,
+                        name=f"Room - {res.room.name} - {guest.full_name} - {pin}",
                     )
-                except Exception as e:
-                    logger.error(f"Failed to roll back front door PIN: {str(e)}")
+                    
+                    if "keyboardPwdId" not in room_response:
+                        logger.error(f"Failed to generate room PIN for {res.room.name}: {room_response.get('errmsg', 'Unknown error')}")
+                        failed_rooms.append(res.room.name)
+                    else:
+                        room_pin_ids.append({
+                            'room_name': res.room.name,
+                            'pin_id': room_response["keyboardPwdId"]
+                        })
+                        logger.info(f"Generated room PIN {pin} for {res.room.name} (Keyboard Password ID: {room_response['keyboardPwdId']})")
                 
-                for pin_info in room_pin_ids:
+                if failed_rooms:
+                    # Rollback: Delete all created PINs
+                    logger.error(f"Failed to generate PINs for rooms: {', '.join(failed_rooms)}. Rolling back...")
                     try:
-                        # Find the room lock to delete PIN
-                        for res in all_reservations:
-                            if res.room.name == pin_info['room_name'] and res.room.ttlock:
-                                client.delete_pin(
-                                    lock_id=str(res.room.ttlock.lock_id),
-                                    keyboard_pwd_id=pin_info['pin_id'],
-                                )
-                                break
+                        client.delete_pin(
+                            lock_id=str(front_door_lock.lock_id),
+                            keyboard_pwd_id=guest.front_door_pin_id,
+                        )
                     except Exception as e:
-                        logger.error(f"Failed to roll back room PIN for {pin_info['room_name']}: {str(e)}")
+                        logger.error(f"Failed to roll back front door PIN: {str(e)}")
+                    
+                    for pin_info in room_pin_ids:
+                        try:
+                            # Find the room lock to delete PIN
+                            for res in all_reservations:
+                                if res.room.name == pin_info['room_name'] and res.room.ttlock:
+                                    client.delete_pin(
+                                        lock_id=str(res.room.ttlock.lock_id),
+                                        keyboard_pwd_id=pin_info['pin_id'],
+                                    )
+                                    break
+                        except Exception as e:
+                            logger.error(f"Failed to roll back room PIN for {pin_info['room_name']}: {str(e)}")
+                    
+                    # Raise exception to trigger transaction rollback
+                    raise Exception(f"Failed to generate PINs for rooms: {', '.join(failed_rooms)}")
                 
-                guest.delete()  # Rollback guest creation
-                messages.error(request, f"Failed to generate PINs for some rooms. Please contact support.")
-                if 'reservation_to_enrich' in request.session:
-                    del request.session['reservation_to_enrich']
-                return redirect("checkin")
-            
-            # Store the first room's PIN ID (for backward compatibility with Guest.room_pin_id field)
-            guest.room_pin_id = room_pin_ids[0]['pin_id'] if room_pin_ids else None
-            guest.save()
+                # Store the first room's PIN ID (for backward compatibility with Guest.room_pin_id field)
+                guest.room_pin_id = room_pin_ids[0]['pin_id'] if room_pin_ids else None
+                guest.save()
+                
+        except TTLock.DoesNotExist:
+            logger.error("Front door lock not configured in the database.")
+            messages.error(request, "Front door lock not configured. Please contact support.")
+            if 'reservation_to_enrich' in request.session:
+                del request.session['reservation_to_enrich']
+            return redirect("checkin")
+        except Exception as e:
+            logger.error(f"Failed to generate PIN for guest (transaction rolled back): {str(e)}")
+            messages.error(request, f"Failed to generate PIN: {str(e)}")
+            if 'reservation_to_enrich' in request.session:
+                del request.session['reservation_to_enrich']
+            return redirect("checkin")
             
             if room_count > 1:
                 logger.info(f"Multi-room PIN generation complete: {room_count} rooms configured with PIN {pin}")
