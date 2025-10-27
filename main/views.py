@@ -2033,20 +2033,43 @@ def all_reservations(request):
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
     search_query = request.GET.get('search', '')
-    quick_filter = request.GET.get('quick', '')  # New: today/tomorrow quick filter
+    quick_filter = request.GET.get('quick', '')
+    show_all = request.GET.get('show_all', '')  # New: show all reservations (including old)
 
-    # Start with all reservations - DEFAULT: nearest check-in first (ascending order)
-    reservations = Reservation.objects.all().select_related('room', 'guest').order_by('check_in_date')
+    today = date.today()
+    yesterday = today - timedelta(days=1)
 
-    # Handle quick filters (today/tomorrow) - Filter by stays active on that date
-    if quick_filter == 'today':
-        today = date.today()
-        # Show reservations where today is within the stay (check_in <= today <= check_out)
-        reservations = reservations.filter(check_in_date__lte=today, check_out_date__gte=today)
+    # DEFAULT: Show relevant reservations (current, upcoming, recently checked out)
+    # UNLESS search query is provided (then show all matching results)
+    # UNLESS show_all=true (then show everything)
+    if search_query:
+        # Search mode: Show ALL reservations matching search (no date filter)
+        reservations = Reservation.objects.all().select_related('room', 'guest')
+    elif show_all:
+        # Show all mode: Show everything
+        reservations = Reservation.objects.all().select_related('room', 'guest')
+    elif quick_filter == 'today':
+        # Show reservations active today (check_in <= today <= check_out)
+        reservations = Reservation.objects.filter(
+            check_in_date__lte=today,
+            check_out_date__gte=today
+        ).select_related('room', 'guest')
     elif quick_filter == 'tomorrow':
-        tomorrow = date.today() + timedelta(days=1)
-        # Show reservations where tomorrow is within the stay (check_in <= tomorrow <= check_out)
-        reservations = reservations.filter(check_in_date__lte=tomorrow, check_out_date__gte=tomorrow)
+        # Show reservations active tomorrow
+        tomorrow = today + timedelta(days=1)
+        reservations = Reservation.objects.filter(
+            check_in_date__lte=tomorrow,
+            check_out_date__gte=tomorrow
+        ).select_related('room', 'guest')
+    else:
+        # DEFAULT VIEW: Show current guests + upcoming + recently checked out (last 1 day)
+        reservations = Reservation.objects.filter(
+            Q(check_out_date__gte=yesterday) |  # Currently staying OR checked out in last 1 day
+            Q(check_in_date__gte=today)  # OR checking in today or future
+        ).select_related('room', 'guest')
+
+    # Order by check-in date (nearest first)
+    reservations = reservations.order_by('check_in_date')
 
     # Apply platform filter
     if platform_filter != 'all':
@@ -2062,8 +2085,8 @@ def all_reservations(request):
     elif enrichment_filter == 'unenriched':
         reservations = reservations.filter(guest__isnull=True)
 
-    # Apply date range filter (only when not using quick filters)
-    if not quick_filter:
+    # Apply date range filter (only when not using quick filters or default view)
+    if date_from or date_to:
         if date_from:
             try:
                 date_from_obj = dt.strptime(date_from, '%Y-%m-%d').date()
@@ -2078,7 +2101,7 @@ def all_reservations(request):
             except ValueError:
                 pass
 
-    # Apply search filter
+    # Apply search filter (searches all reservations regardless of date)
     if search_query:
         reservations = reservations.filter(
             Q(booking_reference__icontains=search_query) |
@@ -3469,31 +3492,138 @@ def handle_twilio_sms_webhook(request):
 @user_passes_test(lambda user: user.has_perm('main.view_reservation'), login_url='/unauthorized/')
 def pending_enrichments_page(request):
     """
-    Admin page showing pending enrichments that failed auto-matching
+    Phase 5 Dashboard: Show unenriched reservations (iCal-driven flow)
+    Displays reservations awaiting enrichment with real-time status tracking
     """
-    from main.models import PendingEnrichment
+    from main.models import Reservation, EnrichmentLog, PendingEnrichment
+    from django.db.models import Q
 
-    # Get all failed enrichments
-    pending = PendingEnrichment.objects.filter(
-        status__in=['failed_awaiting_manual', 'pending']
-    ).select_related('matched_reservation', 'room_matched').order_by('-email_received_at')
+    # Get unenriched reservations (booking_reference is empty string for unenriched)
+    unenriched = Reservation.objects.filter(
+        platform='booking',
+        status='confirmed',
+        guest__isnull=True,
+        booking_reference=''
+    ).select_related('room').order_by('check_in_date')
 
-    pending_data = []
-    for enrichment in pending:
-        pending_data.append({
-            'id': enrichment.id,
-            'booking_reference': enrichment.booking_reference,
-            'check_in_date': enrichment.check_in_date,
-            'email_type': enrichment.email_type,
-            'email_received_at': enrichment.email_received_at,
-            'attempts': enrichment.attempts,
-            'status': enrichment.status,
-            'alert_sent_at': enrichment.alert_sent_at,
+    # Build unenriched data with enrichment status
+    unenriched_data = []
+    for reservation in unenriched:
+        # Get latest enrichment log for this reservation
+        latest_log = EnrichmentLog.objects.filter(
+            reservation=reservation
+        ).order_by('-timestamp').first()
+
+        # Determine status badge
+        if latest_log:
+            if latest_log.action == 'email_search_started':
+                attempt = latest_log.details.get('attempt', 1) if isinstance(latest_log.details, dict) else 1
+                status = f"Searching Email (Attempt {attempt}/4)"
+                badge_class = 'warning' if attempt <= 2 else 'orange'
+            elif latest_log.action == 'email_not_found_alerted':
+                status = "Email Not Found - SMS Sent"
+                badge_class = 'danger'
+            elif latest_log.action == 'collision_detected':
+                status = "Collision Detected - SMS Sent"
+                badge_class = 'info'
+            elif latest_log.action == 'email_found_multi_room':
+                status = "Multi-Room Booking - Confirmation Sent"
+                badge_class = 'purple'
+            else:
+                status = "Awaiting Manual Enrichment"
+                badge_class = 'danger'
+        else:
+            status = "Pending"
+            badge_class = 'secondary'
+
+        nights = (reservation.check_out_date - reservation.check_in_date).days
+
+        unenriched_data.append({
+            'id': reservation.id,
+            'room': reservation.room,
+            'check_in_date': reservation.check_in_date,
+            'check_out_date': reservation.check_out_date,
+            'nights': nights,
+            'platform': 'Booking.com',
+            'status': status,
+            'badge_class': badge_class,
+            'latest_log': latest_log,
         })
 
+    # Get recently enriched reservations (last 20)
+    enriched = Reservation.objects.filter(
+        platform='booking',
+        status='confirmed',
+        guest__isnull=True
+    ).exclude(
+        booking_reference=''
+    ).select_related('room').order_by('-updated_at')[:20]
+
+    # Build enriched data
+    enriched_data = []
+    for reservation in enriched:
+        # Get enrichment method from logs
+        enrichment_log = EnrichmentLog.objects.filter(
+            Q(booking_reference=reservation.booking_reference) |
+            Q(reservation=reservation)
+        ).order_by('-timestamp').first()
+
+        if enrichment_log:
+            if enrichment_log.action == 'email_found_matched':
+                method = "Auto (Email)"
+            elif enrichment_log.action == 'manual_enrichment_sms':
+                method = "Manual (SMS)"
+            elif enrichment_log.action == 'multi_enrichment_sms':
+                method = "Multi (SMS)"
+            elif enrichment_log.action == 'xls_enriched_single':
+                method = "XLS Upload"
+            else:
+                method = "Manual"
+        else:
+            method = "Unknown"
+
+        nights = (reservation.check_out_date - reservation.check_in_date).days
+
+        enriched_data.append({
+            'id': reservation.id,
+            'booking_reference': reservation.booking_reference,
+            'room': reservation.room,
+            'check_in_date': reservation.check_in_date,
+            'check_out_date': reservation.check_out_date,
+            'nights': nights,
+            'platform': 'Booking.com',
+            'method': method,
+        })
+
+    # Get recent enrichment logs (last 50)
+    logs = EnrichmentLog.objects.select_related(
+        'reservation', 'room'
+    ).order_by('-timestamp')[:50]
+
+    logs_data = []
+    for log in logs:
+        logs_data.append({
+            'timestamp': log.timestamp,
+            'action': log.get_action_display(),
+            'booking_reference': log.booking_reference,
+            'room': log.room.name if log.room else '---',
+            'method': log.method or '---',
+            'details': str(log.details) if log.details else '---',
+        })
+
+    # OLD MODEL DATA (for backward compatibility - keep for now)
+    old_pending = PendingEnrichment.objects.filter(
+        status__in=['failed_awaiting_manual', 'pending']
+    ).count()
+
     return render(request, 'main/pending_enrichments.html', {
-        'pending_enrichments': pending_data,
-        'total_count': len(pending_data),
+        'unenriched_reservations': unenriched_data,
+        'enriched_reservations': enriched_data,
+        'enrichment_logs': logs_data,
+        'total_unenriched': len(unenriched_data),
+        'total_enriched': len(enriched_data),
+        'total_logs': len(logs_data),
+        'old_pending_count': old_pending,
     })
 
 

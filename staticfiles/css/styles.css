@@ -185,7 +185,7 @@ nav {
   background: rgba(0, 0, 0, 0.4);
 }
 
-.hero-content {
+.hero .hero-content {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -194,12 +194,12 @@ nav {
   margin-top: -5rem;
 }
 
-.hero-content h1 {
+.hero .hero-content h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
 }
 
-.hero-content p {
+.hero .hero-content p {
   font-size: 1.2rem;
 }
 
@@ -664,13 +664,13 @@ footer {
     margin-top: -25px;
   }
 
-  .hero-content {
+  .hero .hero-content {
     margin-top: -2rem; /* For moving the h1, p, input and button up and down */
     text-align: left;
     left: 45%;
   }
 
-  .hero-content h1 {
+  .hero .hero-content h1 {
     line-height: 1.0;
     word-spacing: -2px;
     width: 110%;
@@ -681,7 +681,7 @@ footer {
     margin-bottom: 1rem;
   }
 
-  .hero-content p {
+  .hero .hero-content p {
     line-height: 1.1;
     width: 115%;
     font-size: 1.3rem;
@@ -1343,5 +1343,31 @@ footer {
     color: white;
     cursor: pointer;
     border-radius: 5px;
+  }
+}
+
+/* Fix footer overlap on check-in pages - Global Fix */
+.hero .hero-content {
+  padding-bottom: 150px !important;
+}
+
+/* Desktop spacing (less needed) */
+@media (min-width: 1025px) {
+  .hero .hero-content {
+    padding-bottom: 120px !important;
+  }
+}
+
+/* Tablet spacing */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .hero .hero-content {
+    padding-bottom: 180px !important;
+  }
+}
+
+/* Mobile spacing (most needed) */
+@media (max-width: 768px) {
+  .hero .hero-content {
+    padding-bottom: 250px !important;
   }
 }
