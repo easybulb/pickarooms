@@ -243,9 +243,15 @@ def checkin_confirm(request):
     - If still generating: Wait briefly and check again
     """
     flow_data = request.session.get('checkin_flow')
-    if not flow_data or flow_data.get('step', 0) < 3:
-        messages.error(request, "Please complete previous steps first.")
+    if not flow_data:
+        messages.error(request, "Session expired. Please start again.")
         return redirect('checkin')
+    
+    # Special case: If PIN is already generated, allow proceed even if step < 3
+    # (User may have refreshed or gone back during the flow)
+    if flow_data.get('step', 0) < 3 and not flow_data.get('pin_generated'):
+        messages.error(request, "Please complete previous steps first.")
+        return redirect('checkin_parking')  # Redirect to parking page, not start
     
     # Update analytics
     try:

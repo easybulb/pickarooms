@@ -618,18 +618,29 @@ def enrich_reservation(request):
                 logger.error(f"Failed to unlock front door for guest {guest.reservation_number}: {str(e)}")
                 messages.warning(request, f"Generated PIN {pin}, but failed to unlock the front door remotely: {str(e)}")
 
-            # Unlock the room door remotely
-            try:
-                unlock_response = client.unlock_lock(lock_id=str(room_lock.lock_id))
-                if "errcode" in unlock_response and unlock_response["errcode"] != 0:
-                    logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
-                    messages.warning(request, f"Generated PIN {pin}, but failed to unlock the room door remotely: {unlock_response.get('errmsg', 'Unknown error')}")
-                else:
-                    logger.info(f"Successfully unlocked room door for guest {guest.reservation_number}")
-                    messages.info(request, "The room door has been unlocked for you.")
-            except Exception as e:
-                logger.error(f"Failed to unlock room door for guest {guest.reservation_number}: {str(e)}")
-                messages.warning(request, f"Generated PIN {pin}, but failed to unlock the room door remotely: {str(e)}")
+            # MULTI-ROOM: Unlock ALL room doors remotely
+            unlocked_rooms = []
+            failed_unlocks = []
+            for res in all_reservations:
+                if res.room.ttlock:
+                    try:
+                        unlock_response = client.unlock_lock(lock_id=str(res.room.ttlock.lock_id))
+                        if "errcode" in unlock_response and unlock_response["errcode"] != 0:
+                            logger.error(f"Failed to unlock {res.room.name} for guest {guest.reservation_number}: {unlock_response.get('errmsg', 'Unknown error')}")
+                            failed_unlocks.append(res.room.name)
+                        else:
+                            logger.info(f"Successfully unlocked {res.room.name} for guest {guest.reservation_number}")
+                            unlocked_rooms.append(res.room.name)
+                    except Exception as e:
+                        logger.error(f"Failed to unlock {res.room.name} for guest {guest.reservation_number}: {str(e)}")
+                        failed_unlocks.append(res.room.name)
+            
+            if unlocked_rooms:
+                rooms_str = ", ".join(unlocked_rooms)
+                messages.info(request, f"Remote unlock successful for: {rooms_str}")
+            if failed_unlocks:
+                rooms_str = ", ".join(failed_unlocks)
+                messages.warning(request, f"Failed to unlock: {rooms_str}. You can use your PIN or the unlock button on the room page.")
 
         except TTLock.DoesNotExist:
             logger.error("Front door lock not configured in the database.")
@@ -648,11 +659,7 @@ def enrich_reservation(request):
                 del request.session['reservation_to_enrich']
             return redirect("checkin")
 
-        # Link guest to reservation
-        reservation.guest = guest
-        reservation.save()
-        logger.info(f"Linked guest {guest.id} to reservation {reservation.id}")
-
+        # All reservations already linked at line 472-476
         # Store reservation_number in session and clean up enrichment data
         request.session['reservation_number'] = guest.reservation_number
         del request.session['reservation_to_enrich']

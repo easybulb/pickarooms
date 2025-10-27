@@ -1,0 +1,141 @@
+MULTI-ROOM BOOKING FIX - NEXT SESSION TODO
+==========================================
+
+PROBLEM:
+--------
+Production error: "duplicate key value violates unique constraint main_reservation_guest_id_key"
+
+ROOT CAUSE:
+-----------
+In main/models.py, Reservation model line ~430:
+    guest = models.OneToOneField(Guest, ...)
+
+OneToOneField = UNIQUE constraint = Only 1 reservation per guest
+This breaks multi-room bookings where 1 guest books 2+ rooms
+
+EXAMPLE SCENARIO:
+-----------------
+Booking ref: 1234567890
+Guest: John Smith
+Rooms: Room 1 + Room 2
+
+When admin does manual check-in for Room 2:
+- Guest (ID 71) already exists from Room 1 check-in
+- Trying to link Guest 71 to Room 2 reservation → DATABASE BLOCKS IT (unique constraint violation)
+
+SOLUTION:
+---------
+Change Reservation.guest from OneToOneField to ForeignKey
+
+FILE: main/models.py (around line 430)
+CHANGE:
+    guest = models.OneToOneField(Guest, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservation')
+TO:
+    guest = models.ForeignKey(Guest, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservations')
+
+NOTE: Also change related_name from 'reservation' (singular) to 'reservations' (plural)
+
+MIGRATION NEEDED:
+-----------------
+1. Change model field
+2. Run: python manage.py makemigrations
+3. Run: python manage.py migrate
+4. Deploy to Heroku
+5. Run: heroku run python manage.py migrate -a pickarooms
+
+CODE CHANGES NEEDED:
+--------------------
+After changing to ForeignKey, update all code that accesses:
+    guest.reservation → guest.reservations.all() or guest.reservations.first()
+
+FILES TO CHECK:
+- main/models.py (Guest.is_ical_guest method)
+- main/views.py (anywhere using guest.reservation)
+- Any templates showing reservation from guest
+
+MULTI-ROOM CHECK-IN LOGIC (WHAT SHOULD HAPPEN):
+------------------------------------------------
+When 1 guest books multiple rooms with same booking ref:
+
+SCENARIO 1: Guest checks in via web portal
+-------------------------------------------
+1. Guest enters booking ref: 1234567890
+2. System finds 2 reservations with that ref (Room 1, Room 2)
+3. Create 1 Guest record with that booking ref
+4. Generate PINs for BOTH rooms (front door + Room 1 + Room 2)
+5. Link BOTH reservations to same Guest
+6. room_detail page shows ALL rooms guest has access to
+
+SCENARIO 2: Admin manual check-in
+----------------------------------
+1. Admin clicks "Check In" on Room 1 reservation
+2. System checks if Guest with booking ref already exists:
+   - YES → Link reservation to existing guest, regenerate PINs for new room
+   - NO → Create new guest, generate PINs for all rooms with same booking ref
+3. Auto-enrich other reservations with same booking ref
+
+SCENARIO 3: SMS collision resolution
+-------------------------------------
+Admin replies: "1234567890: 1-2" and "1234567890: 2-2"
+1. System detects same booking ref for both
+2. Creates 1 Guest
+3. Enriches both reservations
+4. Generates PINs for both rooms
+
+SMS COLLISION FLOW (FROM YESTERDAY'S WORK):
+--------------------------------------------
+File: main/services/sms_commands.py
+
+handle_multi_collision_enrichment() should:
+1. Parse multiple lines with same booking ref
+2. Create 1 Guest (not multiple)
+3. Link all reservations to that 1 Guest
+4. Generate PINs for all rooms
+
+CHECK IF THIS IS IMPLEMENTED:
+File: main/services/sms_commands.py - search for handle_multi_collision_enrichment
+
+EMAIL MULTI-ROOM DETECTION (FROM YESTERDAY):
+---------------------------------------------
+File: main/tasks.py - search_email_for_reservation()
+
+When email found and multiple unenriched reservations exist with same check-in date:
+1. Auto-enrich ALL with same booking ref
+2. Send confirmation SMS to admin
+3. Create SINGLE Guest when admin confirms "OK"
+
+CHECK IF THIS IS IMPLEMENTED:
+File: main/tasks.py - send_multi_room_confirmation_sms
+
+GUEST WEB CHECK-IN FLOW:
+-------------------------
+File: main/views.py - enrich_reservation()
+
+Should check:
+1. If multiple reservations with same booking ref exist
+2. Create 1 Guest
+3. Link ALL reservations to that guest
+4. Generate PINs for all rooms
+5. Show all rooms on room_detail page
+
+ROOM_DETAIL PAGE:
+-----------------
+File: main/templates/main/room_detail.html
+
+Should show:
+- ALL rooms guest has access to (if multi-room)
+- ALL PINs (front door + each room)
+- Can unlock all rooms remotely
+
+TESTING AFTER FIX:
+------------------
+1. Create 2 reservations, same booking ref, same check-in date, different rooms
+2. Manual check-in on Room 1 → Should work
+3. Manual check-in on Room 2 → Should link to same guest (not error)
+4. Verify both reservations.guest points to same Guest record
+5. Verify room_detail page shows both rooms
+6. Test SMS collision flow with same booking ref
+7. Test guest web check-in with multi-room booking
+
+PRIORITY: HIGH
+This blocks multi-room bookings in production right now!
