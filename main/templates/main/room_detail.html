@@ -87,6 +87,27 @@
     {% endif %}
 </div>
 
+<!-- MULTI-ROOM: Show all rooms if multi-room booking -->
+{% if is_multiroom and show_pin %}
+<div class="multi-room-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin: 20px 0; color: white;">
+    <h2 style="margin: 0 0 15px 0; font-size: 20px; font-weight: 600;">🏠 Your Rooms</h2>
+    <p style="margin: 0 0 15px 0; opacity: 0.95;">You have booked multiple rooms. Your PIN works for all of them!</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+        {% for room_info in guest_rooms %}
+        <div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.2);">
+            <h3 style="margin: 0 0 10px 0; font-size: 18px; font-weight: 600;">{{ room_info.room.name }}</h3>
+            <div style="font-size: 14px; opacity: 0.9; line-height: 1.6;">
+                <p style="margin: 5px 0;">📅 Check-in: {{ room_info.check_in|date:"d M Y" }}</p>
+                <p style="margin: 5px 0;">📅 Check-out: {{ room_info.check_out|date:"d M Y" }}</p>
+                <p style="margin: 10px 0 5px 0; font-weight: 600;">🔑 PIN: {{ front_door_pin }}#</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">✨ The same PIN opens the front door and all your room doors.</p>
+</div>
+{% endif %}
+
 <!-- Quick Actions Bar -->
 {% if show_pin %}
 <div class="quick-actions-bar">

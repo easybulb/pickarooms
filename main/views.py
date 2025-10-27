@@ -446,6 +446,13 @@ def enrich_reservation(request):
             messages.success(request, f"Welcome back, {guest.full_name}! Your details have been updated.")
             return redirect('room_detail', room_token=guest.secure_token)
 
+        # MULTI-ROOM: Find ALL reservations with same booking reference
+        all_reservations = Reservation.objects.filter(
+            booking_reference=reservation.booking_reference,
+            status='confirmed',
+            guest__isnull=True  # Only unenriched reservations
+        ).select_related('room')
+
         # Create new Guest record with reservation details
         guest = Guest.objects.create(
             full_name=full_name,
@@ -460,15 +467,25 @@ def enrich_reservation(request):
         )
         logger.info(f"Created new guest {guest.id} for reservation {reservation.booking_reference}")
 
+        # MULTI-ROOM: Link ALL reservations to this guest
+        room_count = 0
+        for res in all_reservations:
+            res.guest = guest
+            res.save()
+            room_count += 1
+            logger.info(f"Linked reservation {res.id} ({res.room.name}) to guest {guest.id}")
+        
+        if room_count > 1:
+            logger.info(f"Multi-room booking detected: {room_count} rooms linked to guest {guest.id}")
+
         # Check if it's the check-in day (or later) before generating PIN
         uk_timezone = pytz.timezone("Europe/London")
         now_uk_time = timezone.now().astimezone(uk_timezone)
 
         # Only generate PIN on or after check-in date
         if now_uk_time.date() < guest.check_in_date:
-            # Too early - save guest without PIN, link to reservation, and show message
-            reservation.guest = guest
-            reservation.save()
+            # Too early - all reservations already linked above
+            # No need to link reservation again
             request.session['reservation_number'] = guest.reservation_number
             del request.session['reservation_to_enrich']
             logger.info(f"Guest {guest.id} created but PIN generation deferred until check-in date {guest.check_in_date}")
@@ -522,34 +539,71 @@ def enrich_reservation(request):
             guest.front_door_pin_id = front_door_response["keyboardPwdId"]
             logger.info(f"Generated front door PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {front_door_response['keyboardPwdId']})")
 
-            # Generate the same PIN for the room lock
-            room_response = client.generate_temporary_pin(
-                lock_id=str(room_lock.lock_id),
-                pin=pin,
-                start_time=start_time,
-                end_time=end_time,
-                name=f"Room - {guest.assigned_room.name} - {guest.full_name} - {pin}",
-            )
-            if "keyboardPwdId" not in room_response:
-                logger.error(f"Failed to generate room PIN for guest {guest.reservation_number}: {room_response.get('errmsg', 'Unknown error')}")
-                # Rollback front door PIN
+            # MULTI-ROOM: Generate the same PIN for ALL room locks
+            room_pin_ids = []
+            failed_rooms = []
+            
+            for res in all_reservations:
+                room_lock = res.room.ttlock
+                if not room_lock:
+                    logger.warning(f"No TTLock assigned to room {res.room.name} - skipping PIN generation")
+                    failed_rooms.append(res.room.name)
+                    continue
+                
+                room_response = client.generate_temporary_pin(
+                    lock_id=str(room_lock.lock_id),
+                    pin=pin,
+                    start_time=start_time,
+                    end_time=end_time,
+                    name=f"Room - {res.room.name} - {guest.full_name} - {pin}",
+                )
+                
+                if "keyboardPwdId" not in room_response:
+                    logger.error(f"Failed to generate room PIN for {res.room.name}: {room_response.get('errmsg', 'Unknown error')}")
+                    failed_rooms.append(res.room.name)
+                else:
+                    room_pin_ids.append({
+                        'room_name': res.room.name,
+                        'pin_id': room_response["keyboardPwdId"]
+                    })
+                    logger.info(f"Generated room PIN {pin} for {res.room.name} (Keyboard Password ID: {room_response['keyboardPwdId']})")
+            
+            if failed_rooms:
+                # Rollback: Delete all created PINs
+                logger.error(f"Failed to generate PINs for rooms: {', '.join(failed_rooms)}. Rolling back...")
                 try:
                     client.delete_pin(
                         lock_id=str(front_door_lock.lock_id),
                         keyboard_pwd_id=guest.front_door_pin_id,
                     )
-                    logger.info(f"Rolled back front door PIN for guest {guest.reservation_number}")
                 except Exception as e:
-                    logger.error(f"Failed to roll back front door PIN for guest {guest.reservation_number}: {str(e)}")
+                    logger.error(f"Failed to roll back front door PIN: {str(e)}")
+                
+                for pin_info in room_pin_ids:
+                    try:
+                        # Find the room lock to delete PIN
+                        for res in all_reservations:
+                            if res.room.name == pin_info['room_name'] and res.room.ttlock:
+                                client.delete_pin(
+                                    lock_id=str(res.room.ttlock.lock_id),
+                                    keyboard_pwd_id=pin_info['pin_id'],
+                                )
+                                break
+                    except Exception as e:
+                        logger.error(f"Failed to roll back room PIN for {pin_info['room_name']}: {str(e)}")
+                
                 guest.delete()  # Rollback guest creation
-                messages.error(request, f"Failed to generate room PIN: {room_response.get('errmsg', 'Unknown error')}")
-                # Clear enrichment data but keep reservation_number for retry
+                messages.error(request, f"Failed to generate PINs for some rooms. Please contact support.")
                 if 'reservation_to_enrich' in request.session:
                     del request.session['reservation_to_enrich']
                 return redirect("checkin")
-            guest.room_pin_id = room_response["keyboardPwdId"]
-            logger.info(f"Generated room PIN {pin} for guest {guest.reservation_number} (Keyboard Password ID: {room_response['keyboardPwdId']})")
+            
+            # Store the first room's PIN ID (for backward compatibility with Guest.room_pin_id field)
+            guest.room_pin_id = room_pin_ids[0]['pin_id'] if room_pin_ids else None
             guest.save()
+            
+            if room_count > 1:
+                logger.info(f"Multi-room PIN generation complete: {room_count} rooms configured with PIN {pin}")
 
             # Unlock the front door remotely
             try:
@@ -672,6 +726,20 @@ def room_detail(request, room_token):
 
     # Add wakeup prefix to PIN for display (2 dummy digits + 4 actual PIN digits)
     display_pin = add_wakeup_prefix(guest.front_door_pin) if guest.front_door_pin else None
+
+    # MULTI-ROOM: Get all reservations for this guest
+    guest_reservations = guest.reservations.all().select_related('room')
+    is_multiroom = guest_reservations.count() > 1
+    
+    # Build list of rooms with their details
+    guest_rooms = []
+    for res in guest_reservations:
+        guest_rooms.append({
+            'room': res.room,
+            'reservation': res,
+            'check_in': res.check_in_date,
+            'check_out': res.check_out_date,
+        })
 
     if request.method == "GET" and request.GET.get('modal'):
         return render(request, "main/room_detail.html", {
@@ -807,6 +875,9 @@ def room_detail(request, room_token):
             "show_pin": not enforce_2pm_rule,
             "front_door_pin": display_pin,
             "id_uploads": guest.id_uploads.all(),
+            # MULTI-ROOM: Add multi-room booking info
+            "guest_rooms": guest_rooms,
+            "is_multiroom": is_multiroom,
         },
     )
 
@@ -1778,12 +1849,60 @@ def manual_checkin_reservation(request, reservation_id):
                     messages.error(request, f"Invalid phone number: {error_msg}")
                     return redirect('manual_checkin_reservation', reservation_id=reservation.id)
 
-        # Check if reservation number already exists (shouldn't happen, but safety check)
-        if Guest.objects.filter(reservation_number=reservation.booking_reference).exists():
-            existing_guest = Guest.objects.get(reservation_number=reservation.booking_reference)
-            messages.warning(request, f"A guest already exists with this booking reference: {existing_guest.full_name}. Linking reservation to existing guest.")
+        # MULTI-ROOM: Check if guest with this booking reference already exists
+        existing_guest = Guest.objects.filter(reservation_number=reservation.booking_reference).first()
+        
+        if existing_guest:
+            # Guest already exists - link this reservation to existing guest
             reservation.guest = existing_guest
             reservation.save()
+            logger.info(f"Linked reservation {reservation.id} to existing guest {existing_guest.id} (multi-room booking)")
+            
+            # MULTI-ROOM FIX: Generate PIN for this additional room using existing guest's PIN
+            if existing_guest.front_door_pin and reservation.room.ttlock:
+                try:
+                    ttlock_client = TTLockClient()
+                    uk_timezone = pytz.timezone("Europe/London")
+                    now_uk_time = timezone.now().astimezone(uk_timezone)
+                    
+                    # Use existing guest's PIN
+                    pin = existing_guest.front_door_pin
+                    start_time = int(now_uk_time.timestamp() * 1000)
+                    check_out_time_val = reservation.late_checkout_time if reservation.late_checkout_time else time(11, 0)
+                    end_date = uk_timezone.localize(
+                        datetime.datetime.combine(reservation.check_out_date, check_out_time_val)
+                    ) + datetime.timedelta(days=1)
+                    end_time = int(end_date.timestamp() * 1000)
+                    
+                    # Generate PIN for this room's lock
+                    room_response = ttlock_client.generate_temporary_pin(
+                        lock_id=reservation.room.ttlock.lock_id,
+                        pin=pin,
+                        start_time=start_time,
+                        end_time=end_time,
+                        name=f"Room - {reservation.room.name} - {existing_guest.full_name} - {pin}",
+                    )
+                    
+                    if "keyboardPwdId" in room_response:
+                        logger.info(f"Generated PIN for additional room {reservation.room.name} (multi-room booking)")
+                        messages.success(request, f"Linked to existing guest {existing_guest.full_name}. Room {reservation.room.name} added with PIN {pin}.")
+                    else:
+                        logger.error(f"Failed to generate PIN for room {reservation.room.name}: {room_response.get('errmsg', 'Unknown error')}")
+                        messages.warning(request, f"Linked reservation but failed to generate PIN for {reservation.room.name}. Guest can use existing PIN for other rooms.")
+                except Exception as e:
+                    logger.error(f"Failed to generate PIN for additional room: {str(e)}")
+                    messages.warning(request, f"Linked reservation but PIN generation failed: {str(e)}")
+            else:
+                messages.success(request, f"Linked to existing guest {existing_guest.full_name}. Room {reservation.room.name} added to their booking.")
+            
+            # Log the action
+            AuditLog.objects.create(
+                user=request.user,
+                action="Manual Check-In (Multi-Room)",
+                object_type="Reservation",
+                object_id=reservation.id,
+                details=f"Linked reservation {reservation.booking_reference} to existing guest {existing_guest.full_name}, generated PIN for {reservation.room.name}"
+            )
             return redirect('admin_page')
 
         # Check for returning guest

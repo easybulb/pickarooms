@@ -84,12 +84,16 @@ class Guest(models.Model):
     def is_ical_guest(self):
         """Check if this guest is from iCal integration (has linked reservation)"""
         try:
-            return hasattr(self, 'reservation') and self.reservation is not None
+            return self.reservations.exists()
         except Exception:
             return False
 
     def _get_message_context(self):
         """Build context dict for message template rendering"""
+        # For multi-room bookings, get platform from first reservation
+        first_reservation = self.reservations.first()
+        platform_name = 'Booking.com' if (first_reservation and first_reservation.platform == 'booking') else 'Airbnb'
+        
         return {
             'guest_name': self.full_name,
             'room_name': self.assigned_room.name,
@@ -98,7 +102,7 @@ class Guest(models.Model):
             'reservation_number': self.reservation_number,
             'pin': self.front_door_pin or 'N/A',
             'room_detail_url': 'https://www.pickarooms.com',
-            'platform_name': 'Booking.com' if (hasattr(self, 'reservation') and self.reservation and self.reservation.platform == 'booking') else 'Airbnb',
+            'platform_name': platform_name,
         }
 
     def _get_template_messages(self, message_type_prefix):
@@ -481,7 +485,7 @@ class Reservation(models.Model):
     check_out_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
     platform = models.CharField(max_length=20, choices=PLATFORM_CHOICES, default='booking', help_text="Source platform (Booking.com or Airbnb)")
-    guest = models.OneToOneField(Guest, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservation', help_text="Linked Guest record (created after enrichment)")
+    guest = models.ForeignKey(Guest, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservations', help_text="Linked Guest record (created after enrichment)")
 
     # Admin-configurable check-in/out times (set before guest checks in)
     early_checkin_time = models.TimeField(null=True, blank=True, help_text="Early check-in time (e.g., 12:00). If not set, defaults to 2:00 PM.")
