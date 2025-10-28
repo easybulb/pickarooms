@@ -3,157 +3,7 @@
 {% load static %}
 
 {% block extra_css %}
-<style>
-    .nav-link {
-        margin-bottom: 10px;
-    }
-    .nav-link {
-        display: inline-block;
-        margin-right: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-    }
-    .nav-link:hover {
-        text-decoration: underline;
-    }
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0px 20px 50px 20px;
-    }
-    .mt-4 {
-        margin-top: 1rem;
-    }
-    h2, h3 {
-        color: #333;
-    }
-
-    .form-section {
-        background: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        border: 1px solid #ddd;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        color: #555;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        width: 100%; /* Full width on mobile by default */
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-        box-sizing: border-box;
-    }
-
-    /* Desktop styling: Limit input width */
-    @media (min-width: 768px) {
-        .form-group input,
-        .form-group select {
-            width: 50%;
-            max-width: 400px;
-        }
-        .form-group textarea {
-            width: 50%;
-            max-width: 400px;
-        }
-    }
-
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    .data-table th,
-    .data-table td {
-        padding: 12px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .data-table th {
-        background: #f1f1f1;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .data-table tr:hover {
-        background: #f5f5f5;
-    }
-
-    /* Responsive table for mobile */
-    @media (max-width: 767px) {
-        .data-table {
-            display: block;
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        .data-table th,
-        .data-table td {
-            min-width: 150px;
-        }
-        .mt-4 {
-            margin-top: 0rem;
-        }
-    }
-
-    .primary-btn,
-    .warning-btn,
-    .danger-btn {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background 0.2s;
-    }
-
-    .primary-btn {
-        background: #007bff;
-        color: white;
-    }
-
-    .primary-btn:hover {
-        background: #0056b3;
-    }
-
-    .warning-btn {
-        background: #ffc107;
-        color: #333;
-    }
-
-    .warning-btn:hover {
-        background: #e0a800;
-    }
-
-    .danger-btn {
-        background: #dc3545;
-        color: white;
-    }
-
-    .danger-btn:hover {
-        background: #c82333;
-    }
-
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 13px;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/room_management.css' %}">
 {% endblock %}
 
 {% block title %}{% trans "Room Management" %}{% endblock %}
@@ -162,6 +12,11 @@
 <div class="container mt-4">
     <div class="nav-link">
         <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
+        <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
+        <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
+        <a href="{% url 'enrichment_logs_page' %}" class="nav-link">{% trans "Enrichment Logs" %}</a>
+        <a href="{% url 'xls_upload_page' %}" class="nav-link">{% trans "XLS Upload" %}</a>
+        <a href="{% url 'message_templates' %}" class="nav-link">{% trans "Message Templates" %}</a>
         {% if 'main.can_give_access' in perms %}
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
         {% endif %}
@@ -175,7 +30,8 @@
             <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
         {% endif %}
     </div>
-    <h2>{% trans "Room Management" %}</h2>
+    <h2 class="page-title">🚪 {% trans "Room Management" %}</h2>
+    <p class="page-subtitle">{% trans "Manage rooms and smart locks" %}</p>
 
     {% if messages %}
         {% for message in messages %}
@@ -183,88 +39,124 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Add a New Lock and Room -->
-    <div class="form-section">
-        <h3>{% trans "Add a New Lock and Room" %}</h3>
-        <p>{% trans "Below is a list of existing locks and rooms in the system. To add a new lock and room, enter a unique room name and lock ID below. The lock ID must be unique and obtained from your iPhone app. Click 'Add' to create the new lock and room." %}</p>
-        <p>{% trans "Existing Locks:" %}</p>
-        <ul>
-            {% for lock in ttlocks %}
-                <li>{{ lock.name }} (Lock ID: {{ lock.lock_id }})</li>
-            {% empty %}
-                <li>{% trans "No locks currently exist." %}</li>
-            {% endfor %}
-        </ul>
-        <p>{% trans "Existing Rooms:" %}</p>
-        <ul>
-            {% for room in rooms %}
-                <li>{{ room.name }} (Lock: {{ room.ttlock.name|default:"None" }} - ID: {{ room.ttlock.lock_id|default:"N/A" }})</li>
-            {% endfor %}
-        </ul>
-        <form method="post" action="{% url 'room_management' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="add_from_inputs">
-            <div class="form-group">
-                <label for="new_room_name">{% trans "New Room Name" %}</label>
-                <input type="text" name="new_room_name" id="new_room_name" placeholder="{% trans 'e.g., Room 5' %}" required>
-            </div>
-            <div class="form-group">
-                <label for="new_lock_id">{% trans "New Lock ID" %}</label>
-                <input type="number" name="new_lock_id" id="new_lock_id" placeholder="{% trans 'e.g., 21170000' %}" required>
-            </div>
-            <button type="submit" class="primary-btn">{% trans "Add" %}</button>
-        </form>
-    </div>
-
     <!-- Define the confirmation message -->
     {% trans "Are you sure you want to delete this room and its associated lock? This action cannot be undone." as delete_confirm_msg %}
 
     <!-- Add New Room Form -->
     <div class="form-section">
-        <h3>{% trans "Add New Room" %}</h3>
-        <form method="post" action="{% url 'room_management' %}">
+        <div class="section-header">
+            <h3>➕ {% trans "Add New Room" %}</h3>
+        </div>
+        <form method="post" action="{% url 'room_management' %}" class="styled-form">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_room">
-            <div class="form-group">
-                <label for="name">{% trans "Room Name" %}</label>
-                <input type="text" name="name" id="name" required>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">{% trans "Room Name" %}</label>
+                    <input type="text" name="name" id="name" placeholder="{% trans 'e.g., Room 1' %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="video_url">{% trans "Video URL" %}</label>
+                    <input type="url" name="video_url" id="video_url" placeholder="{% trans 'https://...' %}" required>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="video_url">{% trans "Video URL" %}</label>
-                <input type="url" name="video_url" id="video_url" required>
-            </div>
-            <div class="form-group">
+
+            <div class="form-group full-width">
                 <label for="description">{% trans "Description" %}</label>
-                <textarea name="description" id="description"></textarea>
+                <textarea name="description" id="description" rows="3" placeholder="{% trans 'Enter room description...' %}"></textarea>
             </div>
-            <div class="form-group">
+
+            <div class="form-group full-width">
                 <label for="image">{% trans "Cloudinary Image URL" %}</label>
-                <input type="url" name="image" id="image" placeholder="{% trans 'Enter Cloudinary URL' %}">
+                <input type="url" name="image" id="image" placeholder="{% trans 'https://res.cloudinary.com/...' %}">
             </div>
-            <div class="form-group">
-                <label for="ttlock">{% trans "Assign Existing TTLock (Optional)" %}</label>
-                <select name="ttlock" id="ttlock">
-                    <option value="">{% trans "None" %}</option>
+
+            <div class="divider"></div>
+
+            <h4 class="subsection-title">🔒 {% trans "Lock Configuration" %}</h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ttlock">{% trans "Assign Existing TTLock (Optional)" %}</label>
+                    <select name="ttlock" id="ttlock">
+                        <option value="">{% trans "None" %}</option>
+                        {% for lock in ttlocks %}
+                            <option value="{{ lock.id }}">{{ lock.name }} (Lock ID: {{ lock.lock_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <p class="or-divider"><span>{% trans "OR" %}</span></p>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="new_lock_name">{% trans "Create New Lock (Optional)" %}</label>
+                    <input type="text" name="new_lock_name" id="new_lock_name" placeholder="{% trans 'e.g., Room 5 Lock' %}">
+                </div>
+                <div class="form-group">
+                    <label for="new_lock_id">{% trans "New Lock ID" %}</label>
+                    <input type="number" name="new_lock_id" id="new_lock_id" placeholder="{% trans 'e.g., 21170000' %}">
+                </div>
+            </div>
+
+            <button type="submit" class="primary-btn">✨ {% trans "Add Room" %}</button>
+        </form>
+    </div>
+
+    <!-- Add a New Lock and Room -->
+    <div class="form-section">
+        <div class="section-header">
+            <h3>🔐 {% trans "Add a New Lock and Room" %}</h3>
+        </div>
+        <div class="info-box">
+            <p>{% trans "Below is a list of existing locks and rooms in the system. To add a new lock and room, enter a unique room name and lock ID below. The lock ID must be unique and obtained from your iPhone app. Click 'Add' to create the new lock and room." %}</p>
+        </div>
+        
+        <div class="grid-2-col">
+            <div class="info-card">
+                <h4>📋 {% trans "Existing Locks" %}</h4>
+                <ul class="item-list">
                     {% for lock in ttlocks %}
-                        <option value="{{ lock.id }}">{{ lock.name }} (Lock ID: {{ lock.lock_id }})</option>
+                        <li><span class="lock-badge">{{ lock.name }}</span> <small class="lock-id">ID: {{ lock.lock_id }}</small></li>
+                    {% empty %}
+                        <li class="empty-state-text">{% trans "No locks currently exist." %}</li>
                     {% endfor %}
-                </select>
+                </ul>
             </div>
-            <div class="form-group">
-                <label for="new_lock_name">{% trans "Or Create New Lock (Optional)" %}</label>
-                <input type="text" name="new_lock_name" id="new_lock_name" placeholder="{% trans 'e.g., Room 5 Lock' %}">
+            <div class="info-card">
+                <h4>🏠 {% trans "Existing Rooms" %}</h4>
+                <ul class="item-list">
+                    {% for room in rooms %}
+                        <li><span class="room-badge">{{ room.name }}</span> <small class="lock-id">Lock: {{ room.ttlock.name|default:"None" }} - ID: {{ room.ttlock.lock_id|default:"N/A" }}</small></li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="form-group">
-                <label for="new_lock_id">{% trans "New Lock ID (Leave blank to use existing lock)" %}</label>
-                <input type="number" name="new_lock_id" id="new_lock_id" placeholder="{% trans 'e.g., 21170000' %}">
+        </div>
+
+        <form method="post" action="{% url 'room_management' %}" class="styled-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_from_inputs">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="new_room_name">{% trans "New Room Name" %}</label>
+                    <input type="text" name="new_room_name" id="new_room_name" placeholder="{% trans 'e.g., Room 5' %}" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_lock_id">{% trans "New Lock ID" %}</label>
+                    <input type="number" name="new_lock_id" id="new_lock_id" placeholder="{% trans 'e.g., 21170000' %}" required>
+                </div>
             </div>
-            <button type="submit" class="primary-btn">{% trans "Add Room" %}</button>
+            <button type="submit" class="primary-btn">✨ {% trans "Add Lock & Room" %}</button>
         </form>
     </div>
 
     <!-- Existing Rooms -->
-    <h3 id="existing-rooms">{% trans "Existing Rooms" %}</h3>
-    <table class="data-table">
+    <div class="table-section">
+        <h3 id="existing-rooms">🏠 {% trans "Existing Rooms" %}</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
         <thead>
             <tr>
                 <th>{% trans "Name" %}</th>
@@ -302,5 +194,7 @@
             {% endfor %}
         </tbody>
     </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

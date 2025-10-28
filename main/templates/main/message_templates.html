@@ -4,256 +4,20 @@
 {% load i18n %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
-<style>
-    body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-    }
-    .admin-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    .nav-link {
-        display: inline-block;
-        margin-right: 20px;
-        color: rgb(4, 3, 63);
-        background: rgba(255,255,255,0.2);
-        padding: 8px 16px;
-        border-radius: 20px;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.3s;
-    }
-    .nav-link:hover {
-        background: rgba(255,255,255,0.3);
-        transform: translateY(-2px);
-    }
-    .admin-title {
-        color: rgb(24, 4, 83);
-        font-size: 26px;
-        margin: 10px 0 10px 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-    .page-subtitle {
-        color: rgba(255,255,255,0.9);
-        margin-bottom: 30px;
-        font-size: 16px;
-    }
-    .template-card {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transition: all 0.3s;
-    }
-    .template-card:hover {
-        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
-        transform: translateY(-3px);
-    }
-    .template-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #f0f0f0;
-    }
-    .template-title {
-        font-size: 20px;
-        font-weight: 600;
-        color: #2c3e50;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .template-status {
-        font-size: 12px;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .status-active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    .status-inactive {
-        background: #e74c3c;
-        color: white;
-    }
-    .template-preview {
-        background: #f8f9fa;
-        padding: 20px;
-        border-left: 5px solid #667eea;
-        border-radius: 8px;
-        margin: 15px 0;
-        font-family: 'Courier New', monospace;
-        font-size: 13px;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        color: #2c3e50;
-    }
-    .subject-line {
-        font-weight: bold;
-        color: #667eea;
-        margin-bottom: 10px;
-        padding: 8px;
-        background: white;
-        border-radius: 4px;
-    }
-    .template-meta {
-        font-size: 12px;
-        color: #7f8c8d;
-        margin-top: 15px;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 6px;
-    }
-    .edit-form {
-        display: none;
-        background: #f8f9fa;
-        padding: 25px;
-        border: 2px solid #667eea;
-        border-radius: 12px;
-        margin-top: 20px;
-    }
-    .edit-form.show {
-        display: block;
-        animation: slideDown 0.3s ease;
-    }
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    textarea {
-        width: 100%;
-        min-height: 180px;
-        padding: 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-family: 'Courier New', monospace;
-        font-size: 13px;
-        line-height: 1.6;
-        transition: border-color 0.3s;
-    }
-    textarea:focus {
-        outline: none;
-        border-color: #667eea;
-    }
-    input[type="text"] {
-        width: 100%;
-        padding: 12px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-size: 14px;
-        transition: border-color 0.3s;
-    }
-    input[type="text"]:focus {
-        outline: none;
-        border-color: #667eea;
-    }
-    .btn {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 600;
-        margin-right: 10px;
-        transition: all 0.3s;
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
-    }
-    .btn-secondary {
-        background: #95a5a6;
-        color: white;
-    }
-    .btn-secondary:hover {
-        background: #7f8c8d;
-    }
-    .sms-counter {
-        font-size: 13px;
-        color: #7f8c8d;
-        margin-top: 8px;
-        padding: 8px;
-        background: white;
-        border-radius: 6px;
-        display: inline-block;
-    }
-    .sms-warning {
-        color: #e67e22;
-        font-weight: bold;
-    }
-    .variables-list {
-        background: white;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 15px 0;
-        border: 2px dashed #e0e0e0;
-    }
-    .variables-list code {
-        background: #667eea;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        margin-right: 8px;
-        margin-bottom: 5px;
-        display: inline-block;
-        font-size: 12px;
-    }
-    .category-section {
-        margin-bottom: 50px;
-    }
-    .category-title {
-        font-size: 18px;
-        color: white;
-        padding: 15px 25px;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
-        border-radius: 12px;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .success-message, .error-message {
-        padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-weight: 500;
-    }
-    .success-message {
-        background: #2ecc71;
-        color: white;
-    }
-    .error-message {
-        background: #e74c3c;
-        color: white;
-    }
-    label {
-        font-weight: 600;
-        color: #2c3e50;
-        display: block;
-        margin-bottom: 8px;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/message_templates.css' %}">
 {% endblock %}
 
 {% block title %}{% trans "Message Templates" %}{% endblock %}
 
 {% block content %}
 <section class="admin-container">
-    <!-- Navigation -->
+        <!-- Navigation -->
     <div class="nav-link" style="margin-bottom: 20px;">
         <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
         <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
+        <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
+        <a href="{% url 'enrichment_logs_page' %}" class="nav-link">{% trans "Enrichment Logs" %}</a>
+        <a href="{% url 'xls_upload_page' %}" class="nav-link">{% trans "XLS Upload" %}</a>
         <a href="{% url 'message_templates' %}" class="nav-link" style="font-weight: bold;">{% trans "Message Templates" %}</a>
         {% if 'main.can_give_access' in perms %}
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
@@ -263,6 +27,8 @@
         {% endif %}
         {% if user.is_superuser %}
             <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
+            <a href="{% url 'price_suggester' %}" class="nav-link">{% trans "Price Suggester" %}</a>
+            <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
             <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
         {% endif %}
     </div>

@@ -1,0 +1,247 @@
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    .admin-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+        .nav-link {
+        display: inline-block;
+        margin-right: 15px;
+        margin-bottom: 10px;
+        color: rgb(4, 3, 63);
+        background: rgba(255,255,255,0.2);
+        padding: 10px 18px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .nav-link:hover {
+        background: rgba(255,255,255,0.35);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        color: rgb(4, 3, 63);
+        text-decoration: none;
+    }
+        .admin-title {
+        color: white;
+        font-size: 32px;
+        margin: 20px 0 10px 0;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .page-subtitle {
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 30px;
+        font-size: 16px;
+    }
+    .template-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+    .template-card:hover {
+        box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        transform: translateY(-3px);
+    }
+    .template-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .template-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .template-status {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .status-inactive {
+        background: #e74c3c;
+        color: white;
+    }
+    .template-preview {
+        background: #f8f9fa;
+        padding: 20px;
+        border-left: 5px solid #667eea;
+        border-radius: 8px;
+        margin: 15px 0;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        color: #2c3e50;
+    }
+    .subject-line {
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 10px;
+        padding: 8px;
+        background: white;
+        border-radius: 4px;
+    }
+    .template-meta {
+        font-size: 12px;
+        color: #7f8c8d;
+        margin-top: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+    }
+    .edit-form {
+        display: none;
+        background: #f8f9fa;
+        padding: 25px;
+        border: 2px solid #667eea;
+        border-radius: 12px;
+        margin-top: 20px;
+    }
+    .edit-form.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    textarea {
+        width: 100%;
+        min-height: 180px;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        transition: border-color 0.3s;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        margin-right: 10px;
+        transition: all 0.3s;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+    }
+    .btn-secondary {
+        background: #95a5a6;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #7f8c8d;
+    }
+    .sms-counter {
+        font-size: 13px;
+        color: #7f8c8d;
+        margin-top: 8px;
+        padding: 8px;
+        background: white;
+        border-radius: 6px;
+        display: inline-block;
+    }
+    .sms-warning {
+        color: #e67e22;
+        font-weight: bold;
+    }
+    .variables-list {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 2px dashed #e0e0e0;
+    }
+    .variables-list code {
+        background: #667eea;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        display: inline-block;
+        font-size: 12px;
+    }
+    .category-section {
+        margin-bottom: 50px;
+    }
+    .category-title {
+        font-size: 18px;
+        color: white;
+        padding: 15px 25px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .success-message, .error-message {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+    .success-message {
+        background: #2ecc71;
+        color: white;
+    }
+    .error-message {
+        background: #e74c3c;
+        color: white;
+    }
+    label {
+        font-weight: 600;
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 8px;
+    }

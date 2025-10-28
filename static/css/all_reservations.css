@@ -1,26 +1,44 @@
 /* All Reservations Page - Modern Responsive Design */
 
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
 /* Container */
 .admin-container {
     max-width: 1600px;
     margin: 0 auto;
     padding: 20px;
+    background: transparent;
 }
 
-/* Navigation */
 .nav-link {
     display: inline-block;
-    margin-right: 20px;
-    color: #007bff !important;
-    text-decoration: none;
-    font-size: 16px;
+    margin-right: 15px;
     margin-bottom: 10px;
-    font-weight: 500;
+    color: rgb(4, 3, 63);
+    background: rgba(255,255,255,0.2);
+    padding: 10px 18px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .nav-link:hover {
-    color: #0056b3 !important;
-    text-decoration: underline;
+    background: rgba(255,255,255,0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    color: rgb(4, 3, 63) !important;
+    text-decoration: none;
 }
 
 /* Page Header */
@@ -34,9 +52,18 @@
 }
 
 .page-header h1 {
+    margin: 0 0 5px 0;
+    font-size: 32px;
+    color: white;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.page-subtitle {
+    color: rgba(255,255,255,0.95);
     margin: 0;
-    font-size: 28px;
-    color: #343a40;
+    font-size: 16px;
+    font-weight: 400;
 }
 
 .view-mode-toggle {
@@ -94,12 +121,18 @@
 
 /* Filter Form */
 .filter-form {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 20px;
-    border-radius: 10px;
+    background: white;
+    border: none;
+    padding: 25px;
+    border-radius: 16px;
     margin-bottom: 25px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.filter-form:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
 }
 
 .filter-grid {
@@ -116,16 +149,16 @@
 
 .filter-group label {
     font-weight: 600;
-    margin-bottom: 6px;
-    font-size: 13px;
-    color: #495057;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #2c3e50;
 }
 
 .filter-group select,
 .filter-group input {
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
     font-size: 14px;
     transition: border-color 0.3s;
 }
@@ -133,8 +166,8 @@
 .filter-group select:focus,
 .filter-group input:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .filter-actions {
@@ -145,9 +178,9 @@
 
 /* Buttons */
 .btn {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
@@ -157,23 +190,24 @@
 }
 
 .btn-primary {
-    background: #007bff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover {
-    background: #0056b3;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
 }
 
 .btn-secondary {
-    background: #6c757d;
+    background: #95a5a6;
     color: white;
 }
 
 .btn-secondary:hover {
-    background: #545b62;
+    background: #7f8c8d;
+    transform: translateY(-2px);
 }
 
 .btn-danger {
@@ -245,10 +279,15 @@
 .table-container {
     overflow-x: auto;
     background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.table-container:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Table */
@@ -259,20 +298,21 @@
 }
 
 .admin-table thead {
-    background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
 
 .admin-table th {
-    padding: 15px 12px;
+    padding: 16px 12px;
     text-align: left;
     font-weight: 600;
     font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
     position: sticky;
     top: 0;
     z-index: 10;
+    border-bottom: none;
 }
 
 .admin-table td {
@@ -286,7 +326,7 @@
 }
 
 .admin-table tbody tr:hover {
-    background: #f1f3f5;
+    background: #f9fafb;
 }
 
 /* Badges */
@@ -366,31 +406,34 @@
 
 /* Action Links */
 .action-link {
-    color: #007bff;
+    color: #667eea;
     text-decoration: none;
     margin-right: 10px;
     font-weight: 500;
     font-size: 13px;
+    transition: color 0.2s ease;
 }
 
 .action-link:hover {
     text-decoration: underline;
-    color: #0056b3;
+    color: #764ba2;
 }
 
 .delete-btn {
-    background: #dc3545;
+    background: #e74c3c;
     color: white;
     border: none;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
+    transition: all 0.2s ease;
 }
 
 .delete-btn:hover {
-    background: #c82333;
+    background: #c0392b;
+    transform: translateY(-1px);
 }
 
 /* Checkbox Styling */

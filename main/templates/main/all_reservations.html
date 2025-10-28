@@ -11,7 +11,7 @@
 {% block content %}
 <div class="admin-container">
     <!-- Navigation -->
-    <div class="nav-links">
+    <div class="nav-link">
         <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
         <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
         <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
@@ -34,7 +34,10 @@
 
     <!-- Page Header -->
     <div class="page-header">
-        <h1>📋 {% trans "All Reservations" %}</h1>
+        <div>
+            <h1>📋 {% trans "All Reservations" %}</h1>
+            <p class="page-subtitle">{% trans "View and manage all Booking.com & Airbnb reservations" %}</p>
+        </div>
         <div class="view-mode-toggle">
             {% if not show_all and not search_query %}
                 <a href="?show_all=true" class="btn btn-secondary">{% trans "Show All (Including Old)" %}</a>

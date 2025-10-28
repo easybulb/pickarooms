@@ -4,144 +4,7 @@
 {% load i18n %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
-<style>
-    .nav-link {
-        margin-bottom: 10px;
-    }
-    .nav-link {
-        display: inline-block;
-        margin-right: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-    }
-    .nav-link:hover {
-        text-decoration: underline;
-    }
-    .user-management-container {
-        padding: 20px 20px 40px 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .user-management-title {
-        font-size: 2rem;
-        color: #333;
-        margin-bottom: 20px;
-    }
-    .table-container {
-        overflow-x: auto;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    th, td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-        color: #000;
-    }
-    th {
-        background-color: #f4f4f4;
-        font-weight: bold;
-    }
-    .action-btn {
-        padding: 8px 16px;
-        margin: 2px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.3s;
-    }
-    .edit-btn {
-        background-color: #2196F3;
-        color: white;
-    }
-    .edit-btn:hover {
-        background-color: #1e87db;
-    }
-    .reset-btn {
-        background-color: #FFA500;
-        color: white;
-    }
-    .reset-btn:hover {
-        background-color: #e69500;
-    }
-    .delete-btn {
-        background-color: #f44336;
-        color: white;
-    }
-    .delete-btn:hover {
-        background-color: #da190b;
-    }
-    .success-message, .error-message {
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 4px;
-        font-size: 16px;
-    }
-    .success-message {
-        background-color: #dff0d8;
-        color: #3c763d;
-    }
-    .error-message {
-        background-color: #f2dede;
-        color: #a94442;
-    }
-    .nav-link {
-        display: inline-block;
-        margin-bottom: 10px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-    }
-    .nav-link:hover {
-        text-decoration: underline;
-    }
-    .add-user-section {
-        margin-top: 30px;
-        padding: 20px;
-        background-color: #f9f9f9;
-        border-radius: 8px;
-    }
-    .add-user-section h2 {
-        font-size: 1.5rem;
-        margin-bottom: 15px;
-    }
-    .add-user-section label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-    .add-user-section input, .add-user-section select {
-        width: 100%;
-        padding: 8px;
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-    .add-user-section button {
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .add-user-section button:hover {
-        background-color: #45a049;
-    }
-
-    /* Mobile Styling for Manual Section */
-    @media (max-width: 768px) {
-    .user-management-container {
-        padding: 0px 10px 40px 10px;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/user_management.css' %}">
 {% endblock %}
 
 {% block title %}{% trans "User Management" %}{% endblock %}
@@ -150,6 +13,11 @@
 <section class="user-management-container">
     <div class="nav-link">
         <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
+        <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
+        <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
+        <a href="{% url 'enrichment_logs_page' %}" class="nav-link">{% trans "Enrichment Logs" %}</a>
+        <a href="{% url 'xls_upload_page' %}" class="nav-link">{% trans "XLS Upload" %}</a>
+        <a href="{% url 'message_templates' %}" class="nav-link">{% trans "Message Templates" %}</a>
         {% if 'main.can_give_access' in perms %}
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
         {% endif %}
@@ -163,7 +31,8 @@
             <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
         {% endif %}
     </div>
-    <h1 class="user-management-title">{% trans "User Management" %}</h1>
+    <h1 class="user-management-title">👥 {% trans "User Management" %}</h1>
+    <p class="page-subtitle">{% trans "Manage admin users, roles, and permissions" %}</p>
 
     {% if messages %}
         {% for message in messages %}

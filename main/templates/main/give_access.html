@@ -4,163 +4,7 @@
 {% load i18n %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/admin_page.css' %}">
-<style>
-    .nav-link {
-        margin-bottom: 10px;
-    }
-    .nav-link {
-        display: inline-block;
-        margin-right: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-    }
-    .nav-link:hover {
-        text-decoration: underline;
-    }
-    .give-access-container {
-        padding: 20px 20px 40px 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .give-access-title {
-        font-size: 2rem;
-        color: #333;
-        margin-bottom: 20px;
-    }
-    .table-container {
-        overflow-x: auto;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-    th, td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-        color: #000;
-    }
-    th {
-        background-color: #f4f4f4;
-        font-weight: bold;
-    }
-    .unlock-btn {
-        padding: 8px 16px;
-        margin: 2px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.3s;
-    }
-    .unlock-btn.front {
-        background-color: #4CAF50;
-        color: white;
-    }
-    .unlock-btn.front:hover {
-        background-color: #45a049;
-    }
-    .unlock-btn.room {
-        background-color: #2196F3;
-        color: white;
-    }
-    .unlock-btn.room:hover {
-        background-color: #1e87db;
-    }
-    .unlock-btn.disabled {
-        background-color: #ccc;
-        color: #666;
-        cursor: not-allowed;
-    }
-    .success-message, .error-message {
-        padding: 10px;
-        margin: 10px 0;
-        border-radius: 4px;
-        font-size: 16px;
-    }
-    .success-message {
-        background-color: #dff0d8;
-        color: #3c763d;
-    }
-    .error-message {
-        background-color: #f2dede;
-        color: #a94442;
-    }
-    .back-link {
-        display: inline-block;
-        margin-bottom: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-    }
-    .back-link:hover {
-        text-decoration: underline;
-    }
-    .manual-section {
-        margin-top: 20px;
-    }
-    .manual-section h2 {
-        font-size: 1.5rem;
-        color: #333;
-        margin-bottom: 10px;
-    }
-    /* Mobile Styling for Manual Section */
-    @media (max-width: 768px) {
-        .give-access-container {
-            padding: 0px 10px 40px 10px;
-        }
-        .manual-section h2 {
-            font-size: 1.2rem;
-        }
-        .manual-section table {
-            border: 0;
-        }
-        .manual-section tr {
-            display: block;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            background-color: #fff;
-            width: 30%;
-        }
-    }
-    /* New Loading Overlay Styles */
-    .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-    .loading-text {
-        color: white;
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 20px;
-        border-radius: 8px;
-    }
-    .loading-dots::after {
-        content: '...';
-        animation: dots 1.5s infinite;
-    }
-    @keyframes dots {
-        0% { content: '.'; }
-        33% { content: '..'; }
-        66% { content: '...'; }
-        100% { content: '.'; }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/give_access.css' %}">
 {% endblock %}
 
 {% block title %}{% trans "Give Access" %}{% endblock %}
@@ -169,6 +13,11 @@
 <section class="give-access-container">
     <div class="nav-link">
         <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
+        <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
+        <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
+        <a href="{% url 'enrichment_logs_page' %}" class="nav-link">{% trans "Enrichment Logs" %}</a>
+        <a href="{% url 'xls_upload_page' %}" class="nav-link">{% trans "XLS Upload" %}</a>
+        <a href="{% url 'message_templates' %}" class="nav-link">{% trans "Message Templates" %}</a>
         {% if 'main.can_give_access' in perms %}
             <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
         {% endif %}
@@ -182,7 +31,8 @@
             <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
         {% endif %}
     </div>
-    <h1 class="give-access-title">{% trans "Give Access" %}</h1>
+    <h1 class="give-access-title">🚪 {% trans "Give Access" %}</h1>
+    <p class="page-subtitle">{% trans "Unlock doors remotely for guests and staff" %}</p>
 
     {% if messages %}
         {% for message in messages %}

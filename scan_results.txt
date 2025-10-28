@@ -1,0 +1,24 @@
+﻿============================================================
+COMPREHENSIVE LOGIC SCAN
+============================================================
+
+=== SCANNING MODELS ===
+python : Traceback (most recent call last):
+At line:1 char:1
++ python comprehensive_scan.py 2>&1 | Out-File -Encoding utf8 scan_resu ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File [35m"C:\Users\easyb\pickarooms\comprehensive_scan.py"[0m, line [35m362[0m, in [35m<module>[0m
+    [31mscan_models[0m[1;31m()[0m
+    [31m~~~~~~~~~~~[0m[1;31m^^[0m
+  File [35m"C:\Users\easyb\pickarooms\comprehensive_scan.py"[0m, line [35m27[0m, in [35mscan_models[0m
+    [31mprint[0m[1;31m("\u2713 Reservation status field exists")[0m
+    [31m~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  File [35m"C:\Users\easyb\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py"[0m, line [35m19[0m, in 
+[35mencode[0m
+    return [31mcodecs.charmap_encode[0m[1;31m(input,self.errors,encoding_table)[0m[0]
+           [31m~~~~~~~~~~~~~~~~~~~~~[0m[1;31m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[1;35mUnicodeEncodeError[0m: [35m'charmap' codec can't encode character '\u2713' in position 0: character maps to 
+<undefined>[0m
