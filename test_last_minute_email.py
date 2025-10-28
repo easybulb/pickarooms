@@ -1,3 +1,9 @@
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pickarooms.settings')
+django.setup()
+
 from main.services.gmail_client import GmailClient
 from main.services.email_parser import parse_booking_com_email_subject
 
