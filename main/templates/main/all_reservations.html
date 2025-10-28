@@ -1,41 +1,19 @@
-{% extends 'base.html' %}
+{% extends 'main/admin_base.html' %}
 {% load static %}
 {% load i18n %}
 
 {% block title %}{% trans "All Reservations" %}{% endblock %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/all_reservations.css' %}">
 {% endblock %}
 
-{% block content %}
-<div class="admin-container">
-    <!-- Navigation -->
-    <div class="nav-link">
-        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
-        <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
-        <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
-        <a href="{% url 'enrichment_logs_page' %}" class="nav-link">{% trans "Enrichment Logs" %}</a>
-        <a href="{% url 'xls_upload_page' %}" class="nav-link">{% trans "XLS Upload" %}</a>
-        <a href="{% url 'message_templates' %}" class="nav-link">{% trans "Message Templates" %}</a>
-        {% if 'main.can_give_access' in perms %}
-            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
-        {% endif %}
-        {% if 'main.manage_rooms' in perms %}
-            <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
-        {% endif %}
-        {% if user.is_superuser %}
-            <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
-            <a href="{% url 'price_suggester' %}" class="nav-link">{% trans "Price Suggester" %}</a>
-            <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
-            <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
-        {% endif %}
-    </div>
-
+{% block admin_content %}
     <!-- Page Header -->
     <div class="page-header">
         <div>
-            <h1>📋 {% trans "All Reservations" %}</h1>
+            <h1 class="page-header-title">📋 {% trans "All Reservations" %}</h1>
             <p class="page-subtitle">{% trans "View and manage all Booking.com & Airbnb reservations" %}</p>
         </div>
         <div class="view-mode-toggle">
@@ -256,8 +234,7 @@
     <!-- Pagination Controls -->
     <div class="pagination" id="pagination-controls"></div>
 
-    <a href="{% url 'admin_page' %}" class="nav-link">← {% trans "Back to Dashboard" %}</a>
-</div>
+    <a href="{% url 'admin_page' %}" class="btn-primary" style="display: inline-block; margin-top: 20px;">← {% trans "Back to Dashboard" %}</a>
 
 <script src="{% static 'js/all_reservations.js' %}"></script>
 {% endblock %}

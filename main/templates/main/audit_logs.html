@@ -1,74 +1,15 @@
-{% extends "base.html" %}
+{% extends "main/admin_base.html" %}
 {% load static %}
 {% load i18n %}
 
+{% block title %}{% trans "Audit Logs" %}{% endblock %}
+
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/audit_logs.css' %}">
 {% endblock %}
 
-{% block title %}{% trans "Audit Logs" %}{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tableWrapper = document.querySelector('.data-table-wrapper');
-        const table = document.querySelector('.data-table');
-        const scrollLeftBtn = document.createElement('button');
-        const scrollRightBtn = document.createElement('button');
-        const scrollButtons = document.querySelector('.scroll-buttons');
-
-        scrollLeftBtn.textContent = '←';
-        scrollRightBtn.textContent = '→';
-
-        scrollButtons.appendChild(scrollLeftBtn);
-        scrollButtons.appendChild(scrollRightBtn);
-
-        // Show scroll buttons only if table overflows
-        function checkOverflow() {
-            if (table.scrollWidth > tableWrapper.clientWidth) {
-                scrollButtons.style.display = 'block';
-            } else {
-                scrollButtons.style.display = 'none';
-            }
-        }
-
-        checkOverflow();
-        window.addEventListener('resize', checkOverflow);
-
-        // Scroll functionality
-        scrollLeftBtn.addEventListener('click', () => {
-            table.scrollLeft -= 200; // Scroll 200px left
-        });
-
-        scrollRightBtn.addEventListener('click', () => {
-            table.scrollLeft += 200; // Scroll 200px right
-        });
-    });
-</script>
-{% endblock %}
-
-{% block content %}
-<div class="container mt-4">
-    <div class="nav-link">
-        <a href="{% url 'admin_page' %}" class="nav-link">{% trans "Dashboard" %}</a>
-        <a href="{% url 'all_reservations' %}" class="nav-link">{% trans "All Reservations" %}</a>
-        <a href="{% url 'pending_enrichments_page' %}" class="nav-link">{% trans "Pending Enrichments" %}</a>
-        <a href="{% url 'enrichment_logs_page' %}" class="nav-link">{% trans "Enrichment Logs" %}</a>
-        <a href="{% url 'xls_upload_page' %}" class="nav-link">{% trans "XLS Upload" %}</a>
-        <a href="{% url 'message_templates' %}" class="nav-link">{% trans "Message Templates" %}</a>
-        {% if 'main.can_give_access' in perms %}
-            <a href="{% url 'give_access' %}" class="nav-link">{% trans "Open Doors" %}</a>
-        {% endif %}
-        {% if 'main.manage_rooms' in perms %}
-        <a href="{% url 'room_management' %}" class="nav-link">{% trans "Manage Rooms" %}</a>
-        {% endif %}
-        {% if user.is_superuser %}
-            <a href="{% url 'user_management' %}" class="nav-link">{% trans "Manage Admins" %}</a>
-            <a href="{% url 'price_suggester' %}" class="nav-link">{% trans "Price Suggester" %}</a>
-            <a href="{% url 'audit_logs' %}" class="nav-link">{% trans "Audit Logs" %}</a>
-            <a href="{% url 'block_review_messages' %}" class="nav-link">{% trans "Block Review Messages" %}</a>
-        {% endif %}
-    </div>
+{% block admin_content %}
     <h2>📋 {% trans "Audit Logs" %}</h2>
     <p class="page-subtitle">{% trans "Track all system activities and administrative actions" %}</p>
 
@@ -155,5 +96,41 @@
 
     <!-- Scroll Buttons -->
     <div class="scroll-buttons"></div>
-</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableWrapper = document.querySelector('.data-table-wrapper');
+        const table = document.querySelector('.data-table');
+        const scrollLeftBtn = document.createElement('button');
+        const scrollRightBtn = document.createElement('button');
+        const scrollButtons = document.querySelector('.scroll-buttons');
+
+        scrollLeftBtn.textContent = '←';
+        scrollRightBtn.textContent = '→';
+
+        scrollButtons.appendChild(scrollLeftBtn);
+        scrollButtons.appendChild(scrollRightBtn);
+
+        // Show scroll buttons only if table overflows
+        function checkOverflow() {
+            if (table.scrollWidth > tableWrapper.clientWidth) {
+                scrollButtons.style.display = 'block';
+            } else {
+                scrollButtons.style.display = 'none';
+            }
+        }
+
+        checkOverflow();
+        window.addEventListener('resize', checkOverflow);
+
+        // Scroll functionality
+        scrollLeftBtn.addEventListener('click', () => {
+            table.scrollLeft -= 200; // Scroll 200px left
+        });
+
+        scrollRightBtn.addEventListener('click', () => {
+            table.scrollLeft += 200; // Scroll 200px right
+        });
+    });
+</script>
 {% endblock %}
