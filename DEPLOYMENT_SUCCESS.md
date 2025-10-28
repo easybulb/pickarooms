@@ -17,7 +17,7 @@
 All config variables have been set on Heroku:
 
 **Essential (Working):**
-- SECRET_KEY: `uXSfABtEsyKkZJpwUIiv37lYgPGT0WmnN4cORzMe6hDxjLQa1H`
+- SECRET_KEY: ✅ Set (keep secret)
 - DEBUG: `False`
 - ALLOWED_HOSTS: Includes new Heroku domain
 - DATABASE_URL: Auto-configured by Heroku Postgres
@@ -67,9 +67,9 @@ All config variables have been set on Heroku:
 **Credentials:**
 - Username: `admin`
 - Email: `admin@pickarooms.com`
-- Password: `Admin123!PickaRooms`
+- Password: ✅ Set securely
 
-**⚠️ IMPORTANT:** Change this password after first login!
+**⚠️ IMPORTANT:** Keep credentials secure and change default passwords!
 
 ---
 
