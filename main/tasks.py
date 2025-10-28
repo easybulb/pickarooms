@@ -498,6 +498,10 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
             if email_type == 'cancellation':
                 continue
             
+            # Treat last-minute bookings as new bookings
+            if email_type == 'new_lastminute':
+                email_type = 'new'
+            
             # Check if check-in date matches
             if check_in_date == reservation.check_in_date:
                 
@@ -885,6 +889,11 @@ def poll_booking_com_emails(self):
                 logger.info(f"Skipping cancellation email for {booking_ref} (handled by iCal sync)")
                 gmail.mark_as_read(email_id)
                 continue
+            
+            # Treat last-minute bookings same as new bookings
+            if email_type == 'new_lastminute':
+                email_type = 'new'
+                logger.info(f"Processing last-minute booking {booking_ref} as new booking")
 
             # Check if we already have this pending enrichment
             existing = PendingEnrichment.objects.filter(

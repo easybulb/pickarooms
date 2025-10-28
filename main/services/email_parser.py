@@ -21,9 +21,12 @@ def parse_booking_com_email_subject(subject):
     Returns:
         tuple: (email_type, booking_ref, check_in_date) or None if not a reservation email
 
-    Examples:
+        Examples:
         >>> parse_booking_com_email_subject("Booking.com - New booking! (5592652343, Saturday, 20 December 2025)")
         ('new', '5592652343', datetime.date(2025, 12, 20))
+
+        >>> parse_booking_com_email_subject("Booking.com - New last-minute booking (6936428721, Wednesday, 29 October 2025)")
+        ('new_lastminute', '6936428721', datetime.date(2025, 10, 29))
 
         >>> parse_booking_com_email_subject("Booking.com - Cancelled booking! (6906335726, Friday, 14 November 2025)")
         ('cancellation', '6906335726', datetime.date(2025, 11, 14))

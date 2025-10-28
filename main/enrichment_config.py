@@ -31,6 +31,7 @@ ROOM_NUMBER_TO_NAME = {
 # Booking.com Email Subject Patterns
 BOOKING_COM_EMAIL_PATTERNS = {
     'new': r'Booking\.com - New booking! \((\d{10}), (.+?)\)',
+    'new_lastminute': r'Booking\.com - New last-minute booking \((\d{10}), (.+?)\)',
     'modification': r'Booking\.com - Modified booking! \((\d{10}), (.+?)\)',
     'cancellation': r'Booking\.com - Cancelled booking! \((\d{10}), (.+?)\)',
 }
