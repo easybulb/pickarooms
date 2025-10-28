@@ -251,14 +251,14 @@
             width: 280px;
             height: calc(100vh - 70px);
             max-height: calc(100vh - 70px);
-            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px 20px 30px;
             box-shadow: -5px 0 30px rgba(0,0,0,0.5);
             z-index: 1000;
             flex-direction: column;
             gap: 0;
             overflow-y: auto;
-            overflow-x: visible;
+            overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
             transition: right 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -292,18 +292,19 @@
             margin: 0 auto;
             margin-bottom: 8px;
             padding: 11px 14px;
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
             color: white;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 400;
             border-radius: 8px;
             transform: translateX(50px);
             opacity: 0;
             transition: all 0.2s ease;
             white-space: normal;
             word-wrap: break-word;
-            overflow: visible;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .nav-links.active .nav-link {
@@ -331,15 +332,15 @@
         }
 
         .nav-link:hover {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.35);
             transform: translateX(3px) !important;
             color: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .nav-link.active {
-            background: rgba(255,255,255,0.3);
-            color: white;
+            background: white;
+            color: #667eea;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.5);
         }
@@ -369,7 +370,7 @@
         .admin-wrapper {
             padding: 10px;
         }
-
+        
         .page-header-title {
             font-size: 24px;
         }
@@ -396,7 +397,11 @@
             padding: 10px 12px;
             font-size: 11.5px;
             margin-bottom: 7px;
-            background: rgba(255,255,255,0.18) !important;
+            font-weight: 400;
+        }
+
+        .nav-link:not(.active) {
+            background: rgba(255,255,255,0.2) !important;
             border: 1px solid rgba(255,255,255,0.3) !important;
         }
     }
@@ -413,9 +418,13 @@
             font-size: 10px;
             padding: 8px 10px;
             margin-bottom: 5px;
-            background: rgba(255,255,255,0.18) !important;
-            border: 1px solid rgba(255,255,255,0.3) !important;
             width: 92%;
+            font-weight: 400;
+        }
+
+        .nav-link:not(.active) {
+            background: rgba(255,255,255,0.2) !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
         }
     }
 
@@ -429,6 +438,7 @@
             font-size: 9.5px;
             padding: 7px 9px;
             width: 93%;
+            font-weight: 400;
         }
     }
 
@@ -436,7 +446,10 @@
         .nav-link {
             font-size: 12px;
             padding: 11px 13px;
-            background: rgba(255,255,255,0.08);
+        }
+
+        .nav-link:not(.active) {
+            background: rgba(255,255,255,0.2);
         }
 
         .nav-links {
