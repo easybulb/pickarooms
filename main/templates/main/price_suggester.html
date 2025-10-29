@@ -4,18 +4,217 @@
 {% block extra_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/price_suggester.css' %}">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+<style>
+    .view-toggle {
+        margin: 20px 0;
+        text-align: right;
+    }
+
+    .view-toggle-btn {
+        padding: 10px 20px;
+        margin-left: 10px;
+        border: 2px solid #3498db;
+        background: white;
+        color: #3498db;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .view-toggle-btn.active {
+        background: #3498db;
+        color: white;
+    }
+
+    .view-toggle-btn:hover {
+        background: #3498db;
+        color: white;
+    }
+
+    .suggestion-item {
+        border-left: 6px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: transform 0.2s;
+    }
+
+    .suggestion-item:hover {
+        transform: translateX(5px);
+    }
+
+    .suggestion-item.color-red {
+        border-left-color: #e74c3c;
+        background: #fee;
+    }
+
+    .suggestion-item.color-orange {
+        border-left-color: #e67e22;
+        background: #fef4e8;
+    }
+
+    .suggestion-item.color-yellow {
+        border-left-color: #f39c12;
+        background: #fefbe8;
+    }
+
+    .suggestion-item.color-green {
+        border-left-color: #27ae60;
+        background: #efffee;
+    }
+
+    .popularity-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    .popularity-badge.red {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .popularity-badge.orange {
+        background: #e67e22;
+        color: white;
+    }
+
+    .popularity-badge.yellow {
+        background: #f39c12;
+        color: white;
+    }
+
+    .popularity-badge.green {
+        background: #27ae60;
+        color: white;
+    }
+
+    .sold-out-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #c0392b;
+        color: white;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    #calendar {
+        max-width: 1200px;
+        margin: 40px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin: 20px 0;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+    }
+
+    .event-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .event-link:hover {
+        text-decoration: underline;
+    }
+
+    .info-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .info-banner h3 {
+        margin-top: 0;
+        font-size: 1.2em;
+    }
+</style>
 {% endblock %}
 
 {% block title %}{% trans "Price Suggester" %}{% endblock %}
 
 {% block admin_content %}
     <h1 class="page-header-title">💰 {% trans "Price Suggester" %}</h1>
-    <p class="page-subtitle">{% trans "Suggestions for room price adjustments based on popular events in Manchester" %}</p>
+    <p class="page-subtitle">{% trans "Automated event tracking with SMS alerts for important events" %}</p>
+
+    <div class="info-banner">
+        <h3>🔔 Automated Event Monitoring</h3>
+        <p>Events are automatically fetched every 6 hours from Ticketmaster. You'll receive SMS alerts for:</p>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>Any new event at Manchester Warehouse Project</li>
+            <li>High popularity events (score 80+)</li>
+            <li>Sold-out events at Co-op Live, Etihad Stadium, or AO Arena</li>
+        </ul>
+        <p style="margin: 5px 0;"><strong>Total events tracked:</strong> {{ total_elements }}</p>
+    </div>
+
+    <!-- View Toggle -->
+    <div class="view-toggle">
+        <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}"
+           class="view-toggle-btn {% if view_mode == 'list' %}active{% endif %}">
+            📋 List View
+        </a>
+        <a href="?view=calendar&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}"
+           class="view-toggle-btn {% if view_mode == 'calendar' %}active{% endif %}">
+            📅 Calendar View
+        </a>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e74c3c;"></div>
+            <span><strong>CRITICAL</strong> (80-100)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e67e22;"></div>
+            <span><strong>HIGH</strong> (60-79)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f39c12;"></div>
+            <span><strong>MEDIUM</strong> (40-59)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #27ae60;"></div>
+            <span><strong>LOW</strong> (0-39)</span>
+        </div>
+    </div>
 
     <!-- Search Form -->
     <form method="get" class="search-form">
-        <label for="keyword">{% trans "Event Location" %}:</label>
-        <input type="text" name="keyword" value="{{ keyword }}" placeholder="{% trans 'e.g., Co-op Live, AO Arena' %}">
+        <input type="hidden" name="view" value="{{ view_mode }}">
+        <label for="keyword">{% trans "Search" %}:</label>
+        <input type="text" name="keyword" value="{{ keyword }}" placeholder="{% trans 'Event name or venue' %}">
         <label for="start_date">{% trans "Start Date" %}:</label>
         <input type="date" name="start_date" value="{{ start_date }}">
         <label for="end_date">{% trans "End Date" %}:</label>
@@ -25,59 +224,110 @@
 
     <!-- Filter Form for Sold-Out Events -->
     <form method="get" class="filter-form">
+        <input type="hidden" name="view" value="{{ view_mode }}">
+        <input type="hidden" name="start_date" value="{{ start_date }}">
+        <input type="hidden" name="end_date" value="{{ end_date }}">
+        <input type="hidden" name="keyword" value="{{ keyword }}">
         {% if show_sold_out %}
-            <button type="submit" name="show_sold_out" value="">{% trans "Show All Popular Events" %}</button>
+            <button type="submit" name="show_sold_out" value="">{% trans "Show All Events" %}</button>
         {% else %}
-            <button type="submit" name="show_sold_out" value="1">{% trans "Show Sold-Out Events" %}</button>
+            <button type="submit" name="show_sold_out" value="1">{% trans "Show Sold-Out Only" %}</button>
         {% endif %}
     </form>
 
-    <!-- Suggestion List -->
-    <div class="suggestion-list">
-        {% if suggestions %}
-            {% for suggestion in suggestions %}
-                <div class="suggestion-item">
-                    <h3>{{ suggestion.name }}</h3>
-                    <p>{% trans "Date: " %}{{ suggestion.date }}</p>
-                    <p>{% trans "Venue: " %}{{ suggestion.venue }}</p>
-                    <p>{% trans "Ticket Price: " %}{{ suggestion.ticket_price }}</p>
-                    <p>{% trans "Suggested Room Price: " %}<strong>{{ suggestion.suggested_price }}</strong></p>
-                    {% if suggestion.image %}
-                        <img src="{{ suggestion.image }}" alt="{% trans 'Event Image' %}">
-                    {% endif %}
-                </div>
-            {% endfor %}
-        {% else %}
-            {% if show_sold_out %}
-                <p>{% trans "No sold-out events found for the given criteria." %}</p>
+    {% if view_mode == 'list' %}
+        <!-- List View -->
+        <div class="suggestion-list">
+            {% if suggestions %}
+                {% for suggestion in suggestions %}
+                    <div class="suggestion-item color-{{ suggestion.color }}">
+                        <h3>
+                            <a href="{% url 'event_detail' suggestion.id %}" class="event-link">
+                                {{ suggestion.name }}
+                            </a>
+                            <span class="popularity-badge {{ suggestion.color }}">
+                                {{ suggestion.popularity_score }}
+                            </span>
+                            {% if suggestion.is_sold_out %}
+                                <span class="sold-out-badge">SOLD OUT</span>
+                            {% endif %}
+                        </h3>
+                        <p>{% trans "Date: " %}{{ suggestion.date|date:"l, F j, Y" }}</p>
+                        <p>{% trans "Venue: " %}{{ suggestion.venue }}</p>
+                        <p>{% trans "Ticket Price: " %}{{ suggestion.ticket_price }}</p>
+                        <p>{% trans "Suggested Room Price: " %}<strong>{{ suggestion.suggested_price }}</strong></p>
+                        {% if suggestion.image %}
+                            <img src="{{ suggestion.image }}" alt="{% trans 'Event Image' %}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;">
+                        {% endif %}
+                    </div>
+                {% endfor %}
             {% else %}
-                <p>{% trans "No popular events found to suggest price changes." %}</p>
-            {% endif %}
-        {% endif %}
-    </div>
-
-    <!-- Pagination -->
-    {% if total_pages > 1 %}
-        <div class="pagination">
-            {% if current_page > 1 %}
-                <a href="?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'-1' }}">{% trans "Previous" %}</a>
-            {% endif %}
-
-            {% for page_num in page_range %}
-                {% if page_num == current_page %}
-                    <span class="current">{{ page_num }}</span>
+                {% if show_sold_out %}
+                    <p>{% trans "No sold-out events found for the given criteria." %}</p>
                 {% else %}
-                    <a href="?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ page_num }}">{{ page_num }}</a>
+                    <p>{% trans "No events found. The Celery task will populate events automatically." %}</p>
                 {% endif %}
-            {% endfor %}
-
-            {% if current_page < total_pages %}
-                <a href="?start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'1' }}">{% trans "Next" %}</a>
             {% endif %}
         </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+            <div class="pagination">
+                {% if current_page > 1 %}
+                    <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'-1' }}">{% trans "Previous" %}</a>
+                {% endif %}
+
+                {% for page_num in page_range %}
+                    {% if page_num == current_page %}
+                        <span class="current">{{ page_num }}</span>
+                    {% else %}
+                        <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ page_num }}">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if current_page < total_pages %}
+                    <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'1' }}">{% trans "Next" %}</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- Calendar View -->
+        <div id='calendar'></div>
     {% endif %}
 {% endblock %}
-        </div>
-    {% endif %}
 
+{% block extra_js %}
+{{ block.super }}
+{% if view_mode == 'calendar' %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,dayGridWeek'
+            },
+            events: {{ calendar_events|safe }},
+            eventClick: function(info) {
+                // Redirect to event detail page
+                window.location.href = '/admin-page/event/' + info.event.id + '/';
+            },
+            eventDidMount: function(info) {
+                // Add tooltip with event details
+                var tooltip = info.event.extendedProps.venue + '\n' +
+                             'Popularity: ' + info.event.extendedProps.popularity + '/100\n' +
+                             'Suggested Price: £' + info.event.extendedProps.suggestedPrice;
+                if (info.event.extendedProps.soldOut) {
+                    tooltip += '\n[SOLD OUT]';
+                }
+                info.el.title = tooltip;
+            }
+        });
+        calendar.render();
+    });
+</script>
+{% endif %}
 {% endblock %}

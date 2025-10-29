@@ -987,3 +987,6 @@ def generate_checkin_pin_background(self, session_key):
         logger.error(f"Failed to update session with error: {str(e)}")
     
     return f"Failed: {error_msg}"
+
+# Import Ticketmaster event polling tasks
+from main.ticketmaster_tasks import poll_ticketmaster_events, check_new_important_events

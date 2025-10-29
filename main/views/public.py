@@ -319,99 +319,212 @@ def event_finder(request):
     }
     return render(request, 'main/event_finder.html', context)
 
-# 14. price_suggester (line ~3369) - ADMIN ONLY, might move to admin_dashboard
+# 14. price_suggester - ADMIN ONLY, reads from database populated by Celery tasks
 @login_required(login_url='/admin-page/login/')
 @user_passes_test(lambda user: user.is_superuser, login_url='/unauthorized/')
 def price_suggester(request):
-    """Suggest room prices based on popular events near M11 3NP (display only)."""
+    """
+    Suggest room prices based on popular events near M11 3NP.
+    Events are automatically populated by the poll_ticketmaster_events Celery task.
+    """
     # Base room price
-    base_price = 50  # £50 as per your requirement
+    base_price = 50
 
-    # Manually collected average hotel price near M11 3NP (e.g., from ibis Budget, Dakota Manchester)
-    average_hotel_price = 80  # Example value; adjust as needed
+    # Manually collected average hotel price near M11 3NP
+    average_hotel_price = 80
 
     # Default date range (from today to 365 days from now)
     today = date.today()
-    start_date = request.GET.get('start_date', today.strftime('%Y-%m-%d'))
-    end_date = request.GET.get('end_date', (today + timedelta(days=365)).strftime('%Y-%m-%d'))
-    keyword = request.GET.get('keyword', '')  # Search by event location (e.g., Co-op Live, AO Arena)
+    start_date_str = request.GET.get('start_date', today.strftime('%Y-%m-%d'))
+    end_date_str = request.GET.get('end_date', (today + timedelta(days=365)).strftime('%Y-%m-%d'))
+    keyword = request.GET.get('keyword', '')  # Search by venue name
     show_sold_out = request.GET.get('show_sold_out', '')  # Filter for sold-out events
-    page = request.GET.get('page', 1)
+    page = int(request.GET.get('page', 1))
+    view_mode = request.GET.get('view', 'list')  # 'list' or 'calendar'
 
-    # Fetch events for display with pagination
-    display_params = {
-        'apikey': settings.TICKETMASTER_CONSUMER_KEY,
-        'city': 'Manchester',
-        'countryCode': 'GB',
-        'size': 10,
-        'page': int(page) - 1,
-        'sort': 'date,asc',
-        'startDateTime': f"{start_date}T00:00:00Z",
-        'endDateTime': f"{end_date}T23:59:59Z",
-    }
-    if keyword:
-        display_params['keyword'] = keyword
+    # Parse dates
+    try:
+        start_date = dt.datetime.strptime(start_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        start_date = today
 
     try:
-        display_response = requests.get('https://app.ticketmaster.com/discovery/v2/events.json', params=display_params)
-        display_response.raise_for_status()
-        display_data = display_response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Ticketmaster API display error: {str(e)}")
-        display_data = {'_embedded': {'events': []}}
+        end_date = dt.datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        end_date = today + timedelta(days=365)
 
-    # Extract events for display
-    display_events = display_data.get('_embedded', {}).get('events', [])
-    major_venues = settings.MAJOR_VENUES
-    suggestions = []
-    for event in display_events:
-        price_info = event.get('priceRanges', [{}])[0]
-        min_price = price_info.get('min', 0)
-        max_price = price_info.get('max', 0)
-        ticket_price = max(min_price, max_price) if min_price or max_price else 0
-        is_sold_out = event.get('dates', {}).get('status', {}).get('code') == 'soldout'
-        venue_name = event.get('_embedded', {}).get('venues', [{}])[0].get('name', '') if event.get('_embedded', {}).get('venues') else 'Unknown Venue'
-        is_major_venue = any(major_venue in venue_name for major_venue in major_venues)
-        is_popular = is_sold_out or ticket_price > 40 or is_major_venue
+    # Query PopularEvent model from database
+    events_query = PopularEvent.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date
+    )
 
-        if show_sold_out and not is_sold_out:
-            continue
-        if not show_sold_out and not is_popular:
-            continue
+    # Apply filters
+    if keyword:
+        events_query = events_query.filter(
+            Q(venue__icontains=keyword) | Q(name__icontains=keyword)
+        )
 
-        suggested_price = 150 if is_sold_out or is_major_venue else 100
-        event_details = {
-            'event_id': event.get('id'),
-            'name': event.get('name'),
-            'date': event.get('dates', {}).get('start', {}).get('localDate'),
-            'venue': venue_name,
-            'ticket_price': f"£{ticket_price}" if ticket_price else "N/A",
-            'suggested_price': f"£{suggested_price}",
-            'image': event.get('images', [{}])[0].get('url') if event.get('images') else None,
+    if show_sold_out:
+        events_query = events_query.filter(is_sold_out=True)
+
+    # Order by date, then popularity score
+    events_query = events_query.order_by('date', '-popularity_score')
+
+    # Pagination (10 events per page for list view)
+    if view_mode == 'list':
+        paginator = Paginator(events_query, 10)
+        try:
+            events_page = paginator.page(page)
+        except:
+            events_page = paginator.page(1)
+            page = 1
+
+        # Build suggestions list
+        suggestions = []
+        for event in events_page:
+            # Get price range display
+            if event.ticket_min_price and event.ticket_max_price:
+                ticket_price = f"£{event.ticket_min_price} - £{event.ticket_max_price}"
+            elif event.ticket_min_price:
+                ticket_price = f"£{event.ticket_min_price}+"
+            else:
+                ticket_price = event.ticket_price  # Legacy format
+
+            # Get color code for display
+            if event.popularity_score >= 80:
+                color = 'red'
+            elif event.popularity_score >= 60:
+                color = 'orange'
+            elif event.popularity_score >= 40:
+                color = 'yellow'
+            else:
+                color = 'green'
+
+            event_details = {
+                'id': event.id,
+                'event_id': event.event_id,
+                'name': event.name,
+                'date': event.date,
+                'venue': event.venue,
+                'ticket_price': ticket_price,
+                'suggested_price': f"£{event.suggested_room_price}",
+                'image': event.image_url,
+                'is_sold_out': event.is_sold_out,
+                'popularity_score': event.popularity_score,
+                'color': color,
+            }
+            suggestions.append(event_details)
+
+        total_pages = paginator.num_pages
+        total_elements = paginator.count
+
+        # Limit page range to 5 pages around the current page
+        page_range = []
+        start_page_num = max(1, page - 2)
+        end_page_num = min(total_pages, page + 2)
+        for i in range(start_page_num, end_page_num + 1):
+            page_range.append(i)
+
+        context = {
+            'suggestions': suggestions,
+            'base_price': f"£{base_price}",
+            'average_hotel_price': f"£{average_hotel_price}",
+            'start_date': start_date_str,
+            'end_date': end_date_str,
+            'keyword': keyword,
+            'show_sold_out': show_sold_out,
+            'current_page': page,
+            'total_pages': total_pages,
+            'total_elements': total_elements,
+            'page_range': page_range,
+            'view_mode': view_mode,
         }
-        suggestions.append(event_details)
+    else:
+        # Calendar view - get all events in date range (no pagination)
+        all_events = list(events_query)
 
-    total_pages = display_data.get('page', {}).get('totalPages', 1)
-    total_elements = display_data.get('page', {}).get('totalElements', 0)
+        # Format events for calendar
+        calendar_events = []
+        for event in all_events:
+            # Get color code
+            if event.popularity_score >= 80:
+                color = '#e74c3c'  # Red
+            elif event.popularity_score >= 60:
+                color = '#e67e22'  # Orange
+            elif event.popularity_score >= 40:
+                color = '#f39c12'  # Yellow
+            else:
+                color = '#27ae60'  # Green
 
-    # Limit page range to 5 pages around the current page
-    page_range = []
-    start_page = max(1, int(page) - 2)
-    end_page = min(total_pages, int(page) + 2)
-    for i in range(start_page, end_page + 1):
-        page_range.append(i)
+            calendar_events.append({
+                'id': event.id,
+                'title': event.name,
+                'start': event.date.isoformat(),
+                'backgroundColor': color,
+                'borderColor': color,
+                'extendedProps': {
+                    'venue': event.venue,
+                    'popularity': event.popularity_score,
+                    'soldOut': event.is_sold_out,
+                    'suggestedPrice': event.suggested_room_price,
+                }
+            })
+
+        context = {
+            'calendar_events': json.dumps(calendar_events),
+            'base_price': f"£{base_price}",
+            'average_hotel_price': f"£{average_hotel_price}",
+            'start_date': start_date_str,
+            'end_date': end_date_str,
+            'keyword': keyword,
+            'show_sold_out': show_sold_out,
+            'view_mode': view_mode,
+            'total_elements': len(all_events),
+        }
+
+    return render(request, 'main/price_suggester.html', context)
+
+
+@login_required
+def event_detail(request, event_id):
+    """
+    Display detailed information about a specific event.
+    Linked from SMS alerts sent for important events.
+    """
+    event = get_object_or_404(PopularEvent, id=event_id)
+
+    # Calculate additional context
+    days_until_event = (event.date - date.today()).days
+
+    # Get price range display
+    if event.ticket_min_price and event.ticket_max_price:
+        price_range = f"£{event.ticket_min_price} - £{event.ticket_max_price}"
+    elif event.ticket_min_price:
+        price_range = f"£{event.ticket_min_price}+"
+    else:
+        price_range = event.ticket_price  # Legacy format
+
+    # Get color code based on popularity
+    if event.popularity_score >= 80:
+        color = 'red'
+        level = 'CRITICAL'
+    elif event.popularity_score >= 60:
+        color = 'orange'
+        level = 'HIGH'
+    elif event.popularity_score >= 40:
+        color = 'yellow'
+        level = 'MEDIUM'
+    else:
+        color = 'green'
+        level = 'LOW'
 
     context = {
-        'suggestions': suggestions,
-        'base_price': f"£{base_price}",
-        'average_hotel_price': f"£{average_hotel_price}",
-        'start_date': start_date,
-        'end_date': end_date,
-        'keyword': keyword,
-        'show_sold_out': show_sold_out,
-        'current_page': int(page),
-        'total_pages': total_pages,
-        'total_elements': total_elements,
-        'page_range': page_range,
+        'event': event,
+        'days_until_event': days_until_event,
+        'price_range': price_range,
+        'color': color,
+        'popularity_level': level,
     }
-    return render(request, 'main/price_suggester.html', context)
+
+    return render(request, 'main/event_detail.html', context)

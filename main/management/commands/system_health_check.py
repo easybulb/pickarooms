@@ -11,24 +11,24 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write("\n" + "="*70)
-        self.stdout.write("🔍 PICKAROOMS SYSTEM HEALTH CHECK")
+        self.stdout.write("[HEALTH CHECK] PICKAROOMS SYSTEM HEALTH CHECK")
         self.stdout.write("="*70 + "\n")
-        
+
         # 1. Check Celery Beat Tasks
         self.check_beat_tasks()
-        
+
         # 2. Check Active Tasks in Code
         self.check_code_tasks()
-        
+
         # 3. Check for Deprecated References
         self.check_deprecated_references()
-        
+
         # 4. Summary
         self.print_summary()
 
     def check_beat_tasks(self):
         """Check all periodic tasks in Celery Beat"""
-        self.stdout.write("\n📅 CELERY BEAT SCHEDULED TASKS")
+        self.stdout.write("\n[BEAT TASKS] CELERY BEAT SCHEDULED TASKS")
         self.stdout.write("-" * 70)
         
         all_tasks = PeriodicTask.objects.all().order_by('name')
@@ -37,13 +37,13 @@ class Command(BaseCommand):
         disabled_tasks = all_tasks.filter(enabled=False)
         
         self.stdout.write(f"\nTotal Tasks: {all_tasks.count()}")
-        self.stdout.write(f"  ✅ Active: {active_tasks.count()}")
-        self.stdout.write(f"  ❌ Disabled: {disabled_tasks.count()}\n")
+        self.stdout.write(f"  [OK] Active: {active_tasks.count()}")
+        self.stdout.write(f"  [X] Disabled: {disabled_tasks.count()}\n")
         
         # List all active tasks
         for task in active_tasks:
             last_run = task.last_run_at.strftime('%Y-%m-%d %H:%M:%S') if task.last_run_at else 'Never'
-            self.stdout.write(f"  ✅ {task.name}")
+            self.stdout.write(f"  [OK] {task.name}")
             self.stdout.write(f"     Task: {task.task}")
             self.stdout.write(f"     Schedule: {task.schedule}")
             self.stdout.write(f"     Last Run: {last_run}\n")
@@ -59,17 +59,17 @@ class Command(BaseCommand):
         found_deprecated = PeriodicTask.objects.filter(task__in=deprecated)
         
         if found_deprecated.exists():
-            self.stdout.write(self.style.ERROR("\n⚠️  DEPRECATED TASKS FOUND:"))
+            self.stdout.write(self.style.ERROR("\n[WARNING] DEPRECATED TASKS FOUND:"))
             for task in found_deprecated:
-                self.stdout.write(self.style.ERROR(f"  ❌ {task.name} ({task.task})"))
+                self.stdout.write(self.style.ERROR(f"  [ERROR] {task.name} ({task.task})"))
             return False
         else:
-            self.stdout.write(self.style.SUCCESS("✅ No deprecated tasks found!"))
+            self.stdout.write(self.style.SUCCESS("[OK] No deprecated tasks found!"))
             return True
 
     def check_code_tasks(self):
         """List all @shared_task functions in code"""
-        self.stdout.write("\n\n💻 TASKS DEFINED IN CODE")
+        self.stdout.write("\n\n[CODE TASKS] TASKS DEFINED IN CODE")
         self.stdout.write("-" * 70 + "\n")
         
         # Expected active tasks
@@ -80,7 +80,7 @@ class Command(BaseCommand):
             ('cleanup_old_reservations', 'Daily cleanup - old reservations'),
             ('cleanup_old_enrichment_logs', 'Daily cleanup - enrichment logs'),
             ('archive_past_guests', 'Archive guests after checkout (3x daily)'),
-            ('trigger_enrichment_workflow', 'NEW: iCal → email search workflow'),
+            ('trigger_enrichment_workflow', 'NEW: iCal -> email search workflow'),
             ('search_email_for_reservation', 'NEW: Search Gmail for booking ref'),
             ('send_collision_alert_ical', 'NEW: Alert for multiple bookings'),
             ('send_multi_room_confirmation_sms', 'NEW: Multi-room booking confirmation'),
@@ -89,18 +89,18 @@ class Command(BaseCommand):
         ]
         
         for task_name, description in expected_tasks:
-            self.stdout.write(f"  ✅ {task_name}")
+            self.stdout.write(f"  [OK] {task_name}")
             self.stdout.write(f"     {description}\n")
 
     def check_deprecated_references(self):
         """Check if deprecated code references exist"""
-        self.stdout.write("\n\n🗑️  DEPRECATED CODE CHECK")
+        self.stdout.write("\n\n[DEPRECATED] DEPRECATED CODE CHECK")
         self.stdout.write("-" * 70)
-        
+
         # This is informational - we already removed the code
-        self.stdout.write("\n  ✅ Deprecated tasks removed from main/tasks.py (369 lines)")
-        self.stdout.write("  ✅ Old email-driven flow deleted")
-        self.stdout.write("  ✅ New iCal-driven flow active")
+        self.stdout.write("\n  [OK] Deprecated tasks removed from main/tasks.py (369 lines)")
+        self.stdout.write("  [OK] Old email-driven flow deleted")
+        self.stdout.write("  [OK] New iCal-driven flow active")
         self.stdout.write("\n  Removed functions:")
         self.stdout.write("    - poll_booking_com_emails()")
         self.stdout.write("    - sync_booking_com_rooms_for_enrichment()")
@@ -112,16 +112,16 @@ class Command(BaseCommand):
     def print_summary(self):
         """Print overall system health summary"""
         self.stdout.write("\n\n" + "="*70)
-        self.stdout.write("📊 SUMMARY")
+        self.stdout.write("[SUMMARY] SYSTEM STATUS")
         self.stdout.write("="*70)
-        
+
         now = timezone.now()
-        
+
         self.stdout.write(f"\n  Timestamp: {now.strftime('%Y-%m-%d %H:%M:%S %Z')}")
-        self.stdout.write(f"\n  ✅ System Status: HEALTHY")
-        self.stdout.write(f"  ✅ Celery Beat: Active (7 scheduled tasks)")
-        self.stdout.write(f"  ✅ Enrichment Flow: iCal-driven (NEW)")
-        self.stdout.write(f"  ✅ Deprecated Code: Removed")
+        self.stdout.write(f"\n  [OK] System Status: HEALTHY")
+        self.stdout.write(f"  [OK] Celery Beat: Active (7 scheduled tasks)")
+        self.stdout.write(f"  [OK] Enrichment Flow: iCal-driven (NEW)")
+        self.stdout.write(f"  [OK] Deprecated Code: Removed")
         self.stdout.write(f"\n  Next scheduled tasks:")
         
         # Show next upcoming tasks

@@ -36,6 +36,7 @@ from .public import (
     how_to_use,
     event_finder,
     price_suggester,
+    event_detail,
 )
 
 # Guest views
@@ -116,6 +117,7 @@ __all__ = [
     'how_to_use',
     'event_finder',
     'price_suggester',
+    'event_detail',
     # Guest
     'checkin_legacy',
     'enrich_reservation',

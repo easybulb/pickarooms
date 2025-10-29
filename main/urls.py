@@ -61,6 +61,7 @@ urlpatterns = [
     path('block-review-messages/', views.block_review_messages, name='block_review_messages'),
     path('event-finder/', views.event_finder, name='event_finder'),
     path('price-suggester/', views.price_suggester, name='price_suggester'),
+    path('admin-page/event/<int:event_id>/', views.event_detail, name='event_detail'),
 
     # Email Enrichment System URLs
     path('webhooks/twilio/sms/', views.handle_twilio_sms_webhook, name='twilio_sms_webhook'),

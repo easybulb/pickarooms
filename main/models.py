@@ -417,20 +417,104 @@ class AuditLog(models.Model):
         verbose_name_plural = "Audit Logs"
 
 class PopularEvent(models.Model):
-    event_id = models.CharField(max_length=100, unique=True)  # Ticketmaster event ID
+    """
+    Popular events from Ticketmaster for price suggestion and SMS alerts.
+    Automatically populated by Celery task: poll_ticketmaster_events
+    """
+    # Event identification
+    event_id = models.CharField(max_length=100, unique=True, db_index=True)  # Ticketmaster event ID
     name = models.CharField(max_length=255)
-    date = models.DateField()
-    venue = models.CharField(max_length=255)
-    ticket_price = models.CharField(max_length=50)
-    suggested_price = models.CharField(max_length=50)
-    email_sent = models.BooleanField(default=False)  # Track if email has been sent
+    date = models.DateField(db_index=True)  # Event date for filtering
+    venue = models.CharField(max_length=255, db_index=True)  # Venue name
+
+    # Pricing information
+    ticket_min_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ticket_max_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ticket_price = models.CharField(max_length=50)  # Display format (legacy)
+    suggested_price = models.CharField(max_length=50)  # Suggested room price (legacy)
+    suggested_room_price = models.IntegerField(default=100)  # Calculated room price
+
+    # Event metadata
+    is_sold_out = models.BooleanField(default=False)
+    popularity_score = models.IntegerField(default=0, db_index=True)  # 0-100 score
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+
+    # Notification tracking
+    email_sent = models.BooleanField(default=False)  # Deprecated - use sms_sent
+    sms_sent = models.BooleanField(default=False)  # Track if SMS alert sent
+    sms_sent_at = models.DateTimeField(null=True, blank=True)  # When SMS was sent
+
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('name', 'date', 'venue')  # Ensure uniqueness across name, date, and venue
+        unique_together = ('name', 'date', 'venue')  # Ensure uniqueness
+        indexes = [
+            models.Index(fields=['date', 'popularity_score']),
+            models.Index(fields=['venue', 'date']),
+            models.Index(fields=['-popularity_score']),
+        ]
+        ordering = ['-date', '-popularity_score']
 
     def __str__(self):
         return f"{self.name} at {self.venue} on {self.date}"
+
+    @property
+    def popularity_level(self):
+        """Get popularity level based on score"""
+        if self.popularity_score >= 80:
+            return 'CRITICAL'
+        elif self.popularity_score >= 60:
+            return 'HIGH'
+        elif self.popularity_score >= 40:
+            return 'MEDIUM'
+        else:
+            return 'LOW'
+
+    @property
+    def color_code(self):
+        """Get color code for display"""
+        level = self.popularity_level
+        return {
+            'CRITICAL': '#dc3545',  # Red
+            'HIGH': '#fd7e14',      # Orange
+            'MEDIUM': '#ffc107',    # Yellow
+            'LOW': '#28a745',       # Green
+        }.get(level, '#6c757d')
+
+    @property
+    def is_priority_venue(self):
+        """Check if event is at a priority venue"""
+        priority_venues = [
+            'Manchester Warehouse Project',
+            'The Co-op Live',
+            'Co-op Live',
+            'Etihad Stadium',
+            'AO Arena',
+        ]
+        return any(venue in self.venue for venue in priority_venues)
+
+    @property
+    def should_send_sms(self):
+        """Determine if SMS should be sent for this event"""
+        if self.sms_sent:
+            return False
+
+        # Always send for Manchester Warehouse Project
+        if 'Manchester Warehouse Project' in self.venue or 'Warehouse Project' in self.venue:
+            return True
+
+        # Send for high popularity events
+        if self.popularity_score >= 80:
+            return True
+
+        # Send for sold-out events at major venues
+        if self.is_sold_out and self.is_priority_venue:
+            return True
+
+        return False
 
 class RoomICalConfig(models.Model):
     """Configuration for iCal feed polling per room - supports both Booking.com and Airbnb"""

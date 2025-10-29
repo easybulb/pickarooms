@@ -408,6 +408,22 @@ CELERY_BEAT_SCHEDULE = {
             'expires': 1800,  # Task expires after 30 minutes if not picked up
         }
     },
+    # Poll Ticketmaster for events - Every 6 hours
+    'poll-ticketmaster-events': {
+        'task': 'main.ticketmaster_tasks.poll_ticketmaster_events',
+        'schedule': crontab(hour='*/6'),  # Every 6 hours (00:00, 06:00, 12:00, 18:00)
+        'options': {
+            'expires': 1800,  # Task expires after 30 minutes if not picked up
+        }
+    },
+    # Check for important events requiring SMS alerts - Every 12 hours
+    'check-important-events': {
+        'task': 'main.ticketmaster_tasks.check_new_important_events',
+        'schedule': crontab(hour='*/12'),  # Every 12 hours (00:00, 12:00)
+        'options': {
+            'expires': 600,  # Task expires after 10 minutes if not picked up
+        }
+    },
 }
 
 # Store task results in Django database
