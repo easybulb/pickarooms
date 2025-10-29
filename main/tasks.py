@@ -364,10 +364,9 @@ def trigger_enrichment_workflow(self, reservation_id):
     """
     Triggered when iCal creates a new unenriched reservation
     
-    Workflow:
-    1. Check for collision (multiple bookings for same check_in_date)
-    2. If collision → send SMS alert immediately
-    3. If single → start email search (4 attempts over 10 min)
+    Simply starts the email search workflow.
+    Collision detection happens in the email search task when multiple emails
+    with the same check-in date are found.
     
     Args:
         reservation_id: ID of newly created Reservation
@@ -385,57 +384,24 @@ def trigger_enrichment_workflow(self, reservation_id):
         logger.info(f"Reservation {reservation_id} already enriched, skipping workflow")
         return "Already enriched"
     
-    # Check for collision: multiple unenriched bookings for same check-in date
-    # Only count reservations that don't have a booking_reference (truly unenriched)
-    same_day_bookings = Reservation.objects.filter(
-        check_in_date=reservation.check_in_date,
-        platform='booking',
-        status='confirmed',
-        guest__isnull=True,  # Unenriched only
-        booking_reference=''  # No booking ref yet
+    # Start email search
+    logger.info(f"Starting email search for reservation {reservation_id}")
+    
+    # Log email search start
+    from main.models import EnrichmentLog
+    EnrichmentLog.objects.create(
+        reservation=reservation,
+        action='email_search_started',
+        booking_reference='',
+        room=reservation.room,
+        method='email_search',
+        details={
+            'check_in_date': str(reservation.check_in_date),
+        }
     )
     
-    collision_count = same_day_bookings.count()
-    
-    if collision_count > 1:
-        # COLLISION DETECTED - Send SMS immediately
-        logger.warning(f"Collision detected: {collision_count} bookings for {reservation.check_in_date}")
-        
-        # Log collision
-        from main.models import EnrichmentLog
-        EnrichmentLog.objects.create(
-            reservation=reservation,
-            action='collision_detected',
-            booking_reference='',
-            room=reservation.room,
-            method='ical_detection',
-            details={
-                'collision_count': collision_count,
-                'check_in_date': str(reservation.check_in_date),
-            }
-        )
-        
-        send_collision_alert_ical.delay(reservation.check_in_date.isoformat())
-        return f"Collision detected: {collision_count} bookings"
-    else:
-        # SINGLE BOOKING - Start email search
-        logger.info(f"Starting email search for reservation {reservation_id}")
-        
-        # Log email search start
-        from main.models import EnrichmentLog
-        EnrichmentLog.objects.create(
-            reservation=reservation,
-            action='email_search_started',
-            booking_reference='',
-            room=reservation.room,
-            method='email_search',
-            details={
-                'check_in_date': str(reservation.check_in_date),
-            }
-        )
-        
-        search_email_for_reservation.delay(reservation_id, attempt=1)
-        return "Email search started"
+    search_email_for_reservation.delay(reservation_id, attempt=1)
+    return "Email search started"
 
 
 @shared_task(bind=True, max_retries=3)
@@ -484,7 +450,8 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
         
         logger.info(f"Searching {len(emails)} recent Booking.com emails for check-in date {reservation.check_in_date}")
         
-        # Filter emails by check-in date
+        # First pass: Collect all emails matching the check-in date (collision detection)
+        matching_emails = []
         for email_data in emails:
             subject = email_data['subject']
             parsed = parse_booking_com_email_subject(subject)
@@ -504,90 +471,121 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
             
             # Check if check-in date matches
             if check_in_date == reservation.check_in_date:
-                
-                # ✅ PROTECTION: Check if this booking_ref already exists in database
+                # Check if this booking_ref already exists in database
                 already_exists = Reservation.objects.filter(
                     booking_reference=booking_ref,
                     platform='booking'
                 ).exists()
                 
-                if already_exists:
-                    logger.warning(f"Booking ref {booking_ref} already used in database, skipping this email")
-                    continue  # Try next email
+                if not already_exists:
+                    matching_emails.append({
+                        'email_data': email_data,
+                        'booking_ref': booking_ref,
+                        'check_in_date': check_in_date
+                    })
+        
+        # COLLISION DETECTION: If multiple emails found with same check-in date
+        if len(matching_emails) > 1:
+            logger.warning(f"COLLISION: Found {len(matching_emails)} emails for check-in date {reservation.check_in_date}")
+            
+            # Log collision
+            from main.models import EnrichmentLog
+            EnrichmentLog.objects.create(
+                reservation=reservation,
+                action='collision_detected',
+                booking_reference='',
+                room=reservation.room,
+                method='email_collision',
+                details={
+                    'collision_count': len(matching_emails),
+                    'check_in_date': str(reservation.check_in_date),
+                    'booking_refs': [m['booking_ref'] for m in matching_emails],
+                }
+            )
+            
+            # Send collision SMS
+            send_collision_alert_ical.delay(reservation.check_in_date.isoformat())
+            return f"Collision detected: {len(matching_emails)} emails found"
+        
+        # Process the single matching email (if any)
+        for match in matching_emails:
+            email_data = match['email_data']
+            booking_ref = match['booking_ref']
+            check_in_date = match['check_in_date']
+            
+            # Safe to use this email - booking ref is unique
+            logger.info(f"Using email: Ref {booking_ref}, Check-in {check_in_date}, Unread: {email_data.get('is_unread', False)}")
+            
+            # MATCH FOUND! Check if this is a multi-room booking
+            multi_room_reservations = Reservation.objects.filter(
+                check_in_date=check_in_date,
+                platform='booking',
+                status='confirmed',
+                guest__isnull=True,
+                booking_reference=''  # Unenriched
+            )
+            
+            room_count = multi_room_reservations.count()
+            
+            if room_count > 1:
+                # MULTI-ROOM BOOKING - Enrich all rooms with same ref
+                logger.info(f"Multi-room booking detected: {room_count} rooms for {booking_ref}")
                 
-                # Safe to use this email - booking ref is unique
-                logger.info(f"Using email: Ref {booking_ref}, Check-in {check_in_date}, Unread: {email_data.get('is_unread', False)}")
+                for res in multi_room_reservations:
+                    res.booking_reference = booking_ref
+                    res.guest_name = f"Guest {booking_ref}"
+                    res.save()
                 
-                # MATCH FOUND! Check if this is a multi-room booking
-                multi_room_reservations = Reservation.objects.filter(
-                    check_in_date=check_in_date,
-                    platform='booking',
-                    status='confirmed',
-                    guest__isnull=True,
-                    booking_reference=''  # Unenriched
+                # Mark email as read
+                gmail.mark_as_read(email_data['id'])
+                
+                # Log the multi-room enrichment
+                from main.models import EnrichmentLog
+                EnrichmentLog.objects.create(
+                    reservation=reservation,
+                    action='email_found_multi_room',
+                    booking_reference=booking_ref,
+                    room=reservation.room,
+                    method='email_search',
+                    details={
+                        'attempts': attempt,
+                        'room_count': room_count,
+                        'rooms': [r.room.name for r in multi_room_reservations],
+                        'check_in_date': str(check_in_date),
+                    }
                 )
                 
-                room_count = multi_room_reservations.count()
+                logger.info(f"✅ Multi-room enrichment! {room_count} rooms enriched with ref {booking_ref}")
                 
-                if room_count > 1:
-                    # MULTI-ROOM BOOKING - Enrich all rooms with same ref
-                    logger.info(f"Multi-room booking detected: {room_count} rooms for {booking_ref}")
-                    
-                    for res in multi_room_reservations:
-                        res.booking_reference = booking_ref
-                        res.guest_name = f"Guest {booking_ref}"
-                        res.save()
-                    
-                    # Mark email as read
-                    gmail.mark_as_read(email_data['id'])
-                    
-                    # Log the multi-room enrichment
-                    from main.models import EnrichmentLog
-                    EnrichmentLog.objects.create(
-                        reservation=reservation,
-                        action='email_found_multi_room',
-                        booking_reference=booking_ref,
-                        room=reservation.room,
-                        method='email_search',
-                        details={
-                            'attempts': attempt,
-                            'room_count': room_count,
-                            'rooms': [r.room.name for r in multi_room_reservations],
-                            'check_in_date': str(check_in_date),
-                        }
-                    )
-                    
-                    logger.info(f"✅ Multi-room enrichment! {room_count} rooms enriched with ref {booking_ref}")
-                    
-                    # Send confirmation SMS to admin
-                    send_multi_room_confirmation_sms.delay(booking_ref, check_in_date.isoformat())
-                    
-                    return f"Multi-room matched: {booking_ref} ({room_count} rooms)"
-                else:
-                    # SINGLE ROOM - Standard enrichment
-                    reservation.booking_reference = booking_ref
-                    reservation.guest_name = f"Guest {booking_ref}"  # Placeholder
-                    reservation.save()
-                    
-                    # Mark email as read
-                    gmail.mark_as_read(email_data['id'])
-                    
-                    # Log the enrichment
-                    from main.models import EnrichmentLog
-                    EnrichmentLog.objects.create(
-                        reservation=reservation,
-                        action='email_found_matched',
-                        booking_reference=booking_ref,
-                        room=reservation.room,
-                        method='email_search',
-                        details={
-                            'attempts': attempt,
-                            'check_in_date': str(reservation.check_in_date),
-                        }
-                    )
-                    
-                    logger.info(f"✅ Email found! Enriched reservation {reservation_id} with ref {booking_ref}")
-                    return f"Matched: {booking_ref}"
+                # Send confirmation SMS to admin
+                send_multi_room_confirmation_sms.delay(booking_ref, check_in_date.isoformat())
+                
+                return f"Multi-room matched: {booking_ref} ({room_count} rooms)"
+            else:
+                # SINGLE ROOM - Standard enrichment
+                reservation.booking_reference = booking_ref
+                reservation.guest_name = f"Guest {booking_ref}"  # Placeholder
+                reservation.save()
+                
+                # Mark email as read
+                gmail.mark_as_read(email_data['id'])
+                
+                # Log the enrichment
+                from main.models import EnrichmentLog
+                EnrichmentLog.objects.create(
+                    reservation=reservation,
+                    action='email_found_matched',
+                    booking_reference=booking_ref,
+                    room=reservation.room,
+                    method='email_search',
+                    details={
+                        'attempts': attempt,
+                        'check_in_date': str(reservation.check_in_date),
+                    }
+                )
+                
+                logger.info(f"✅ Email found! Enriched reservation {reservation_id} with ref {booking_ref}")
+                return f"Matched: {booking_ref}"
         
         # Email not found - schedule retry or send alert
         if attempt < 4:
