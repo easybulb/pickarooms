@@ -222,7 +222,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'pickarooms.middleware.restrict_staff_to_custom_admin',
-    'main.middleware.PopularEventMonitorMiddleware',
+    # DEPRECATED: 'main.middleware.PopularEventMonitorMiddleware',
+    # Disabled - now using Celery task poll_ticketmaster_events every 10 minutes
 ]
 
 MAJOR_VENUES = ['Co-op Live', 'AO Arena', 'Etihad Stadium', 'Old Trafford', 'Manchester Academy', 'O2 Apollo Manchester', 'O2 Ritz Manchester']
@@ -408,20 +409,12 @@ CELERY_BEAT_SCHEDULE = {
             'expires': 1800,  # Task expires after 30 minutes if not picked up
         }
     },
-    # Poll Ticketmaster for events - Every 6 hours
+    # Poll Ticketmaster for events - Every 10 minutes (changed from 6 hours)
     'poll-ticketmaster-events': {
         'task': 'main.ticketmaster_tasks.poll_ticketmaster_events',
-        'schedule': crontab(hour='*/6'),  # Every 6 hours (00:00, 06:00, 12:00, 18:00)
+        'schedule': 600.0,  # Every 10 minutes (600 seconds)
         'options': {
-            'expires': 1800,  # Task expires after 30 minutes if not picked up
-        }
-    },
-    # Check for important events requiring SMS alerts - Every 12 hours
-    'check-important-events': {
-        'task': 'main.ticketmaster_tasks.check_new_important_events',
-        'schedule': crontab(hour='*/12'),  # Every 12 hours (00:00, 12:00)
-        'options': {
-            'expires': 600,  # Task expires after 10 minutes if not picked up
+            'expires': 300,  # Task expires after 5 minutes if not picked up
         }
     },
 }

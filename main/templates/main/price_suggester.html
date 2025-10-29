@@ -4,7 +4,6 @@
 {% block extra_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/price_suggester.css' %}">
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
 <style>
     .view-toggle {
         margin: 20px 0;
@@ -158,6 +157,25 @@
         margin-top: 0;
         font-size: 1.2em;
     }
+
+    .view-details-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.9em;
+        margin-top: 10px;
+        transition: background 0.3s;
+    }
+
+    .view-details-btn:hover {
+        background: #2980b9;
+        color: white;
+        text-decoration: none;
+    }
 </style>
 {% endblock %}
 
@@ -169,24 +187,30 @@
 
     <div class="info-banner">
         <h3>🔔 Automated Event Monitoring</h3>
-        <p>Events are automatically fetched every 6 hours from Ticketmaster. You'll receive SMS alerts for:</p>
-        <ul style="margin: 10px 0; padding-left: 20px;">
-            <li>Any new event at Manchester Warehouse Project</li>
-            <li>High popularity events (score 80+)</li>
-            <li>Sold-out events at Co-op Live, Etihad Stadium, or AO Arena</li>
+        <p>Events are automatically fetched <strong>every 10 minutes</strong> from Ticketmaster.</p>
+        
+        <p style="margin: 10px 0;"><strong>You'll receive alerts for:</strong></p>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+            <li><strong>Any new event</strong> at Manchester Warehouse Project</li>
+            <li><strong>Critical/High popularity</strong> events (score 60+)</li>
+            <li><strong>Sold-out events</strong> at Co-op Live, Etihad Stadium, or AO Arena</li>
         </ul>
-        <p style="margin: 5px 0;"><strong>Total events tracked:</strong> {{ total_elements }}</p>
+        
+        <p style="margin: 10px 0;"><strong>📧 Email:</strong> Full details of all new events (unlimited)</p>
+        <p style="margin: 5px 0;"><strong>📱 SMS:</strong> Simple list with dates (max 10 per day)</p>
+        
+        <p style="margin: 10px 0 5px 0;"><strong>Total events tracked:</strong> {{ total_elements }}</p>
     </div>
 
-    <!-- View Toggle -->
-    <div class="view-toggle">
-        <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}"
-           class="view-toggle-btn {% if view_mode == 'list' %}active{% endif %}">
-            📋 List View
+    <!-- View Toggle: Priority Venues vs All Manchester -->
+    <div class="view-toggle" id="view-toggle-section">
+        <a href="?filter=priority&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}#view-toggle-section"
+           class="view-toggle-btn {% if venue_filter == 'priority' %}active{% endif %}">
+            ⭐ Priority Venues (Co-op Live, AO Arena, Etihad, Warehouse)
         </a>
-        <a href="?view=calendar&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}"
-           class="view-toggle-btn {% if view_mode == 'calendar' %}active{% endif %}">
-            📅 Calendar View
+        <a href="?filter=all&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}#view-toggle-section"
+           class="view-toggle-btn {% if venue_filter == 'all' %}active{% endif %}">
+            🏛️ All Manchester Events
         </a>
     </div>
 
@@ -211,20 +235,26 @@
     </div>
 
     <!-- Search Form -->
-    <form method="get" class="search-form">
-        <input type="hidden" name="view" value="{{ view_mode }}">
-        <label for="keyword">{% trans "Search" %}:</label>
-        <input type="text" name="keyword" value="{{ keyword }}" placeholder="{% trans 'Event name or venue' %}">
-        <label for="start_date">{% trans "Start Date" %}:</label>
-        <input type="date" name="start_date" value="{{ start_date }}">
-        <label for="end_date">{% trans "End Date" %}:</label>
-        <input type="date" name="end_date" value="{{ end_date }}">
-        <button type="submit">{% trans "Search" %}</button>
+    <form method="get" class="search-form" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+        <input type="hidden" name="filter" value="{{ venue_filter }}">
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label for="keyword" style="margin: 0;">{% trans "Search" %}:</label>
+            <input type="text" id="keyword" name="keyword" value="{{ keyword }}" placeholder="{% trans 'Event name or venue' %}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label for="start_date" style="margin: 0;">{% trans "Start Date" %}:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label for="end_date" style="margin: 0;">{% trans "End Date" %}:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <button type="submit" style="padding: 8px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">{% trans "Search" %}</button>
     </form>
 
     <!-- Filter Form for Sold-Out Events -->
     <form method="get" class="filter-form">
-        <input type="hidden" name="view" value="{{ view_mode }}">
+        <input type="hidden" name="filter" value="{{ venue_filter }}">
         <input type="hidden" name="start_date" value="{{ start_date }}">
         <input type="hidden" name="end_date" value="{{ end_date }}">
         <input type="hidden" name="keyword" value="{{ keyword }}">
@@ -235,9 +265,8 @@
         {% endif %}
     </form>
 
-    {% if view_mode == 'list' %}
-        <!-- List View -->
-        <div class="suggestion-list">
+    <!-- Event List -->
+    <div class="suggestion-list">
             {% if suggestions %}
                 {% for suggestion in suggestions %}
                     <div class="suggestion-item color-{{ suggestion.color }}">
@@ -259,75 +288,44 @@
                         {% if suggestion.image %}
                             <img src="{{ suggestion.image }}" alt="{% trans 'Event Image' %}" style="max-width: 200px; border-radius: 8px; margin-top: 10px;">
                         {% endif %}
+                        <div style="margin-top: 15px;">
+                            <a href="{% url 'event_detail' suggestion.id %}" class="view-details-btn">
+                                📋 View Full Details
+                            </a>
+                        </div>
                     </div>
                 {% endfor %}
+        {% else %}
+            {% if show_sold_out %}
+                <p>{% trans "No sold-out events found for the given criteria." %}</p>
             {% else %}
-                {% if show_sold_out %}
-                    <p>{% trans "No sold-out events found for the given criteria." %}</p>
+                <p>{% trans "No events found. The Celery task will populate events automatically." %}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if current_page > 1 %}
+                <a href="?filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'-1' }}">{% trans "Previous" %}</a>
+            {% endif %}
+
+            {% for page_num in page_range %}
+                {% if page_num == current_page %}
+                    <span class="current">{{ page_num }}</span>
                 {% else %}
-                    <p>{% trans "No events found. The Celery task will populate events automatically." %}</p>
+                    <a href="?filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ page_num }}">{{ page_num }}</a>
                 {% endif %}
+            {% endfor %}
+
+            {% if current_page < total_pages %}
+                <a href="?filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'1' }}">{% trans "Next" %}</a>
             {% endif %}
         </div>
-
-        <!-- Pagination -->
-        {% if total_pages > 1 %}
-            <div class="pagination">
-                {% if current_page > 1 %}
-                    <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'-1' }}">{% trans "Previous" %}</a>
-                {% endif %}
-
-                {% for page_num in page_range %}
-                    {% if page_num == current_page %}
-                        <span class="current">{{ page_num }}</span>
-                    {% else %}
-                        <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ page_num }}">{{ page_num }}</a>
-                    {% endif %}
-                {% endfor %}
-
-                {% if current_page < total_pages %}
-                    <a href="?view=list&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}&page={{ current_page|add:'1' }}">{% trans "Next" %}</a>
-                {% endif %}
-            </div>
-        {% endif %}
-    {% else %}
-        <!-- Calendar View -->
-        <div id='calendar'></div>
     {% endif %}
 {% endblock %}
 
 {% block extra_js %}
 {{ block.super }}
-{% if view_mode == 'calendar' %}
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
-        var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,dayGridWeek'
-            },
-            events: {{ calendar_events|safe }},
-            eventClick: function(info) {
-                // Redirect to event detail page
-                window.location.href = '/admin-page/event/' + info.event.id + '/';
-            },
-            eventDidMount: function(info) {
-                // Add tooltip with event details
-                var tooltip = info.event.extendedProps.venue + '\n' +
-                             'Popularity: ' + info.event.extendedProps.popularity + '/100\n' +
-                             'Suggested Price: £' + info.event.extendedProps.suggestedPrice;
-                if (info.event.extendedProps.soldOut) {
-                    tooltip += '\n[SOLD OUT]';
-                }
-                info.el.title = tooltip;
-            }
-        });
-        calendar.render();
-    });
-</script>
-{% endif %}
 {% endblock %}

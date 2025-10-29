@@ -26,55 +26,136 @@ def poll_ticketmaster_events(self):
 
     logger.info("Starting Ticketmaster event polling...")
 
-    # Fetch events for next 365 days
+    # STEP 0: Get list of existing event IDs BEFORE polling
+    # This allows us to detect truly NEW events
+    existing_event_ids = set(PopularEvent.objects.values_list('event_id', flat=True))
+    logger.info(f"Existing events in database: {len(existing_event_ids)}")
+
+    # Fetch ALL future events
     today = date.today()
-    end_date = today + timedelta(days=365)
-
-    # Priority venues for detailed scanning
-    priority_venues = [
-        'Manchester Warehouse Project',
-        'Warehouse Project',
-        'The Co-op Live',
-        'Co-op Live',
-        'Etihad Stadium',
-        'AO Arena',
+    
+    # Priority venue IDs from Ticketmaster API
+    priority_venue_ids = [
+        'KovZ9177z1f',  # Co-op Live
+        'Z7r9jZaAWw',   # AO Arena (main)
+        'KovZ9177A4f',  # AO Arena (alternate)
+        'KovZpZAnJ6AA', # Etihad Stadium (Manchester)
+        'KovZ9177TpV',  # The Warehouse Project
     ]
+    
+    # Strategy: Query by venue ID for priority venues, then query Manchester for all others
+    all_events_data = []
+    
+    # STEP 1: Fetch ALL events from priority venues (by venue ID)
+    logger.info("Fetching events from priority venues by venue ID...")
+    for venue_id in priority_venue_ids:
+        page = 0
+        max_pages = 20
+        
+        while page < max_pages:
+            params = {
+                'apikey': settings.TICKETMASTER_CONSUMER_KEY,
+                'venueId': venue_id,
+                'size': 200,
+                'page': page,
+                'sort': 'date,asc',
+                'startDateTime': f"{today.isoformat()}T00:00:00Z",
+            }
 
-    # Ticketmaster API parameters
-    params = {
-        'apikey': settings.TICKETMASTER_CONSUMER_KEY,
-        'city': 'Manchester',
-        'countryCode': 'GB',
-        'size': 200,  # Max events per request
-        'page': 0,
-        'sort': 'date,asc',
-        'startDateTime': f"{today.isoformat()}T00:00:00Z",
-        'endDateTime': f"{end_date.isoformat()}T23:59:59Z",
-    }
+            try:
+                response = requests.get(
+                    'https://app.ticketmaster.com/discovery/v2/events.json',
+                    params=params,
+                    timeout=30
+                )
+                response.raise_for_status()
+                data = response.json()
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Ticketmaster API error for venue {venue_id}, page {page}: {str(e)}")
+                break
 
-    try:
-        response = requests.get(
-            'https://app.ticketmaster.com/discovery/v2/events.json',
-            params=params,
-            timeout=30
-        )
-        response.raise_for_status()
-        data = response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Ticketmaster API error: {str(e)}")
-        raise self.retry(exc=e)
+            page_data = data.get('_embedded', {}).get('events', [])
+            
+            if not page_data:
+                break
+            
+            all_events_data.extend(page_data)
+            
+            page_info = data.get('page', {})
+            total_pages = page_info.get('totalPages', 1)
+            
+            logger.info(f"Venue {venue_id}: Fetched page {page + 1}/{total_pages}: {len(page_data)} events")
+            
+            if page + 1 >= total_pages:
+                break
+            
+            page += 1
+    
+    logger.info(f"Fetched {len(all_events_data)} events from priority venues")
+    
+    # STEP 2: Also fetch general Manchester events (to catch other venues)
+    logger.info("Fetching general Manchester events...")
+    page = 0
+    max_pages = 20
+    
+    while page < max_pages:
+        params = {
+            'apikey': settings.TICKETMASTER_CONSUMER_KEY,
+            'city': 'Manchester',
+            'countryCode': 'GB',
+            'size': 200,
+            'page': page,
+            'sort': 'date,asc',
+            'startDateTime': f"{today.isoformat()}T00:00:00Z",
+        }
 
-    events_data = data.get('_embedded', {}).get('events', [])
+        try:
+            response = requests.get(
+                'https://app.ticketmaster.com/discovery/v2/events.json',
+                params=params,
+                timeout=30
+            )
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Ticketmaster API error for Manchester, page {page}: {str(e)}")
+            break
 
+        page_data = data.get('_embedded', {}).get('events', [])
+        
+        if not page_data:
+            break
+        
+        all_events_data.extend(page_data)
+        
+        page_info = data.get('page', {})
+        total_pages = page_info.get('totalPages', 1)
+        
+        logger.info(f"Manchester: Fetched page {page + 1}/{total_pages}: {len(page_data)} events")
+        
+        if page + 1 >= total_pages:
+            break
+        
+        page += 1
+
+    events_data = all_events_data
+    
     if not events_data:
         logger.info("No events found from Ticketmaster")
         return "No events found"
+    
+    logger.info(f"Total events fetched from Ticketmaster: {len(events_data)}")
 
     created_count = 0
     updated_count = 0
-    new_priority_events = []
+    new_priority_events = []  # Track newly created priority events (by comparing event_ids)
+    updated_priority_events = []  # Track updated events that became priority
+    
+    # Track which event_ids we've seen in this poll
+    polled_event_ids = set()
 
     for event in events_data:
+        polled_event_ids.add(event.get('id'))
         try:
             # Extract event details
             event_id = event.get('id')
@@ -137,26 +218,50 @@ def poll_ticketmaster_events(self):
 
             if created:
                 created_count += 1
-                # Track newly created priority events
-                if event_obj.is_priority_venue and event_obj.should_send_sms:
+                # SMART CHECK: Only alert if event_id is TRULY NEW (wasn't in database before)
+                is_truly_new = event_id not in existing_event_ids
+                
+                if is_truly_new and event_obj.is_priority_venue and event_obj.should_send_sms:
                     new_priority_events.append(event_obj.id)
+                    logger.info(f"✨ NEW priority event: {event_obj.name} at {event_obj.venue} (Score: {event_obj.popularity_score})")
             else:
                 updated_count += 1
+                # Check if an existing event became priority (e.g., sold out)
+                # Only alert if it WASN'T already sent
+                if event_obj.should_send_sms and not event_obj.sms_sent:
+                    # This is an existing event that just became priority
+                    is_newly_priority = event_id in existing_event_ids
+                    if is_newly_priority:
+                        updated_priority_events.append(event_obj.id)
+                        logger.info(f"📈 Event became priority: {event_obj.name} at {event_obj.venue} (Score: {event_obj.popularity_score})")
 
         except Exception as e:
             logger.error(f"Error processing event {event.get('id')}: {str(e)}")
             continue
 
+    # Calculate truly new events (event_ids that didn't exist before)
+    truly_new_event_ids = polled_event_ids - existing_event_ids
+    
     logger.info(
-        f"Ticketmaster polling complete: {created_count} created, "
-        f"{updated_count} updated. Priority events: {len(new_priority_events)}"
+        f"Ticketmaster polling complete:\n"
+        f"  - Total fetched: {len(events_data)} events\n"
+        f"  - Created in DB: {created_count}\n"
+        f"  - Updated in DB: {updated_count}\n"
+        f"  - Truly NEW events (not seen before): {len(truly_new_event_ids)}\n"
+        f"  - New priority events: {len(new_priority_events)}\n"
+        f"  - Updated priority events: {len(updated_priority_events)}"
     )
 
-    # Trigger SMS check for new priority events
-    if new_priority_events:
-        check_new_important_events.delay(new_event_ids=new_priority_events)
+    # Trigger alerts ONLY for new and updated priority events
+    all_priority_events = new_priority_events + updated_priority_events
+    
+    if all_priority_events:
+        check_new_important_events.delay(new_event_ids=all_priority_events)
+        logger.info(f"🔔 Triggering alerts for {len(all_priority_events)} priority events")
+    else:
+        logger.info("No new priority events - no alerts needed")
 
-    return f"Created: {created_count}, Updated: {updated_count}"
+    return f"Fetched: {len(events_data)}, New: {len(truly_new_event_ids)}, Priority alerts: {len(all_priority_events)}"
 
 
 def calculate_popularity_score(ticket_min, ticket_max, is_sold_out, venue_name):
@@ -165,31 +270,48 @@ def calculate_popularity_score(ticket_min, ticket_max, is_sold_out, venue_name):
 
     Scoring factors:
     - Sold out: +50
-    - High ticket price: +30
-    - Priority venue: +25-30
+    - High ticket price: +35
+    - Priority venue: +35-50 (major venues get higher scores)
+    - Base score for any event: +15 (increased from +10)
+    - Missing price at major venue: +15 bonus (assume premium event)
     """
-    score = 0
+    score = 15  # Base score for any event (increased from 10)
 
     # Sold out = instant high score
     if is_sold_out:
         score += 50
 
-    # Ticket price indicator
+    # Check if price is available
     max_price = ticket_max or ticket_min or 0
+    has_price = max_price > 0
+    
+    # Ticket price indicator (increased scoring)
     if max_price > 100:
-        score += 30
+        score += 35
+    elif max_price > 75:
+        score += 28
     elif max_price > 50:
-        score += 20
+        score += 22
     elif max_price > 30:
-        score += 10
+        score += 12
+    elif max_price > 15:
+        score += 5
 
-    # Venue importance
+    # Venue importance (increased scoring)
+    is_major_venue = False
     if 'Manchester Warehouse Project' in venue_name or 'Warehouse Project' in venue_name:
-        score += 30
+        score += 50  # Increased from 40 - always premium
+        is_major_venue = True
     elif any(v in venue_name for v in ['Co-op Live', 'Etihad Stadium', 'AO Arena']):
-        score += 25
+        score += 40  # Increased from 35 - tier 1 venues
+        is_major_venue = True
     elif any(v in venue_name for v in settings.MAJOR_VENUES):
-        score += 15
+        score += 25  # Increased from 20 - tier 2 venues
+        is_major_venue = True
+    
+    # Bonus: If no price info but at major venue, assume it's a premium event
+    if not has_price and is_major_venue:
+        score += 15  # Bonus for missing price at major venues
 
     return min(score, 100)  # Cap at 100
 
@@ -227,46 +349,39 @@ def calculate_suggested_price(popularity_score, is_sold_out, venue_name):
 @shared_task(bind=True, max_retries=1)
 def check_new_important_events(self, new_event_ids=None):
     """
-    Check for new important events and send SMS alerts.
+    Check for new important events and send EMAIL + SMS alerts.
 
-    Runs every 12 hours OR triggered after poll_ticketmaster_events
-    finds new priority events.
+    Triggered after poll_ticketmaster_events finds new priority events.
 
-    SMS alert criteria:
+    Alert criteria:
     1. NEW event at Manchester Warehouse Project (always)
-    2. NEW event with popularity_score >= 80
+    2. NEW event with popularity_score >= 60 (HIGH or CRITICAL)
     3. NEW sold-out event at Co-op Live, Etihad, AO Arena
-    4. Limit: Max 2 SMS per day (don't spam)
+    
+    Email: Full details of all new events
+    SMS: Simple list with dates (max 10 events per SMS)
 
     Args:
         new_event_ids: List of newly created event IDs to check
     """
     from main.models import PopularEvent
     from twilio.rest import Client
+    from django.core.mail import send_mail
     from django.urls import reverse
 
-    logger.info("Checking for important events requiring SMS alerts...")
+    logger.info("Checking for important events requiring alerts...")
 
-    # Check SMS limit (max 2 per day)
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    sms_sent_today = PopularEvent.objects.filter(
-        sms_sent=True,
-        sms_sent_at__gte=today_start
-    ).count()
-
-    if sms_sent_today >= 2:
-        logger.info(f"SMS limit reached for today ({sms_sent_today}/2). Skipping alerts.")
-        return "SMS limit reached"
-
-    # Query for events that need SMS
+    # Query for NEW events (provided by poll task)
+    if not new_event_ids:
+        logger.info("No new event IDs provided")
+        return "No new events"
+    
+    # Get the new priority events
     query = PopularEvent.objects.filter(
+        id__in=new_event_ids,
         sms_sent=False,
         date__gte=date.today()
     )
-
-    # If specific events provided, filter to those
-    if new_event_ids:
-        query = query.filter(id__in=new_event_ids)
 
     # Get events that should send SMS
     events_to_alert = []
@@ -286,59 +401,150 @@ def check_new_important_events(self, new_event_ids=None):
         )
     )
 
-    # Send SMS (max 2 per day)
-    sms_count = 0
-    max_sms = 2 - sms_sent_today
+    # STEP 1: Send EMAIL with full details
+    email_sent = send_email_alert(events_to_alert)
+    
+    # STEP 2: Send SMS with simple list (only if not exceeding daily limit)
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    sms_sent_today = PopularEvent.objects.filter(
+        sms_sent=True,
+        sms_sent_at__gte=today_start
+    ).count()
+    
+    max_sms_per_day = 10  # Increased limit
+    sms_sent = False
+    
+    if sms_sent_today < max_sms_per_day:
+        sms_sent = send_sms_alert(events_to_alert)
+    else:
+        logger.info(f"SMS daily limit reached ({sms_sent_today}/{max_sms_per_day})")
+    
+    # Mark all events as notified
+    for event in events_to_alert:
+        event.sms_sent = True
+        event.sms_sent_at = timezone.now()
+        event.save()
+    
+    result_msg = f"Email: {'✓' if email_sent else '✗'}, SMS: {'✓' if sms_sent else '✗'}, Events: {len(events_to_alert)}"
+    logger.info(f"Alert summary: {result_msg}")
+    return result_msg
 
+
+def send_email_alert(events):
+    """Send detailed email alert with all new priority events"""
+    from django.core.mail import send_mail
+    
+    if not events:
+        return False
+    
+    try:
+        # Build email subject
+        event_count = len(events)
+        subject = f"🎫 {event_count} New Priority Event{'s' if event_count > 1 else ''} - Price Suggester"
+        
+        # Build email body with full details
+        body_lines = [
+            "New priority events have been detected in Manchester:\n",
+            "=" * 70,
+            ""
+        ]
+        
+        for i, event in enumerate(events, 1):
+            # Get price display
+            if event.ticket_min_price and event.ticket_max_price:
+                price_range = f"£{event.ticket_min_price} - £{event.ticket_max_price}"
+            elif event.ticket_min_price:
+                price_range = f"£{event.ticket_min_price}+"
+            else:
+                price_range = "N/A"
+            
+            venue_emoji = get_venue_emoji(event.venue)
+            popularity_emoji = get_popularity_emoji(event.popularity_level)
+            
+            body_lines.extend([
+                f"{i}. {venue_emoji} {event.name}",
+                f"   Date: {event.date.strftime('%A, %B %d, %Y')}",
+                f"   Venue: {event.venue}",
+                f"   Ticket Price: {price_range}",
+                f"   Popularity: {popularity_emoji} {event.popularity_level} ({event.popularity_score}/100)",
+                f"   Suggested Room Price: £{event.suggested_room_price}",
+                f"   {'SOLD OUT' if event.is_sold_out else 'Tickets Available'}",
+                f"   Details: https://pickarooms-495ab160017c.herokuapp.com/admin-page/event/{event.id}/",
+                ""
+            ])
+        
+        body_lines.extend([
+            "=" * 70,
+            "\nView all events: https://pickarooms-495ab160017c.herokuapp.com/price-suggester/",
+            "\n--\nAutomated Price Suggester Alert",
+            "Polling every 10 minutes from Ticketmaster"
+        ])
+        
+        body = "\n".join(body_lines)
+        
+        # Send email
+        send_mail(
+            subject=subject,
+            message=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.DEFAULT_FROM_EMAIL],  # Send to yourself
+            fail_silently=False,
+        )
+        
+        logger.info(f"Email alert sent for {event_count} events")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send email alert: {str(e)}")
+        return False
+
+
+def send_sms_alert(events):
+    """Send SMS with simple event list"""
+    from twilio.rest import Client
+    
+    if not events:
+        return False
+    
     try:
         twilio_client = Client(
             settings.TWILIO_ACCOUNT_SID,
             settings.TWILIO_AUTH_TOKEN
         )
+        
+        # Build simple SMS message (max 1600 chars for SMS)
+        event_count = len(events)
+        message_lines = [
+            f"🎫 {event_count} NEW PRIORITY EVENT{'S' if event_count > 1 else ''}\n"
+        ]
+        
+        # List up to 10 events
+        for event in events[:10]:
+            venue_short = event.venue.replace('Co-op Live', 'Co-op').replace('AO Arena', 'AO').replace('The Warehouse Project', 'WHP')
+            message_lines.append(
+                f"• {event.date.strftime('%m/%d')}: {event.name[:40]} @ {venue_short}"
+            )
+        
+        if event_count > 10:
+            message_lines.append(f"\n+ {event_count - 10} more events")
+        
+        message_lines.append("\nCheck email for full details")
+        
+        message = "\n".join(message_lines)
+        
+        # Send SMS
+        twilio_client.messages.create(
+            body=message,
+            from_=settings.TWILIO_PHONE_NUMBER,
+            to=settings.ADMIN_PHONE_NUMBER
+        )
+        
+        logger.info(f"SMS alert sent for {event_count} events")
+        return True
+        
     except Exception as e:
-        logger.error(f"Twilio client initialization failed: {str(e)}")
-        return "Twilio error"
-
-    for event in events_to_alert[:max_sms]:
-        try:
-            # Build event detail URL
-            event_url = f"https://pickarooms-495ab160017c.herokuapp.com/admin-page/event/{event.id}/"
-
-            # Build SMS message
-            venue_emoji = get_venue_emoji(event.venue)
-            popularity_emoji = get_popularity_emoji(event.popularity_level)
-
-            message = (
-                f"{venue_emoji} NEW EVENT ALERT {popularity_emoji}\n\n"
-                f"{event.name}\n"
-                f"Date: {event.date.strftime('%a, %b %d, %Y')}\n"
-                f"Venue: {event.venue}\n"
-                f"Popularity: {event.popularity_level} ({event.popularity_score}/100)\n"
-                f"Suggested Price: £{event.suggested_room_price}\n\n"
-                f"View details: {event_url}"
-            )
-
-            # Send SMS
-            twilio_client.messages.create(
-                body=message,
-                from_=settings.TWILIO_PHONE_NUMBER,
-                to=settings.ADMIN_PHONE_NUMBER  # Your phone number
-            )
-
-            # Mark as sent
-            event.sms_sent = True
-            event.sms_sent_at = timezone.now()
-            event.save()
-
-            sms_count += 1
-            logger.info(f"SMS sent for event: {event.name} at {event.venue}")
-
-        except Exception as e:
-            logger.error(f"Failed to send SMS for event {event.id}: {str(e)}")
-            continue
-
-    logger.info(f"Sent {sms_count} SMS alerts for important events")
-    return f"Sent {sms_count} SMS alerts"
+        logger.error(f"Failed to send SMS alert: {str(e)}")
+        return False
 
 
 def get_venue_emoji(venue_name):
