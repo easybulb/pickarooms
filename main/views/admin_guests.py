@@ -48,6 +48,7 @@ from main.models import (
     PopularEvent, Reservation, RoomICalConfig, MessageTemplate,
     PendingEnrichment, EnrichmentLog, CheckInAnalytics
 )
+from main.views.base import get_available_rooms
 from main.ttlock_utils import TTLockClient
 from main.pin_utils import generate_memorable_4digit_pin, add_wakeup_prefix
 from main.phone_utils import normalize_phone_to_e164, validate_phone_number
