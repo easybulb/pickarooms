@@ -357,14 +357,9 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # Celery Beat Schedule (Consolidated - All periodic tasks defined here)
 CELERY_BEAT_SCHEDULE = {
-    # Email polling - Reduced from 2min to 5min to reduce load
-    'poll-booking-com-emails': {
-        'task': 'main.tasks.poll_booking_com_emails',
-        'schedule': 300.0,  # Every 5 minutes (reduced from 2 min)
-        'options': {
-            'expires': 120,  # Task expires after 2 minutes if not picked up
-        }
-    },
+    # REMOVED: poll-booking-com-emails (deprecated Oct 29, 2025)
+    # Old email-driven flow removed in favor of iCal-driven enrichment
+
     # iCal feed polling - Reduced from 10min to 15min
     'poll-ical-feeds-every-15-minutes': {
         'task': 'main.tasks.poll_all_ical_feeds',
