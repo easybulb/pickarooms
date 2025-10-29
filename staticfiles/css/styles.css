@@ -1345,29 +1345,3 @@ footer {
     border-radius: 5px;
   }
 }
-
-/* Fix footer overlap on check-in pages - Global Fix */
-.hero .hero-content {
-  padding-bottom: 150px !important;
-}
-
-/* Desktop spacing (less needed) */
-@media (min-width: 1025px) {
-  .hero .hero-content {
-    padding-bottom: 120px !important;
-  }
-}
-
-/* Tablet spacing */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .hero .hero-content {
-    padding-bottom: 180px !important;
-  }
-}
-
-/* Mobile spacing (most needed) */
-@media (max-width: 768px) {
-  .hero .hero-content {
-    padding-bottom: 250px !important;
-  }
-}
