@@ -120,7 +120,7 @@ def edit_guest(request, guest_id):
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             end_date = uk_timezone.localize(
                 dt.datetime.combine(guest.check_out_date, check_out_time)
-            ) + datetime.timedelta(days=1)
+            ) + timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             try:
@@ -288,7 +288,7 @@ def edit_guest(request, guest_id):
                         check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                         end_date = uk_timezone.localize(
                             dt.datetime.combine(check_out_date, check_out_time)
-                        ) + datetime.timedelta(days=1)
+                        ) + timedelta(days=1)
                         end_time = int(end_date.timestamp() * 1000)
 
                         # Generate new PIN for front door
@@ -555,7 +555,7 @@ def manual_checkin_reservation(request, reservation_id):
                     check_out_time_val = reservation.late_checkout_time if reservation.late_checkout_time else time(11, 0)
                     end_date = uk_timezone.localize(
                         dt.datetime.combine(reservation.check_out_date, check_out_time_val)
-                    ) + datetime.timedelta(days=1)
+                    ) + timedelta(days=1)
                     end_time = int(end_date.timestamp() * 1000)
                     
                     # Generate PIN for this room's lock
@@ -650,7 +650,7 @@ def manual_checkin_reservation(request, reservation_id):
             check_out_time_val = reservation.late_checkout_time if reservation.late_checkout_time else time(11, 0)
             end_date = uk_timezone.localize(
                 dt.datetime.combine(reservation.check_out_date, check_out_time_val)
-            ) + datetime.timedelta(days=1)
+            ) + timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             ttlock_client = TTLockClient()
@@ -842,7 +842,7 @@ def manage_checkin_checkout(request, guest_id):
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             end_date = uk_timezone.localize(
                 dt.datetime.combine(guest.check_out_date, check_out_time)
-            ) + datetime.timedelta(days=1)
+            ) + timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             try:

@@ -119,7 +119,7 @@ def checkin_legacy(request):
                     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                     end_date = uk_timezone.localize(
                         dt.datetime.combine(guest.check_out_date, check_out_time)
-                    ) + datetime.timedelta(days=1)
+                    ) + timedelta(days=1)
                     end_time = int(end_date.timestamp() * 1000)
                     pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
 
@@ -453,7 +453,7 @@ def enrich_reservation(request):
                 check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                 end_date = uk_timezone.localize(
                     dt.datetime.combine(guest.check_out_date, check_out_time)
-                ) + datetime.timedelta(days=1)
+                ) + timedelta(days=1)
                 end_time = int(end_date.timestamp() * 1000)
                 pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
 
