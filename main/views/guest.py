@@ -72,7 +72,7 @@ def checkin_legacy(request):
             now_uk_time = timezone.now().astimezone(uk_timezone)
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             check_out_datetime = uk_timezone.localize(
-                datetime.datetime.combine(guest.check_out_date, check_out_time)
+                dt.datetime.combine(guest.check_out_date, check_out_time)
             )
 
             if now_uk_time > check_out_datetime:
@@ -118,7 +118,7 @@ def checkin_legacy(request):
 
                     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                     end_date = uk_timezone.localize(
-                        datetime.datetime.combine(guest.check_out_date, check_out_time)
+                        dt.datetime.combine(guest.check_out_date, check_out_time)
                     ) + datetime.timedelta(days=1)
                     end_time = int(end_date.timestamp() * 1000)
                     pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
@@ -223,7 +223,7 @@ def checkin_legacy(request):
             now_uk_time = timezone.now().astimezone(uk_timezone)
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             check_out_datetime = uk_timezone.localize(
-                datetime.datetime.combine(guest.check_out_date, check_out_time)
+                dt.datetime.combine(guest.check_out_date, check_out_time)
             )
 
             if now_uk_time > check_out_datetime:
@@ -452,7 +452,7 @@ def enrich_reservation(request):
 
                 check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                 end_date = uk_timezone.localize(
-                    datetime.datetime.combine(guest.check_out_date, check_out_time)
+                    dt.datetime.combine(guest.check_out_date, check_out_time)
                 ) + datetime.timedelta(days=1)
                 end_time = int(end_date.timestamp() * 1000)
                 pin = generate_memorable_4digit_pin()  # 4-digit memorable PIN
@@ -648,22 +648,22 @@ def room_detail(request, room_token):
     check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
     try:
         check_in_datetime = uk_timezone.localize(
-            datetime.datetime.combine(guest.check_in_date, check_in_time)
+            dt.datetime.combine(guest.check_in_date, check_in_time)
         )
     except Exception as e:
         logger.error(f"Error localizing check-in datetime for guest {guest.reservation_number}: {str(e)}")
         # Fallback: Use replace instead of localize for DST safety
-        check_in_datetime = datetime.datetime.combine(guest.check_in_date, check_in_time).replace(tzinfo=uk_timezone)
+        check_in_datetime = dt.datetime.combine(guest.check_in_date, check_in_time).replace(tzinfo=uk_timezone)
 
     check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
     try:
         check_out_datetime = uk_timezone.localize(
-            datetime.datetime.combine(guest.check_out_date, check_out_time)
+            dt.datetime.combine(guest.check_out_date, check_out_time)
         )
     except Exception as e:
         logger.error(f"Error localizing check-out datetime for guest {guest.reservation_number}: {str(e)}")
         # Fallback: Use replace instead of localize for DST safety
-        check_out_datetime = datetime.datetime.combine(guest.check_out_date, check_out_time).replace(tzinfo=uk_timezone)
+        check_out_datetime = dt.datetime.combine(guest.check_out_date, check_out_time).replace(tzinfo=uk_timezone)
 
     if now_uk_time > check_out_datetime:
         request.session.pop("reservation_number", None)

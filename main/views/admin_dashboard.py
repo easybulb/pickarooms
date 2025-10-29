@@ -292,15 +292,15 @@ def admin_page(request):
             # Set end time based on late_checkout_time (default to 11:00 AM if not set)
             if late_checkout_time:
                 try:
-                    late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
+                    late_checkout_time = dt.datetime.strptime(late_checkout_time, '%H:%M').time()
                 except ValueError:
                     messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
                     return redirect('admin_page')
             else:
                 late_checkout_time = time(11, 0)
             end_date = uk_timezone.localize(
-                datetime.datetime.combine(check_out_date, late_checkout_time)
-            ) + datetime.timedelta(days=1)
+                dt.datetime.combine(check_out_date, late_checkout_time)
+            ) + timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
             ttlock_client = TTLockClient()

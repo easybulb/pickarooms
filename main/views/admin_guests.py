@@ -119,7 +119,7 @@ def edit_guest(request, guest_id):
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             end_date = uk_timezone.localize(
-                datetime.datetime.combine(guest.check_out_date, check_out_time)
+                dt.datetime.combine(guest.check_out_date, check_out_time)
             ) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
@@ -214,7 +214,7 @@ def edit_guest(request, guest_id):
             new_early_checkin_time = None
             if early_checkin_time:
                 try:
-                    new_early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+                    new_early_checkin_time = dt.datetime.strptime(early_checkin_time, '%H:%M').time()
                     guest.early_checkin_time = new_early_checkin_time
                 except ValueError:
                     messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
@@ -226,7 +226,7 @@ def edit_guest(request, guest_id):
             new_late_checkout_time = None
             if late_checkout_time:
                 try:
-                    new_late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
+                    new_late_checkout_time = dt.datetime.strptime(late_checkout_time, '%H:%M').time()
                     guest.late_checkout_time = new_late_checkout_time
                 except ValueError:
                     messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
@@ -287,7 +287,7 @@ def edit_guest(request, guest_id):
 
                         check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
                         end_date = uk_timezone.localize(
-                            datetime.datetime.combine(check_out_date, check_out_time)
+                            dt.datetime.combine(check_out_date, check_out_time)
                         ) + datetime.timedelta(days=1)
                         end_time = int(end_date.timestamp() * 1000)
 
@@ -425,7 +425,7 @@ def edit_reservation(request, reservation_id):
         # Update early_checkin_time if provided
         if early_checkin_time:
             try:
-                reservation.early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+                reservation.early_checkin_time = dt.datetime.strptime(early_checkin_time, '%H:%M').time()
             except ValueError:
                 messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
                 return redirect('edit_reservation', reservation_id=reservation.id)
@@ -435,7 +435,7 @@ def edit_reservation(request, reservation_id):
         # Update late_checkout_time if provided
         if late_checkout_time:
             try:
-                reservation.late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
+                reservation.late_checkout_time = dt.datetime.strptime(late_checkout_time, '%H:%M').time()
             except ValueError:
                 messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 14:00).")
                 return redirect('edit_reservation', reservation_id=reservation.id)
@@ -554,7 +554,7 @@ def manual_checkin_reservation(request, reservation_id):
                     start_time = int(now_uk_time.timestamp() * 1000)
                     check_out_time_val = reservation.late_checkout_time if reservation.late_checkout_time else time(11, 0)
                     end_date = uk_timezone.localize(
-                        datetime.datetime.combine(reservation.check_out_date, check_out_time_val)
+                        dt.datetime.combine(reservation.check_out_date, check_out_time_val)
                     ) + datetime.timedelta(days=1)
                     end_time = int(end_date.timestamp() * 1000)
                     
@@ -649,7 +649,7 @@ def manual_checkin_reservation(request, reservation_id):
             # Set end time based on late_checkout_time (from reservation or default)
             check_out_time_val = reservation.late_checkout_time if reservation.late_checkout_time else time(11, 0)
             end_date = uk_timezone.localize(
-                datetime.datetime.combine(reservation.check_out_date, check_out_time_val)
+                dt.datetime.combine(reservation.check_out_date, check_out_time_val)
             ) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
@@ -841,7 +841,7 @@ def manage_checkin_checkout(request, guest_id):
             # Set endDate to one day after check-out
             check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
             end_date = uk_timezone.localize(
-                datetime.datetime.combine(guest.check_out_date, check_out_time)
+                dt.datetime.combine(guest.check_out_date, check_out_time)
             ) + datetime.timedelta(days=1)
             end_time = int(end_date.timestamp() * 1000)
 
@@ -911,7 +911,7 @@ def manage_checkin_checkout(request, guest_id):
             # Convert time strings (e.g., "12:00") to time objects
             if early_checkin_time:
                 try:
-                    early_checkin_time = datetime.datetime.strptime(early_checkin_time, '%H:%M').time()
+                    early_checkin_time = dt.datetime.strptime(early_checkin_time, '%H:%M').time()
                     guest.early_checkin_time = early_checkin_time
                 except ValueError:
                     messages.error(request, "Invalid early check-in time format. Use HH:MM (e.g., 12:00).")
@@ -921,7 +921,7 @@ def manage_checkin_checkout(request, guest_id):
 
             if late_checkout_time:
                 try:
-                    late_checkout_time = datetime.datetime.strptime(late_checkout_time, '%H:%M').time()
+                    late_checkout_time = dt.datetime.strptime(late_checkout_time, '%H:%M').time()
                     guest.late_checkout_time = late_checkout_time
                 except ValueError:
                     messages.error(request, "Invalid late check-out time format. Use HH:MM (e.g., 12:00).")
