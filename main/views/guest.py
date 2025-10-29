@@ -70,7 +70,7 @@ def checkin_legacy(request):
             # Check if the guest has checked out (even if not archived)
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
-            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
             check_out_datetime = uk_timezone.localize(
                 dt.datetime.combine(guest.check_out_date, check_out_time)
             )
@@ -116,7 +116,7 @@ def checkin_legacy(request):
                     # (PIN visibility to guest is controlled separately in room_detail view with early_checkin_time)
                     start_time = int(now_uk_time.timestamp() * 1000)
 
-                    check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+                    check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
                     end_date = uk_timezone.localize(
                         dt.datetime.combine(guest.check_out_date, check_out_time)
                     ) + timedelta(days=1)
@@ -221,7 +221,7 @@ def checkin_legacy(request):
             # Double-check the check-out status to be sure
             uk_timezone = pytz.timezone("Europe/London")
             now_uk_time = timezone.now().astimezone(uk_timezone)
-            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
             check_out_datetime = uk_timezone.localize(
                 dt.datetime.combine(guest.check_out_date, check_out_time)
             )
@@ -450,7 +450,7 @@ def enrich_reservation(request):
                 # Set start_time to NOW so PIN is immediately active
                 start_time = int(now_uk_time.timestamp() * 1000)
 
-                check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+                check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
                 end_date = uk_timezone.localize(
                     dt.datetime.combine(guest.check_out_date, check_out_time)
                 ) + timedelta(days=1)
@@ -645,7 +645,7 @@ def room_detail(request, room_token):
     uk_timezone = pytz.timezone("Europe/London")
     now_uk_time = timezone.now().astimezone(uk_timezone)
 
-    check_in_time = guest.early_checkin_time if guest.early_checkin_time else datetime.time(14, 0)
+    check_in_time = guest.early_checkin_time if guest.early_checkin_time else time(14, 0)
     try:
         check_in_datetime = uk_timezone.localize(
             dt.datetime.combine(guest.check_in_date, check_in_time)
@@ -655,7 +655,7 @@ def room_detail(request, room_token):
         # Fallback: Use replace instead of localize for DST safety
         check_in_datetime = dt.datetime.combine(guest.check_in_date, check_in_time).replace(tzinfo=uk_timezone)
 
-    check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+    check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
     try:
         check_out_datetime = uk_timezone.localize(
             dt.datetime.combine(guest.check_out_date, check_out_time)

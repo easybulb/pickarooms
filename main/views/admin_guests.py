@@ -117,7 +117,7 @@ def edit_guest(request, guest_id):
             start_time = int(now_uk_time.timestamp() * 1000)
 
             # Set endDate to one day after check-out
-            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
             end_date = uk_timezone.localize(
                 dt.datetime.combine(guest.check_out_date, check_out_time)
             ) + timedelta(days=1)
@@ -285,7 +285,7 @@ def edit_guest(request, guest_id):
                         # (PIN visibility to guest is controlled separately in room_detail view with early_checkin_time)
                         start_time = int(now_uk_time.timestamp() * 1000)
 
-                        check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+                        check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
                         end_date = uk_timezone.localize(
                             dt.datetime.combine(check_out_date, check_out_time)
                         ) + timedelta(days=1)
@@ -839,7 +839,7 @@ def manage_checkin_checkout(request, guest_id):
             start_time = int(now_uk_time.timestamp() * 1000)
 
             # Set endDate to one day after check-out
-            check_out_time = guest.late_checkout_time if guest.late_checkout_time else datetime.time(11, 0)
+            check_out_time = guest.late_checkout_time if guest.late_checkout_time else time(11, 0)
             end_date = uk_timezone.localize(
                 dt.datetime.combine(guest.check_out_date, check_out_time)
             ) + timedelta(days=1)
