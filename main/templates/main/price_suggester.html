@@ -185,32 +185,19 @@
     <h1 class="page-header-title">💰 {% trans "Price Suggester" %}</h1>
     <p class="page-subtitle">{% trans "Automated event tracking with SMS alerts for important events" %}</p>
 
-    <div class="info-banner">
-        <h3>🔔 Automated Event Monitoring</h3>
-        <p>Events are automatically fetched <strong>every 10 minutes</strong> from Ticketmaster.</p>
-        
-        <p style="margin: 10px 0;"><strong>You'll receive alerts for:</strong></p>
-        <ul style="margin: 5px 0; padding-left: 20px;">
-            <li><strong>Any new event</strong> at Manchester Warehouse Project</li>
-            <li><strong>Critical/High popularity</strong> events (score 60+)</li>
-            <li><strong>Sold-out events</strong> at Co-op Live, Etihad Stadium, or AO Arena</li>
-        </ul>
-        
-        <p style="margin: 10px 0;"><strong>📧 Email:</strong> Full details of all new events (unlimited)</p>
-        <p style="margin: 5px 0;"><strong>📱 SMS:</strong> Simple list with dates (max 10 per day)</p>
-        
-        <p style="margin: 10px 0 5px 0;"><strong>Total events tracked:</strong> {{ total_elements }}</p>
-    </div>
+    <p style="text-align: center; font-size: 1.1em; margin: 20px 0; color: white;">
+        <strong>Total events tracked:</strong> {{ total_elements }}
+    </p>
 
     <!-- View Toggle: Priority Venues vs All Manchester -->
     <div class="view-toggle" id="view-toggle-section">
         <a href="?filter=priority&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}#view-toggle-section"
            class="view-toggle-btn {% if venue_filter == 'priority' %}active{% endif %}">
-            ⭐ Priority Venues (Co-op Live, AO Arena, Etihad, Warehouse)
+            ⭐ Priority Venues
         </a>
         <a href="?filter=all&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}&show_sold_out={{ show_sold_out }}#view-toggle-section"
            class="view-toggle-btn {% if venue_filter == 'all' %}active{% endif %}">
-            🏛️ All Manchester Events
+            🏛️ All Manchester
         </a>
     </div>
 
