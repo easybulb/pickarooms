@@ -185,9 +185,27 @@
     @media (max-width: 768px) {
         .view-toggle {
             text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .view-toggle-btn {
+        /* Keep venue filter buttons (Priority/All Manchester) on same line */
+        #view-toggle-section .view-toggle-btn {
+            display: inline-block !important;
+            width: 48% !important;
+            margin: 0 !important;
+            font-size: 13px;
+            padding: 8px 10px;
+        }
+
+        /* Make list/calendar view buttons full width */
+        .view-toggle:not(#view-toggle-section) {
+            flex-direction: column;
+        }
+
+        .view-toggle:not(#view-toggle-section) .view-toggle-btn {
             display: block;
             width: 100%;
             margin: 10px 0;
@@ -199,6 +217,27 @@
 
         #calendar {
             padding: 10px;
+        }
+    }
+
+    /* iPhone 14 and 14 Pro Max specific (390px - 430px width) */
+    @media (max-width: 430px) and (min-width: 360px) {
+        #view-toggle-section .view-toggle-btn {
+            width: 36% !important;
+            padding: 8px 6px !important;
+            font-size: 12px;
+        }
+
+        /* Reduce calendar month/year title size for iPhone */
+        #calendar .fc-toolbar-title {
+            font-size: 14px !important;
+        }
+    }
+
+    /* All mobile devices - reduce calendar title size */
+    @media (max-width: 768px) {
+        #calendar .fc-toolbar-title {
+            font-size: 20px !important;
         }
     }
 
