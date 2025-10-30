@@ -356,14 +356,7 @@
 {% block extra_js %}
 {{ block.super }}
 {% if view_mode == 'calendar' %}
-<!-- DEBUG: Calendar view mode is active, loading scripts -->
-<script>console.log('DEBUG: About to load FullCalendar scripts. View mode:', '{{ view_mode }}');</script>
 <script src="{% static 'lib/fullcalendar/fullcalendar-v5.min.js' %}"></script>
-<script>console.log('DEBUG: FullCalendar library loaded, now loading calendar.js');</script>
 <script src="{% static 'js/price_suggester_calendar.js' %}"></script>
-<script>console.log('DEBUG: Calendar.js should be loaded now');</script>
-{% else %}
-<!-- DEBUG: Not in calendar view. View mode is: {{ view_mode }} -->
-<script>console.log('DEBUG: Not loading calendar scripts. View mode:', '{{ view_mode }}');</script>
 {% endif %}
 {% endblock %}
