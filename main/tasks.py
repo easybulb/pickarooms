@@ -374,14 +374,14 @@ def trigger_enrichment_workflow(self, reservation_id):
     from main.models import Reservation
     
     try:
-        reservation = Reservation.objects.select_related('room').get(id=reservation_id)
+        reservation = Reservation.objects.select_related('room', 'guest').get(id=reservation_id)
     except Reservation.DoesNotExist:
         logger.error(f"Reservation {reservation_id} not found")
         return "Reservation not found"
-    
-    # Skip if already enriched
-    if reservation.booking_reference and len(reservation.booking_reference) >= 5:
-        logger.info(f"Reservation {reservation_id} already enriched, skipping workflow")
+
+    # Skip if already enriched (has a Guest object)
+    if reservation.guest is not None:
+        logger.info(f"Reservation {reservation_id} already enriched (has guest), skipping workflow")
         return "Already enriched"
     
     # Start email search
@@ -428,14 +428,14 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
     logger.info(f"Email search attempt {attempt}/4 for reservation {reservation_id}")
     
     try:
-        reservation = Reservation.objects.get(id=reservation_id)
+        reservation = Reservation.objects.select_related('guest').get(id=reservation_id)
     except Reservation.DoesNotExist:
         logger.error(f"Reservation {reservation_id} not found")
         return "Reservation not found"
-    
-    # Skip if already enriched
-    if reservation.booking_reference and len(reservation.booking_reference) >= 5:
-        logger.info(f"Reservation {reservation_id} already enriched during search")
+
+    # Skip if already enriched (has a Guest object)
+    if reservation.guest is not None:
+        logger.info(f"Reservation {reservation_id} already enriched (has guest) during search")
         return "Already enriched"
     
     try:
