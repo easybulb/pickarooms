@@ -322,6 +322,7 @@ def price_suggester(request):
     show_sold_out = request.GET.get('show_sold_out', '')  # Filter for sold-out events
     page = int(request.GET.get('page', 1))
     venue_filter = request.GET.get('filter', 'priority')  # 'priority' or 'all'
+    view_mode = request.GET.get('view', 'list')  # 'list' or 'calendar'
 
     # Parse dates
     try:
@@ -370,17 +371,33 @@ def price_suggester(request):
     # Log result count
     logger.info(f"Price suggester found {events_query.count()} events matching criteria")
 
+    # For calendar view, get all events (no pagination)
+    if view_mode == 'calendar':
+        events_to_display = events_query
+        total_pages = 1
+        total_elements = events_query.count()
+        page_range = []
+    else:
         # Pagination (15 events per page - increased from 10)
-    paginator = Paginator(events_query, 15)
-    try:
-        events_page = paginator.page(page)
-    except:
-        events_page = paginator.page(1)
-        page = 1
+        paginator = Paginator(events_query, 15)
+        try:
+            events_page = paginator.page(page)
+        except:
+            events_page = paginator.page(1)
+            page = 1
+        events_to_display = events_page
+        total_pages = paginator.num_pages
+        total_elements = paginator.count
+        # Limit page range to 5 pages around the current page
+        page_range = []
+        start_page_num = max(1, page - 2)
+        end_page_num = min(total_pages, page + 2)
+        for i in range(start_page_num, end_page_num + 1):
+            page_range.append(i)
 
     # Build suggestions list
     suggestions = []
-    for event in events_page:
+    for event in events_to_display:
         # Get price range display
         if event.ticket_min_price and event.ticket_max_price:
             ticket_price = f"£{event.ticket_min_price} - £{event.ticket_max_price}"
@@ -414,15 +431,37 @@ def price_suggester(request):
         }
         suggestions.append(event_details)
 
-    total_pages = paginator.num_pages
-    total_elements = paginator.count
+    # Prepare calendar events JSON (for calendar view)
+    import json
+    calendar_events = []
+    if view_mode == 'calendar':
+        for event_details in suggestions:
+            calendar_event = {
+                'id': event_details['id'],
+                'title': event_details['name'],
+                'start': event_details['date'].strftime('%Y-%m-%d'),
+                'backgroundColor': {
+                    'red': '#e74c3c',
+                    'orange': '#e67e22',
+                    'yellow': '#f39c12',
+                    'green': '#27ae60'
+                }.get(event_details['color'], '#3498db'),
+                'borderColor': {
+                    'red': '#c0392b',
+                    'orange': '#d35400',
+                    'yellow': '#f39c12',
+                    'green': '#27ae60'
+                }.get(event_details['color'], '#2980b9'),
+                'extendedProps': {
+                    'venue': event_details['venue'],
+                    'popularity': event_details['popularity_score'],
+                    'suggestedPrice': event_details['suggested_price'].replace('£', ''),
+                    'soldOut': event_details['is_sold_out']
+                }
+            }
+            calendar_events.append(calendar_event)
 
-    # Limit page range to 5 pages around the current page
-    page_range = []
-    start_page_num = max(1, page - 2)
-    end_page_num = min(total_pages, page + 2)
-    for i in range(start_page_num, end_page_num + 1):
-        page_range.append(i)
+    calendar_events_json = json.dumps(calendar_events)
 
     context = {
         'suggestions': suggestions,
@@ -437,6 +476,8 @@ def price_suggester(request):
         'total_elements': total_elements,
         'page_range': page_range,
         'venue_filter': venue_filter,
+        'view_mode': view_mode,
+        'calendar_events': calendar_events_json,
     }
 
     return render(request, 'main/price_suggester.html', context)

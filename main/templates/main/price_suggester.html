@@ -4,6 +4,7 @@
 {% block extra_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/price_suggester.css' %}">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
 <style>
     .view-toggle {
         margin: 20px 0;
@@ -176,6 +177,33 @@
         color: white;
         text-decoration: none;
     }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .view-toggle {
+            text-align: center;
+        }
+
+        .view-toggle-btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .legend {
+            flex-wrap: wrap;
+        }
+
+        #calendar {
+            padding: 10px;
+        }
+    }
+
+    /* Calendar sold-out event styling */
+    .sold-out-event {
+        text-decoration: line-through;
+        opacity: 0.8;
+    }
 </style>
 {% endblock %}
 
@@ -239,19 +267,24 @@
         <button type="submit" style="padding: 8px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">{% trans "Search" %}</button>
     </form>
 
-    <!-- Filter Form for Sold-Out Events -->
-    <form method="get" class="filter-form">
-        <input type="hidden" name="filter" value="{{ venue_filter }}">
-        <input type="hidden" name="start_date" value="{{ start_date }}">
-        <input type="hidden" name="end_date" value="{{ end_date }}">
-        <input type="hidden" name="keyword" value="{{ keyword }}">
-        {% if show_sold_out %}
-            <button type="submit" name="show_sold_out" value="">{% trans "Show All Events" %}</button>
-        {% else %}
-            <button type="submit" name="show_sold_out" value="1">{% trans "Show Sold-Out Only" %}</button>
-        {% endif %}
-    </form>
+    <!-- List/Calendar View Toggle -->
+    <div style="display: flex; justify-content: flex-start; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <a href="?view=list&filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}"
+           class="view-toggle-btn {% if view_mode == 'list' or not view_mode %}active{% endif %}"
+           style="margin-left: 0;">
+            📋 List View
+        </a>
+        <a href="?view=calendar&filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}"
+           class="view-toggle-btn {% if view_mode == 'calendar' %}active{% endif %}"
+           style="margin-left: 0;">
+            📅 Calendar View
+        </a>
+    </div>
 
+    {% if view_mode == 'calendar' %}
+        <!-- Calendar View -->
+        <div id='calendar' data-events='{{ calendar_events|safe }}'></div>
+    {% else %}
     <!-- Event List -->
     <div class="suggestion-list">
             {% if suggestions %}
@@ -311,8 +344,13 @@
             {% endif %}
         </div>
     {% endif %}
+    {% endif %}
 {% endblock %}
 
 {% block extra_js %}
 {{ block.super }}
+{% if view_mode == 'calendar' %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src="{% static 'js/price_suggester_calendar.js' %}"></script>
+{% endif %}
 {% endblock %}
