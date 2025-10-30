@@ -192,11 +192,11 @@ def pending_enrichments_page(request):
             'latest_log': latest_log,
         })
 
-    # Get recently enriched reservations (last 20)
+        # Get recently enriched reservations (last 20)
+    # Enriched = has booking_reference AND not empty
     enriched = Reservation.objects.filter(
         platform='booking',
-        status='confirmed',
-        guest__isnull=True
+        status='confirmed'
     ).exclude(
         booking_reference=''
     ).select_related('room').order_by('-updated_at')[:20]
