@@ -503,9 +503,23 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
                 }
             )
             
-            # Send collision SMS
-            send_collision_alert_ical.delay(reservation.check_in_date.isoformat())
-            return f"Collision detected: {len(matching_emails)} emails found"
+            # TRUE COLLISION: Multiple separate bookings detected
+            # This is RARE - it means we found multiple DIFFERENT confirmation emails
+            # with the same check-in date (not a multi-room booking)
+            logger.error(
+                f"🚨 TRUE COLLISION: Found {len(matching_emails)} DIFFERENT emails "
+                f"for check-in date {reservation.check_in_date}. "
+                f"Booking refs: {[m['booking_ref'] for m in matching_emails]}. "
+                f"Sending collision alert SMS."
+            )
+            
+            # Send TRUE collision SMS alert
+            send_true_collision_alert.delay(
+                reservation.check_in_date.isoformat(),
+                [m['booking_ref'] for m in matching_emails]
+            )
+            
+            return f"True collision: {len(matching_emails)} separate bookings found"
         
         # Process the single matching email (if any)
         for match in matching_emails:
@@ -632,13 +646,38 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
         return f"Error: {str(e)}"
 
 
+# DEPRECATED FUNCTION REMOVED (Oct 30, 2025)
+# send_collision_alert_ical() was removed because it caused false collision alerts.
+# 
+# OLD BEHAVIOR (DEPRECATED):
+# - Called when database shows multiple unenriched reservations for same date
+# - Caused false positives for multi-room bookings (1 booking = 2 rooms)
+# 
+# NEW BEHAVIOR (CORRECT):
+# - Multi-room bookings are detected by finding ONE email with multiple rooms
+# - Automatically enriched with same booking_ref
+# - send_multi_room_confirmation_sms() is called instead (has emojis, shows ref)
+# 
+# TRUE COLLISIONS (multiple separate bookings) are extremely rare and will be
+# detected when search_email_for_reservation() finds multiple DIFFERENT emails
+# with the same check-in date. In that case, send_true_collision_alert() is called.
+# 
+# See commit 8ecdcc1 for the fix that made this function obsolete.
+
+
 @shared_task(bind=True, max_retries=2)
-def send_collision_alert_ical(self, check_in_date_str):
+def send_true_collision_alert(self, check_in_date_str, booking_refs):
     """
-    Send SMS alert when iCal detects multiple bookings for same date
+    Send SMS alert when multiple DIFFERENT booking emails are found for same check-in date.
+    This is a TRUE COLLISION - multiple separate customers booking for the same date.
+    
+    This is DIFFERENT from:
+    - Multi-room bookings (1 customer, 2 rooms, same booking ref) - handled by send_multi_room_confirmation_sms()
+    - False collisions (old deprecated logic) - removed completely
     
     Args:
         check_in_date_str: Check-in date as ISO string (YYYY-MM-DD)
+        booking_refs: List of booking references found in different emails
     """
     from main.models import Reservation
     from main.enrichment_config import ADMIN_PHONE
@@ -648,33 +687,46 @@ def send_collision_alert_ical(self, check_in_date_str):
     
     check_in_date = date.fromisoformat(check_in_date_str)
     
-    # Get all unenriched bookings for this date (no booking_reference yet)
+    # Get all unenriched bookings for this date to show rooms
     bookings = Reservation.objects.filter(
         check_in_date=check_in_date,
         platform='booking',
         status='confirmed',
         guest__isnull=True,
-        booking_reference=''  # Truly unenriched
-    ).select_related('room')[:4]  # Max 4
+        booking_reference=''  # Unenriched
+    ).select_related('room')[:10]  # Max 10
     
-    if bookings.count() < 2:
-        logger.warning(f"Collision alert called but found {bookings.count()} booking(s) for {check_in_date}")
-        return "Not a collision"
-    
-    # Build SMS message
+    # Build SMS message - clearly different from multi-room SMS
     sms_lines = [
-        "PickARooms Alert",
+        "🚨 PickARooms COLLISION ALERT 🚨",
         "",
-        f"Multiple bookings detected:",
+        f"TRUE COLLISION DETECTED:",
+        f"{len(booking_refs)} DIFFERENT bookings found",
         f"Check-in: {check_in_date.strftime('%d %b %Y')}",
-        ""
+        "",
+        "Booking references found in Gmail:"
     ]
     
-    for booking in bookings:
-        nights = (booking.check_out_date - booking.check_in_date).days
-        sms_lines.append(f"{booking.room.name} ({nights} nights)")
+    # List the booking refs found
+    for ref in booking_refs[:5]:  # Max 5 refs
+        sms_lines.append(f"  #{ref}")
+    
+    if len(booking_refs) > 5:
+        sms_lines.append(f"  ...and {len(booking_refs) - 5} more")
     
     sms_lines.extend([
+        "",
+        "Rooms needing assignment:"
+    ])
+    
+    # List the rooms
+    for booking in bookings:
+        nights = (booking.check_out_date - booking.check_in_date).days
+        sms_lines.append(f"  {booking.room.name} ({nights} nights)")
+    
+    sms_lines.extend([
+        "",
+        "⚠️ MANUAL ASSIGNMENT REQUIRED",
         "",
         "Reply with booking ref for EACH room:",
         "",
@@ -682,9 +734,7 @@ def send_collision_alert_ical(self, check_in_date_str):
         "",
         "Example:",
         "6588202211: 1-2",
-        "6717790453: 3-1",
-        "",
-        "(One per line)"
+        "6717790453: 3-1"
     ])
     
     sms_body = "\n".join(sms_lines)
@@ -697,10 +747,10 @@ def send_collision_alert_ical(self, check_in_date_str):
             from_=settings.TWILIO_PHONE_NUMBER,
             body=sms_body
         )
-        logger.info(f"Collision SMS sent for {check_in_date}: {message.sid}")
-        return f"Collision SMS sent: {message.sid}"
+        logger.info(f"🚨 TRUE COLLISION SMS sent for {check_in_date}: {message.sid}")
+        return f"True collision SMS sent: {message.sid}"
     except Exception as e:
-        logger.error(f"Failed to send collision SMS: {str(e)}")
+        logger.error(f"Failed to send true collision SMS: {str(e)}")
         return f"SMS failed: {str(e)}"
 
 
