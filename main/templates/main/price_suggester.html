@@ -4,6 +4,9 @@
 {% block extra_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'css/price_suggester.css' %}">
+{% if view_mode == 'calendar' %}
+<link rel="stylesheet" href="{% static 'lib/fullcalendar/fullcalendar-v5.min.css' %}">
+{% endif %}
 <style>
     .view-toggle {
         margin: 20px 0;
@@ -112,6 +115,7 @@
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        min-height: 600px;
     }
 
     .legend {
@@ -268,21 +272,24 @@
 
     <!-- List/Calendar View Toggle -->
     <div style="display: flex; justify-content: flex-start; align-items: center; gap: 10px; margin-bottom: 20px;">
-        <a href="?view=list&filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}"
-           class="view-toggle-btn {% if view_mode == 'list' or not view_mode %}active{% endif %}"
-           style="margin-left: 0;">
-            📋 List View
-        </a>
         <a href="?view=calendar&filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}"
-           class="view-toggle-btn {% if view_mode == 'calendar' %}active{% endif %}"
+           class="view-toggle-btn {% if view_mode == 'calendar' or not view_mode %}active{% endif %}"
            style="margin-left: 0;">
             📅 Calendar View
+        </a>
+        <a href="?view=list&filter={{ venue_filter }}&start_date={{ start_date }}&end_date={{ end_date }}&keyword={{ keyword }}"
+           class="view-toggle-btn {% if view_mode == 'list' %}active{% endif %}"
+           style="margin-left: 0;">
+            📋 List View
         </a>
     </div>
 
     {% if view_mode == 'calendar' %}
         <!-- Calendar View -->
-        <div id='calendar' data-events='{{ calendar_events|safe }}'></div>
+        <div id='calendar'></div>
+        <script id="calendar-events-data" type="application/json">
+            {{ calendar_events|safe }}
+        </script>
     {% else %}
     <!-- Event List -->
     <div class="suggestion-list">
@@ -349,7 +356,14 @@
 {% block extra_js %}
 {{ block.super }}
 {% if view_mode == 'calendar' %}
-<script src="{% static 'lib/fullcalendar/fullcalendar.min.js' %}"></script>
+<!-- DEBUG: Calendar view mode is active, loading scripts -->
+<script>console.log('DEBUG: About to load FullCalendar scripts. View mode:', '{{ view_mode }}');</script>
+<script src="{% static 'lib/fullcalendar/fullcalendar-v5.min.js' %}"></script>
+<script>console.log('DEBUG: FullCalendar library loaded, now loading calendar.js');</script>
 <script src="{% static 'js/price_suggester_calendar.js' %}"></script>
+<script>console.log('DEBUG: Calendar.js should be loaded now');</script>
+{% else %}
+<!-- DEBUG: Not in calendar view. View mode is: {{ view_mode }} -->
+<script>console.log('DEBUG: Not loading calendar scripts. View mode:', '{{ view_mode }}');</script>
 {% endif %}
 {% endblock %}

@@ -322,7 +322,7 @@ def price_suggester(request):
     show_sold_out = request.GET.get('show_sold_out', '')  # Filter for sold-out events
     page = int(request.GET.get('page', 1))
     venue_filter = request.GET.get('filter', 'priority')  # 'priority' or 'all'
-    view_mode = request.GET.get('view', 'list')  # 'list' or 'calendar'
+    view_mode = request.GET.get('view', 'calendar')  # 'list' or 'calendar' - default to calendar
 
     # Parse dates
     try:
