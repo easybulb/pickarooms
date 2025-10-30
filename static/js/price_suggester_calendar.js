@@ -3,8 +3,11 @@
  * Handles calendar initialization and event rendering with FullCalendar
  */
 
+alert('Price suggester calendar.js file is loading!');
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Calendar JS loaded');
+    alert('DOMContentLoaded fired!');
 
     // Check if FullCalendar is available
     if (typeof FullCalendar === 'undefined') {
