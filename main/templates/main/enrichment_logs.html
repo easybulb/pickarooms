@@ -30,6 +30,8 @@
                     <th>{% trans "Action" %}</th>
                     <th>{% trans "Booking Reference" %}</th>
                     <th>{% trans "Room" %}</th>
+                    <th>{% trans "Check-in" %}</th>
+                    <th>{% trans "Check-out" %}</th>
                     <th>{% trans "Method" %}</th>
                     <th>{% trans "Details" %}</th>
                 </tr>
@@ -57,6 +59,20 @@
                     </td>
                     <td><strong>{{ log.booking_reference }}</strong></td>
                     <td>{{ log.room }}</td>
+                    <td>
+                        {% if log.check_in_date %}
+                            {{ log.check_in_date|date:"d M Y" }}
+                        {% else %}
+                            <em>-</em>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.check_out_date %}
+                            {{ log.check_out_date|date:"d M Y" }}
+                        {% else %}
+                            <em>-</em>
+                        {% endif %}
+                    </td>
                     <td>
                         {% if log.method %}
                             <span class="method-badge">{{ log.method }}</span>

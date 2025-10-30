@@ -365,6 +365,13 @@ def enrichment_logs_page(request):
         # List view (original)
         logs_data = []
         for log in logs:
+            # Get check-in/check-out dates from reservation if available
+            check_in_date = None
+            check_out_date = None
+            if log.reservation:
+                check_in_date = log.reservation.check_in_date
+                check_out_date = log.reservation.check_out_date
+
             logs_data.append({
                 'id': log.id,
                 'action': log.get_action_display(),
@@ -374,6 +381,8 @@ def enrichment_logs_page(request):
                 'method': log.method if hasattr(log, 'method') else 'N/A',
                 'timestamp': log.timestamp,
                 'details': log.details,
+                'check_in_date': check_in_date,
+                'check_out_date': check_out_date,
             })
 
         return render(request, 'main/enrichment_logs.html', {
