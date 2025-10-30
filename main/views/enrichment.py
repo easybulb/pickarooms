@@ -192,40 +192,55 @@ def pending_enrichments_page(request):
             'latest_log': latest_log,
         })
 
-        # Get recently enriched reservations (last 20)
-    # Enriched = has booking_reference AND not empty
-    enriched = Reservation.objects.filter(
-        platform='booking',
-        status='confirmed'
-    ).exclude(
-        booking_reference=''
-    ).select_related('room').order_by('-updated_at')[:20]
+            # Get recently enriched reservations (last 20)
+    # Use EnrichmentLog to find recently enriched bookings
+    recent_enrichment_logs = EnrichmentLog.objects.filter(
+        action__in=[
+            'email_found_matched',
+            'manual_enrichment_sms',
+            'multi_enrichment_sms',
+            'xls_enriched_single',
+            'xls_enriched_multi',
+            'email_found_multi_room'
+        ]
+    ).select_related('reservation', 'room').order_by('-timestamp')[:20]
 
-    # Build enriched data
+    # Build enriched data from logs
     enriched_data = []
-    for reservation in enriched:
-        # Get enrichment method from logs
-        enrichment_log = EnrichmentLog.objects.filter(
-            Q(booking_reference=reservation.booking_reference) |
-            Q(reservation=reservation)
-        ).order_by('-timestamp').first()
-
-        if enrichment_log:
-            if enrichment_log.action == 'email_found_matched':
-                method = "Auto (Email)"
-            elif enrichment_log.action == 'manual_enrichment_sms':
-                method = "Manual (SMS)"
-            elif enrichment_log.action == 'multi_enrichment_sms':
-                method = "Multi (SMS)"
-            elif enrichment_log.action == 'xls_enriched_single':
-                method = "XLS Upload"
-            else:
-                method = "Manual"
+    seen_booking_refs = set()  # Avoid duplicates
+    
+    for log in recent_enrichment_logs:
+        # Skip if we've already added this booking ref
+        if log.booking_reference in seen_booking_refs:
+            continue
+        
+        seen_booking_refs.add(log.booking_reference)
+        
+        # Get the reservation for this booking ref
+        reservation = Reservation.objects.filter(
+            booking_reference=log.booking_reference,
+            platform='booking'
+        ).select_related('room').first()
+        
+        if not reservation:
+            continue
+        
+        # Determine method from log action
+        if log.action == 'email_found_matched':
+            method = "Auto (Email)"
+        elif log.action == 'manual_enrichment_sms':
+            method = "Manual (SMS)"
+        elif log.action == 'multi_enrichment_sms':
+            method = "Multi (SMS)"
+        elif log.action in ['xls_enriched_single', 'xls_enriched_multi']:
+            method = "XLS Upload"
+        elif log.action == 'email_found_multi_room':
+            method = "Auto (Multi-Room)"
         else:
-            method = "Unknown"
-
+            method = "Manual"
+        
         nights = (reservation.check_out_date - reservation.check_in_date).days
-
+        
         enriched_data.append({
             'id': reservation.id,
             'booking_reference': reservation.booking_reference,
