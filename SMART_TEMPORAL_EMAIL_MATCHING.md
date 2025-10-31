@@ -608,6 +608,68 @@ EMAIL_SEARCH_LOOKBACK_DAYS = 45  # Increase from 30
 
 ---
 
+## Multi-Room Race Condition Fix (Option 6 Revised)
+
+### The Problem
+
+When iCal syncs a multi-room booking (2+ rooms, same check-in date), two Celery tasks launch concurrently:
+- **Task A**: `search_email_for_reservation(room1_id)`
+- **Task B**: `search_email_for_reservation(room2_id)`
+
+**Race Condition Timeline**:
+1. Both tasks start simultaneously
+2. Both find the SAME email (temporal matching finds it for both)
+3. Both query: "Are there multiple unenriched reservations for this check-in date?"
+4. Both find 2 reservations (neither has enriched yet)
+5. **Both enrich the same 2 rooms** with same booking_ref
+6. **Both send confirmation SMS** to admin
+7. **Result**: Admin receives duplicate SMS messages
+
+### The Solution
+
+Add an additional enrichment check at the START of `search_email_for_reservation()`:
+
+```python
+# Skip if already enriched (has a Guest object)
+if reservation.guest is not None:
+    return "Already enriched"
+
+# Skip if already enriched via multi-room (has booking_ref from sibling task)
+# This prevents race condition where 2 concurrent tasks both try to enrich same multi-room booking
+if reservation.booking_reference and len(reservation.booking_reference) >= 5:
+    logger.info(
+        f"Reservation {reservation_id} already has booking_ref '{reservation.booking_reference}' "
+        f"(likely enriched by sibling multi-room task), skipping duplicate processing"
+    )
+    return "Already enriched (multi-room sibling)"
+```
+
+### Why This Is Safe
+
+**Important Distinction**:
+- **OLD BUG** (fixed Oct 30): Checked `booking_reference` at **workflow trigger** → Blocked ALL enrichment (even iCal reservations with refs)
+- **NEW CHECK** (Option 6): Checks `booking_reference` at **email search start** → Only prevents duplicate processing in multi-room race
+
+**Flow After Fix**:
+1. Task A enriches both rooms → sets `booking_reference`
+2. Task B starts email search → sees `booking_reference` already set → exits gracefully
+3. Only ONE confirmation SMS sent
+4. No duplicate processing
+
+### Benefits
+
+- ✅ Prevents duplicate confirmation SMS
+- ✅ Prevents redundant database operations
+- ✅ More efficient (Task B exits immediately)
+- ✅ Preserves temporal matching logic
+- ✅ No false alerts
+
+### Why We Needed This
+
+The temporal matching algorithm made both tasks find the same email reliably (by time proximity), which increased the likelihood of the race condition. The old count-based system had timing variations that sometimes prevented the race, but temporal matching is deterministic.
+
+---
+
 ## Summary
 
 ### What We Built
@@ -618,6 +680,7 @@ A **smart, time-aware email matching algorithm** that:
 - ✅ Keeps bulletproof read/unread handling
 - ✅ Enhances collision detection
 - ✅ Provides sanity checks and monitoring
+- ✅ Prevents multi-room race condition duplicates
 
 ### Impact
 
@@ -628,15 +691,15 @@ A **smart, time-aware email matching algorithm** that:
 
 ### Deployment
 
-**Status:** ✅ Live in Production (v153)
+**Status:** ✅ Live in Production (v154)
 **Deployed:** October 31, 2025
-**All Dynos:** Restarted with new algorithm
+**All Dynos:** Restarted with new algorithm + race condition fix
 **Monitoring:** Active via Heroku logs
 
 ---
 
 **Document Created:** October 31, 2025
-**Algorithm Version:** v1.0
-**Production Version:** v153
+**Algorithm Version:** v1.1 (includes multi-room race fix)
+**Production Version:** v154
 
 ---

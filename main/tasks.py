@@ -437,7 +437,16 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
     if reservation.guest is not None:
         logger.info(f"Reservation {reservation_id} already enriched (has guest) during search")
         return "Already enriched"
-    
+
+    # Skip if already enriched via multi-room (has booking_ref from sibling task)
+    # This prevents race condition where 2 concurrent tasks both try to enrich same multi-room booking
+    if reservation.booking_reference and len(reservation.booking_reference) >= 5:
+        logger.info(
+            f"Reservation {reservation_id} already has booking_ref '{reservation.booking_reference}' "
+            f"(likely enriched by sibling multi-room task), skipping duplicate processing"
+        )
+        return "Already enriched (multi-room sibling)"
+
     try:
         # Smart temporal matching: Search by time window, pick by proximity
         from main.enrichment_config import (
