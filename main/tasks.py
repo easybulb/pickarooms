@@ -439,16 +439,12 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
         return "Already enriched"
     
     try:
-        # Adaptive email search: More emails if collision detected
-        from main.enrichment_config import get_adaptive_email_count, EMAIL_SEARCH_LOOKBACK_DAYS
-        
-        # Determine optimal email count based on collision status
-        email_count = get_adaptive_email_count(reservation.check_in_date)
-        logger.info(f"Using adaptive email search: {email_count} emails for check-in date {reservation.check_in_date}")
-        
+        # Search recent emails (read OR unread - bulletproof against accidental reads)
+        from main.enrichment_config import EMAIL_SEARCH_LOOKBACK_COUNT, EMAIL_SEARCH_LOOKBACK_DAYS
+
         gmail = GmailClient()
         emails = gmail.get_recent_booking_emails(
-            max_results=email_count,
+            max_results=EMAIL_SEARCH_LOOKBACK_COUNT,
             lookback_days=EMAIL_SEARCH_LOOKBACK_DAYS
         )
         

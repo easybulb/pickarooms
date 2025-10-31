@@ -59,38 +59,6 @@ ADMIN_PHONE = '+447539029629'
 ADMIN_EMAIL = 'easybulb@gmail.com'
 
 # Email search configuration (iCal-driven enrichment)
-# Adaptive search: Increases lookback count when collision detected
-EMAIL_SEARCH_LOOKBACK_COUNT_NORMAL = 20  # Normal case: single booking on check-in date
-EMAIL_SEARCH_LOOKBACK_COUNT_COLLISION = 30  # Collision case: multiple bookings on same date
+# Fixed count: Searches both read and unread emails (bulletproof against accidental reads)
+EMAIL_SEARCH_LOOKBACK_COUNT = 30  # Search last 30 emails (covers busy periods and payment delays)
 EMAIL_SEARCH_LOOKBACK_DAYS = 30  # Only search emails from last N days
-
-
-def get_adaptive_email_count(check_in_date):
-    """
-    Adaptive email search window based on collision detection
-    
-    Logic:
-    - Normal case (1 booking): Search 20 emails (covers ~2 weeks of traffic)
-    - Collision case (2+ bookings): Search 30 emails (covers ~3 weeks, handles multi-room payment delays)
-    
-    Args:
-        check_in_date: Date to check for collisions
-    
-    Returns:
-        int: Number of emails to search (20 or 30)
-    """
-    from main.models import Reservation
-    
-    same_day_bookings = Reservation.objects.filter(
-        check_in_date=check_in_date,
-        platform='booking',
-        status='confirmed',
-        guest__isnull=True  # Unenriched only
-    ).count()
-    
-    if same_day_bookings > 1:
-        # Collision detected: Search more emails to find all matching bookings
-        return EMAIL_SEARCH_LOOKBACK_COUNT_COLLISION
-    else:
-        # Normal case: Standard search window
-        return EMAIL_SEARCH_LOOKBACK_COUNT_NORMAL

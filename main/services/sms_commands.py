@@ -10,9 +10,59 @@ from django.conf import settings
 from twilio.rest import Client
 
 from main.models import Reservation, Room, EnrichmentLog
-from main.enrichment_config import ROOM_NUMBER_TO_NAME
+from main.enrichment_config import ROOM_NUMBER_TO_NAME, EMAIL_SEARCH_LOOKBACK_DAYS
 
 logger = logging.getLogger('main')
+
+
+def mark_email_as_read_by_booking_ref(booking_ref):
+    """
+    Search for email with booking reference and mark it as read
+
+    This is used after manual SMS enrichment to clean up Gmail inbox
+
+    Args:
+        booking_ref (str): 10-digit booking reference
+
+    Returns:
+        bool: True if email found and marked as read, False otherwise
+    """
+    try:
+        from main.services.gmail_client import GmailClient
+        from main.services.email_parser import parse_booking_com_email_subject
+
+        gmail = GmailClient()
+
+        from main.enrichment_config import EMAIL_SEARCH_LOOKBACK_COUNT
+
+        # Search recent emails (same window as enrichment)
+        emails = gmail.get_recent_booking_emails(
+            max_results=EMAIL_SEARCH_LOOKBACK_COUNT,
+            lookback_days=EMAIL_SEARCH_LOOKBACK_DAYS
+        )
+
+        # Find the email with this booking ref
+        for email_data in emails:
+            subject = email_data['subject']
+            parsed = parse_booking_com_email_subject(subject)
+
+            if not parsed:
+                continue
+
+            email_type, email_booking_ref, check_in_date = parsed
+
+            if email_booking_ref == booking_ref:
+                # Found it! Mark as read
+                gmail.mark_as_read(email_data['id'])
+                logger.info(f"✅ Marked email as read for booking ref {booking_ref}")
+                return True
+
+        logger.warning(f"⚠️ Email not found in recent emails for booking ref {booking_ref}")
+        return False
+
+    except Exception as e:
+        logger.error(f"Error marking email as read for booking ref {booking_ref}: {str(e)}")
+        return False
 
 
 def send_confirmation_sms(to_number, message):
@@ -247,9 +297,12 @@ def handle_single_ref_enrichment(from_number, booking_ref):
         reservation.booking_reference = booking_ref
         reservation.guest_name = f"Guest {booking_ref}"
         reservation.save()
-        
+
+        # Mark email as read in Gmail
+        mark_email_as_read_by_booking_ref(booking_ref)
+
         nights = (reservation.check_out_date - reservation.check_in_date).days
-        
+
         confirmation = (
             f"✅ ENRICHMENT COMPLETE\n\n"
             f"Booking: #{booking_ref}\n"
@@ -260,7 +313,7 @@ def handle_single_ref_enrichment(from_number, booking_ref):
         )
         send_confirmation_sms(from_number, confirmation)
         logger.info(f"Enriched reservation {reservation.id} with ref {booking_ref}")
-        
+
         # Log the enrichment
         EnrichmentLog.objects.create(
             reservation=reservation,
@@ -314,7 +367,10 @@ def handle_collision_enrichment(from_number, booking_ref, room_number, nights):
         reservation.check_out_date = check_out_date
         reservation.guest_name = f"Guest {booking_ref}"
         reservation.save()
-        
+
+        # Mark email as read in Gmail
+        mark_email_as_read_by_booking_ref(booking_ref)
+
         confirmation = (
             f"✅ ENRICHMENT COMPLETE\n\n"
             f"Booking: #{booking_ref}\n"
@@ -325,7 +381,7 @@ def handle_collision_enrichment(from_number, booking_ref, room_number, nights):
         )
         send_confirmation_sms(from_number, confirmation)
         logger.info(f"Collision enrichment: {booking_ref} → {room.name}, {nights}n")
-        
+
         # Log the enrichment
         EnrichmentLog.objects.create(
             reservation=reservation,
@@ -335,7 +391,7 @@ def handle_collision_enrichment(from_number, booking_ref, room_number, nights):
             method='sms_collision',
             details={'nights': nights}
         )
-        
+
         return "Collision enrichment complete"
         
     except Exception as e:
@@ -389,13 +445,16 @@ def handle_multi_collision_enrichment(from_number, enrichments):
             reservation.check_out_date = check_out_date
             reservation.guest_name = f"Guest {booking_ref}"
             reservation.save()
-            
+
+            # Mark email as read in Gmail
+            mark_email_as_read_by_booking_ref(booking_ref)
+
             results.append(
                 f"✅ #{booking_ref}\n"
                 f"   {room.name}, {nights}n\n"
                 f"   {reservation.check_in_date.strftime('%d %b')} - {check_out_date.strftime('%d %b')}"
             )
-            
+
             logger.info(f"Multi-collision: {booking_ref} → {room.name}, {nights}n")
         
         # Send consolidated confirmation
