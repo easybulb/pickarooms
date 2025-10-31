@@ -439,36 +439,40 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
         return "Already enriched"
     
     try:
-        # Search recent emails (read OR unread - bulletproof against accidental reads)
-        from main.enrichment_config import EMAIL_SEARCH_LOOKBACK_COUNT, EMAIL_SEARCH_LOOKBACK_DAYS
+        # Smart temporal matching: Search by time window, pick by proximity
+        from main.enrichment_config import (
+            EMAIL_SEARCH_MAX_RESULTS,
+            EMAIL_SEARCH_LOOKBACK_DAYS,
+            EMAIL_TEMPORAL_THRESHOLD_HOURS
+        )
 
         gmail = GmailClient()
         emails = gmail.get_recent_booking_emails(
-            max_results=EMAIL_SEARCH_LOOKBACK_COUNT,
+            max_results=EMAIL_SEARCH_MAX_RESULTS,
             lookback_days=EMAIL_SEARCH_LOOKBACK_DAYS
         )
-        
-        logger.info(f"Searching {len(emails)} recent Booking.com emails for check-in date {reservation.check_in_date}")
-        
-        # First pass: Collect all emails matching the check-in date (collision detection)
+
+        logger.info(f"Searching {len(emails)} recent emails for reservation {reservation_id} (check-in: {reservation.check_in_date})")
+
+        # Collect all candidate emails matching check-in date
         matching_emails = []
         for email_data in emails:
             subject = email_data['subject']
             parsed = parse_booking_com_email_subject(subject)
-            
+
             if not parsed:
                 continue
-            
+
             email_type, booking_ref, check_in_date = parsed
-            
+
             # Skip cancellations
             if email_type == 'cancellation':
                 continue
-            
+
             # Treat last-minute bookings as new bookings
             if email_type == 'new_lastminute':
                 email_type = 'new'
-            
+
             # Check if check-in date matches
             if check_in_date == reservation.check_in_date:
                 # Check if this booking_ref already exists in database
@@ -476,18 +480,46 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
                     booking_reference=booking_ref,
                     platform='booking'
                 ).exists()
-                
+
                 if not already_exists:
+                    # Calculate temporal proximity score (seconds difference)
+                    email_arrival = email_data['received_at']
+                    reservation_created = reservation.created_at
+
+                    # Make both timezone-aware for comparison
+                    if email_arrival.tzinfo is None:
+                        from django.utils import timezone as django_tz
+                        email_arrival = django_tz.make_aware(email_arrival)
+                    if reservation_created.tzinfo is None:
+                        from django.utils import timezone as django_tz
+                        reservation_created = django_tz.make_aware(reservation_created)
+
+                    time_diff_seconds = abs((email_arrival - reservation_created).total_seconds())
+                    time_diff_hours = time_diff_seconds / 3600
+
                     matching_emails.append({
                         'email_data': email_data,
                         'booking_ref': booking_ref,
-                        'check_in_date': check_in_date
+                        'check_in_date': check_in_date,
+                        'time_diff_seconds': time_diff_seconds,
+                        'time_diff_hours': time_diff_hours,
+                        'email_arrival': email_arrival
                     })
         
         # COLLISION DETECTION: If multiple emails found with same check-in date
         if len(matching_emails) > 1:
-            logger.warning(f"COLLISION: Found {len(matching_emails)} emails for check-in date {reservation.check_in_date}")
-            
+            # Log temporal info for all collision candidates
+            collision_info = []
+            for m in matching_emails:
+                collision_info.append(
+                    f"{m['booking_ref']} (email arrived {m['time_diff_hours']:.1f}h from iCal sync)"
+                )
+
+            logger.warning(
+                f"COLLISION: Found {len(matching_emails)} emails for check-in date {reservation.check_in_date}. "
+                f"Candidates: {', '.join(collision_info)}"
+            )
+
             # Log collision
             from main.models import EnrichmentLog
             EnrichmentLog.objects.create(
@@ -500,35 +532,49 @@ def search_email_for_reservation(self, reservation_id, attempt=1):
                     'collision_count': len(matching_emails),
                     'check_in_date': str(reservation.check_in_date),
                     'booking_refs': [m['booking_ref'] for m in matching_emails],
+                    'temporal_scores': {
+                        m['booking_ref']: f"{m['time_diff_hours']:.2f}h"
+                        for m in matching_emails
+                    }
                 }
             )
-            
+
             # TRUE COLLISION: Multiple separate bookings detected
-            # This is RARE - it means we found multiple DIFFERENT confirmation emails
-            # with the same check-in date (not a multi-room booking)
             logger.error(
                 f"🚨 TRUE COLLISION: Found {len(matching_emails)} DIFFERENT emails "
                 f"for check-in date {reservation.check_in_date}. "
-                f"Booking refs: {[m['booking_ref'] for m in matching_emails]}. "
                 f"Sending collision alert SMS."
             )
-            
+
             # Send TRUE collision SMS alert
             send_true_collision_alert.delay(
                 reservation.check_in_date.isoformat(),
                 [m['booking_ref'] for m in matching_emails]
             )
-            
+
             return f"True collision: {len(matching_emails)} separate bookings found"
-        
-        # Process the single matching email (if any)
-        for match in matching_emails:
+
+        # SINGLE MATCH: Pick the best match using temporal proximity
+        if len(matching_emails) == 1:
+            match = matching_emails[0]
             email_data = match['email_data']
             booking_ref = match['booking_ref']
             check_in_date = match['check_in_date']
-            
-            # Safe to use this email - booking ref is unique
-            logger.info(f"Using email: Ref {booking_ref}, Check-in {check_in_date}, Unread: {email_data.get('is_unread', False)}")
+            time_diff_hours = match['time_diff_hours']
+
+            # Log temporal proximity info
+            logger.info(
+                f"✅ TEMPORAL MATCH: Ref {booking_ref}, Check-in {check_in_date}, "
+                f"Email arrived {time_diff_hours:.2f}h from iCal sync, "
+                f"Unread: {email_data.get('is_unread', False)}"
+            )
+
+            # Sanity check: Warn if email timing seems suspicious
+            if time_diff_hours > EMAIL_TEMPORAL_THRESHOLD_HOURS:
+                logger.warning(
+                    f"⚠️ Temporal anomaly: Email arrived {time_diff_hours:.1f}h from iCal sync "
+                    f"(threshold: {EMAIL_TEMPORAL_THRESHOLD_HOURS}h). This might be delayed sync or wrong match."
+                )
             
             # MATCH FOUND! Check if this is a multi-room booking
             multi_room_reservations = Reservation.objects.filter(

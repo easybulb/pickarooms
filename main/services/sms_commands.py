@@ -10,7 +10,11 @@ from django.conf import settings
 from twilio.rest import Client
 
 from main.models import Reservation, Room, EnrichmentLog
-from main.enrichment_config import ROOM_NUMBER_TO_NAME, EMAIL_SEARCH_LOOKBACK_DAYS
+from main.enrichment_config import (
+    ROOM_NUMBER_TO_NAME,
+    EMAIL_SEARCH_LOOKBACK_DAYS,
+    EMAIL_SEARCH_MAX_RESULTS
+)
 
 logger = logging.getLogger('main')
 
@@ -33,11 +37,9 @@ def mark_email_as_read_by_booking_ref(booking_ref):
 
         gmail = GmailClient()
 
-        from main.enrichment_config import EMAIL_SEARCH_LOOKBACK_COUNT
-
-        # Search recent emails (same window as enrichment)
+        # Search recent emails (same generous window as enrichment)
         emails = gmail.get_recent_booking_emails(
-            max_results=EMAIL_SEARCH_LOOKBACK_COUNT,
+            max_results=EMAIL_SEARCH_MAX_RESULTS,
             lookback_days=EMAIL_SEARCH_LOOKBACK_DAYS
         )
 

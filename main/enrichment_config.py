@@ -59,6 +59,7 @@ ADMIN_PHONE = '+447539029629'
 ADMIN_EMAIL = 'easybulb@gmail.com'
 
 # Email search configuration (iCal-driven enrichment)
-# Fixed count: Searches both read and unread emails (bulletproof against accidental reads)
-EMAIL_SEARCH_LOOKBACK_COUNT = 30  # Search last 30 emails (covers busy periods and payment delays)
+# Smart temporal matching: Searches both read and unread emails (bulletproof against accidental reads)
+EMAIL_SEARCH_MAX_RESULTS = 100  # Generous limit - we filter smartly by temporal proximity
 EMAIL_SEARCH_LOOKBACK_DAYS = 30  # Only search emails from last N days
+EMAIL_TEMPORAL_THRESHOLD_HOURS = 48  # Warn if email >48 hours away from iCal sync time
