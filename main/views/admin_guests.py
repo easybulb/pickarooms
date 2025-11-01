@@ -1052,3 +1052,73 @@ def block_review_messages(request):
         'search_query': search_query,
     }
     return render(request, 'main/block_review_message.html', context)
+
+# 8. admin_id_uploads (line ~1058)
+@login_required(login_url='/admin-page/login/')
+@user_passes_test(lambda user: user.has_perm('main.view_admin_dashboard'), login_url='/unauthorized/')
+def admin_id_uploads(request):
+    """Admin interface for viewing uploaded guest IDs"""
+    from datetime import timedelta
+
+    # Get all guests with ID images (both from Guest.id_image and GuestIDUpload model)
+    guests_with_ids = Guest.objects.exclude(id_image__isnull=True).exclude(id_image='').select_related('assigned_room').order_by('-check_in_date')
+
+    # Determine guest status
+    uk_timezone = pytz.timezone("Europe/London")
+    now_uk_date = timezone.now().astimezone(uk_timezone).date()
+
+    guests_list = []
+    for guest in guests_with_ids:
+        # Determine status
+        if guest.check_in_date <= now_uk_date <= guest.check_out_date:
+            status = 'active'
+        elif now_uk_date > guest.check_out_date:
+            status = 'checked-out'
+        else:
+            status = 'upcoming'
+
+        # Get reservation object if exists
+        reservation = Reservation.objects.filter(guest=guest).first()
+
+        guests_list.append({
+            'id': guest.id,
+            'full_name': guest.full_name,
+            'phone_number': guest.phone_number,
+            'email': guest.email,
+            'id_image': guest.id_image,
+            'status': status,
+            'reservation': reservation if reservation else type('obj', (object,), {
+                'room': guest.assigned_room,
+                'checkin_date': guest.check_in_date,
+                'checkout_date': guest.check_out_date,
+                'booking_reference': guest.reservation_number
+            })()
+        })
+
+    # Calculate statistics
+    total_uploads = len(guests_list)
+    active_guests = len([g for g in guests_list if g['status'] == 'active'])
+
+    # Recent uploads (last 7 days)
+    seven_days_ago = now_uk_date - timedelta(days=7)
+    recent_uploads = len([g for g in guests_with_ids if g.check_in_date >= seven_days_ago])
+
+    # Get all rooms for filter dropdown
+    rooms = Room.objects.all().order_by('number')
+
+    # Pagination
+    paginator = Paginator(guests_list, 20)  # 20 guests per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'guests': page_obj,
+        'total_uploads': total_uploads,
+        'active_guests': active_guests,
+        'recent_uploads': recent_uploads,
+        'rooms': rooms,
+        'is_paginated': paginator.num_pages > 1,
+        'page_obj': page_obj,
+    }
+
+    return render(request, 'main/admin_id_uploads.html', context)

@@ -1,0 +1,994 @@
+/**
+ * PickARooms Check-In Process Styling
+ * Modern, clean design with gradient backgrounds
+ * Fully responsive for all mobile devices
+ */
+
+/* ============================================
+   GRADIENT HERO BACKGROUNDS (No images)
+   ============================================ */
+.checkin-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Modern gradient - booking.com inspired blues with subtle animation */
+    background: linear-gradient(135deg,
+        #0c1929 0%,
+        #1a2b42 25%,
+        #2d4363 50%,
+        #1a2b42 75%,
+        #0c1929 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Subtle overlay for better text contrast */
+.checkin-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+    pointer-events: none;
+}
+
+/* ============================================
+   PROGRESS BAR - Modern & Clean
+   ============================================ */
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 40px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.step {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 18px;
+    backdrop-filter: blur(10px);
+}
+
+.step.completed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.step.active {
+    background: linear-gradient(135deg, #0066cc 0%, #003d99 100%);
+    border-color: #0066cc;
+    box-shadow: 0 0 20px rgba(0, 102, 204, 0.6), 0 4px 12px rgba(0, 102, 204, 0.3);
+    transform: scale(1.1);
+}
+
+.step .step-number {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.step.completed .step-number {
+    display: none;
+}
+
+.step .checkmark {
+    display: none;
+    font-size: 24px;
+}
+
+.step.completed .checkmark {
+    display: block;
+}
+
+.step-line {
+    width: 70px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+.step-line.completed {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* ============================================
+   CONTENT CONTAINER
+   ============================================ */
+.checkin-content {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    width: 90%;
+    margin: 0 auto;
+    padding: 40px 30px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.checkin-content h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 12px;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.checkin-content > p {
+    font-size: 15px;
+    color: #e2e8f0;
+    margin-bottom: 24px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* Input Area - White Card with Shadow */
+.input-area {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: none;
+    
+    margin-bottom: 20px;
+}
+
+/* ============================================
+   FORM STYLES - Clean & Modern
+   ============================================ */
+.checkin-form {
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: #ffffff;
+    color: #ffffff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+    background: #ffffff;
+}
+
+.form-group input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+
+/* ============================================
+   BUTTONS - Booking.com Inspired
+   ============================================ */
+.btn-primary {
+    width: 100%;
+    padding: 16px 24px;
+    border: none;
+    background: linear-gradient(90deg, #0066cc 0%, #003d99 100%);
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+    letter-spacing: 0.3px;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 102, 204, 0.4);
+    background: linear-gradient(90deg, #0052a3 0%, #002d7a 100%);
+}
+
+.btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Secondary Button */
+.btn-secondary {
+    width: 100%;
+    padding: 16px 24px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: #ffffff;
+    color: #e2e8f0;
+    font-size: 17px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 12px;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   NOTICE BOXES
+   ============================================ */
+.privacy-notice,
+.info-box,
+.gdpr-consent-box {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 24px;
+}
+
+.privacy-notice p,
+.info-box p {
+    font-size: 14px;
+    color: #e2e8f0;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* GDPR Consent Box */
+.gdpr-consent-box {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.gdpr-consent-box h4 {
+    margin: 0 0 12px 0;
+    color: #92400e;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.gdpr-consent-box p,
+.gdpr-consent-box ul {
+    font-size: 14px;
+    color: #44403c;
+    line-height: 1.7;
+}
+
+.consent-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: #ffffff;
+    cursor: pointer;
+    line-height: 1.6;
+}
+
+.consent-label input[type="checkbox"] {
+    margin-top: 4px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: #0066cc;
+}
+
+.consent-label a {
+    color: #0066cc;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.consent-label a:hover {
+    color: #003d99;
+}
+
+/* ============================================
+   SUMMARY BOX (Step 4)
+   ============================================ */
+.summary-box {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+    border: 2px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.summary-box h3 {
+    margin: 0 0 20px 0;
+    color: #065f46;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+    font-size: 15px;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item .label {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.summary-item .value {
+    color: #ffffff;
+    font-weight: 700;
+    text-align: right;
+}
+
+/* ============================================
+   PARKING & ID UPLOAD SECTION
+   ============================================ */
+.parking-question {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.parking-question label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.parking-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.parking-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.parking-option:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #cbd5e1;
+}
+
+.parking-option input[type="radio"] {
+    display: none;
+}
+
+.parking-option input[type="radio"]:checked + label {
+    background: linear-gradient(135deg, #0066cc 0%, #003d99 100%);
+    color: white;
+    border-color: #0066cc;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
+
+/* Car Registration Input (Hidden by default) */
+.car-reg-input {
+    display: none;
+    margin-top: 16px;
+    animation: slideDown 0.3s ease;
+}
+
+.car-reg-input.visible {
+    display: block;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ID Upload Section */
+.id-upload-section {
+    margin-top: 32px;
+}
+
+.id-upload-section > label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.id-upload-section > p {
+    font-size: 14px;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.upload-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.upload-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ffffff;
+}
+
+.upload-btn:hover {
+    border-color: #0066cc;
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(0, 102, 204, 0.02) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+}
+
+.upload-btn .btn-icon {
+    font-size: 36px;
+}
+
+.upload-btn .btn-text {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* Image Preview */
+.preview-container {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #10b981;
+    background: #f0fdf4;
+    max-width: 100%;
+}
+
+.preview-container img {
+    width: 100%;
+    max-height: 350px;
+    object-fit: contain;
+    display: block;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.remove-btn:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+/* ============================================
+   PIN PROGRESS BOX
+   ============================================ */
+.pin-progress-box {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 28px;
+    animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.25);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+.progress-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.progress-icon {
+    font-size: 28px;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.progress-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.progress-bar-track {
+    height: 10px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0066cc, #003d99, #0066cc);
+    background-size: 200% 100%;
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.5s ease;
+    animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.progress-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    background: #0066cc;
+    border-radius: 50%;
+    animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* PIN Status Success */
+.pin-progress-box.ready {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.06) 100%);
+    border-color: #10b981;
+    animation: none;
+}
+
+.pin-progress-box.ready .status-dot {
+    background: #10b981;
+    animation: none;
+}
+
+.pin-progress-box.ready .progress-bar-fill {
+    background: linear-gradient(90deg, #10b981, #059669);
+    animation: none;
+}
+
+/* ============================================
+   BACK LINK
+   ============================================ */
+.back-link {
+    color: #e2e8f0;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 16px;
+    transition: all 0.2s ease;
+}
+
+.back-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+/* ============================================
+   SPINNER
+   ============================================ */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   MOBILE RESPONSIVENESS - ALL SIZES
+   ============================================ */
+
+/* Tablets & Small Laptops (768px - 1024px) */
+@media (max-width: 1024px) {
+    .checkin-content {
+        max-width: 480px;
+        padding: 35px 28px;
+    }
+
+    .checkin-content h1 {
+        font-size: 28px;
+    }
+
+    .step {
+        width: 44px;
+        height: 44px;
+    }
+
+    .step-line {
+        width: 60px;
+    }
+}
+
+/* Mobile Landscape & Large Phones (481px - 767px) */
+@media (max-width: 767px) {
+    .checkin-hero {
+        min-height: auto;
+        padding: 100px 0 40px 0;
+    }
+
+    .checkin-content {
+        max-width: 100%;
+        width: 92%;
+        padding: 30px 24px;
+        border-radius: 14px;
+    }
+
+    .checkin-content h1 {
+        font-size: 26px;
+        margin-bottom: 10px;
+    }
+
+    .checkin-content > p {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .progress-bar {
+        max-width: 100%;
+        margin-bottom: 32px;
+    }
+
+    .step {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .step .checkmark {
+        font-size: 20px;
+    }
+
+    .step-line {
+        width: 50px;
+        height: 3px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 13px 14px;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 15px 20px;
+        font-size: 16px;
+    }
+
+    .summary-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 12px 0;
+    }
+
+    .summary-item .value {
+        text-align: left;
+    }
+
+    .upload-methods {
+        gap: 10px;
+    }
+
+    .upload-btn {
+        padding: 20px 12px;
+    }
+
+    .upload-btn .btn-icon {
+        font-size: 32px;
+    }
+
+    .upload-btn .btn-text {
+        font-size: 14px;
+    }
+}
+
+/* Small Mobile Phones (320px - 480px) */
+@media (max-width: 480px) {
+    .checkin-content {
+        width: 94%;
+        padding: 26px 20px;
+    }
+
+    .checkin-content h1 {
+        font-size: 24px;
+    }
+
+    .checkin-content > p {
+        font-size: 13px;
+    }
+
+    .step {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .step .checkmark {
+        font-size: 18px;
+    }
+
+    .step-line {
+        width: 40px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 12px 13px;
+        font-size: 16px;
+    }
+
+    .form-group small {
+        font-size: 12px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 14px 18px;
+        font-size: 15px;
+    }
+
+    .privacy-notice,
+    .info-box,
+    .gdpr-consent-box {
+        padding: 16px;
+    }
+
+    .privacy-notice p,
+    .info-box p,
+    .gdpr-consent-box p,
+    .gdpr-consent-box ul {
+        font-size: 13px;
+    }
+
+    .summary-box {
+        padding: 20px;
+    }
+
+    .summary-box h3 {
+        font-size: 18px;
+    }
+
+    .summary-item {
+        font-size: 14px;
+    }
+
+    .parking-options {
+        grid-template-columns: 1fr;
+    }
+
+    .parking-option {
+        padding: 14px;
+        font-size: 15px;
+    }
+
+    .upload-methods {
+        grid-template-columns: 1fr;
+    }
+
+    .upload-btn {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 16px;
+    }
+
+    .upload-btn .btn-icon {
+        font-size: 28px;
+    }
+
+    .pin-progress-box {
+        padding: 20px;
+    }
+
+    .progress-icon {
+        font-size: 24px;
+    }
+
+    .progress-text {
+        font-size: 15px;
+    }
+}
+
+/* Very Small Devices (< 320px) */
+@media (max-width: 319px) {
+    .checkin-content {
+        width: 96%;
+        padding: 20px 16px;
+    }
+
+    .checkin-content h1 {
+        font-size: 22px;
+    }
+
+    .step {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+    }
+
+    .step-line {
+        width: 30px;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY & UTILITIES
+   ============================================ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Focus Visible for Keyboard Navigation */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+    outline: 3px solid #0066cc;
+    outline-offset: 2px;
+}
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

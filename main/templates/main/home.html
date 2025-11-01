@@ -15,12 +15,19 @@
             {% trans "Ready to check in? Click below to start your seamless check-in experience." %}
         </p>
         
-        <!-- Check In Now Button -->
-        <a href="{% url 'checkin' %}" class="checkin-btn">
-            <span class="btn-icon">🔑</span>
-            {% trans "Check In Now" %}
-        </a>
-        
+        <!-- Check-in Buttons -->
+        <div style="display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 0 auto;">
+            <a href="{% url 'checkin' %}" class="checkin-btn checkin-btn-primary">
+                <span class="btn-icon">🔑</span>
+                {% trans "Check In Now" %}
+            </a>
+
+            <a href="{% url 'checkin' %}" class="checkin-btn checkin-btn-secondary">
+                <span class="btn-icon">✓</span>
+                {% trans "Already Checked In" %}
+            </a>
+        </div>
+
         <p style="font-size: 13px; color: #ccc; margin-top: 20px;">
             {% trans "Have your Booking.com confirmation number ready" %}
         </p>
@@ -34,48 +41,71 @@
         <style>
             /* Check In Button Styling */
             .checkin-btn {
-                display: inline-block;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
                 padding: 18px 40px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
-                font-size: 20px;
+                font-size: 19px;
                 font-weight: 700;
                 text-decoration: none;
-                border-radius: 50px;
-                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-                transition: all 0.3s ease;
+                border-radius: 12px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 position: relative;
                 overflow: hidden;
+                letter-spacing: 0.3px;
             }
-            
-            .checkin-btn:hover {
+
+            /* Primary Button - Booking.com Blue */
+            .checkin-btn-primary {
+                background: linear-gradient(90deg, #0066cc 0%, #003d99 100%);
+                box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
+            }
+
+            .checkin-btn-primary:hover {
                 transform: translateY(-3px);
-                box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+                box-shadow: 0 8px 20px rgba(0, 102, 204, 0.5);
+                background: linear-gradient(90deg, #0052a3 0%, #002d7a 100%);
             }
-            
+
+            /* Secondary Button - Green Success */
+            .checkin-btn-secondary {
+                background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            }
+
+            .checkin-btn-secondary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5);
+                background: linear-gradient(90deg, #059669 0%, #047857 100%);
+            }
+
             .checkin-btn:active {
-                transform: translateY(-1px);
+                transform: translateY(0);
             }
-            
+
             .checkin-btn .btn-icon {
                 margin-right: 10px;
                 font-size: 22px;
             }
-            
-            .checkin-btn .btn-arrow {
-                margin-left: 10px;
-                transition: transform 0.3s ease;
-            }
-            
-            .checkin-btn:hover .btn-arrow {
-                transform: translateX(5px);
-            }
-            
+
             /* Mobile Responsive */
             @media (max-width: 768px) {
                 .checkin-btn {
-                    font-size: 18px;
-                    padding: 16px 35px;
+                    font-size: 17px;
+                    padding: 16px 32px;
+                }
+
+                .checkin-btn .btn-icon {
+                    font-size: 20px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .checkin-btn {
+                    font-size: 16px;
+                    padding: 15px 28px;
                 }
             }
         </style>

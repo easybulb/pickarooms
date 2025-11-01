@@ -67,6 +67,7 @@ from .admin_guests import (
     manage_checkin_checkout,
     guest_details,
     block_review_messages,
+    admin_id_uploads,
 )
 
 # Admin room management
@@ -139,6 +140,7 @@ __all__ = [
     'manage_checkin_checkout',
     'guest_details',
     'block_review_messages',
+    'admin_id_uploads',
     # Admin rooms
     'room_management',
     'edit_room',

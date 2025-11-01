@@ -1,0 +1,387 @@
+{% extends 'main/admin_base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "ID Uploads Viewer" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/id_uploads.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="id-uploads-container">
+    <!-- Header -->
+    <div class="id-uploads-header">
+        <h2>
+            <span>🪪</span>
+            {% trans "Guest ID Uploads" %}
+        </h2>
+        <p>{% trans "View and manage guest identification documents" %}</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <h3>{{ total_uploads }}</h3>
+                <p>{% trans "Total ID Uploads" %}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <h3>{{ active_guests }}</h3>
+                <p>{% trans "Currently Active Guests" %}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <h3>{{ recent_uploads }}</h3>
+                <p>{% trans "Last 7 Days" %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="id-filters">
+        <div class="filter-group">
+            <label for="search-name">{% trans "Search Guest Name" %}</label>
+            <input type="text" id="search-name" placeholder="{% trans 'Enter guest name...' %}">
+        </div>
+        <div class="filter-group">
+            <label for="filter-status">{% trans "Guest Status" %}</label>
+            <select id="filter-status">
+                <option value="">{% trans "All Statuses" %}</option>
+                <option value="active">{% trans "Active" %}</option>
+                <option value="checked-out">{% trans "Checked Out" %}</option>
+                <option value="upcoming">{% trans "Upcoming" %}</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-room">{% trans "Room Number" %}</label>
+            <select id="filter-room">
+                <option value="">{% trans "All Rooms" %}</option>
+                {% for room in rooms %}
+                <option value="{{ room.number }}">{% trans "Room" %} {{ room.number }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="filter-btn" onclick="applyFilters()">
+            {% trans "Apply Filters" %}
+        </button>
+        <button class="filter-btn filter-btn-secondary" onclick="clearFilters()">
+            {% trans "Clear" %}
+        </button>
+    </div>
+
+    <!-- ID Uploads Table -->
+    <div class="id-uploads-grid">
+        {% if guests %}
+        <table class="id-uploads-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Guest" %}</th>
+                    <th>{% trans "Room" %}</th>
+                    <th>{% trans "Check-In" %}</th>
+                    <th>{% trans "Check-Out" %}</th>
+                    <th>{% trans "ID Preview" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody id="uploads-table-body">
+                {% for guest in guests %}
+                <tr data-guest-name="{{ guest.full_name|lower }}"
+                    data-room="{{ guest.reservation.room.number }}"
+                    data-status="{{ guest.status }}">
+                    <td>
+                        <div class="guest-info">
+                            <span class="guest-name">{{ guest.full_name }}</span>
+                            <span class="guest-details">
+                                {% if guest.phone_number %}
+                                    📞 {{ guest.phone_number }}
+                                {% endif %}
+                                {% if guest.email %}
+                                    <br>✉️ {{ guest.email }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <strong>{% trans "Room" %} {{ guest.reservation.room.number }}</strong>
+                    </td>
+                    <td>
+                        {{ guest.reservation.checkin_date|date:"d M Y" }}
+                    </td>
+                    <td>
+                        {{ guest.reservation.checkout_date|date:"d M Y" }}
+                    </td>
+                    <td>
+                        {% if guest.id_image %}
+                        <img src="{{ guest.id_image }}"
+                             alt="ID for {{ guest.full_name }}"
+                             class="id-thumbnail"
+                             onclick="openModal('{{ guest.id }}')">
+                        {% else %}
+                        <span style="color: #64748b; font-size: 13px;">{% trans "No ID" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if guest.status == 'active' %}
+                        <span class="status-badge status-active">{% trans "Active" %}</span>
+                        {% elif guest.status == 'checked-out' %}
+                        <span class="status-badge status-checked-out">{% trans "Checked Out" %}</span>
+                        {% else %}
+                        <span class="status-badge status-upcoming">{% trans "Upcoming" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            {% if guest.id_image %}
+                            <button class="btn-view" onclick="openModal('{{ guest.id }}')">
+                                👁️ {% trans "View" %}
+                            </button>
+                            <button class="btn-download" onclick="downloadID('{{ guest.id_image }}', '{{ guest.full_name }}')">
+                                ⬇️ {% trans "Download" %}
+                            </button>
+                            {% else %}
+                            <span style="color: #94a3b8; font-size: 13px;">{% trans "No actions" %}</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <button class="page-btn" onclick="window.location.href='?page=1'">
+                &laquo; {% trans "First" %}
+            </button>
+            <button class="page-btn" onclick="window.location.href='?page={{ page_obj.previous_page_number }}'">
+                ‹ {% trans "Previous" %}
+            </button>
+            {% else %}
+            <button class="page-btn" disabled>&laquo; {% trans "First" %}</button>
+            <button class="page-btn" disabled>‹ {% trans "Previous" %}</button>
+            {% endif %}
+
+            <span style="padding: 8px 14px; color: #475569; font-weight: 600;">
+                {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+            <button class="page-btn" onclick="window.location.href='?page={{ page_obj.next_page_number }}'">
+                {% trans "Next" %} ›
+            </button>
+            <button class="page-btn" onclick="window.location.href='?page={{ page_obj.paginator.num_pages }}'">
+                {% trans "Last" %} &raquo;
+            </button>
+            {% else %}
+            <button class="page-btn" disabled>{% trans "Next" %} ›</button>
+            <button class="page-btn" disabled>{% trans "Last" %} &raquo;</button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">🪪</div>
+            <h3>{% trans "No ID Uploads Found" %}</h3>
+            <p>{% trans "There are no guest ID uploads to display at this time." %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal for Full-Size ID View -->
+<div class="id-modal" id="id-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">{% trans "Guest ID Document" %}</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-guest-info" id="modal-guest-info">
+                <!-- Guest info will be populated by JavaScript -->
+            </div>
+            <img src="" alt="ID Document" class="modal-id-image" id="modal-id-image">
+            <div class="modal-actions">
+                <button class="filter-btn filter-btn-secondary" onclick="closeModal()">
+                    {% trans "Close" %}
+                </button>
+                <button class="filter-btn" id="modal-download-btn">
+                    ⬇️ {% trans "Download ID" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Guest data for modal (passed from Django)
+    const guestData = {
+        {% for guest in guests %}
+        '{{ guest.id }}': {
+            name: '{{ guest.full_name }}',
+            phone: '{{ guest.phone_number }}',
+            email: '{{ guest.email }}',
+            room: '{{ guest.reservation.room.number }}',
+            checkin: '{{ guest.reservation.checkin_date|date:"d M Y" }}',
+            checkout: '{{ guest.reservation.checkout_date|date:"d M Y" }}',
+            id_image: '{{ guest.id_image }}',
+            booking_ref: '{{ guest.reservation.booking_reference }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    // Open Modal
+    function openModal(guestId) {
+        const guest = guestData[guestId];
+        if (!guest) return;
+
+        // Set modal image
+        document.getElementById('modal-id-image').src = guest.id_image;
+        document.getElementById('modal-title').textContent = `${guest.name} - ID Document`;
+
+        // Populate guest info
+        document.getElementById('modal-guest-info').innerHTML = `
+            <div class="info-item">
+                <span class="info-label">{% trans "Guest Name" %}</span>
+                <span class="info-value">${guest.name}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">{% trans "Room Number" %}</span>
+                <span class="info-value">{% trans "Room" %} ${guest.room}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">{% trans "Booking Reference" %}</span>
+                <span class="info-value">${guest.booking_ref}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">{% trans "Phone" %}</span>
+                <span class="info-value">${guest.phone || 'N/A'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">{% trans "Email" %}</span>
+                <span class="info-value">${guest.email || 'N/A'}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">{% trans "Check-In" %}</span>
+                <span class="info-value">${guest.checkin}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">{% trans "Check-Out" %}</span>
+                <span class="info-value">${guest.checkout}</span>
+            </div>
+        `;
+
+        // Set download button
+        document.getElementById('modal-download-btn').onclick = () => downloadID(guest.id_image, guest.name);
+
+        // Show modal
+        document.getElementById('id-modal').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Close Modal
+    function closeModal() {
+        document.getElementById('id-modal').classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal on outside click
+    document.getElementById('id-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // Download ID
+    function downloadID(imageUrl, guestName) {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `ID_${guestName.replace(/\s+/g, '_')}.jpg`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // Apply Filters
+    function applyFilters() {
+        const searchName = document.getElementById('search-name').value.toLowerCase();
+        const filterStatus = document.getElementById('filter-status').value;
+        const filterRoom = document.getElementById('filter-room').value;
+
+        const rows = document.querySelectorAll('#uploads-table-body tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const guestName = row.getAttribute('data-guest-name');
+            const roomNumber = row.getAttribute('data-room');
+            const status = row.getAttribute('data-status');
+
+            let showRow = true;
+
+            // Filter by name
+            if (searchName && !guestName.includes(searchName)) {
+                showRow = false;
+            }
+
+            // Filter by status
+            if (filterStatus && status !== filterStatus) {
+                showRow = false;
+            }
+
+            // Filter by room
+            if (filterRoom && roomNumber !== filterRoom) {
+                showRow = false;
+            }
+
+            if (showRow) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show empty state if no results
+        if (visibleCount === 0 && rows.length > 0) {
+            // Could add a "no results" message here
+            console.log('No results found for current filters');
+        }
+    }
+
+    // Clear Filters
+    function clearFilters() {
+        document.getElementById('search-name').value = '';
+        document.getElementById('filter-status').value = '';
+        document.getElementById('filter-room').value = '';
+
+        const rows = document.querySelectorAll('#uploads-table-body tr');
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+    }
+
+    // Real-time search
+    document.getElementById('search-name').addEventListener('input', applyFilters);
+    document.getElementById('filter-status').addEventListener('change', applyFilters);
+    document.getElementById('filter-room').addEventListener('change', applyFilters);
+
+    // ESC key to close modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}{% trans "Check-In - Your Details" %}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkin.css' %}">
+{% endblock %}
+
 {% block content %}
-<section class="hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
+<section class="checkin-hero">
+    <div class="checkin-content">
         <!-- Progress Bar -->
         <div class="progress-bar">
             <div class="step completed">
@@ -28,267 +32,105 @@
         </div>
 
         <h1>{% trans "Your Details" %}</h1>
-        <p style="font-size: 14px; color: #ccc; margin-bottom: 10px;">
-            {% trans "Please provide your contact information to complete check-in." %}
-        </p>
-        
+        <p>{% trans "Please provide your contact information to complete check-in." %}</p>
+
         <!-- GDPR Privacy Notice -->
         <div class="privacy-notice">
-            <p style="font-size: 13px; color: #f0f0f0; line-height: 1.5; margin: 0;">
-                🔒 {% trans "We use your contact details to provide your access code and manage your stay. Your details are stored securely and can be deleted at any time by contacting us." %}
-            </p>
+            <p>🔒 {% trans "We use your contact details to provide your access code and manage your stay. Your details are stored securely and can be deleted at any time by contacting us." %}</p>
         </div>
 
-        {% if messages %}
-            {% for message in messages %}
-                <p style="color: {% if message.tags == 'error' %}red{% else %}#4CAF50{% endif %};" class="message">
-                    {{ message }}
-                </p>
-            {% endfor %}
-        {% endif %}
+        <div class="input-area">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="info-box" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; margin-bottom: 20px;">
+                        <p style="color: #dc2626; margin: 0; font-weight: 600;">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-        <form method="post" class="checkin-form" id="details-form">
-            {% csrf_token %}
-            
-            <!-- Full Name -->
-            <div class="form-group">
-                <label for="full_name">{% trans "Full Name" %} *</label>
-                <input type="text" 
-                       name="full_name" 
-                       id="full_name"
-                       placeholder="{% trans 'John Smith' %}"
-                       value="{{ flow_data.full_name|default:'' }}"
-                       required 
-                       autofocus>
-            </div>
+            <form method="post" class="checkin-form" id="details-form">
+                {% csrf_token %}
 
-            <!-- Phone Number with Country Code -->
-            <div class="form-group">
-                <label for="phone_number">{% trans "Phone Number" %} *</label>
-                <div style="display: flex; gap: 10px; width: 100%;">
-                    <select name="country_code" id="country-code" style="width: 180px; padding: 12px; border: 1px solid #444; border-radius: 5px; background: rgba(0, 0, 0, 0.5); color: white; font-size: 14px;">
-                        <option value="+44" selected>🇬🇧 UK (+44)</option>
-                        <option value="+1">🇺🇸 US/CA (+1)</option>
-                        <option value="+91">🇮🇳 India (+91)</option>
-                        <option value="+234">🇳🇬 Nigeria (+234)</option>
-                        <option value="+86">🇨🇳 China (+86)</option>
-                        <option value="+33">🇫🇷 France (+33)</option>
-                        <option value="+49">🇩🇪 Germany (+49)</option>
-                        <option value="+81">🇯🇵 Japan (+81)</option>
-                        <option value="+61">🇦🇺 Australia (+61)</option>
-                        <option value="+55">🇧🇷 Brazil (+55)</option>
-                    </select>
-                    <input type="tel" 
-                           name="phone_number" 
-                           id="phone_number"
-                           placeholder="{% trans '7123456789' %}"
-                           value="{{ flow_data.phone_number|default:'' }}"
-                           style="flex: 1; padding: 12px; border: 1px solid #444; border-radius: 5px; background: rgba(0, 0, 0, 0.5); color: white; font-size: 16px;"
-                           required>
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="full_name">{% trans "Full Name" %} *</label>
+                    <input type="text"
+                           name="full_name"
+                           id="full_name"
+                           placeholder="{% trans 'John Smith' %}"
+                           value="{{ flow_data.full_name|default:'' }}"
+                           required
+                           autofocus>
                 </div>
-                <small style="color: #ccc; font-size: 12px; display: block; margin-top: 5px;">
-                    {% trans "Enter without leading 0. Example: 07123456789 becomes 7123456789" %}
-                </small>
-            </div>
 
-            <!-- Email (Optional) -->
-            <div class="form-group">
-                <label for="email">{% trans "Email Address" %} ({% trans "optional" %})</label>
-                <input type="email" 
-                       name="email" 
-                       id="email"
-                       placeholder="{% trans 'john@example.com' %}"
-                       value="{{ flow_data.email|default:'' }}">
-            </div>
+                <!-- Phone Number with Country Code -->
+                <div class="form-group">
+                    <label for="phone_number">{% trans "Phone Number" %} *</label>
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <select name="country_code" id="country-code" class="country-select">
+                            <option value="+44" selected>🇬🇧 UK (+44)</option>
+                            <option value="+1">🇺🇸 US/CA (+1)</option>
+                            <option value="+91">🇮🇳 India (+91)</option>
+                            <option value="+234">🇳🇬 Nigeria (+234)</option>
+                            <option value="+86">🇨🇳 China (+86)</option>
+                            <option value="+33">🇫🇷 France (+33)</option>
+                            <option value="+49">🇩🇪 Germany (+49)</option>
+                            <option value="+81">🇯🇵 Japan (+81)</option>
+                            <option value="+61">🇦🇺 Australia (+61)</option>
+                            <option value="+55">🇧🇷 Brazil (+55)</option>
+                        </select>
+                        <input type="tel"
+                               name="phone_number"
+                               id="phone_number"
+                               placeholder="{% trans '7123456789' %}"
+                               value="{{ flow_data.phone_number|default:'' }}"
+                               style="flex: 1;"
+                               required>
+                    </div>
+                    <small>{% trans "Enter without leading 0. Example: 07123456789 becomes 7123456789" %}</small>
+                </div>
 
-            <!-- Submit Button -->
-            <button type="submit" class="btn-primary">
-                {% trans "Continue" %} →
-            </button>
-        </form>
+                <!-- Email (Optional) -->
+                <div class="form-group">
+                    <label for="email">{% trans "Email Address" %} <span style="font-weight: 400; color: rgba(255,255,255,0.7);">({% trans "optional" %})</span></label>
+                    <input type="email"
+                           name="email"
+                           id="email"
+                           placeholder="{% trans 'john@example.com' %}"
+                           value="{{ flow_data.email|default:'' }}">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary">
+                    {% trans "Continue" %} →
+                </button>
+            </form>
+        </div>
 
         <!-- Back Link -->
-        <p style="margin-top: 15px;">
+        <p style="text-align: center; margin-top: 15px;">
             <a href="{% url 'checkin' %}" class="back-link">← {% trans "Back to Step 1" %}</a>
         </p>
 
         <!-- Privacy Policy Link -->
-        <p style="font-size: 12px; color: #aaa; margin-top: 20px; text-align: center;">
-            <a href="{% url 'privacy_policy' %}" target="_blank" style="color: #FFD700; text-decoration: none;">
+        <p style="font-size: 13px; color: #cbd5e1; margin-top: 20px; text-align: center;">
+            <a href="{% url 'privacy_policy' %}" target="_blank" style="color: #e2e8f0; text-decoration: none; font-weight: 600;">
                 📜 {% trans "Read our Privacy Policy" %}
             </a>
         </p>
     </div>
-    <img src="https://res.cloudinary.com/dkqpb7vwr/image/upload/v1739380781/grey-hero-pickarooms_i5lums.png"
-         alt="{% trans 'Luxury Hotel Room' %}" class="hero-image">
 </section>
 
 <style>
-    /* Progress Bar Styles */
-    .progress-bar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 30px;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
+    .country-select {
+        width: 180px !important;
+        flex-shrink: 0;
     }
 
-    .step {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        color: #fff;
-        position: relative;
-        transition: all 0.3s ease;
-    }
-
-    .step.completed {
-        background: #28a745;
-        border-color: #28a745;
-    }
-
-    .step.active {
-        background: #667eea;
-        border-color: #667eea;
-        box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
-    }
-
-    .step .step-number {
-        display: block;
-    }
-
-    .step.completed .step-number {
-        display: none;
-    }
-
-    .step .checkmark {
-        display: none;
-        font-size: 20px;
-    }
-
-    .step.completed .checkmark {
-        display: block;
-    }
-
-    .step-line {
-        width: 60px;
-        height: 3px;
-        background: rgba(255, 255, 255, 0.2);
-        transition: all 0.3s ease;
-    }
-
-    .step-line.completed {
-        background: #28a745;
-    }
-
-    /* Privacy Notice Box */
-    .privacy-notice {
-        background: rgba(102, 126, 234, 0.15);
-        border: 1px solid rgba(102, 126, 234, 0.3);
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-
-    /* Form Styles */
-    .form-group {
-        margin-bottom: 20px;
-        text-align: left;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #fff;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .form-group input,
-    .form-group select {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #444;
-        border-radius: 5px;
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        font-size: 16px;
-        transition: border-color 0.3s ease;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-primary {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        background: linear-gradient(90deg, #002147, #003580, #0056b3);
-        color: white;
-        font-size: 16px;
-        font-weight: 600;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-top: 10px;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 86, 179, 0.4);
-    }
-
-    .btn-primary:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .back-link {
-        color: #FFD700;
-        text-decoration: none;
-        font-size: 14px;
-    }
-
-    .back-link:hover {
-        text-decoration: underline;
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-        .progress-bar {
-            max-width: 100%;
-            padding: 0 20px;
-        }
-
-        .step {
-            width: 35px;
-            height: 35px;
-            font-size: 14px;
-        }
-
-        .step-line {
-            width: 40px;
-        }
-
-        .hero-content h1 {
-            font-size: 2rem;
-        }
-
-        .form-group input,
-        .form-group select {
-            font-size: 16px; /* Prevent zoom on iOS */
+    @media (max-width: 480px) {
+        .country-select {
+            width: 140px !important;
+            font-size: 14px !important;
         }
     }
 </style>
@@ -307,33 +149,39 @@
         }
 
         // Form validation feedback
-        const form = document.getElementById('details-form');
         const nameInput = document.getElementById('full_name');
         const emailInput = document.getElementById('email');
 
         // Real-time validation
         nameInput.addEventListener('blur', function() {
             if (this.value.trim().length < 2) {
-                this.style.borderColor = '#dc3545';
+                this.style.borderColor = '#ef4444';
+                this.style.background = 'rgba(239, 68, 68, 0.05)';
             } else {
-                this.style.borderColor = '#28a745';
+                this.style.borderColor = '#10b981';
+                this.style.background = 'rgba(16, 185, 129, 0.05)';
             }
         });
 
         phoneInput.addEventListener('blur', function() {
             if (this.value.trim().length < 7) {
-                this.style.borderColor = '#dc3545';
+                this.style.borderColor = '#ef4444';
+                this.style.background = 'rgba(239, 68, 68, 0.05)';
             } else {
-                this.style.borderColor = '#28a745';
+                this.style.borderColor = '#10b981';
+                this.style.background = 'rgba(16, 185, 129, 0.05)';
             }
         });
 
-        // Page enter animation
-        document.body.style.opacity = '0';
-        setTimeout(() => {
-            document.body.style.transition = 'opacity 0.3s ease';
-            document.body.style.opacity = '1';
-        }, 50);
+        // Reset on focus
+        [nameInput, phoneInput, emailInput].forEach(input => {
+            if (input) {
+                input.addEventListener('focus', function() {
+                    this.style.borderColor = '#0066cc';
+                    this.style.background = '#ffffff';
+                });
+            }
+        });
     });
 </script>
 {% endblock %}
