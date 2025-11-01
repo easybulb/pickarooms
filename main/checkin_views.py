@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
-from main.models import Guest, Reservation, CheckInAnalytics
+from main.models import Guest, Reservation, CheckInAnalytics, GuestIDUpload
 from main.phone_utils import normalize_phone_to_e164, validate_phone_number
 from main.tasks import generate_checkin_pin_background
 import pytz
@@ -312,7 +312,7 @@ def checkin_confirm(request):
         pin_status = flow_data.get('pin_generated')
         
         if pin_status == True:
-            # ✅ PIN READY! Create guest
+                        # ✅ PIN READY! Create guest
             try:
                 guest = Guest.objects.create(
                     full_name=flow_data['full_name'],
@@ -323,13 +323,23 @@ def checkin_confirm(request):
                     check_out_date=reservation.check_out_date,
                     assigned_room=reservation.room,
                     car_registration=flow_data.get('car_registration'),
-                    id_image=flow_data.get('id_image_url', ''),  # Save ID image if uploaded
                     early_checkin_time=reservation.early_checkin_time,
                     late_checkout_time=reservation.late_checkout_time,
                     front_door_pin=flow_data['pin'],
                     front_door_pin_id=flow_data['front_door_pin_id'],
                     room_pin_id=flow_data['room_pin_id'],
                 )
+                
+                # Save ID image if uploaded (using GuestIDUpload model)
+                if flow_data.get('id_image_url'):
+                    try:
+                        GuestIDUpload.objects.create(
+                            guest=guest,
+                            id_image=flow_data['id_image_url']
+                        )
+                        logger.info(f"Saved ID upload for guest {guest.full_name}")
+                    except Exception as e:
+                        logger.error(f"Failed to save ID upload: {str(e)}")
                 
                 # Link guest to reservation
                 reservation.guest = guest
