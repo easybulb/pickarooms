@@ -5,10 +5,11 @@
 {% block title %}{% trans "ID Uploads Viewer" %}{% endblock %}
 
 {% block extra_css %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/id_uploads.css' %}">
 {% endblock %}
 
-{% block content %}
+{% block admin_content %}
 <div class="id-uploads-container">
     <!-- Header -->
     <div class="id-uploads-header">
