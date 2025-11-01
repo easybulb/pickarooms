@@ -1060,8 +1060,12 @@ def admin_id_uploads(request):
     """Admin interface for viewing uploaded guest IDs"""
     from datetime import timedelta
 
-    # Get all guests with ID images (both from Guest.id_image and GuestIDUpload model)
-    guests_with_ids = Guest.objects.exclude(id_image__isnull=True).exclude(id_image='').select_related('assigned_room').order_by('-check_in_date')
+        # Get all guests with ID uploads from GuestIDUpload model
+    guests_with_id_uploads = GuestIDUpload.objects.select_related('guest', 'guest__assigned_room').order_by('-uploaded_at')
+    
+    # Get unique guests from ID uploads
+    guest_ids = guests_with_id_uploads.values_list('guest_id', flat=True).distinct()
+    guests_with_ids = Guest.objects.filter(id__in=guest_ids).select_related('assigned_room').order_by('-check_in_date')
 
     # Determine guest status
     uk_timezone = pytz.timezone("Europe/London")
@@ -1080,12 +1084,15 @@ def admin_id_uploads(request):
         # Get reservation object if exists
         reservation = Reservation.objects.filter(guest=guest).first()
 
+                # Get the most recent ID upload for this guest
+        latest_id_upload = guest.id_uploads.order_by('-uploaded_at').first()
+        
         guests_list.append({
             'id': guest.id,
             'full_name': guest.full_name,
             'phone_number': guest.phone_number,
             'email': guest.email,
-            'id_image': guest.id_image,
+            'id_image': latest_id_upload.id_image if latest_id_upload else None,
             'status': status,
             'reservation': reservation if reservation else type('obj', (object,), {
                 'room': guest.assigned_room,
@@ -1103,8 +1110,8 @@ def admin_id_uploads(request):
     seven_days_ago = now_uk_date - timedelta(days=7)
     recent_uploads = len([g for g in guests_with_ids if g.check_in_date >= seven_days_ago])
 
-    # Get all rooms for filter dropdown
-    rooms = Room.objects.all().order_by('number')
+        # Get all rooms for filter dropdown
+    rooms = Room.objects.all().order_by('name')
 
     # Pagination
     paginator = Paginator(guests_list, 20)  # 20 guests per page
