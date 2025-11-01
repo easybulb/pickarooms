@@ -83,101 +83,142 @@ def create_reservations_from_xls_row(row, warnings_list=None):
         logger.error(f"No rooms mapped for booking {booking_ref}, unit type: {unit_type}")
         return []
 
-    # Check for room changes (booking moved to different room)
-    existing_reservations = Reservation.objects.filter(
+    # ===========================================================================
+    # XLS RECONCILIATION LOGIC (Option B++: Smart Room Assignment with Victim Restoration)
+    # ===========================================================================
+    # XLS is the single source of truth. This logic:
+    # 1. Finds ALL existing reservations for this booking
+    # 2. Deletes reservations for rooms NOT in XLS (wrong assignments)
+    # 3. Restores any "victim" bookings that were auto-cancelled by the wrong assignment
+    # 4. Updates existing correct room assignments (fixes status, guest name, etc.)
+    # 5. Creates missing room assignments from XLS
+    # ===========================================================================
+
+    # STEP 1: Find ALL existing reservations for this booking reference
+    all_existing = Reservation.objects.filter(
         booking_reference=booking_ref,
         check_in_date=check_in
     )
 
-    if existing_reservations.exists():
-        existing_rooms = set(res.room.name for res in existing_reservations)
-        new_rooms = set(rooms)
+    existing_rooms_map = {res.room.name: res for res in all_existing}
+    new_rooms_set = set(rooms)  # Rooms from XLS (truth)
+    existing_rooms_set = set(existing_rooms_map.keys())  # Rooms in DB
 
-        # Detect room changes
-        removed_rooms = existing_rooms - new_rooms
-        added_rooms = new_rooms - existing_rooms
+    # STEP 2: Identify room changes
+    rooms_to_delete = existing_rooms_set - new_rooms_set  # In DB but NOT in XLS (wrong!)
+    rooms_to_create = new_rooms_set - existing_rooms_set  # In XLS but NOT in DB (missing)
+    rooms_to_update = new_rooms_set & existing_rooms_set  # In both (correct rooms, may need data update)
 
-        if removed_rooms or added_rooms:
-            warning_msg = f"⚠️ ROOM CHANGE DETECTED for booking {booking_ref} ({guest_name}, {check_in}):"
-            if removed_rooms:
-                warning_msg += f" Removed from {', '.join(removed_rooms)}."
-            if added_rooms:
-                warning_msg += f" Added to {', '.join(added_rooms)}."
-            warning_msg += " Please manually check/delete old reservations from Django admin."
-
-            logger.warning(warning_msg)
-            if warnings_list is not None:
-                warnings_list.append({
-                    'type': 'room_change',
-                    'booking_ref': booking_ref,
-                    'guest_name': guest_name,
-                    'check_in': check_in.isoformat(),  # Convert date to ISO string for JSON serialization
-                    'removed_rooms': list(removed_rooms),
-                    'added_rooms': list(added_rooms),
-                    'message': warning_msg
-                })
-
+    # Track actions for logging
     created_reservations = []
+    restored_victims = []
 
-    for room_name in rooms:
+    # STEP 3: Delete wrong room assignments and restore victims
+    if rooms_to_delete:
+        logger.info(f"Room change detected for {booking_ref}: Removing from {rooms_to_delete}")
+        if warnings_list is not None:
+            warnings_list.append({
+                'type': 'room_change',
+                'booking_ref': booking_ref,
+                'guest_name': guest_name,
+                'check_in': check_in.isoformat(),
+                'removed_rooms': list(rooms_to_delete),
+                'added_rooms': list(rooms_to_create),
+                'message': f"Auto-corrected: Removed {booking_ref} from {', '.join(rooms_to_delete)}"
+            })
+
+        for room_name in rooms_to_delete:
+            wrong_res = existing_rooms_map[room_name]
+            room = wrong_res.room
+
+            # CRITICAL: Check if another booking was auto-cancelled due to this wrong assignment
+            victim_booking = Reservation.objects.filter(
+                room=room,
+                check_in_date=check_in,
+                status='cancelled'
+            ).exclude(
+                booking_reference__in=[booking_ref, '', None]
+            ).order_by('-updated_at').first()
+
+            # Delete the wrong assignment (only if guest not checked in)
+            if wrong_res.guest is None:
+                wrong_res.delete()
+                logger.info(f"✓ Deleted wrong assignment: {booking_ref} from {room_name}")
+
+                # Restore victim booking if found
+                if victim_booking:
+                    victim_booking.status = 'confirmed'
+                    victim_booking.save()
+                    restored_victims.append(victim_booking)
+                    logger.info(f"✓ RESTORED victim: {victim_booking.booking_reference} ({victim_booking.guest_name}) to {room_name}")
+            else:
+                logger.warning(f"Cannot delete {booking_ref} from {room_name}: Guest already checked in")
+
+    # STEP 4: Update existing correct room assignments
+    for room_name in rooms_to_update:
+        existing = existing_rooms_map[room_name]
+
+        # Update all fields from XLS (XLS is truth)
+        existing.booking_reference = booking_ref
+        existing.guest_name = guest_name
+        existing.check_out_date = check_out
+
+        # CRITICAL: If XLS says status='ok', restore from cancelled
+        if status == 'ok' and existing.status == 'cancelled':
+            existing.status = 'confirmed'
+            logger.info(f"✓ RESTORED status: {booking_ref} -> {room_name} (was cancelled, now confirmed)")
+        elif status == 'cancelled_by_guest':
+            existing.status = 'cancelled'
+        else:
+            existing.status = 'confirmed'
+
+        existing.save()
+        created_reservations.append(('updated', existing))
+        logger.info(f"✓ Updated: {booking_ref} -> {room_name}")
+
+    # STEP 5: Create missing room assignments
+    for room_name in rooms_to_create:
         try:
             room = Room.objects.get(name=room_name)
         except Room.DoesNotExist:
             logger.error(f"Room {room_name} not found in database")
             continue
 
-                                        # Check if reservation already exists
-        # Strategy 1: Match by booking_reference (for XLS-created or previously enriched reservations)
-        # Strategy 2: Match by room + dates (for iCal-synced reservations without booking_ref)
-        
-        existing = None
-        
-        # Strategy 1: Try matching by booking_reference + room + check_in
-        # CRITICAL: Prioritize confirmed reservations over cancelled ones
-        if booking_ref:
-            existing = Reservation.objects.filter(
-                booking_reference=booking_ref,
-                room=room,
-                check_in_date=check_in,
-                status='confirmed'  # Only match confirmed reservations
-            ).first()
-            
-            # If no confirmed reservation found, check for cancelled (fallback)
-            if not existing:
-                existing = Reservation.objects.filter(
-                    booking_reference=booking_ref,
-                    room=room,
-                    check_in_date=check_in,
-                    status='cancelled'
-                ).first()
-        
-        # Strategy 2: If not found by booking_ref, try matching by room + dates + status
-        # This catches iCal-synced reservations that don't have booking_ref yet
-        if not existing:
-            existing = Reservation.objects.filter(
-                room=room,
-                check_in_date=check_in,
-                check_out_date=check_out,
-                status='confirmed',
-                booking_reference__in=['', None]  # Only match if booking_ref is empty
-                        ).first()
-            
-            if existing:
-                logger.info(f"Matched iCal reservation by dates: {room.name} {check_in} -> {check_out}")
+        # Check if room already has a different booking (collision)
+        # First try to match by room + dates (for iCal-synced reservations without booking_ref)
+        ical_match = Reservation.objects.filter(
+            room=room,
+            check_in_date=check_in,
+            check_out_date=check_out,
+            status='confirmed',
+            booking_reference__in=['', None]
+        ).first()
 
-        if existing:
-            # Update existing (enriching iCal-synced or updating XLS-created)
-            existing.booking_reference = booking_ref  # Set/update booking ref
-            existing.guest_name = guest_name
-            existing.check_out_date = check_out
-            if status == 'cancelled_by_guest':
-                existing.status = 'cancelled'
-            existing.save()
-            created_reservations.append(('updated', existing))
-            logger.info(f"Enriched reservation: {booking_ref} -> {room.name} (was: '{existing.booking_reference or 'empty'}')")        
+        if ical_match:
+            # Enrich the iCal reservation with booking ref from XLS
+            ical_match.booking_reference = booking_ref
+            ical_match.guest_name = guest_name
+            ical_match.status = 'confirmed' if status == 'ok' else 'cancelled'
+            ical_match.save()
+            created_reservations.append(('updated', ical_match))
+            logger.info(f"✓ Enriched iCal reservation: {booking_ref} -> {room_name}")
         else:
-            # Create new (no matching reservation found - should be rare if iCal synced first)
-            reservation_status = 'cancelled' if status == 'cancelled_by_guest' else 'confirmed'
+            # Check for collision with existing confirmed booking
+            collision = Reservation.objects.filter(
+                room=room,
+                check_in_date=check_in,
+                status='confirmed'
+            ).exclude(
+                booking_reference__in=[booking_ref, '', None]
+            ).first()
+
+            if collision:
+                # Cancel the collision (XLS is truth)
+                collision.status = 'cancelled'
+                collision.save()
+                logger.warning(f"⚠ Collision detected: Cancelled {collision.booking_reference} in {room_name} (XLS says {booking_ref} should be there)")
+
+            # Create new reservation from XLS
             reservation = Reservation.objects.create(
                 room=room,
                 booking_reference=booking_ref,
@@ -185,11 +226,15 @@ def create_reservations_from_xls_row(row, warnings_list=None):
                 check_in_date=check_in,
                 check_out_date=check_out,
                 platform='booking',
-                status=reservation_status,
+                status='confirmed' if status == 'ok' else 'cancelled',
                 ical_uid=f'xls_{booking_ref}_{room_name}_{timezone.now().timestamp()}',
             )
             created_reservations.append(('created', reservation))
-            logger.info(f"Created new reservation: {booking_ref} -> {room.name} (no iCal match found)")
+            logger.info(f"✓ Created: {booking_ref} -> {room_name}")
+
+    # Log summary of restoration
+    if restored_victims:
+        logger.info(f"✓ XLS reconciliation complete for {booking_ref}: Restored {len(restored_victims)} cancelled victim(s)")
 
     return created_reservations
 
