@@ -108,8 +108,58 @@ def xls_upload_page(request):
 
         return redirect('xls_upload_page')
 
-    # Get recent upload logs
-    recent_logs = CSVEnrichmentLog.objects.all().order_by('-uploaded_at')[:20]
+    # Get most recent upload (for Last Upload Analysis)
+    latest_upload = CSVEnrichmentLog.objects.filter(
+        uploaded_by=request.user
+    ).order_by('-uploaded_at').first()
+
+    # Prepare detailed analysis of latest upload
+    latest_analysis = None
+    if latest_upload:
+        summary = latest_upload.enrichment_summary or {}
+
+        # Detect file age (compare with previous upload)
+        file_age_status = "✅ FRESH"
+        previous_upload = CSVEnrichmentLog.objects.filter(
+            uploaded_by=request.user
+        ).exclude(id=latest_upload.id).order_by('-uploaded_at').first()
+
+        if previous_upload and previous_upload.enrichment_summary:
+            prev_metadata = previous_upload.enrichment_summary.get('file_metadata', {})
+            curr_metadata = summary.get('file_metadata', {})
+
+            prev_latest_booking = prev_metadata.get('latest_booking_date')
+            curr_latest_booking = curr_metadata.get('latest_booking_date')
+
+            if prev_latest_booking and curr_latest_booking:
+                if curr_latest_booking < prev_latest_booking:
+                    file_age_status = "⚠️ OLD FILE - Contains older bookings than previous upload"
+                elif curr_latest_booking == prev_latest_booking:
+                    file_age_status = "🔄 DUPLICATE - Same booking dates as previous upload"
+                else:
+                    file_age_status = "✅ FRESH - Contains newer bookings"
+
+        latest_analysis = {
+            'file_name': latest_upload.file_name,
+            'uploaded_at': latest_upload.uploaded_at,
+            'file_age_status': file_age_status,
+            'total_rows': latest_upload.total_rows,
+            'created_count': latest_upload.created_count,
+            'updated_count': latest_upload.updated_count,
+            'multi_room_count': latest_upload.multi_room_count,
+            'deleted_count': len(summary.get('deleted_assignments', [])),
+            'restored_victims_count': len(summary.get('restored_victims', [])),
+            'status_restorations_count': len(summary.get('status_restorations', [])),
+            'warnings_count': len(summary.get('warnings', [])),
+            # Detailed lists
+            'deleted_assignments': summary.get('deleted_assignments', []),
+            'restored_victims': summary.get('restored_victims', []),
+            'status_restorations': summary.get('status_restorations', []),
+            'warnings': summary.get('warnings', []),
+        }
+
+    # Get recent upload logs (show last 10)
+    recent_logs = CSVEnrichmentLog.objects.all().order_by('-uploaded_at')[:10]
 
     logs_data = []
     for log in recent_logs:
@@ -126,6 +176,7 @@ def xls_upload_page(request):
         })
 
     return render(request, 'main/xls_upload.html', {
+        'latest_analysis': latest_analysis,
         'recent_logs': logs_data,
     })
 

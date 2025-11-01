@@ -50,7 +50,7 @@ def parse_multi_room_unit_type(unit_type_str):
     return rooms
 
 
-def create_reservations_from_xls_row(row, warnings_list=None):
+def create_reservations_from_xls_row(row, warnings_list=None, action_log=None):
     """
     Create one or more Reservation objects from XLS row
     Handles both single-room and multi-room bookings
@@ -58,6 +58,7 @@ def create_reservations_from_xls_row(row, warnings_list=None):
     Args:
         row (pandas.Series): Row from XLS dataframe
         warnings_list (list): Optional list to append warnings to
+        action_log (dict): Optional dict to track detailed actions (deletions, restorations, status_changes)
 
     Returns:
         list: List of tuples (action, reservation) where action is 'created' or 'updated'
@@ -109,9 +110,20 @@ def create_reservations_from_xls_row(row, warnings_list=None):
     rooms_to_create = new_rooms_set - existing_rooms_set  # In XLS but NOT in DB (missing)
     rooms_to_update = new_rooms_set & existing_rooms_set  # In both (correct rooms, may need data update)
 
-    # Track actions for logging
+    # Track actions for logging and analysis
     created_reservations = []
     restored_victims = []
+    deleted_assignments = []
+    status_restorations = []
+
+    # Initialize action_log if provided
+    if action_log is not None:
+        if 'deleted_assignments' not in action_log:
+            action_log['deleted_assignments'] = []
+        if 'restored_victims' not in action_log:
+            action_log['restored_victims'] = []
+        if 'status_restorations' not in action_log:
+            action_log['status_restorations'] = []
 
     # STEP 3: Delete wrong room assignments and restore victims
     if rooms_to_delete:
@@ -142,6 +154,20 @@ def create_reservations_from_xls_row(row, warnings_list=None):
 
             # Delete the wrong assignment (only if guest not checked in)
             if wrong_res.guest is None:
+                # Track deletion before deleting
+                deleted_assignments.append({
+                    'booking_ref': booking_ref,
+                    'guest_name': guest_name,
+                    'room': room_name
+                })
+                if action_log is not None:
+                    action_log['deleted_assignments'].append({
+                        'booking_ref': booking_ref,
+                        'guest_name': guest_name,
+                        'room': room_name,
+                        'check_in': check_in.isoformat()
+                    })
+
                 wrong_res.delete()
                 logger.info(f"✓ Deleted wrong assignment: {booking_ref} from {room_name}")
 
@@ -150,6 +176,16 @@ def create_reservations_from_xls_row(row, warnings_list=None):
                     victim_booking.status = 'confirmed'
                     victim_booking.save()
                     restored_victims.append(victim_booking)
+
+                    # Track restoration
+                    if action_log is not None:
+                        action_log['restored_victims'].append({
+                            'booking_ref': victim_booking.booking_reference,
+                            'guest_name': victim_booking.guest_name,
+                            'room': room_name,
+                            'check_in': check_in.isoformat()
+                        })
+
                     logger.info(f"✓ RESTORED victim: {victim_booking.booking_reference} ({victim_booking.guest_name}) to {room_name}")
             else:
                 logger.warning(f"Cannot delete {booking_ref} from {room_name}: Guest already checked in")
@@ -166,6 +202,21 @@ def create_reservations_from_xls_row(row, warnings_list=None):
         # CRITICAL: If XLS says status='ok', restore from cancelled
         if status == 'ok' and existing.status == 'cancelled':
             existing.status = 'confirmed'
+
+            # Track status restoration
+            status_restorations.append({
+                'booking_ref': booking_ref,
+                'guest_name': guest_name,
+                'room': room_name
+            })
+            if action_log is not None:
+                action_log['status_restorations'].append({
+                    'booking_ref': booking_ref,
+                    'guest_name': guest_name,
+                    'room': room_name,
+                    'check_in': check_in.isoformat()
+                })
+
             logger.info(f"✓ RESTORED status: {booking_ref} -> {room_name} (was cancelled, now confirmed)")
         elif status == 'cancelled_by_guest':
             existing.status = 'cancelled'
@@ -262,6 +313,20 @@ def process_xls_file(xls_file, uploaded_by=None):
 
     today = date.today()
 
+    # Extract file metadata for age detection
+    latest_booked_on = None
+    if 'Booked on' in df.columns:
+        try:
+            booked_dates = pd.to_datetime(df['Booked on'], errors='coerce').dropna()
+            if len(booked_dates) > 0:
+                latest_booked_on = booked_dates.max()
+        except Exception as e:
+            logger.warning(f"Could not extract 'Booked on' dates: {e}")
+
+    # Get file upload timestamp (current time - will be compared on next upload)
+    from django.utils import timezone as dj_timezone
+    current_upload_time = dj_timezone.now()
+
     results = {
         'success': True,
         'total_rows': 0,
@@ -272,6 +337,13 @@ def process_xls_file(xls_file, uploaded_by=None):
         'enrichment_results': [],
         'discrepancies': [],
         'warnings': [],  # Room change warnings
+        'deleted_assignments': [],  # Track deletions
+        'restored_victims': [],  # Track restorations
+        'status_restorations': [],  # Track status changes
+        'file_metadata': {
+            'upload_timestamp': current_upload_time.isoformat(),
+            'latest_booking_date': latest_booked_on.isoformat() if latest_booked_on else None,
+        }
     }
 
     for _, row in df.iterrows():
@@ -295,8 +367,12 @@ def process_xls_file(xls_file, uploaded_by=None):
         else:
             results['single_room_count'] += 1
 
-        # Create reservations (pass warnings list for room change detection)
-        created_reservations = create_reservations_from_xls_row(row, warnings_list=results['warnings'])
+        # Create reservations (pass warnings list and action_log for detailed tracking)
+        created_reservations = create_reservations_from_xls_row(
+            row,
+            warnings_list=results['warnings'],
+            action_log=results  # Pass results dict which contains action tracking lists
+        )
 
         for action, reservation in created_reservations:
             if action == 'created':
