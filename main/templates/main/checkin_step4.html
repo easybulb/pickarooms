@@ -123,10 +123,10 @@
             <a href="{% url 'checkin_parking' %}" class="back-link">← {% trans "Back" %}</a>
         </p>
 
-        <!-- PIN Status Indicator (Hidden by default) -->
-        <div id="pin-status" style="display: none; margin-top: 20px; padding: 16px; border-radius: 12px; font-size: 14px; background: rgba(255, 255, 255, 0.12); border: 2px solid rgba(255, 255, 255, 0.25);">
-            <span id="status-icon"></span>
-            <span id="status-text" style="color: #ffffff;"></span>
+        <!-- PIN Status Indicator (Always visible with loading state) -->
+        <div id="pin-status" style="margin-top: 20px; padding: 16px; border-radius: 12px; font-size: 14px; background: rgba(255, 255, 255, 0.12); border: 2px solid rgba(255, 255, 255, 0.25);">
+            <span id="status-icon"><span class="spinner"></span></span>
+            <span id="status-text" style="color: #ffffff;">{% trans "Preparing your access PIN... Almost ready!" %}</span>
         </div>
     </div>
 </section>
@@ -138,18 +138,28 @@
         const btnText = document.getElementById('btn-text');
         const btnLoading = document.getElementById('btn-loading');
         const form = document.getElementById('confirm-form');
+        const pinStatus = document.getElementById('pin-status');
+        const statusIcon = document.getElementById('status-icon');
+        const statusText = document.getElementById('status-text');
+        
+        let pinReady = false;
 
-        // Enable button when consent is checked
+        // GDPR Checkbox - Enable button only when both PIN ready AND consent checked
         consentCheckbox.addEventListener('change', function() {
-            confirmBtn.disabled = !this.checked;
-            if (this.checked) {
+            updateButtonState();
+        });
+        
+        function updateButtonState() {
+            if (pinReady && consentCheckbox.checked) {
+                confirmBtn.disabled = false;
                 confirmBtn.style.opacity = '1';
                 confirmBtn.style.cursor = 'pointer';
             } else {
+                confirmBtn.disabled = true;
                 confirmBtn.style.opacity = '0.6';
                 confirmBtn.style.cursor = 'not-allowed';
             }
-        });
+        }
 
         // Show loading state on submit
         form.addEventListener('submit', function() {
@@ -158,39 +168,52 @@
             confirmBtn.disabled = true;
         });
 
-        // Check PIN status periodically
+        // Check PIN status on page load
+        checkPINStatus();
+
         function checkPINStatus() {
             fetch('/checkin/pin-status/')
                 .then(response => response.json())
                 .then(data => {
-                    const pinStatus = document.getElementById('pin-status');
-                    const statusIcon = document.getElementById('status-icon');
-                    const statusText = document.getElementById('status-text');
-
                     if (data.ready) {
-                        pinStatus.style.display = 'block';
+                        // ✅ PIN is ready!
+                        pinReady = true;
                         pinStatus.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.06) 100%)';
                         pinStatus.style.borderColor = '#10b981';
-                        statusIcon.textContent = '✅ ';
-                        statusText.textContent = '{% trans "PIN ready! You can complete check-in." %}';
-                        statusText.style.color = '#ffffff';
+                        statusIcon.innerHTML = '✅ ';
+                        statusText.textContent = '{% trans "Your access PIN is ready! Please accept the privacy terms below to continue." %}';
+                        updateButtonState();
                     } else if (data.failed) {
-                        pinStatus.style.display = 'block';
+                        // ❌ PIN generation failed
                         pinStatus.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(239, 68, 68, 0.06) 100%)';
                         pinStatus.style.borderColor = '#ef4444';
-                        statusIcon.textContent = '⚠️ ';
-                        statusText.textContent = '{% trans "PIN generation failed. Please contact support." %}';
-                        statusText.style.color = '#ffffff';
-                        confirmBtn.disabled = true;
+                        statusIcon.innerHTML = '❌ ';
+                        statusText.textContent = '{% trans "PIN generation failed. You will be redirected to contact support." %}';
+                        
+                        // Auto-redirect to error page after 2 seconds
+                        setTimeout(() => {
+                            window.location.href = '/checkin/error/';
+                        }, 2000);
                     } else {
-                        setTimeout(checkPINStatus, 2000);
+                        // ⏳ Still generating
+                        pinReady = false;
+                        pinStatus.style.background = 'linear-gradient(135deg, rgba(0, 102, 204, 0.12) 0%, rgba(0, 102, 204, 0.06) 100%)';
+                        pinStatus.style.borderColor = '#0066cc';
+                        statusIcon.innerHTML = '<span class="spinner"></span>';
+                        statusText.textContent = '{% trans "Preparing your access PIN... Almost ready!" %}';
+                        updateButtonState();
+                        
+                        // Check again in 1 second
+                        setTimeout(checkPINStatus, 1000);
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error checking PIN status:', error);
+                    // Assume PIN is ready on error (backend will handle validation)
+                    pinReady = true;
+                    updateButtonState();
+                });
         }
-
-        // Start checking PIN status
-        checkPINStatus();
     });
 </script>
 {% endblock %}
