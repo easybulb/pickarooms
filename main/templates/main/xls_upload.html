@@ -55,6 +55,120 @@
         </ul>
     </div>
 
+    {% if latest_analysis %}
+    <div class="analysis-section">
+        <h2>📊 {% trans "Last Upload Analysis" %}</h2>
+
+        <div class="analysis-header">
+            <div class="analysis-file-info">
+                <strong>{{ latest_analysis.file_name }}</strong>
+                <span class="upload-time">{{ latest_analysis.uploaded_at|date:"d M Y H:i" }}</span>
+            </div>
+            <div class="file-age-badge {{ latest_analysis.file_age_status|slice:':1' }}">
+                {{ latest_analysis.file_age_status }}
+            </div>
+        </div>
+
+        <div class="analysis-summary">
+            <div class="summary-card">
+                <div class="summary-number">{{ latest_analysis.total_rows }}</div>
+                <div class="summary-label">Bookings Processed</div>
+            </div>
+            <div class="summary-card card-created">
+                <div class="summary-number">{{ latest_analysis.created_count }}</div>
+                <div class="summary-label">✅ Created</div>
+            </div>
+            <div class="summary-card card-updated">
+                <div class="summary-number">{{ latest_analysis.updated_count }}</div>
+                <div class="summary-label">🔄 Updated</div>
+            </div>
+            <div class="summary-card card-deleted">
+                <div class="summary-number">{{ latest_analysis.deleted_count }}</div>
+                <div class="summary-label">🗑️ Deleted (Wrong Rooms)</div>
+            </div>
+            <div class="summary-card card-restored">
+                <div class="summary-number">{{ latest_analysis.restored_victims_count }}</div>
+                <div class="summary-label">🔓 Restored Victims</div>
+            </div>
+            <div class="summary-card card-status">
+                <div class="summary-number">{{ latest_analysis.status_restorations_count }}</div>
+                <div class="summary-label">✨ Status Fixed</div>
+            </div>
+        </div>
+
+        {% if latest_analysis.deleted_count > 0 or latest_analysis.restored_victims_count > 0 or latest_analysis.status_restorations_count > 0 %}
+        <div class="analysis-details">
+            <h3>📝 {% trans "Detailed Actions" %}</h3>
+
+            {% if latest_analysis.deleted_assignments %}
+            <details class="action-group">
+                <summary>🗑️ Deleted Wrong Room Assignments ({{ latest_analysis.deleted_count }})</summary>
+                <ul class="action-list">
+                    {% for item in latest_analysis.deleted_assignments %}
+                    <li>
+                        <strong>{{ item.booking_ref }}</strong> ({{ item.guest_name }})
+                        removed from <span class="room-badge">{{ item.room }}</span>
+                        <span class="date-badge">{{ item.check_in }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </details>
+            {% endif %}
+
+            {% if latest_analysis.restored_victims %}
+            <details class="action-group">
+                <summary>🔓 Restored Cancelled Victims ({{ latest_analysis.restored_victims_count }})</summary>
+                <ul class="action-list">
+                    {% for item in latest_analysis.restored_victims %}
+                    <li>
+                        <strong>{{ item.booking_ref }}</strong> ({{ item.guest_name }})
+                        restored to <span class="room-badge">{{ item.room }}</span>
+                        <span class="date-badge">{{ item.check_in }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </details>
+            {% endif %}
+
+            {% if latest_analysis.status_restorations %}
+            <details class="action-group">
+                <summary>✨ Status Restored (Cancelled → Confirmed) ({{ latest_analysis.status_restorations_count }})</summary>
+                <ul class="action-list">
+                    {% for item in latest_analysis.status_restorations %}
+                    <li>
+                        <strong>{{ item.booking_ref }}</strong> ({{ item.guest_name }})
+                        in <span class="room-badge">{{ item.room }}</span>
+                        <span class="date-badge">{{ item.check_in }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </details>
+            {% endif %}
+
+            {% if latest_analysis.warnings %}
+            <details class="action-group warnings">
+                <summary>⚠️ Room Changes Detected ({{ latest_analysis.warnings_count }})</summary>
+                <ul class="action-list">
+                    {% for warning in latest_analysis.warnings %}
+                    <li>
+                        <strong>{{ warning.booking_ref }}</strong> ({{ warning.guest_name }})
+                        <span class="date-badge">{{ warning.check_in }}</span>
+                        {% if warning.removed_rooms %}
+                            <br>❌ Removed from: {{ warning.removed_rooms|join:", " }}
+                        {% endif %}
+                        {% if warning.added_rooms %}
+                            <br>✅ Added to: {{ warning.added_rooms|join:", " }}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </details>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
     <h2>📜 {% trans "Recent Upload History" %}</h2>
 
     {% if recent_logs %}
