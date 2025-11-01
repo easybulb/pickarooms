@@ -1059,18 +1059,16 @@ def block_review_messages(request):
 def admin_id_uploads(request):
     """Admin interface for viewing uploaded guest IDs"""
     from datetime import timedelta
-
-        # Get all guests with ID uploads from GuestIDUpload model
-    guests_with_id_uploads = GuestIDUpload.objects.select_related('guest', 'guest__assigned_room').order_by('-uploaded_at')
     
-    # Get unique guests from ID uploads
-    guest_ids = guests_with_id_uploads.values_list('guest_id', flat=True).distinct()
-    guests_with_ids = Guest.objects.filter(id__in=guest_ids).select_related('assigned_room').order_by('-check_in_date')
-
-    # Determine guest status
     uk_timezone = pytz.timezone("Europe/London")
     now_uk_date = timezone.now().astimezone(uk_timezone).date()
-
+    seven_days_ago = now_uk_date - timedelta(days=7)
+    
+    # Optimized: Get guests with IDs in one query with prefetch
+    guests_with_ids = Guest.objects.filter(
+        id_uploads__isnull=False
+    ).distinct().select_related('assigned_room').prefetch_related('id_uploads').order_by('-check_in_date')
+    
     guests_list = []
     for guest in guests_with_ids:
         # Determine status
@@ -1080,44 +1078,51 @@ def admin_id_uploads(request):
             status = 'checked-out'
         else:
             status = 'upcoming'
-
-        # Get reservation object if exists
-        reservation = Reservation.objects.filter(guest=guest).first()
-
-                # Get the most recent ID upload for this guest
-        latest_id_upload = guest.id_uploads.order_by('-uploaded_at').first()
+        
+        # Get most recent ID upload (already prefetched, no extra query)
+        id_uploads = list(guest.id_uploads.all())
+        latest_id_upload = id_uploads[0] if id_uploads else None
+        
+        # Get reservation (don't create fake objects, use None)
+        try:
+            reservation = Reservation.objects.select_related('room').get(guest=guest)
+            room_number = reservation.room.number
+            room_name = reservation.room.name
+            booking_reference = reservation.booking_reference
+        except Reservation.DoesNotExist:
+            # Use guest data if no reservation exists
+            reservation = None
+            room_number = guest.assigned_room.number if guest.assigned_room else 'N/A'
+            room_name = guest.assigned_room.name if guest.assigned_room else 'N/A'
+            booking_reference = guest.reservation_number
         
         guests_list.append({
             'id': guest.id,
             'full_name': guest.full_name,
-            'phone_number': guest.phone_number,
-            'email': guest.email,
-            'id_image': latest_id_upload.id_image if latest_id_upload else None,
+            'phone_number': guest.phone_number or '',
+            'email': guest.email or '',
+            'id_image': latest_id_upload.id_image if latest_id_upload else '',
             'status': status,
-            'reservation': reservation if reservation else type('obj', (object,), {
-                'room': guest.assigned_room,
-                'checkin_date': guest.check_in_date,
-                'checkout_date': guest.check_out_date,
-                'booking_reference': guest.reservation_number
-            })()
+            'room_number': room_number,
+            'room_name': room_name,
+            'checkin_date': guest.check_in_date,
+            'checkout_date': guest.check_out_date,
+            'booking_reference': booking_reference,
         })
-
-    # Calculate statistics
+    
+    # Statistics
     total_uploads = len(guests_list)
     active_guests = len([g for g in guests_list if g['status'] == 'active'])
-
-    # Recent uploads (last 7 days)
-    seven_days_ago = now_uk_date - timedelta(days=7)
     recent_uploads = len([g for g in guests_with_ids if g.check_in_date >= seven_days_ago])
-
-        # Get all rooms for filter dropdown
+    
+    # Get all rooms for filter
     rooms = Room.objects.all().order_by('name')
-
+    
     # Pagination
-    paginator = Paginator(guests_list, 20)  # 20 guests per page
+    paginator = Paginator(guests_list, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-
+    
     context = {
         'guests': page_obj,
         'total_uploads': total_uploads,
@@ -1127,5 +1132,5 @@ def admin_id_uploads(request):
         'is_paginated': paginator.num_pages > 1,
         'page_obj': page_obj,
     }
-
+    
     return render(request, 'main/admin_id_uploads.html', context)

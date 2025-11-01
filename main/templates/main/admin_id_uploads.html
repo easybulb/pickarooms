@@ -95,7 +95,7 @@
             <tbody id="uploads-table-body">
                 {% for guest in guests %}
                 <tr data-guest-name="{{ guest.full_name|lower }}"
-                    data-room="{{ guest.reservation.room.name }}"
+                    data-room="{{ guest.room_name }}"
                     data-status="{{ guest.status }}">
                     <td>
                         <div class="guest-info">
@@ -111,13 +111,13 @@
                         </div>
                     </td>
                     <td>
-                        <strong>{{ guest.reservation.room.name }}</strong>
+                        <strong>{{ guest.room_name }}</strong>
                     </td>
                     <td>
-                        {{ guest.reservation.checkin_date|date:"d M Y" }}
+                        {{ guest.checkin_date|date:"d M Y" }}
                     </td>
                     <td>
-                        {{ guest.reservation.checkout_date|date:"d M Y" }}
+                        {{ guest.checkout_date|date:"d M Y" }}
                     </td>
                     <td>
                         {% if guest.id_image %}
@@ -227,18 +227,18 @@
 
 <script>
     /* eslint-disable */
-    // Guest data for modal (passed from Django)
+    // Guest data for modal (passed from Django) - includes ALL pages
     const guestData = {
-        {% for guest in guests %}
+        {% for guest in page_obj.paginator.object_list %}
         '{{ guest.id }}': {
             name: '{{ guest.full_name|escapejs }}',
-            phone: '{{ guest.phone_number|default:"" }}',
-            email: '{{ guest.email|default:"" }}',
-            room: '{{ guest.reservation.room.name|escapejs }}',
-            checkin: '{{ guest.reservation.checkin_date|date:"d M Y" }}',
-            checkout: '{{ guest.reservation.checkout_date|date:"d M Y" }}',
+            phone: '{{ guest.phone_number|default:""|escapejs }}',
+            email: '{{ guest.email|default:""|escapejs }}',
+            room: '{{ guest.room_name|escapejs }}',
+            checkin: '{{ guest.checkin_date|date:"d M Y" }}',
+            checkout: '{{ guest.checkout_date|date:"d M Y" }}',
             id_image: '{{ guest.id_image|escapejs }}',
-            booking_ref: '{{ guest.reservation.booking_reference|escapejs }}'
+            booking_ref: '{{ guest.booking_reference|escapejs }}'
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
     };
