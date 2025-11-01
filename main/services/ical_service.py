@@ -263,6 +263,46 @@ def sync_reservations_for_room(config_id, platform='booking'):
                         except Reservation.DoesNotExist:
                             pass
 
+                    # Method 3: COLLISION DETECTION
+                    # Before creating a new reservation, check if room+dates are already occupied
+                    # This prevents iCal from creating "CLOSED - Not available" duplicates after XLS upload
+                    if not reservation:
+                        collision = Reservation.objects.filter(
+                            room=config.room,
+                            check_in_date=event['dtstart'],
+                            check_out_date=event['dtend'],
+                            status='confirmed'
+                        ).exclude(ical_uid=uid).first()
+
+                        if collision:
+                            # Room+dates already occupied by a different reservation
+                            if collision.booking_reference and len(collision.booking_reference) >= 5:
+                                # CASE A: Collision has valid booking_ref (from XLS/email enrichment)
+                                # This iCal event is likely a duplicate placeholder (e.g., "CLOSED - Not available")
+                                # SKIP creating the iCal reservation to prevent duplicates
+                                logger.info(f"⚠️ COLLISION DETECTED: Skipping iCal event '{event['summary'][:50]}...' "
+                                           f"because room {config.room.name} is already occupied by enriched booking "
+                                           f"{collision.booking_reference} ({collision.guest_name}) "
+                                           f"for {event['dtstart']} to {event['dtend']}")
+                                continue  # Skip to next event
+
+                            elif booking_ref and len(booking_ref) >= 5:
+                                # CASE B: iCal event has valid booking_ref, but collision doesn't
+                                # The iCal event is the real booking, collision is old placeholder
+                                # Replace the old placeholder with this iCal event
+                                logger.info(f"⚠️ COLLISION: Replacing old placeholder (no booking_ref) "
+                                           f"with iCal event that has booking_ref {booking_ref}")
+                                reservation = collision
+                                match_method = 'collision_replace'
+
+                            else:
+                                # CASE C: Both are placeholders (no valid booking_ref)
+                                # Update the existing one instead of creating duplicate
+                                logger.info(f"⚠️ COLLISION: Both placeholders - updating existing reservation "
+                                           f"instead of creating duplicate")
+                                reservation = collision
+                                match_method = 'collision_update'
+
                     if reservation:
                         # UPDATE EXISTING: Preserve XLS-enriched data
                         # Only update fields that iCal should control (dates, status, raw data)
