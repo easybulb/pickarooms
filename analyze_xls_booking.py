@@ -13,7 +13,7 @@ from datetime import datetime
 from main.models import Reservation
 
 # XLS file path
-xls_path = r"C:\Users\easyb\Downloads\Check-in with contact details 2025-10-30 to 2025-11-30.xls"
+xls_path = r"C:\Users\easyb\Downloads\Check-in with contact details 2025-10-31 to 2026-11-30.xls"
 
 print(f"\n{'='*80}")
 print(f"XLS BOOKING ANALYSIS")
@@ -55,8 +55,8 @@ try:
             print(f"   - {col}")
         print()
     
-    # Target booking references from unread emails
-    target_refs = ['6508851340', '5041560226']
+    # Target booking references - June 20, 2026
+    target_refs = ['5041560226', '6682343841', '6668929481']
     
     print(f"{'='*80}")
     print(f"SEARCHING FOR TARGET BOOKINGS:")
@@ -111,31 +111,31 @@ try:
             print(f"      Likely reason: Payment pending or cancelled")
             print()
     
-    # Show all November 21 bookings from XLS
+    # Show all June 20, 2026 bookings from XLS
     print(f"\n{'='*80}")
-    print(f"ALL BOOKINGS FOR NOVEMBER 21, 2025 in XLS:")
+    print(f"ALL BOOKINGS FOR JUNE 20, 2026 in XLS:")
     print(f"{'='*80}\n")
-    
+
     # Try to find check-in date column
     checkin_col = None
     for col in df.columns:
         if 'check' in col.lower() and 'in' in col.lower():
             checkin_col = col
             break
-    
+
     if checkin_col:
         print(f"Using check-in column: '{checkin_col}'\n")
-        
+
         # Convert to datetime
         df[checkin_col] = pd.to_datetime(df[checkin_col], errors='coerce')
-        
-        # Filter for Nov 21, 2025
-        target_date = pd.Timestamp('2025-11-21')
-        nov_21_bookings = df[df[checkin_col] == target_date]
-        
-        print(f"Found {len(nov_21_bookings)} booking(s) for Nov 21, 2025:\n")
-        
-        for idx, row in nov_21_bookings.iterrows():
+
+        # Filter for June 20, 2026
+        target_date = pd.Timestamp('2026-06-20')
+        june_20_bookings = df[df[checkin_col] == target_date]
+
+        print(f"Found {len(june_20_bookings)} booking(s) for June 20, 2026:\n")
+
+        for idx, row in june_20_bookings.iterrows():
             print(f"   {'-'*70}")
             for column in df.columns:
                 value = row[column]
@@ -148,14 +148,15 @@ try:
         for col in df.columns:
             if 'date' in col.lower() or 'check' in col.lower():
                 print(f"   - {col}")
-    
+
     # Summary
     print(f"\n{'='*80}")
     print(f"SUMMARY:")
     print(f"{'='*80}")
     print(f"Total rows in XLS: {len(df)}")
-    print(f"Booking 6508851340 found: {'YES' if '6508851340' in str(df.values) else 'NO'}")
     print(f"Booking 5041560226 found: {'YES' if '5041560226' in str(df.values) else 'NO'}")
+    print(f"Booking 6682343841 found: {'YES' if '6682343841' in str(df.values) else 'NO'}")
+    print(f"Booking 6668929481 found: {'YES' if '6668929481' in str(df.values) else 'NO'}")
     print(f"{'='*80}\n")
     
 except Exception as e:
