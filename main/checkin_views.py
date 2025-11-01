@@ -196,14 +196,14 @@ def checkin_details(request):
 
 def checkin_parking(request):
     """
-    Step 3: Parking Information (Optional car registration)
+    Step 3: Additional Information (Parking + ID Upload)
     While guest fills this out, PIN is being generated in background
     """
     flow_data = request.session.get('checkin_flow')
     if not flow_data or flow_data.get('step', 0) < 2:
         messages.error(request, "Please complete previous steps first.")
         return redirect('checkin')
-    
+
     # Update analytics
     try:
         CheckInAnalytics.objects.filter(
@@ -212,22 +212,60 @@ def checkin_parking(request):
         ).update(step_reached=3)
     except Exception as e:
         logger.warning(f"Failed to update analytics: {str(e)}")
-    
+
     if request.method == 'POST':
         has_car = request.POST.get('has_car') == 'yes'
         car_reg = request.POST.get('car_registration', '').strip().upper() if has_car else None
-        
+
+        # Handle ID upload (optional)
+        id_image_url = None
+        id_file = request.FILES.get('id_image') or request.FILES.get('id_image_gallery')
+
+        if id_file:
+            try:
+                # Validate file
+                if id_file.size > 5 * 1024 * 1024:  # 5MB limit
+                    messages.error(request, "ID image must be under 5MB.")
+                    return render(request, 'main/checkin_step3.html', {'flow_data': flow_data})
+
+                if not id_file.content_type.startswith('image/'):
+                    messages.error(request, "Please upload a valid image file.")
+                    return render(request, 'main/checkin_step3.html', {'flow_data': flow_data})
+
+                # Upload to Cloudinary
+                import cloudinary.uploader
+                from django.utils import timezone as django_tz
+                now = django_tz.now()
+
+                upload_response = cloudinary.uploader.upload(
+                    id_file,
+                    folder=f"checkin_ids/{now.year}/{now.month}/{now.day}/",
+                    resource_type="image"
+                )
+
+                if 'url' in upload_response:
+                    id_image_url = upload_response['url']
+                    logger.info(f"Uploaded ID for checkin session {request.session.session_key}: {id_image_url}")
+                else:
+                    logger.error(f"Cloudinary upload failed: {upload_response}")
+                    messages.warning(request, "ID upload failed, but you can continue check-in.")
+
+            except Exception as e:
+                logger.error(f"Error uploading ID during check-in: {str(e)}")
+                messages.warning(request, "ID upload failed, but you can continue check-in.")
+
         # Update flow data
         flow_data.update({
             'has_car': has_car,
             'car_registration': car_reg,
+            'id_image_url': id_image_url,
             'step': 3
         })
         request.session['checkin_flow'] = flow_data
         request.session.modified = True
-        
+
         return redirect('checkin_confirm')
-    
+
     # GET request
     return render(request, 'main/checkin_step3.html', {
         'flow_data': flow_data
@@ -285,6 +323,7 @@ def checkin_confirm(request):
                     check_out_date=reservation.check_out_date,
                     assigned_room=reservation.room,
                     car_registration=flow_data.get('car_registration'),
+                    id_image=flow_data.get('id_image_url', ''),  # Save ID image if uploaded
                     early_checkin_time=reservation.early_checkin_time,
                     late_checkout_time=reservation.late_checkout_time,
                     front_door_pin=flow_data['pin'],

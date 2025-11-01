@@ -28,12 +28,27 @@
             </div>
         </div>
 
-        <h1>🚗 {% trans "Parking Information" %}</h1>
+        <h1>📝 {% trans "Additional Information" %}</h1>
         <p style="font-size: 14px; color: #ccc; margin-bottom: 15px;">
-            {% trans "Are you arriving by car? We offer free on-street parking." %}
+            {% trans "Just a few more details to complete your check-in." %}
         </p>
 
-        <form method="post" class="checkin-form" id="parking-form">
+        <!-- PIN Generation Progress (Real-time) -->
+        <div id="pin-progress" class="pin-progress-box">
+            <div class="progress-header">
+                <span class="progress-icon">🔑</span>
+                <span class="progress-text">{% trans "Preparing your access PIN..." %}</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-status" id="progress-status">
+                <span class="status-dot"></span>
+                <span id="status-text">{% trans "Generating..." %}</span>
+            </div>
+        </div>
+
+        <form method="post" class="checkin-form" id="parking-form" enctype="multipart/form-data">
             {% csrf_token %}
             
             <!-- Car Yes/No -->
@@ -84,6 +99,52 @@
                         <li>{% trans "No permit required" %}</li>
                         <li>{% trans "24/7 access to your vehicle" %}</li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- ID Upload Section (Optional) -->
+            <div class="form-group" style="margin-top: 30px;">
+                <label>📸 {% trans "ID Upload" %} ({% trans "optional" %})</label>
+                <p style="font-size: 13px; color: #ccc; margin-bottom: 15px;">
+                    {% trans "Upload a photo of your ID or passport. This helps us verify your identity." %}
+                </p>
+
+                <!-- Upload Method Selection -->
+                <div class="upload-methods">
+                    <button type="button" class="upload-btn camera-btn" id="camera-btn">
+                        <span class="btn-icon">📷</span>
+                        <span class="btn-text">{% trans "Take Photo" %}</span>
+                    </button>
+                    <button type="button" class="upload-btn gallery-btn" id="gallery-btn">
+                        <span class="btn-icon">🖼️</span>
+                        <span class="btn-text">{% trans "Upload from Gallery" %}</span>
+                    </button>
+                </div>
+
+                <!-- Hidden File Inputs -->
+                <input type="file"
+                       name="id_image"
+                       id="camera-input"
+                       accept="image/*"
+                       capture="environment"
+                       style="display: none;">
+                <input type="file"
+                       name="id_image_gallery"
+                       id="gallery-input"
+                       accept="image/*"
+                       style="display: none;">
+
+                <!-- Image Preview -->
+                <div id="image-preview" style="display: none; margin-top: 15px;">
+                    <div class="preview-container">
+                        <img id="preview-img" src="" alt="{% trans 'ID Preview' %}">
+                        <button type="button" class="remove-btn" id="remove-image">
+                            <span>✕</span> {% trans "Remove" %}
+                        </button>
+                    </div>
+                    <p style="font-size: 12px; color: #28a745; margin-top: 10px;">
+                        ✓ {% trans "ID uploaded successfully!" %}
+                    </p>
                 </div>
             </div>
 
@@ -308,6 +369,162 @@
         text-decoration: underline;
     }
 
+    /* PIN Progress Box */
+    .pin-progress-box {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+        border: 2px solid rgba(102, 126, 234, 0.4);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 15px rgba(102, 126, 234, 0.3); }
+        50% { box-shadow: 0 0 25px rgba(102, 126, 234, 0.5); }
+    }
+
+    .progress-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .progress-icon {
+        font-size: 24px;
+        animation: rotate 3s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .progress-text {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .progress-bar-track {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        background-size: 200% 100%;
+        border-radius: 10px;
+        width: 0%;
+        transition: width 0.5s ease;
+        animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .progress-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #ccc;
+    }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        background: #667eea;
+        border-radius: 50%;
+        animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    /* Upload Methods */
+    .upload-methods {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .upload-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 20px 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: #fff;
+    }
+
+    .upload-btn:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .upload-btn .btn-icon {
+        font-size: 32px;
+    }
+
+    .upload-btn .btn-text {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* Image Preview */
+    .preview-container {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid #28a745;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .preview-container img {
+        width: 100%;
+        max-height: 300px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .remove-btn:hover {
+        background: #dc3545;
+        transform: scale(1.05);
+    }
+
     /* Spinner */
     .spinner {
         display: inline-block;
@@ -413,6 +630,132 @@
                 notice.style.display = 'block';
             }
         }, 2000);
+
+        // ========================
+        // ID Upload Functionality
+        // ========================
+        const cameraBtn = document.getElementById('camera-btn');
+        const galleryBtn = document.getElementById('gallery-btn');
+        const cameraInput = document.getElementById('camera-input');
+        const galleryInput = document.getElementById('gallery-input');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        const removeBtn = document.getElementById('remove-image');
+
+        let selectedFile = null;
+
+        // Camera button click
+        cameraBtn.addEventListener('click', function() {
+            cameraInput.click();
+        });
+
+        // Gallery button click
+        galleryBtn.addEventListener('click', function() {
+            galleryInput.click();
+        });
+
+        // Handle camera input
+        cameraInput.addEventListener('change', function(e) {
+            handleFileSelect(e.target.files[0], 'camera');
+        });
+
+        // Handle gallery input
+        galleryInput.addEventListener('change', function(e) {
+            handleFileSelect(e.target.files[0], 'gallery');
+        });
+
+        function handleFileSelect(file, source) {
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file (JPG, PNG, etc.)');
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image must be under 5MB');
+                return;
+            }
+
+            selectedFile = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+
+                // Hide upload buttons after selection
+                document.querySelector('.upload-methods').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove image
+        removeBtn.addEventListener('click', function() {
+            selectedFile = null;
+            cameraInput.value = '';
+            galleryInput.value = '';
+            imagePreview.style.display = 'none';
+            document.querySelector('.upload-methods').style.display = 'grid';
+        });
+
+        // ===================================
+        // Real-time PIN Generation Progress
+        // ===================================
+        const progressFill = document.getElementById('progress-fill');
+        const statusText = document.getElementById('status-text');
+        const pinProgressBox = document.getElementById('pin-progress');
+
+        let progress = 0;
+        let checkInterval;
+
+        // Simulate progress (smooth animation)
+        function updateProgress() {
+            if (progress < 95) {
+                progress += Math.random() * 10;
+                if (progress > 95) progress = 95; // Cap at 95% until confirmed
+                progressFill.style.width = progress + '%';
+            }
+        }
+
+        // Check PIN status via AJAX
+        function checkPINStatus() {
+            fetch('/checkin/pin-status/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ready) {
+                        // PIN is ready!
+                        progress = 100;
+                        progressFill.style.width = '100%';
+                        statusText.textContent = '{% trans "Ready!" %}';
+                        statusText.style.color = '#28a745';
+                        pinProgressBox.style.borderColor = '#28a745';
+                        pinProgressBox.style.background = 'linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.1))';
+                        clearInterval(checkInterval);
+                    } else if (data.failed) {
+                        // PIN generation failed
+                        statusText.textContent = '{% trans "Failed - Please contact support" %}';
+                        statusText.style.color = '#dc3545';
+                        pinProgressBox.style.borderColor = '#dc3545';
+                        clearInterval(checkInterval);
+                    } else {
+                        // Still generating
+                        updateProgress();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking PIN status:', error);
+                });
+        }
+
+        // Start checking PIN status every 1.5 seconds
+        checkInterval = setInterval(checkPINStatus, 1500);
+
+        // Initial check
+        checkPINStatus();
     });
 </script>
 {% endblock %}
