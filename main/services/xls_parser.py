@@ -111,7 +111,7 @@ def create_reservations_from_xls_row(row, warnings_list=None):
                     'type': 'room_change',
                     'booking_ref': booking_ref,
                     'guest_name': guest_name,
-                    'check_in': check_in,
+                    'check_in': check_in.isoformat(),  # Convert date to ISO string for JSON serialization
                     'removed_rooms': list(removed_rooms),
                     'added_rooms': list(added_rooms),
                     'message': warning_msg
