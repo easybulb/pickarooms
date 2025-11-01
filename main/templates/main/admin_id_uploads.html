@@ -65,7 +65,7 @@
             <select id="filter-room">
                 <option value="">{% trans "All Rooms" %}</option>
                 {% for room in rooms %}
-                <option value="{{ room.number }}">{% trans "Room" %} {{ room.number }}</option>
+                <option value="{{ room.name }}">{{ room.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -95,7 +95,7 @@
             <tbody id="uploads-table-body">
                 {% for guest in guests %}
                 <tr data-guest-name="{{ guest.full_name|lower }}"
-                    data-room="{{ guest.reservation.room.number }}"
+                    data-room="{{ guest.reservation.room.name }}"
                     data-status="{{ guest.status }}">
                     <td>
                         <div class="guest-info">
@@ -111,7 +111,7 @@
                         </div>
                     </td>
                     <td>
-                        <strong>{% trans "Room" %} {{ guest.reservation.room.number }}</strong>
+                        <strong>{{ guest.reservation.room.name }}</strong>
                     </td>
                     <td>
                         {{ guest.reservation.checkin_date|date:"d M Y" }}
@@ -226,18 +226,19 @@
 </div>
 
 <script>
+    /* eslint-disable */
     // Guest data for modal (passed from Django)
     const guestData = {
         {% for guest in guests %}
         '{{ guest.id }}': {
-            name: '{{ guest.full_name }}',
-            phone: '{{ guest.phone_number }}',
-            email: '{{ guest.email }}',
-            room: '{{ guest.reservation.room.number }}',
+            name: '{{ guest.full_name|escapejs }}',
+            phone: '{{ guest.phone_number|default:"" }}',
+            email: '{{ guest.email|default:"" }}',
+            room: '{{ guest.reservation.room.name|escapejs }}',
             checkin: '{{ guest.reservation.checkin_date|date:"d M Y" }}',
             checkout: '{{ guest.reservation.checkout_date|date:"d M Y" }}',
-            id_image: '{{ guest.id_image }}',
-            booking_ref: '{{ guest.reservation.booking_reference }}'
+            id_image: '{{ guest.id_image|escapejs }}',
+            booking_ref: '{{ guest.reservation.booking_reference|escapejs }}'
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
     };
@@ -258,8 +259,8 @@
                 <span class="info-value">${guest.name}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">{% trans "Room Number" %}</span>
-                <span class="info-value">{% trans "Room" %} ${guest.room}</span>
+                <span class="info-label">{% trans "Room" %}</span>
+                <span class="info-value">${guest.room}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">{% trans "Booking Reference" %}</span>
