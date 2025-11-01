@@ -368,11 +368,13 @@ def sync_reservations_for_room(config_id, platform='booking'):
             # Mark reservations as cancelled if they're no longer in the feed
             # Includes both enriched and unenriched reservations
             # Signal handler will automatically trigger cancellation task for enriched ones
+            # IMPORTANT: Exclude XLS-created reservations (ical_uid starts with 'xls_')
+            # XLS reservations are managed by XLS uploads, not iCal sync
             missing_reservations = Reservation.objects.filter(
                 room=config.room,
                 platform=platform,
                 status='confirmed',
-            ).exclude(ical_uid__in=current_uids)
+            ).exclude(ical_uid__in=current_uids).exclude(ical_uid__startswith='xls_')
 
             for reservation in missing_reservations:
                 reservation.status = 'cancelled'
